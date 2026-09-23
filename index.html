@@ -16,16 +16,21 @@
   <div id="grid-productos"></div>
   <script>
     async function cargar() {
-      const res = await fetch('productos.json');
-      const data = await res.json();
-      document.getElementById('grid-productos').innerHTML = data.map(p => `
-        <div class="product-card">
-          <img src="${p.img}">
-          <h3>${p.titulo}</h3>
-          <h2>$${p.precio}</h2>
-          <a href="#" class="btn">Comprar Ahora</a>
-        </div>
-      `).join('');
+      try {
+        const res = await fetch('productos.json');
+        const data = await res.json();
+        document.getElementById('grid-productos').innerHTML = data.map(p => `
+          <div class="product-card">
+            <img src="${p.img}" alt="${p.titulo}">
+            <h3>${p.titulo}</h3>
+            <h2>$${p.precio}</h2>
+            <a href="#" class="btn">Comprar Ahora</a>
+          </div>
+        `).join('');
+      } catch (error) {
+        console.error("Error cargando productos:", error);
+        document.getElementById('grid-productos').innerHTML = "<p>Error al cargar el catálogo.</p>";
+      }
     }
     cargar();
   </script>
