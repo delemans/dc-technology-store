@@ -1,16 +1,8 @@
 [
   {
-    "id": 101,
+    "id": 1,
     "titulo": "Asus ROG Zephyrus G14",
-    "precio": 7500000,
-    "categoria": "laptops",
+    "precio": "7.500.000",
     "img": "https://dummyimage.com/300x200/0d1321/00f2fe.png&text=ROG+Zephyrus"
-  },
-  {
-    "id": 102,
-    "titulo": "Monitor Alienware 34",
-    "precio": 4800000,
-    "categoria": "monitores",
-    "img": "https://dummyimage.com/300x200/0d1321/fbbf24.png&text=Alienware"
   }
 ]

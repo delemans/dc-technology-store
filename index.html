@@ -3,91 +3,31 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DC Technology | Hardware Premium</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <title>DC Technology | Tienda Premium</title>
   <style>
-    :root {
-      --bg-deep: #030712; --bg-surface: #0f172a; --accent-cyan: #06b6d4; --accent-blue: #3b82f6;
-      --text-main: #f8fafc; --text-muted: #94a3b8; --success: #10b981;
-      --border-glass: 1px solid rgba(255, 255, 255, 0.08);
-      --grad-primary: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
-    body { background-color: var(--bg-deep); color: var(--text-main); }
-    .navbar { background: rgba(3, 7, 18, 0.85); backdrop-filter: blur(20px); border-bottom: var(--border-glass); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
-    .brand-logo { font-size: 1.5rem; font-weight: 800; color: white; text-decoration: none; display: flex; gap: 0.5rem; }
-    .brand-logo span { color: var(--accent-cyan); }
-    .hero { padding: 4rem 2rem; text-align: center; background: radial-gradient(circle at top, rgba(59, 130, 246, 0.15), transparent 60%); }
-    .hero h1 { font-size: 3rem; margin-bottom: 1rem; }
-    .text-gradient { background: var(--grad-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    .store-container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
-    .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 2rem; margin-top: 2rem; }
-    .product-card { background: var(--bg-surface); border: var(--border-glass); border-radius: 16px; padding: 1.5rem; transition: transform 0.3s; }
-    .product-card:hover { transform: translateY(-5px); border-color: var(--accent-cyan); box-shadow: 0 10px 30px rgba(6, 182, 212, 0.15); }
-    .card-image-wrapper { width: 100%; height: 200px; background: #000; border-radius: 8px; margin-bottom: 1rem; display: flex; justify-content: center; align-items: center; overflow: hidden; }
-    .card-image-wrapper img { max-width: 100%; max-height: 100%; object-fit: contain; }
-    .product-name { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem; }
-    .price-main { font-size: 1.5rem; font-weight: 800; color: var(--accent-cyan); margin-bottom: 1rem; }
-    .btn-buy { display: flex; align-items: center; justify-content: center; gap: 0.5rem; width: 100%; padding: 1rem; border-radius: 8px; background: white; color: black; font-weight: 800; text-decoration: none; border: none; cursor: pointer; transition: 0.3s; }
-    .btn-buy:hover { background: var(--success); color: white; }
-    .floating-wa { position: fixed; bottom: 2rem; right: 2rem; width: 60px; height: 60px; background: #25d366; color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 2rem; text-decoration: none; box-shadow: 0 10px 25px rgba(37, 211, 102, 0.5); }
+    body { background-color: #030712; color: #f8fafc; font-family: sans-serif; text-align: center; padding: 2rem; }
+    .product-card { background: #0f172a; padding: 1.5rem; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); margin: 1rem auto; max-width: 300px; }
+    .product-card img { max-width: 100%; border-radius: 8px; }
+    .btn { background: #10b981; color: white; padding: 1rem; border-radius: 8px; text-decoration: none; display: block; margin-top: 1rem; font-weight: bold; }
   </style>
 </head>
 <body>
-  <nav class="navbar">
-    <a href="#" class="brand-logo"><i class="fa-solid fa-microchip"></i> DC <span>TECHNOLOGY</span></a>
-  </nav>
-
-  <header class="hero">
-    <h1>El Setup de tus Sueños,<br><span class="text-gradient">A un Clic de Distancia.</span></h1>
-    <p>Conecta directamente con nuestra IA de ventas para despachos inmediatos.</p>
-  </header>
-
-  <main class="store-container">
-    <h2>Catálogo <span class="text-gradient">Premium</span></h2>
-    <div class="product-grid" id="grid-productos"></div>
-  </main>
-
-  <a href="https://wa.me/573000000000" target="_blank" class="floating-wa"><i class="fa-brands fa-whatsapp"></i></a>
-
+  <h1>DC Technology Premium</h1>
+  <div id="grid-productos"></div>
   <script>
-    const NUMERO_WHATSAPP = "573000000000"; 
-    const formatoCOP = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 });
-
-    async function cargarCatalogo() {
-      try {
-        const res = await fetch('productos.json');
-        const productos = await res.json();
-        renderizarProductos(productos);
-      } catch (error) {
-        document.getElementById('grid-productos').innerHTML = "<p>Error cargando productos. Verifica productos.json</p>";
-      }
-    }
-
-    window.iniciarCompra = function(id, titulo, precio) {
-      const msg = encodeURIComponent(`⚡ ¡Hola DC Technology!\nQuiero comprar:\n*${titulo}*\n*Ref:* #${id}\n*Precio:* ${formatoCOP.format(precio)}\n¿Hay disponibilidad?`);
-      window.open(`https://wa.me/${NUMERO_WHATSAPP}?text=${msg}`, '_blank');
-    }
-
-    function renderizarProductos(productos) {
-      const grid = document.getElementById('grid-productos');
-      grid.innerHTML = productos.map(p => `
-        <article class="product-card">
-          <div class="card-image-wrapper">
-            <img src="${p.img}" alt="${p.titulo}">
-          </div>
-          <h3 class="product-name">${p.titulo}</h3>
-          <div class="price-main">${formatoCOP.format(p.precio)}</div>
-          <button onclick="iniciarCompra(${p.id}, '${p.titulo}', ${p.precio})" class="btn-buy">
-            <i class="fa-brands fa-whatsapp"></i> Comprar Ahora
-          </button>
-        </article>
+    async function cargar() {
+      const res = await fetch('productos.json');
+      const data = await res.json();
+      document.getElementById('grid-productos').innerHTML = data.map(p => `
+        <div class="product-card">
+          <img src="${p.img}">
+          <h3>${p.titulo}</h3>
+          <h2>$${p.precio}</h2>
+          <a href="#" class="btn">Comprar Ahora</a>
+        </div>
       `).join('');
     }
-    window.onload = cargarCatalogo;
+    cargar();
   </script>
 </body>
 </html>
