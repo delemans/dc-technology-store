@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="es" class="dark scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DC TECHNOLOGY | Store Futurista Oficial</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        dcRed: '#FF0033',
+                        dcRedGlow: '#E60000',
+                        dcDarkBg: '#050608',
+                        dcCardBg: '#0D0E15',
+                        dcBorder: '#1A1D2B'
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #050608; color: #FFFFFF; }
+        .font-tech { font-family: 'Orbitron', sans-serif; }
+
+        /* Efectos Neón y Glow */
+        .glow-red { filter: drop-shadow(0 0 12px rgba(255, 0, 51, 0.6)); }
+        .glow-box { box-shadow: 0 0 25px rgba(255, 0, 51, 0.25); }
+
+        /* Glassmorphism */
+        .glass-panel {
+            background: rgba(13, 14, 21, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+
+        /* Tarjeta 3D Interactiva */
+        .card-3d {
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            background: linear-gradient(145deg, #0F111A, #08090E);
+            border: 1px solid #1A1D2B;
+        }
+        .card-3d:hover {
+            transform: translateY(-8px) rotateX(2deg);
+            border-color: #FF0033;
+            box-shadow: 0 15px 35px rgba(255, 0, 51, 0.3);
+        }
+
+        /* Botón Neón Pulsante */
+        .btn-glow {
+            background: linear-gradient(135deg, #FF0033 0%, #990022 100%);
+            box-shadow: 0 4px 20px rgba(255, 0, 51, 0.4);
+            transition: all 0.3s ease;
+        }
+        .btn-glow:hover {
+            box-shadow: 0 6px 30px rgba(255, 0, 51, 0.8);
+            transform: scale(1.02);
+        }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-dcRed selection:text-white">
+
+    <!-- Banner Superior Neón -->
+    <div class="bg-gradient-to-r from-dcRed via-red-600 to-dcRed text-white text-[11px] font-black uppercase tracking-widest text-center py-2 px-4 shadow-lg">
+        ⚡ ENTREGAS INMEDIATAS 24/7 • PLATAFORMAS, LICENCIAS & TECNOLOGÍA OFICIAL ⚡
+    </div>
+
+    <!-- Header Principal -->
+    <header class="sticky top-0 z-40 glass-panel border-b border-dcBorder">
+        <div class="container mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-4">
+            
+            <!-- Logo Oficial de la Imagen -->
+            <a href="#" class="flex items-center gap-3 group">
+                <img src="https://i.ibb.co/LDN4xyW0/Mesa-de-trabajo-1.png" alt="DC Technology Logo" class="h-10 md:h-12 w-auto object-contain glow-red group-hover:scale-105 transition-transform duration-300">
+            </a>
+
+            <!-- Buscador Cyberpunk -->
+            <div class="w-full md:w-2/5 relative">
+                <input type="search" id="searchInput" placeholder="¿Qué deseas adquirir hoy? (Ej. Netflix, Office, Smartwatch)..." class="w-full rounded-2xl px-5 py-3 bg-[#0A0B10] text-white text-xs md:text-sm border border-dcBorder focus:outline-none focus:border-dcRed focus:ring-1 focus:ring-dcRed transition-all placeholder-gray-500 shadow-inner">
+                <span class="absolute right-4 top-3.5 text-gray-400 text-xs">🔍</span>
+            </div>
+
+            <!-- Accesos Rápidos -->
+            <div class="flex items-center space-x-3">
+                <a href="portal.html" class="bg-dcCardBg hover:bg-gray-800 text-white px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all border border-dcBorder flex items-center gap-2">
+                    🔑 <span class="hidden sm:inline">Portal Clientes</span>
+                </a>
+                <a href="https://wa.me/573223284622" target="_blank" class="btn-glow text-white px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider flex items-center gap-2">
+                    💬 <span class="hidden sm:inline">Asesor IA</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Layout Principal -->
+    <main class="container mx-auto px-4 py-8 flex flex-col lg:flex-row gap-8 flex-grow">
+        
+        <!-- Sidebar Filtros -->
+        <aside class="w-full lg:w-1/4 h-fit sticky top-28 z-10">
+            <div class="bg-dcCardBg p-6 rounded-3xl border border-dcBorder shadow-2xl">
+                <h2 class="text-sm font-black mb-5 uppercase font-tech tracking-wider text-white flex items-center gap-2">
+                    <span class="w-2.5 h-6 bg-dcRed rounded-full shadow-[0_0_10px_#FF0033]"></span> Categorías
+                </h2>
+                
+                <ul class="space-y-2 text-xs font-bold" id="filter-container">
+                    <li><button class="filter-btn w-full text-left px-4 py-3.5 rounded-2xl bg-dcRed text-white font-black shadow-lg transition-all flex items-center justify-between" data-filter="todos"><span>🔥 Catálogo Completo</span> <span class="text-[10px]">VER</span></button></li>
+                    <li><button class="filter-btn w-full text-left px-4 py-3.5 rounded-2xl text-gray-400 hover:bg-[#151824] hover:text-dcRed transition-all flex items-center justify-between" data-filter="tecnologia"><span>💻 Tecnología Física</span> <span>→</span></button></li>
+                    <li><button class="filter-btn w-full text-left px-4 py-3.5 rounded-2xl text-gray-400 hover:bg-[#151824] hover:text-dcRed transition-all flex items-center justify-between" data-filter="streaming"><span>🎬 Cuentas Streaming</span> <span>→</span></button></li>
+                    <li><button class="filter-btn w-full text-left px-4 py-3.5 rounded-2xl text-gray-400 hover:bg-[#151824] hover:text-dcRed transition-all flex items-center justify-between" data-filter="licencias"><span>🔑 Licencias Software</span> <span>→</span></button></li>
+                    <li><button class="filter-btn w-full text-left px-4 py-3.5 rounded-2xl text-gray-400 hover:bg-[#151824] hover:text-dcRed transition-all flex items-center justify-between" data-filter="pines"><span>🎮 Pines Virtuales</span> <span>→</span></button></li>
+                    <li><button class="filter-btn w-full text-left px-4 py-3.5 rounded-2xl text-gray-400 hover:bg-[#151824] hover:text-dcRed transition-all flex items-center justify-between" data-filter="recargas"><span>💸 Recargas & Apuestas</span> <span>→</span></button></li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Grilla de Productos -->
+        <section class="w-full lg:w-3/4">
+            <div class="flex justify-between items-center mb-6 border-b border-dcBorder pb-4">
+                <div>
+                    <span class="text-[10px] text-dcRed font-black uppercase tracking-widest block">Explora el Stock</span>
+                    <h1 class="text-xl md:text-2xl font-black uppercase font-tech text-white" id="category-title">Catálogo Completo</h1>
+                </div>
+                <span class="text-xs font-black text-dcRed bg-dcRed/10 px-4 py-2 rounded-full border border-dcRed/30 shadow-inner" id="product-count">0 Productos</span>
+            </div>
+
+            <!-- Grilla Dinámica -->
+            <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+                <!-- Se cargan por JS -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MODAL DE PRODUCTO Y CHECKOUT INTELEGIENTE -->
+    <div id="product-modal" class="fixed inset-0 bg-black/85 z-50 hidden flex items-center justify-center backdrop-blur-md p-4 opacity-0 transition-opacity duration-300">
+        <div class="bg-[#0D0E15] rounded-3xl border border-dcBorder w-full max-w-3xl max-h-[92vh] overflow-y-auto no-scrollbar relative shadow-2xl flex flex-col md:flex-row transform scale-95 transition-transform duration-300" id="modal-content-box">
+            
+            <button id="close-modal" class="absolute top-4 right-5 text-gray-400 hover:text-dcRed text-3xl font-black z-20 transition-colors">&times;</button>
+            
+            <!-- Imagen Modal -->
+            <div class="w-full md:w-5/12 bg-white flex flex-col items-center justify-center p-6 rounded-t-3xl md:rounded-l-3xl md:rounded-tr-none relative border-b md:border-b-0 md:border-r border-dcBorder">
+                <div class="absolute top-4 left-4 bg-dcRed text-white text-[10px] font-black px-2.5 py-1 rounded-full z-10 hidden" id="modal-discount-badge"></div>
+                <img id="modal-img" src="" alt="Producto" class="w-full h-48 md:h-60 object-contain">
+                <div class="mt-4 w-full text-center bg-yellow-500/10 border border-yellow-500/30 text-yellow-400 text-[11px] font-bold py-2 px-3 rounded-xl flex items-center justify-center gap-1">
+                    ⭐ Producto Garantizado por DC Technology
+                </div>
+            </div>
+            
+            <!-- Contenido Modal -->
+            <div class="w-full md:w-7/12 p-6 md:p-8 flex flex-col justify-between">
+                <div>
+                    <span id="modal-brand" class="text-[10px] uppercase text-dcRed font-black tracking-widest block mb-1">DC Technology</span>
+                    <h2 id="modal-title" class="text-xl md:text-2xl font-black text-white font-tech mb-3 leading-snug"></h2>
+                    
+                    <!-- Precios -->
+                    <div class="flex items-end gap-3 mb-1">
+                        <span id="modal-old-price" class="text-sm line-through text-gray-500"></span>
+                        <span id="modal-price" class="text-3xl font-black text-dcRed"></span>
+                    </div>
+                    <div class="text-xs text-green-400 font-bold mb-5 hidden" id="modal-savings"></div>
+
+                    <!-- Selector de Variantes -->
+                    <div class="mb-6 bg-[#08090E] p-4 rounded-2xl border border-dcBorder">
+                        <h3 class="text-[11px] font-black uppercase tracking-wider text-gray-300 mb-3">Elige tu Plan o Configuración:</h3>
+                        <div id="modal-variants" class="grid grid-cols-1 gap-2 max-h-40 overflow-y-auto no-scrollbar pr-1">
+                            <!-- JS Inyecta las variantes -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botón de Orden Directa -->
+                <button id="btn-whatsapp" class="btn-glow w-full text-white font-black uppercase tracking-wider py-4 rounded-2xl text-xs flex items-center justify-center gap-2">
+                    SOLICITAR Y ACTIVAR VÍA WHATSAPP 📲
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-[#030405] border-t border-dcBorder text-gray-500 py-8 text-xs">
+        <div class="container mx-auto text-center px-4 flex flex-col items-center gap-3">
+            <img src="https://i.ibb.co/LDN4xyW0/Mesa-de-trabajo-1.png" alt="DC Technology Logo" class="h-8 w-auto opacity-80">
+            <p>&copy; 2026 DC Technology. Todos los derechos reservados. Sistema automatizado de e-commerce.</p>
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
