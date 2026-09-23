@@ -2,143 +2,91 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-  <meta name="description" content="DC Technology - Componentes y Laptops de Alto Rendimiento. Compra segura con asesoría IA.">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>DC Technology | Hardware Premium</title>
-  <link rel="stylesheet" href="styles.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --bg-deep: #030712; --bg-surface: #0f172a; --accent-cyan: #06b6d4; --accent-blue: #3b82f6;
+      --text-main: #f8fafc; --text-muted: #94a3b8; --success: #10b981;
+      --border-glass: 1px solid rgba(255, 255, 255, 0.08);
+      --grad-primary: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+    body { background-color: var(--bg-deep); color: var(--text-main); }
+    .navbar { background: rgba(3, 7, 18, 0.85); backdrop-filter: blur(20px); border-bottom: var(--border-glass); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+    .brand-logo { font-size: 1.5rem; font-weight: 800; color: white; text-decoration: none; display: flex; gap: 0.5rem; }
+    .brand-logo span { color: var(--accent-cyan); }
+    .hero { padding: 4rem 2rem; text-align: center; background: radial-gradient(circle at top, rgba(59, 130, 246, 0.15), transparent 60%); }
+    .hero h1 { font-size: 3rem; margin-bottom: 1rem; }
+    .text-gradient { background: var(--grad-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .store-container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+    .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 2rem; margin-top: 2rem; }
+    .product-card { background: var(--bg-surface); border: var(--border-glass); border-radius: 16px; padding: 1.5rem; transition: transform 0.3s; }
+    .product-card:hover { transform: translateY(-5px); border-color: var(--accent-cyan); box-shadow: 0 10px 30px rgba(6, 182, 212, 0.15); }
+    .card-image-wrapper { width: 100%; height: 200px; background: #000; border-radius: 8px; margin-bottom: 1rem; display: flex; justify-content: center; align-items: center; overflow: hidden; }
+    .card-image-wrapper img { max-width: 100%; max-height: 100%; object-fit: contain; }
+    .product-name { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem; }
+    .price-main { font-size: 1.5rem; font-weight: 800; color: var(--accent-cyan); margin-bottom: 1rem; }
+    .btn-buy { display: flex; align-items: center; justify-content: center; gap: 0.5rem; width: 100%; padding: 1rem; border-radius: 8px; background: white; color: black; font-weight: 800; text-decoration: none; border: none; cursor: pointer; transition: 0.3s; }
+    .btn-buy:hover { background: var(--success); color: white; }
+    .floating-wa { position: fixed; bottom: 2rem; right: 2rem; width: 60px; height: 60px; background: #25d366; color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 2rem; text-decoration: none; box-shadow: 0 10px 25px rgba(37, 211, 102, 0.5); }
+  </style>
 </head>
 <body>
-
-  <!-- Alertas Flotantes (Toasts) -->
-  <div id="toast-container" class="toast-container"></div>
-
-  <div class="top-bar">
-    <div class="top-bar-content">
-      <span><i class="fa-solid fa-bolt text-accent"></i> Envío Nacional Express | Seguro Contra Daños</span>
-      <div class="countdown" id="countdown" aria-label="Tiempo restante de la oferta">04:59:59</div>
-    </div>
-  </div>
-
-  <nav class="navbar" role="navigation">
-    <div class="nav-container">
-      <a href="#" class="brand-logo" aria-label="Inicio DC Technology">
-        <div class="logo-icon"><i class="fa-solid fa-microchip"></i></div>
-        <div class="logo-text">DC <span>TECHNOLOGY</span></div>
-      </a>
-      <div class="search-wrapper">
-        <i class="fa-solid fa-magnifying-glass search-icon"></i>
-        <input type="search" id="buscador" class="search-input" placeholder="Buscar RTX, Ryzen, Monitores..." oninput="filtrarProductos()">
-        <div class="search-shortcut">/</div>
-      </div>
-    </div>
+  <nav class="navbar">
+    <a href="#" class="brand-logo"><i class="fa-solid fa-microchip"></i> DC <span>TECHNOLOGY</span></a>
   </nav>
 
   <header class="hero">
-    <div class="hero-bg-glow"></div>
-    <div class="hero-content">
-      <div class="premium-badge"><i class="fa-solid fa-gem"></i> Hardware Enthusiast 2026</div>
-      <h1 class="hero-title">El Setup de tus Sueños,<br><span class="text-gradient">A un Clic de Distancia.</span></h1>
-      <p class="hero-subtitle">Conecta directamente con nuestra IA de ventas para despachos inmediatos.</p>
-    </div>
+    <h1>El Setup de tus Sueños,<br><span class="text-gradient">A un Clic de Distancia.</span></h1>
+    <p>Conecta directamente con nuestra IA de ventas para despachos inmediatos.</p>
   </header>
 
   <main class="store-container">
-    <div class="section-header">
-      <h2>Catálogo <span class="text-gradient">Premium</span></h2>
-      <div class="filter-pills" id="contenedor-filtros" role="group">
-        <button class="filter-btn active" data-categoria="todos">Todo</button>
-        <button class="filter-btn" data-categoria="laptops">Laptops</button>
-        <button class="filter-btn" data-categoria="monitores">Monitores</button>
-        <button class="filter-btn" data-categoria="perifericos">Periféricos</button>
-      </div>
-    </div>
-
-    <div class="product-grid" id="grid-productos">
-      <!-- Carga dinámica -->
-    </div>
+    <h2>Catálogo <span class="text-gradient">Premium</span></h2>
+    <div class="product-grid" id="grid-productos"></div>
   </main>
 
-  <a href="https://wa.me/573000000000" target="_blank" class="floating-wa" aria-label="Contactar por WhatsApp">
-    <i class="fa-brands fa-whatsapp"></i>
-    <span class="wa-tooltip">Asesoría IA 24/7</span>
-  </a>
+  <a href="https://wa.me/573000000000" target="_blank" class="floating-wa"><i class="fa-brands fa-whatsapp"></i></a>
 
   <script>
     const NUMERO_WHATSAPP = "573000000000"; 
-    let productosGlobal = [];
     const formatoCOP = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 });
-
-    function mostrarToast(mensaje) {
-      const container = document.getElementById('toast-container');
-      const toast = document.createElement('div');
-      toast.className = 'toast show';
-      toast.innerHTML = `<i class="fa-solid fa-check-circle" style="color:var(--success)"></i> ${mensaje}`;
-      container.appendChild(toast);
-      setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 3000);
-    }
 
     async function cargarCatalogo() {
       try {
         const res = await fetch('productos.json');
-        if (!res.ok) throw new Error("JSON no accesible");
-        productosGlobal = await res.json();
+        const productos = await res.json();
+        renderizarProductos(productos);
       } catch (error) {
-        productosGlobal = [
-          { id: 101, titulo: "Asus ROG Zephyrus G14 OLED", precio: 7500000, precioAnterior: 8200000, categoria: "laptops", img: "https://via.placeholder.com/300x200/0d1321/00f2fe?text=ROG", stock: 2, vendido: 90 },
-          { id: 102, titulo: "Monitor Alienware 34' QD-OLED", precio: 4800000, categoria: "monitores", img: "https://via.placeholder.com/300x200/0d1321/fbbf24?text=Alienware", stock: 5, vendido: 60 }
-        ];
+        document.getElementById('grid-productos').innerHTML = "<p>Error cargando productos. Verifica productos.json</p>";
       }
-      renderizarProductos(productosGlobal);
     }
 
     window.iniciarCompra = function(id, titulo, precio) {
-      mostrarToast("Conectando con asesor...");
-      const msg = encodeURIComponent(`⚡ ¡Hola DC Technology!\n\nInicio proceso de compra para:\n*${titulo}*\n*Ref:* #${id}\n*Precio:* ${formatoCOP.format(precio)}\n\nEspero confirmación de stock y métodos de pago.`);
-      setTimeout(() => { window.open(`https://wa.me/${NUMERO_WHATSAPP}?text=${msg}`, '_blank'); }, 800);
+      const msg = encodeURIComponent(`⚡ ¡Hola DC Technology!\nQuiero comprar:\n*${titulo}*\n*Ref:* #${id}\n*Precio:* ${formatoCOP.format(precio)}\n¿Hay disponibilidad?`);
+      window.open(`https://wa.me/${NUMERO_WHATSAPP}?text=${msg}`, '_blank');
     }
 
     function renderizarProductos(productos) {
       const grid = document.getElementById('grid-productos');
-      grid.innerHTML = productos.map(p => {
-        const precioViejo = p.precioAnterior || Math.round(p.precio * 1.15);
-        const porcentaje = Math.round(((precioViejo - p.precio) / precioViejo) * 100);
-        return `
-          <article class="product-card">
-            <div class="card-badges">
-              <span class="badge badge-discount">-${porcentaje}%</span>
-              ${(p.stock || 3) <= 3 ? `<span class="badge badge-urgent"><i class="fa-solid fa-fire"></i> ¡Últimos ${(p.stock || 3)}!</span>` : ''}
-            </div>
-            <div class="card-image-wrapper">
-              <img src="${p.img || 'https://via.placeholder.com/300'}" alt="${p.titulo}" loading="lazy" width="300" height="200">
-            </div>
-            <div class="card-info">
-              <h3 class="product-name">${p.titulo}</h3>
-              <div class="pricing">
-                <div class="price-main">${formatoCOP.format(p.precio)}</div>
-                <div class="price-old">${formatoCOP.format(precioViejo)}</div>
-              </div>
-            </div>
-            <button onclick="iniciarCompra(${p.id}, '${p.titulo}', ${p.precio})" class="btn-buy shine-effect">
-              <i class="fa-brands fa-whatsapp"></i> Comprar Ahora
-            </button>
-          </article>
-        `;
-      }).join('');
+      grid.innerHTML = productos.map(p => `
+        <article class="product-card">
+          <div class="card-image-wrapper">
+            <img src="${p.img}" alt="${p.titulo}">
+          </div>
+          <h3 class="product-name">${p.titulo}</h3>
+          <div class="price-main">${formatoCOP.format(p.precio)}</div>
+          <button onclick="iniciarCompra(${p.id}, '${p.titulo}', ${p.precio})" class="btn-buy">
+            <i class="fa-brands fa-whatsapp"></i> Comprar Ahora
+          </button>
+        </article>
+      `).join('');
     }
-
-    document.querySelectorAll('.filter-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-        e.target.classList.add('active');
-        const cat = e.target.getAttribute('data-categoria');
-        renderizarProductos(cat === 'todos' ? productosGlobal : productosGlobal.filter(p => p.categoria === cat));
-      });
-    });
-
     window.onload = cargarCatalogo;
   </script>
 </body>
