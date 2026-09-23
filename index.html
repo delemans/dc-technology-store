@@ -2,251 +2,144 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>DC Technology | Tienda Premium de Hardware</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <meta name="description" content="DC Technology - Componentes y Laptops de Alto Rendimiento. Compra segura con asesoría IA.">
+  <title>DC Technology | Hardware Premium</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 
-  <!-- Topbar: Urgencia y Confianza -->
+  <!-- Alertas Flotantes (Toasts) -->
+  <div id="toast-container" class="toast-container"></div>
+
   <div class="top-bar">
     <div class="top-bar-content">
-      <span><i class="fa-solid fa-bolt text-accent"></i> Oferta Flash: Envío Gratis en compras superiores a $500.000</span>
-      <div class="countdown" id="countdown">Termina en: 04:59:59</div>
+      <span><i class="fa-solid fa-bolt text-accent"></i> Envío Nacional Express | Seguro Contra Daños</span>
+      <div class="countdown" id="countdown" aria-label="Tiempo restante de la oferta">04:59:59</div>
     </div>
   </div>
 
-  <!-- Navbar Glassmorphism -->
-  <nav class="navbar">
+  <nav class="navbar" role="navigation">
     <div class="nav-container">
-      <a href="#" class="brand-logo">
+      <a href="#" class="brand-logo" aria-label="Inicio DC Technology">
         <div class="logo-icon"><i class="fa-solid fa-microchip"></i></div>
         <div class="logo-text">DC <span>TECHNOLOGY</span></div>
       </a>
       <div class="search-wrapper">
         <i class="fa-solid fa-magnifying-glass search-icon"></i>
-        <input type="text" id="buscador" class="search-input" placeholder="Buscar RTX 4090, Laptops, Monitores..." oninput="filtrarProductos()">
+        <input type="search" id="buscador" class="search-input" placeholder="Buscar RTX, Ryzen, Monitores..." oninput="filtrarProductos()">
         <div class="search-shortcut">/</div>
       </div>
     </div>
   </nav>
 
-  <!-- Hero Section: Autoridad y Deseo -->
   <header class="hero">
     <div class="hero-bg-glow"></div>
     <div class="hero-content">
-      <div class="premium-badge">
-        <i class="fa-solid fa-gem"></i> Hardware Grado Enthusiast 2026
-      </div>
+      <div class="premium-badge"><i class="fa-solid fa-gem"></i> Hardware Enthusiast 2026</div>
       <h1 class="hero-title">El Setup de tus Sueños,<br><span class="text-gradient">A un Clic de Distancia.</span></h1>
-      <p class="hero-subtitle">Asesoría experta por IA. Despachos asegurados a toda Colombia con pago contraentrega en Bogotá.</p>
-      <div class="trust-metrics">
-        <div class="metric"><span class="highlight">+5k</span> Clientes</div>
-        <div class="metric"><span class="highlight">4.9/5</span> Reseñas</div>
-        <div class="metric"><span class="highlight">100%</span> Garantía</div>
-      </div>
+      <p class="hero-subtitle">Conecta directamente con nuestra IA de ventas para despachos inmediatos.</p>
     </div>
   </header>
 
-  <!-- Ticker de Marcas Asociadas (Autoridad) -->
-  <div class="brands-ticker">
-    <div class="ticker-track">
-      <span>NVIDIA RTX</span> • <span>AMD RYZEN</span> • <span>INTEL CORE</span> • <span>ASUS ROG</span> • <span>CORSAIR</span> • <span>MSI</span> • 
-      <span>NVIDIA RTX</span> • <span>AMD RYZEN</span> • <span>INTEL CORE</span> • <span>ASUS ROG</span> • <span>CORSAIR</span> • <span>MSI</span>
-    </div>
-  </div>
-
-  <!-- Contenedor del Catálogo -->
   <main class="store-container">
     <div class="section-header">
-      <h2>Catálogo <span class="text-gradient">Destacado</span></h2>
-      
-      <!-- Filtros estilo píldora -->
-      <div class="filter-pills" id="contenedor-filtros">
+      <h2>Catálogo <span class="text-gradient">Premium</span></h2>
+      <div class="filter-pills" id="contenedor-filtros" role="group">
         <button class="filter-btn active" data-categoria="todos">Todo</button>
         <button class="filter-btn" data-categoria="laptops">Laptops</button>
         <button class="filter-btn" data-categoria="monitores">Monitores</button>
         <button class="filter-btn" data-categoria="perifericos">Periféricos</button>
-        <button class="filter-btn" data-categoria="componentes">Componentes</button>
       </div>
     </div>
 
-    <!-- Grid de Productos -->
     <div class="product-grid" id="grid-productos">
-      <!-- Skeleton Loaders (Efecto de carga Premium) -->
-      <div class="skeleton-card"></div>
-      <div class="skeleton-card"></div>
-      <div class="skeleton-card"></div>
-      <div class="skeleton-card"></div>
+      <!-- Carga dinámica -->
     </div>
   </main>
 
-  <!-- Botón Flotante de WhatsApp -->
-  <a href="https://wa.me/573000000000" target="_blank" class="floating-wa">
+  <a href="https://wa.me/573000000000" target="_blank" class="floating-wa" aria-label="Contactar por WhatsApp">
     <i class="fa-brands fa-whatsapp"></i>
-    <span class="wa-tooltip">¿Dudas? Habla con un experto</span>
+    <span class="wa-tooltip">Asesoría IA 24/7</span>
   </a>
 
-  <!-- Footer Premium -->
-  <footer class="footer">
-    <div class="footer-grid">
-      <div class="footer-brand">
-        <h3>DC TECHNOLOGY</h3>
-        <p>Elevando el estándar del hardware en Colombia.</p>
-        <div class="secure-payments">
-          <i class="fa-brands fa-cc-visa"></i>
-          <i class="fa-brands fa-cc-mastercard"></i>
-          <i class="fa-solid fa-building-columns"></i>
-        </div>
-      </div>
-    </div>
-    <div class="footer-bottom">
-      <p>&copy; 2026 DC Technology Store. Sitio 100% Seguro.</p>
-    </div>
-  </footer>
-
-  <!-- Lógica de la Tienda -->
   <script>
-    const NUMERO_WHATSAPP = "573000000000"; // Tu número real
+    const NUMERO_WHATSAPP = "573000000000"; 
     let productosGlobal = [];
-
-    // Formateador de moneda
     const formatoCOP = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 });
 
-    // Temporizador falso de urgencia (Neuromarketing)
-    function iniciarTemporizador() {
-      let tiempo = 4 * 3600 + 59 * 60 + 59; // 4h 59m 59s
-      setInterval(() => {
-        const h = Math.floor(tiempo / 3600).toString().padStart(2, '0');
-        const m = Math.floor((tiempo % 3600) / 60).toString().padStart(2, '0');
-        const s = (tiempo % 60).toString().padStart(2, '0');
-        document.getElementById('countdown').innerText = `Termina en: ${h}:${m}:${s}`;
-        tiempo = tiempo > 0 ? tiempo - 1 : 17999;
-      }, 1000);
+    function mostrarToast(mensaje) {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = 'toast show';
+      toast.innerHTML = `<i class="fa-solid fa-check-circle" style="color:var(--success)"></i> ${mensaje}`;
+      container.appendChild(toast);
+      setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 3000);
     }
 
-    // Carga de productos desde el JSON de tu repositorio
     async function cargarCatalogo() {
       try {
         const res = await fetch('productos.json');
-        if (!res.ok) throw new Error("No se encontró JSON");
+        if (!res.ok) throw new Error("JSON no accesible");
         productosGlobal = await res.json();
       } catch (error) {
-        console.log("Cargando base de datos de respaldo...");
-        // Mock data premium si falla el JSON
         productosGlobal = [
-          { id: 101, titulo: "Asus ROG Zephyrus G14 OLED", precio: 7500000, precioAnterior: 8200000, categoria: "laptops", img: "https://via.placeholder.com/300x200/0d1321/00f2fe?text=ROG+Zephyrus", stock: 3, vendido: 85 },
-          { id: 102, titulo: "NVIDIA GeForce RTX 4080 Super", precio: 5200000, precioAnterior: 5800000, categoria: "componentes", img: "https://via.placeholder.com/300x200/0d1321/7928ca?text=RTX+4080", stock: 1, vendido: 98 },
-          { id: 103, titulo: "Monitor Alienware 34' QD-OLED", precio: 4800000, categoria: "monitores", img: "https://via.placeholder.com/300x200/0d1321/fbbf24?text=Alienware", stock: 5, vendido: 60 }
+          { id: 101, titulo: "Asus ROG Zephyrus G14 OLED", precio: 7500000, precioAnterior: 8200000, categoria: "laptops", img: "https://via.placeholder.com/300x200/0d1321/00f2fe?text=ROG", stock: 2, vendido: 90 },
+          { id: 102, titulo: "Monitor Alienware 34' QD-OLED", precio: 4800000, categoria: "monitores", img: "https://via.placeholder.com/300x200/0d1321/fbbf24?text=Alienware", stock: 5, vendido: 60 }
         ];
       }
       renderizarProductos(productosGlobal);
     }
 
-    // Renderizado de tarjetas (Neuromarketing visual)
+    window.iniciarCompra = function(id, titulo, precio) {
+      mostrarToast("Conectando con asesor...");
+      const msg = encodeURIComponent(`⚡ ¡Hola DC Technology!\n\nInicio proceso de compra para:\n*${titulo}*\n*Ref:* #${id}\n*Precio:* ${formatoCOP.format(precio)}\n\nEspero confirmación de stock y métodos de pago.`);
+      setTimeout(() => { window.open(`https://wa.me/${NUMERO_WHATSAPP}?text=${msg}`, '_blank'); }, 800);
+    }
+
     function renderizarProductos(productos) {
       const grid = document.getElementById('grid-productos');
-      grid.innerHTML = '';
-
-      if (productos.length === 0) {
-        grid.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding: 3rem; color: #64748b;">No se encontraron productos.</div>`;
-        return;
-      }
-
-      productos.forEach(p => {
-        // Cálculos psicológicos
+      grid.innerHTML = productos.map(p => {
         const precioViejo = p.precioAnterior || Math.round(p.precio * 1.15);
-        const ahorro = precioViejo - p.precio;
-        const porcentaje = Math.round((ahorro / precioViejo) * 100);
-        const stockRestante = p.stock || Math.floor(Math.random() * 5) + 1;
-        const porcentajeVendido = p.vendido || Math.floor(Math.random() * 30) + 70; // Ej: 85% vendido
-        
-        // Mensaje pre-armado
-        const msg = encodeURIComponent(`⚡ ¡Hola DC Technology!\n\nQuiero comprar el siguiente producto:\n*${p.titulo}*\n*Ref:* #${p.id}\n*Precio:* ${formatoCOP.format(p.precio)}\n\n¿Aún tienen stock para envío inmediato?`);
-        const linkWA = `https://wa.me/${NUMERO_WHATSAPP}?text=${msg}`;
-
-        grid.innerHTML += `
-          <div class="product-card">
-            <!-- Badges -->
+        const porcentaje = Math.round(((precioViejo - p.precio) / precioViejo) * 100);
+        return `
+          <article class="product-card">
             <div class="card-badges">
-              <span class="badge badge-discount">-${porcentaje}% DTO</span>
-              ${stockRestante <= 2 ? `<span class="badge badge-urgent"><i class="fa-solid fa-fire"></i> ¡Solo ${stockRestante}!</span>` : ''}
+              <span class="badge badge-discount">-${porcentaje}%</span>
+              ${(p.stock || 3) <= 3 ? `<span class="badge badge-urgent"><i class="fa-solid fa-fire"></i> ¡Últimos ${(p.stock || 3)}!</span>` : ''}
             </div>
-
-            <!-- Imagen -->
             <div class="card-image-wrapper">
-              <img src="${p.img || 'https://via.placeholder.com/300'}" alt="${p.titulo}" loading="lazy">
+              <img src="${p.img || 'https://via.placeholder.com/300'}" alt="${p.titulo}" loading="lazy" width="300" height="200">
             </div>
-
-            <!-- Información -->
             <div class="card-info">
-              <div class="reviews">
-                <div class="stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star-half-stroke"></i></div>
-                <span>(4.9)</span>
-              </div>
-              <h3 class="product-name" title="${p.titulo}">${p.titulo}</h3>
-              
-              <!-- Precios (Anclaje) -->
+              <h3 class="product-name">${p.titulo}</h3>
               <div class="pricing">
                 <div class="price-main">${formatoCOP.format(p.precio)}</div>
                 <div class="price-old">${formatoCOP.format(precioViejo)}</div>
               </div>
-
-              <!-- Barra de Escasez -->
-              <div class="stock-meter">
-                <div class="stock-info">
-                  <span>Demanda alta</span>
-                  <span>${porcentajeVendido}% Reservado</span>
-                </div>
-                <div class="progress-bg">
-                  <div class="progress-fill" style="width: ${porcentajeVendido}%"></div>
-                </div>
-              </div>
             </div>
-
-            <!-- CTA -->
-            <div class="card-action">
-              <a href="${linkWA}" target="_blank" class="btn-buy">
-                <i class="fa-brands fa-whatsapp"></i> Comprar Ahora
-              </a>
-            </div>
-          </div>
+            <button onclick="iniciarCompra(${p.id}, '${p.titulo}', ${p.precio})" class="btn-buy shine-effect">
+              <i class="fa-brands fa-whatsapp"></i> Comprar Ahora
+            </button>
+          </article>
         `;
-      });
+      }).join('');
     }
 
-    // Sistema de Búsqueda
-    function filtrarProductos() {
-      const query = document.getElementById('buscador').value.toLowerCase();
-      const filtrados = productosGlobal.filter(p => p.titulo.toLowerCase().includes(query) || (p.categoria && p.categoria.toLowerCase().includes(query)));
-      renderizarProductos(filtrados);
-    }
-
-    // Sistema de Filtros por Botones
     document.querySelectorAll('.filter-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
         document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
         e.target.classList.add('active');
         const cat = e.target.getAttribute('data-categoria');
-        
-        if (cat === 'todos') {
-          renderizarProductos(productosGlobal);
-        } else {
-          const filtrados = productosGlobal.filter(p => p.categoria && p.categoria.toLowerCase() === cat);
-          renderizarProductos(filtrados);
-        }
+        renderizarProductos(cat === 'todos' ? productosGlobal : productosGlobal.filter(p => p.categoria === cat));
       });
     });
 
-    // Iniciar
-    window.onload = () => {
-      iniciarTemporizador();
-      cargarCatalogo();
-    };
+    window.onload = cargarCatalogo;
   </script>
 </body>
 </html>
