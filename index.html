@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="es" class="dark">
+<html lang="es" class="dark scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DC TECHNOLOGY | Tienda Oficial</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -13,73 +14,142 @@
                     colors: {
                         dcRed: '#FF0033',
                         dcRedDark: '#CC0029',
-                        dcDarkBg: '#090A0F',
-                        dcDarkCard: '#12151E',
-                        dcLightBg: '#F3F4F8',
+                        dcDarkBg: '#0F111A',
+                        dcDarkCard: '#181B26',
+                        dcLightBg: '#F4F6F8',
                         dcLightCard: '#FFFFFF'
                     }
                 }
             }
         }
     </script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; transition: background-color 0.3s, color 0.3s; }
-        .font-tech { font-family: 'Orbitron', sans-serif; }
 
-        .card-3d { transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .dark .card-3d { background: #12151E; border: 1px solid #1E2332; }
-        html:not(.dark) .card-3d { background: #FFFFFF; border: 1px solid #E2E8F0; box-shadow: 0 4px 15px rgba(0,0,0,0.04); }
+    <!-- Fuentes Premium (Inter y Outfit) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;700;800;900&display=swap" rel="stylesheet">
+    
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+            transition: background-color 0.3s ease, color 0.3s ease; 
+        }
+        .font-tech { font-family: 'Outfit', sans-serif; letter-spacing: -0.02em; }
+
+        /* Scrollbar limpia */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
+        .dark ::-webkit-scrollbar-thumb { background: #334155; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Tarjetas: 3D Suave y Elegante */
+        .card-3d { 
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            perspective: 1000px;
+        }
+        .dark .card-3d { background: #181B26; border: 1px solid #272C3D; }
+        html:not(.dark) .card-3d { background: #FFFFFF; border: 1px solid #E2E8F0; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
         .card-3d:hover {
-            transform: translateY(-8px) scale(1.01);
+            transform: translateY(-6px);
             border-color: #FF0033;
-            box-shadow: 0 15px 30px rgba(255, 0, 51, 0.22);
+            box-shadow: 0 12px 24px rgba(255, 0, 51, 0.12);
         }
 
+        /* Botón de pago más sólido */
         .btn-glow {
-            background: linear-gradient(135deg, #FF0033 0%, #B30024 100%);
-            box-shadow: 0 4px 18px rgba(255, 0, 51, 0.4);
+            background: #FF0033;
             transition: all 0.3s ease;
         }
         .btn-glow:hover {
-            box-shadow: 0 6px 25px rgba(255, 0, 51, 0.7);
-            transform: translateY(-1px);
+            background: #CC0029;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(255, 0, 51, 0.3);
         }
 
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        /* Giro 360° mantenido y sombras de imagen */
+        .img-360 { 
+            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter 0.4s ease; 
+            transform-style: preserve-3d; 
+            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.1));
+        }
+        .card-3d:hover .img-360 { 
+            transform: rotateY(360deg) scale(1.15); 
+            filter: drop-shadow(0 15px 25px rgba(255,0,51,0.3)); 
+        }
+
+        /* Neón Sutil (Legible y Premium) */
+        @keyframes neon-pulse-soft { 
+            0%, 100% { text-shadow: 0 0 2px rgba(255, 0, 51, 0.1); } 
+            50% { text-shadow: 0 0 8px rgba(255, 0, 51, 0.4); } 
+        }
+        .precio-magico { animation: neon-pulse-soft 2s infinite alternate; font-family: 'Outfit', sans-serif; font-variant-numeric: tabular-nums; }
+
+        /* Acordeón de Categorías - Limpio y de alto contraste */
+        .acc-row {
+            display: flex; align-items: center; gap: 0.75rem; width: 100%; text-align: left; 
+            padding: 0.85rem 1rem; border-radius: 0.75rem; font-weight: 700; 
+            transition: all 0.2s ease; border: 1px solid transparent;
+        }
+        .dark .acc-row:hover { background: #232838; }
+        html:not(.dark) .acc-row:hover { background: #F1F5F9; }
+        .acc-row[data-parent="true"] { color: #FF0033; }
+        .acc-row[data-active="true"] { background: #FF0033; color: #fff; }
+        
+        .acc-count { margin-left: auto; font-size: 10px; font-weight: 800; padding: 0.15rem 0.5rem; border-radius: 999px; background: rgba(148,163,184,0.2); }
+        .acc-row[data-active="true"] .acc-count { background: rgba(255,255,255,0.25); color: #fff; }
+        
+        .acc-chev { width: 1rem; height: 1rem; flex: none; transition: transform 0.3s ease; }
+        .acc-row[aria-expanded="true"] .acc-chev { transform: rotate(180deg); }
+        
+        .acc-panel { display: grid; grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows 0.3s ease, opacity 0.2s ease; }
+        .acc-panel.open { grid-template-rows: 1fr; opacity: 1; }
+        .acc-panel > div { overflow: hidden; min-height: 0; }
+        
+        /* Chips limpios */
+        .acc-chip { 
+            font-size: 11px; font-weight: 700; padding: 0.4rem 0.75rem; border-radius: 999px; 
+            border: 1px solid; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 0.4rem;
+        }
+        .dark .acc-chip { color: #CBD5E1; border-color: #272C3D; background: #181B26; }
+        html:not(.dark) .acc-chip { color: #475569; border-color: #E2E8F0; background: #FFFFFF; }
+        .acc-chip:hover { border-color: #FF0033; color: #FF0033; }
+        .acc-chip[data-active="true"] { background: #FF0033 !important; border-color: #FF0033 !important; color: #fff !important; }
+        .acc-chip span { opacity: 0.7; font-size: 10px; background: rgba(0,0,0,0.1); padding: 0.1rem 0.4rem; border-radius: 999px; }
     </style>
 </head>
 <body class="bg-dcLightBg dark:bg-dcDarkBg text-gray-900 dark:text-white min-h-screen flex flex-col">
 
     <!-- Top Notice Bar -->
-    <div class="bg-dcRed text-white text-[11px] font-black uppercase tracking-widest text-center py-2 px-4 shadow-md">
+    <div class="bg-dcRed text-white text-[11px] font-black uppercase tracking-widest text-center py-2.5 px-4">
         ⚡ ENTREGA AUTOMÁTICA EN MINUTOS • SOPORTE DIRECTO DC TECHNOLOGY ⚡
     </div>
 
-    <!-- Header Glassmorphism -->
-    <header class="sticky top-0 z-40 bg-white/90 dark:bg-dcDarkBg/90 backdrop-blur-md border-b border-gray-200 dark:border-gray-800">
+    <!-- Header Sólido y Claro -->
+    <header class="sticky top-0 z-40 bg-white dark:bg-[#0F111A] border-b border-gray-200 dark:border-gray-800 shadow-sm">
         <div class="container mx-auto px-4 py-3.5 flex flex-wrap justify-between items-center gap-4">
             
-            <!-- Logo -->
+            <!-- Logo Oficial -->
             <div class="flex items-center gap-3">
-                <a href="#" class="text-2xl md:text-3xl font-black tracking-tighter uppercase font-tech text-gray-900 dark:text-white">
-                    DC <span class="text-dcRed drop-shadow-[0_0_8px_rgba(255,0,51,0.5)]">TECHNOLOGY</span>
+                <a href="#" class="flex items-center gap-3 group">
+                    <img src="https://i.ibb.co/LDN4xyW0/Mesa-de-trabajo-1.png" alt="DC Technology Logo" class="h-10 md:h-12 object-contain group-hover:scale-105 transition-transform duration-300">
+                    <span class="text-xl md:text-2xl font-black tracking-tighter uppercase font-tech text-gray-900 dark:text-white flex flex-col leading-none hidden sm:flex">
+                        DC <span class="text-dcRed">TECHNOLOGY</span>
+                    </span>
                 </a>
             </div>
 
-            <!-- Buscador en Tiempo Real -->
-            <div class="w-full md:w-1/3 relative">
-                <input type="search" id="searchInput" placeholder="Buscar producto, recarga, juego..." class="w-full rounded-2xl px-5 py-2.5 bg-gray-100 dark:bg-[#12151E] text-gray-900 dark:text-white text-xs border border-gray-300 dark:border-gray-700 focus:outline-none focus:border-dcRed transition-all">
-                <span class="absolute right-4 top-2.5 text-gray-400">🔍</span>
+            <!-- Buscador Mejorado -->
+            <div class="w-full md:w-1/3 relative group">
+                <input type="search" id="searchInput" placeholder="Buscar producto, recarga, juego..." class="w-full rounded-xl pl-10 pr-5 py-2.5 bg-gray-100 dark:bg-[#181B26] text-gray-900 dark:text-white text-sm border border-gray-200 dark:border-gray-700 focus:outline-none focus:border-dcRed focus:bg-white dark:focus:bg-[#181B26] transition-all">
+                <span class="absolute left-3 top-2.5 text-gray-400">🔍</span>
             </div>
 
             <!-- Controles y Accesos -->
             <div class="flex items-center space-x-3">
-                <button id="themeToggle" class="p-2.5 rounded-xl bg-gray-200 dark:bg-gray-800 hover:border-dcRed border border-transparent text-sm transition-all" title="Cambiar Tema">
+                <button id="themeToggle" class="p-2.5 rounded-xl bg-gray-100 dark:bg-[#181B26] hover:bg-gray-200 dark:hover:bg-gray-800 border border-transparent hover:border-dcRed text-sm transition-all" aria-label="Cambiar Tema">
                     <span id="themeIcon">🌙</span>
                 </button>
-                <a href="portal.html" class="bg-gray-800 hover:bg-gray-700 text-white px-3.5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all border border-gray-700">
+                <a href="portal.html" class="hidden md:flex bg-gray-900 dark:bg-[#181B26] hover:bg-dcRed dark:hover:bg-dcRed text-white px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all border border-gray-800 dark:border-gray-700 items-center gap-2">
                     🔑 Portal Clientes
                 </a>
             </div>
@@ -90,32 +160,26 @@
     <main class="container mx-auto px-4 py-8 flex flex-col lg:flex-row gap-8 flex-grow">
         
         <!-- Sidebar de Filtros -->
-        <aside class="w-full lg:w-1/4 h-fit sticky top-24 z-10">
-            <div class="bg-white dark:bg-[#12151E] p-6 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-xl">
-                <h2 class="text-sm font-black mb-4 uppercase text-gray-900 dark:text-white font-tech tracking-wider flex items-center gap-2">
+        <aside class="w-full lg:w-1/4 h-fit lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto no-scrollbar z-10">
+            <div class="bg-white dark:bg-[#181B26] p-6 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
+                <h2 class="text-sm font-black mb-5 uppercase text-gray-900 dark:text-white font-tech tracking-wider flex items-center gap-2">
                     <span class="w-2.5 h-5 bg-dcRed rounded-full"></span> Categorías
                 </h2>
-                
-                <ul class="space-y-1.5 text-xs font-bold text-gray-600 dark:text-gray-400" id="filter-container">
-                    <li><button class="filter-btn w-full text-left px-4 py-3 rounded-2xl bg-dcRed text-white font-black shadow-md transition-all" data-filter="todos">🚀 Todos los Productos</button></li>
-                    <li><button class="filter-btn w-full text-left px-4 py-3 rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all" data-filter="tecnologia">💻 Tecnología Física</button></li>
-                    <li><button class="filter-btn w-full text-left px-4 py-3 rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all" data-filter="streaming">🎬 Cuentas Streaming</button></li>
-                    <li><button class="filter-btn w-full text-left px-4 py-3 rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all" data-filter="licencias">🔑 Licencias Software</button></li>
-                    <li><button class="filter-btn w-full text-left px-4 py-3 rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all" data-filter="pines">🎮 Pines Virtuales</button></li>
-                    <li><button class="filter-btn w-full text-left px-4 py-3 rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all" data-filter="recargas">💸 Recargas & Apuestas</button></li>
-                </ul>
+                <nav id="category-accordion" class="space-y-1.5 text-xs" aria-label="Categorías"></nav>
             </div>
         </aside>
 
-        <!-- Product Grid -->
+        <!-- Product Grid Section -->
         <section class="w-full lg:w-3/4">
-            <div class="flex justify-between items-center mb-6 border-b border-gray-200 dark:border-gray-800 pb-3">
-                <h1 class="text-xl md:text-2xl font-black uppercase font-tech tracking-wide text-gray-900 dark:text-white" id="category-title">Catálogo Completo</h1>
-                <span class="text-xs font-black text-dcRed bg-red-500/10 px-3.5 py-1.5 rounded-full border border-red-500/20" id="product-count">Cargando...</span>
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 border-b border-gray-200 dark:border-gray-800 pb-4 gap-3">
+                <h1 class="text-2xl font-black uppercase font-tech tracking-wide text-gray-900 dark:text-white" id="category-title">Catálogo Completo</h1>
+                <span class="text-xs font-black text-dcRed bg-red-500/10 px-3.5 py-1.5 rounded-full border border-red-500/20" id="product-count">
+                    Cargando...
+                </span>
             </div>
 
             <!-- Grilla Dinámica -->
-            <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+            <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6 md:gap-8">
                 <!-- Inyección JS -->
             </div>
         </section>
@@ -123,58 +187,71 @@
     </main>
 
     <!-- MODAL DETALLADO DE VARIANTES -->
-    <div id="product-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center backdrop-blur-md p-4 opacity-0 transition-opacity duration-300">
-        <div class="bg-white dark:bg-[#12151E] rounded-3xl border border-gray-200 dark:border-gray-800 w-full max-w-3xl max-h-[92vh] overflow-y-auto no-scrollbar relative shadow-2xl flex flex-col md:flex-row transform scale-95 transition-transform duration-300" id="modal-content-box">
+    <div id="product-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 opacity-0 transition-opacity duration-300">
+        <div class="bg-white dark:bg-[#181B26] rounded-3xl border border-gray-200 dark:border-gray-800 w-full max-w-4xl max-h-[92vh] overflow-y-auto no-scrollbar relative shadow-2xl flex flex-col md:flex-row transform scale-95 transition-transform duration-300" id="modal-content-box">
             
-            <button id="close-modal" class="absolute top-4 right-5 text-gray-400 hover:text-dcRed text-3xl font-black z-20">&times;</button>
+            <button id="close-modal" class="absolute top-4 right-5 text-gray-400 hover:text-dcRed bg-gray-100 dark:bg-[#0F111A] rounded-full p-2 transition-colors z-20">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
             
-            <!-- Imagen -->
-            <div class="w-full md:w-5/12 bg-white flex flex-col items-center justify-center p-6 rounded-t-3xl md:rounded-l-3xl md:rounded-tr-none relative border-b md:border-b-0 md:border-r border-gray-200 dark:border-gray-800">
-                <div class="absolute top-4 left-4 bg-dcRed text-white text-[10px] font-black px-2.5 py-1 rounded-full z-10 hidden" id="modal-discount-badge"></div>
-                <img id="modal-img" src="" alt="Producto" class="w-full h-48 md:h-60 object-contain">
-                <div class="mt-4 w-full text-center bg-yellow-500/10 border border-yellow-500/30 text-yellow-600 dark:text-yellow-400 text-[11px] font-bold py-2 px-3 rounded-xl">
+            <!-- Imagen Modal -->
+            <div class="w-full md:w-5/12 bg-gray-50 dark:bg-[#0F111A] flex flex-col items-center justify-center p-8 rounded-t-3xl md:rounded-l-3xl md:rounded-tr-none relative border-b md:border-b-0 md:border-r border-gray-200 dark:border-gray-800">
+                <div class="absolute top-4 left-4 bg-dcRed text-white text-[10px] font-black px-3 py-1 rounded-full z-10 hidden" id="modal-discount-badge"></div>
+                
+                <img id="modal-img" src="" alt="Producto" class="w-full h-48 md:h-64 object-contain img-360">
+                
+                <div class="mt-6 w-full text-center bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-200 dark:border-yellow-700/30 text-yellow-700 dark:text-yellow-500 text-xs font-bold py-2 px-3 rounded-xl">
                     ⭐ Garantía Oficial DC Technology
                 </div>
             </div>
             
-            <!-- Detalles y Selección -->
+            <!-- Detalles y Selección Modal -->
             <div class="w-full md:w-7/12 p-6 md:p-8 flex flex-col justify-between">
                 <div>
-                    <span id="modal-brand" class="text-[10px] uppercase text-dcRed font-black tracking-widest block mb-1">DC Technology</span>
-                    <h2 id="modal-title" class="text-xl md:text-2xl font-black text-gray-900 dark:text-white logo-font mb-3 leading-snug"></h2>
+                    <span id="modal-brand" class="text-[10px] uppercase text-gray-500 dark:text-gray-400 font-black tracking-widest block mb-1">DC Technology</span>
+                    <h2 id="modal-title" class="text-xl md:text-2xl font-black text-gray-900 dark:text-white font-tech mb-3 leading-snug"></h2>
                     
                     <!-- Precios -->
-                    <div class="flex items-end gap-3 mb-1">
-                        <span id="modal-old-price" class="text-sm line-through text-gray-400"></span>
-                        <span id="modal-price" class="text-3xl font-black text-dcRed"></span>
+                    <div class="flex items-end gap-3 mb-2">
+                        <span id="modal-price" class="text-3xl font-black text-dcRed precio-magico"></span>
+                        <span id="modal-old-price" class="text-sm line-through text-gray-400 font-semibold"></span>
                     </div>
-                    <div class="text-xs text-green-500 font-bold mb-4 hidden" id="modal-savings"></div>
+                    <div class="text-xs text-green-600 dark:text-green-400 font-bold mb-5 hidden" id="modal-savings"></div>
 
                     <!-- Variantes Dinámicas -->
-                    <div class="mb-5 bg-gray-50 dark:bg-gray-900/60 p-4 rounded-2xl border border-gray-200 dark:border-gray-800">
-                        <h3 class="text-[11px] font-black uppercase tracking-wider text-gray-700 dark:text-gray-300 mb-3">Selecciona tu Plan / Variante:</h3>
-                        <div id="modal-variants" class="grid grid-cols-1 gap-2 max-h-44 overflow-y-auto no-scrollbar pr-1">
+                    <div class="mb-6">
+                        <h3 class="text-xs font-black uppercase text-gray-700 dark:text-gray-300 mb-3">Selecciona tu Opción:</h3>
+                        <div id="modal-variants" class="grid grid-cols-1 gap-2 max-h-40 overflow-y-auto no-scrollbar pr-1">
                             <!-- JS inserta las opciones -->
                         </div>
                     </div>
                 </div>
 
-                <!-- Botón de Pago por WhatsApp -->
-                <button id="btn-whatsapp" class="btn-glow w-full text-white font-black uppercase tracking-wider py-4 rounded-2xl text-xs flex items-center justify-center gap-2">
-                    SOLICITAR Y PAGAR POR WHATSAPP 📲
-                </button>
+                <!-- Acciones de compra -->
+                <div class="flex flex-col gap-2.5 mt-4">
+                    <button id="btn-pagar" class="btn-glow w-full text-white font-black uppercase tracking-wider py-3.5 rounded-xl text-xs flex items-center justify-center gap-2">
+                        PAGAR EN LÍNEA (NEQUI/PSE) 🔒
+                    </button>
+                    <button id="btn-whatsapp" class="w-full font-bold uppercase tracking-wider py-3 rounded-xl text-xs border-2 border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:border-dcRed hover:text-dcRed transition-colors flex items-center justify-center gap-2">
+                        O SOLICITAR POR WHATSAPP 📲
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- Footer -->
-    <footer class="bg-white dark:bg-[#060709] border-t border-gray-200 dark:border-gray-800/80 text-gray-600 dark:text-gray-400 py-6 mt-auto text-xs">
+    <footer class="bg-white dark:bg-[#0F111A] border-t border-gray-200 dark:border-gray-800 text-gray-500 dark:text-gray-400 py-6 mt-auto">
         <div class="container mx-auto text-center px-4">
-            <p class="font-tech font-black text-base text-gray-900 dark:text-white mb-1">DC <span class="text-dcRed">TECHNOLOGY</span></p>
-            <p class="text-[11px] text-gray-500">&copy; 2026 DC Technology. Todos los derechos reservados.</p>
+            <a href="#" class="inline-flex items-center gap-2 mb-2">
+                <img src="https://i.ibb.co/LDN4xyW0/Mesa-de-trabajo-1.png" alt="Logo" class="h-6 object-contain grayscale opacity-60">
+                <p class="font-tech font-black text-sm text-gray-900 dark:text-white">DC <span class="text-dcRed">TECHNOLOGY</span></p>
+            </a>
+            <p class="text-[11px] font-medium">&copy; 2026 DC Technology. Todos los derechos reservados.</p>
         </div>
     </footer>
 
+    <script src="checkout.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
