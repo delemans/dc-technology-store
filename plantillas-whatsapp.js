@@ -188,6 +188,27 @@
             '_Si prefieres no recibir estos mensajes, responde *NO*._',
         ].join('\n'),
 
+        // Entrega de accesos de un producto digital (triangulación con el proveedor, WO-024).
+        // Las líneas con datos vacíos se omiten al rellenar (p. ej. sin PIN de perfil).
+        entregaCredenciales: ({ pedido, producto, usuario, clave, perfil, pin, codigo }) => [
+            `🔐 *¡Tus accesos están listos!* · ${FIRMA}`,
+            '',
+            `📦 Pedido: *#${pedido}*`,
+            `🛒 Producto: ${producto}`,
+            '',
+            // Monoespaciado (```): WhatsApp no aplica formato adentro, así * _ ~ de una clave se ven tal cual.
+            // Estos 4 datos se insertan EXACTOS (sin limpiar): ver "Mensaje de entrega" en n8n/generar_flujo_n8n.js
+            `👤 Usuario / correo: \`\`\`${usuario}\`\`\``,
+            `🔑 Clave: \`\`\`${clave}\`\`\``,
+            perfil !== undefined ? `🙋 Perfil: \`\`\`${perfil}\`\`\`` : null,
+            pin !== undefined ? `🔢 PIN: \`\`\`${pin}\`\`\`` : null,
+            '',
+            '📌 Para conservar tu garantía: no cambies correo ni contraseña, usa solo tu perfil y no compartas el acceso.',
+            codigo !== undefined ? `🛡️ Garantía y soporte: ${URL_PORTAL}?codigo=${codigo}` : null,
+            '',
+            '¿Algo no funciona? Responde *SOPORTE* 🛠️',
+        ].filter((l) => l !== null).join('\n'),
+
         // Respuesta del bot al pasar la conversación a una persona
         escalarAsesor: ({ pedido } = {}) => [
             `🙋 *Te paso con un asesor humano* · ${FIRMA}`,

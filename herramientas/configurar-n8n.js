@@ -108,6 +108,8 @@ function prepararFlujo(flujo, ids) {
                 evolution_instancia: env.EVOLUTION_INSTANCIA,
                 // 3001234567 → 573001234567 (WhatsApp necesita el indicativo)
                 numero_aviso_admin: (env.NUMERO_AVISO_ADMIN || '').replace(/\D/g, '').replace(/^(3\d{9})$/, '57$1'),
+                // WhatsApp del proveedor (ALL NECESSARY COLOMBIA): activa la triangulación de productos digitales
+                numero_proveedor: (env.NUMERO_PROVEEDOR || '').replace(/\D/g, '').replace(/^(3\d{9})$/, '57$1'),
             };
             for (const a of p.assignments?.assignments ?? []) if (a.name in valores) a.value = valores[a.name];
         }

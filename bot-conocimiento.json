@@ -1,5 +1,5 @@
 {
-  "version": "2026-10-02T18:50:30.008Z",
+  "version": "2026-10-02T18:57:40.134Z",
   "instrucciones_agente": [
     "Responde solo con información de este archivo; si no sabes algo, escala a un asesor (ver \"escalamiento\").",
     "No envíes entradas con \"pendiente_configurar\": true.",
@@ -334,7 +334,8 @@
     "pago_recibido": "✅ *¡Pago confirmado!* · ⚡ *DC Technology*\n\nRecibimos tu pago por *{metodo}* y ya estamos procesando tu pedido.\n\n📦 Pedido: *#{pedido}*\n🛒 Producto: {producto}\n⏱️ Entrega: máximo *15 minutos* (lunes a sábado, 8:00 a.m. a 8:00 p.m.).\n\n🔎 Sigue tu pedido en tiempo real:\nhttps://dctecnology.xyz/portal.html?codigo={codigo}\n\nGracias por confiar en nosotros 🙌",
     "entrega_confirmada": "🎉 *¡Tu pedido fue entregado!* · ⚡ *DC Technology*\n\n📦 Pedido: *#{pedido}*\n🛒 Producto: {producto}\n🛡️ Garantía activa: *{garantia_dias} días* (hasta el {garantia_hasta}).\n\n🔐 Tus datos de acceso se entregan *solo por este chat oficial*. Si no los ves arriba, responde *ACCESOS* y te los reenviamos.\n📌 Para conservar tu garantía: no cambies correo ni contraseña y usa solo tu perfil asignado.\n\n🔎 Tu pedido y garantía:\nhttps://dctecnology.xyz/portal.html?codigo={codigo}\n\n¿Necesitas ayuda? Responde *SOPORTE* 🛠️",
     "solicitud_resena": "⭐ *¿Cómo te fue con {producto}?* · ⚡ *DC Technology*\n\nYa pasó un día desde tu entrega y queremos confirmar que todo funciona al 100%.\n\n👉 Califícanos en 30 segundos (reseña de compra verificada):\nhttps://dctecnology.xyz/portal.html?codigo={codigo}#resena\n_Solo necesitas los últimos 4 dígitos de tu WhatsApp._\n\n¿Algo no va bien? Responde *SOPORTE* y lo resolvemos de inmediato.\n_Si prefieres no recibir estos mensajes, responde *NO*._",
-    "escalar_asesor": "🙋 *Te paso con un asesor humano* · ⚡ *DC Technology*\n\nNuestro equipo te responde por este chat en horario de atención (lunes a sábado, 8:00 a.m. a 8:00 p.m.).\nYa tenemos tu pedido *#{pedido}* a la mano."
+    "escalar_asesor": "🙋 *Te paso con un asesor humano* · ⚡ *DC Technology*\n\nNuestro equipo te responde por este chat en horario de atención (lunes a sábado, 8:00 a.m. a 8:00 p.m.).\nYa tenemos tu pedido *#{pedido}* a la mano.",
+    "entrega_credenciales": "🔐 *¡Tus accesos están listos!* · ⚡ *DC Technology*\n\n📦 Pedido: *#{pedido}*\n🛒 Producto: {producto}\n\n👤 Usuario / correo: ```{usuario}```\n🔑 Clave: ```{clave}```\n🙋 Perfil: ```{perfil}```\n🔢 PIN: ```{pin}```\n\n📌 Para conservar tu garantía: no cambies correo ni contraseña, usa solo tu perfil y no compartas el acceso.\n\n¿Algo no funciona? Responde *SOPORTE* 🛠️"
   },
   "catalogo": [
     {
