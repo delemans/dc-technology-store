@@ -1154,7 +1154,7 @@ function filaVacia(texto, icono = 'fa-circle-check') {
 
 // La tabla ya existe con columnas propias: se leen con nombres candidatos
 const CAMPOS_METODO = {
-    nombre:     ['nombre', 'metodo', 'tipo', 'banco', 'entidad', 'plataforma'],
+    nombre:     ['banco_alias', 'nombre', 'metodo', 'tipo', 'banco', 'entidad', 'plataforma'],
     numero:     ['numero', 'numero_cuenta', 'cuenta', 'telefono', 'celular', 'llave', 'wallet', 'direccion', 'billetera'],
     titular:    ['titular', 'nombre_titular', 'beneficiario', 'a_nombre_de'],
     tipoCuenta: ['tipo_cuenta', 'red', 'network'],
