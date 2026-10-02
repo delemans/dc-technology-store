@@ -135,17 +135,21 @@
         }
         .marco-img::after { content: ''; position: absolute; inset: auto 15% 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(255, 42, 95, .7), transparent); }
         .marco-img { perspective: 700px; }
-        /* Giro 360° con rebote al pasar el cursor (rotateY: la marca da una vuelta completa en 3D) */
-        .marco-img img { display: block; width: 100%; object-fit: contain; transition: transform .6s cubic-bezier(.34, 1.56, .64, 1), opacity .35s ease; }
+        /* Giro 360° en 3D. Va en la propiedad 'rotate' (independiente de 'transform'): si se mezclara con el
+           scale() de reposo, el navegador interpolaría matrices y 360° = 0° → el logo solo crecía, no giraba.
+           Es una animación (no una transición): siempre gira hacia adelante y no "desgira" al salir. */
+        @keyframes giro-360 { from { rotate: y 0deg; } to { rotate: y 360deg; } }
+        .marco-img img { display: block; width: 100%; object-fit: contain; transition: transform .45s cubic-bezier(.34, 1.56, .64, 1), opacity .35s ease; }
+        .tarjeta-3d:hover .marco-img img, .marco-img img.girar { animation: giro-360 .9s cubic-bezier(.34, 1.25, .64, 1); }
         /* Mientras app.js limpia el fondo blanco la imagen no se muestra: así no parpadea el cuadro blanco */
         .marco-img img.limpiando, .zoom-caja img.limpiando { opacity: 0; }
         /* Halo claro detrás del logo + contorno sutil: los logos oscuros (Free Fire) también se leen */
         .marco-logo { height: 8.25rem; padding: 10px; background: radial-gradient(closest-side, rgba(255, 255, 255, .10), transparent), rgba(18, 24, 38, .7); }
         .marco-logo img { height: 95px; transform: scale(1.18); filter: drop-shadow(0 0 1px rgba(255, 255, 255, .45)) drop-shadow(0 4px 10px rgba(0, 0, 0, .45)); }
-        .tarjeta-3d:hover .marco-logo img { transform: rotateY(360deg) scale(1.27); }
+        .tarjeta-3d:hover .marco-logo img { transform: scale(1.27); }
         .marco-foto { height: 11rem; padding: 8px; }
         .marco-foto img { height: 100%; position: absolute; inset: 0; padding: 10px; }
-        .tarjeta-3d:hover .marco-foto img { transform: rotateY(360deg) scale(1.08); }
+        .tarjeta-3d:hover .marco-foto img { transform: scale(1.08); }
         /* Productos sin fondo: sombra de "piso" para que floten sobre el vidrio */
         .marco-foto img.sin-fondo { filter: drop-shadow(0 14px 18px rgba(0, 0, 0, .55)) drop-shadow(0 0 1px rgba(255, 255, 255, .15)); }
 
@@ -195,6 +199,30 @@
         ::-webkit-scrollbar-thumb { background: var(--scroll); border-radius: 10px; }
         input[type=search]::-webkit-search-cancel-button { display: none; }
         .descripcion-producto strong { color: rgb(var(--tinta)); }
+
+        /* Descripción del producto: secciones con línea de tiempo neón, comparativa y listas con íconos */
+        .descripcion-producto { display: grid; gap: .75rem; }
+        .desc-seccion { border-radius: 1rem; padding: 1rem; background: rgb(var(--fondo) / .6); box-shadow: inset 0 0 0 1px rgb(var(--tinta) / .06); }
+        .desc-titulo { display: flex; align-items: center; gap: .5rem; margin-bottom: .85rem; font: 800 10px/1 Outfit, Inter, sans-serif; letter-spacing: .2em; text-transform: uppercase; color: rgb(var(--tinta) / .85); }
+        .desc-titulo i { display: grid; place-items: center; width: 1.6rem; height: 1.6rem; border-radius: .55rem; font-size: 11px; color: #FF2A5F; background: rgb(255 42 95 / .12); box-shadow: 0 0 12px -2px rgb(255 42 95 / .5); }
+        .desc-pasos { position: relative; display: grid; gap: .8rem; }
+        .desc-pasos::before { content: ''; position: absolute; left: 15px; top: 10px; bottom: 10px; width: 2px; border-radius: 2px; background: linear-gradient(#FF2A5F, rgb(255 42 95 / .1)); }
+        .desc-pasos li { position: relative; display: flex; gap: .75rem; align-items: flex-start; font-size: 12.5px; line-height: 1.45; color: rgb(var(--tinta) / .7); animation: fade-slide-in .45s cubic-bezier(.2, .8, .2, 1) both; animation-delay: calc(var(--i) * 70ms); }
+        .desc-pasos li b { color: rgb(var(--tinta)); font-weight: 800; }
+        .desc-paso-icono { position: relative; z-index: 1; flex: none; display: grid; place-items: center; width: 32px; height: 32px; border-radius: 999px; font-size: 12px; color: #fff; background: linear-gradient(135deg, #FF2A5F, #E50914); box-shadow: 0 0 0 3px rgb(var(--fondo)), 0 0 14px rgb(255 42 95 / .55); }
+        .desc-comparar { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; }
+        .desc-comparar div { display: grid; gap: .25rem; padding: .75rem; border-radius: .85rem; font-size: 12px; line-height: 1.4; color: rgb(var(--tinta) / .65); background: rgb(var(--tinta) / .04); box-shadow: inset 0 0 0 1px rgb(var(--tinta) / .08); }
+        .desc-comparar i { color: #FF2A5F; font-size: 15px; }
+        .desc-comparar b { color: rgb(var(--tinta)); font-size: 13px; }
+        .desc-detalles { display: grid; gap: .55rem; }
+        .desc-detalles li { display: flex; gap: .65rem; align-items: flex-start; font-size: 12.5px; line-height: 1.45; color: rgb(var(--tinta) / .7); }
+        .desc-detalles li > i { flex: none; margin-top: 1px; display: grid; place-items: center; width: 1.6rem; height: 1.6rem; border-radius: .55rem; font-size: 11px; color: rgb(var(--em300)); background: rgb(var(--em300) / .12); }
+        .desc-detalles b { display: block; color: rgb(var(--tinta)); font-weight: 800; }
+        .desc-reglas { display: grid; gap: .45rem; }
+        .desc-reglas li { position: relative; padding-left: 1.4rem; font-size: 12px; line-height: 1.45; color: rgb(var(--tinta) / .65); }
+        .desc-reglas li::before { content: '\f058'; position: absolute; left: 0; top: 1px; font: 900 11px 'Font Awesome 6 Free'; color: rgb(var(--am300)); }
+        .desc-reglas b { color: rgb(var(--tinta)); }
+        @media (max-width: 400px) { .desc-comparar { grid-template-columns: 1fr; } }
 
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after { animation: none !important; transition: none !important; }
@@ -420,7 +448,7 @@
                     <i class="fa-solid fa-cart-shopping"></i> Continuar con la compra
                 </button>
 
-                <div id="modal-extra-info" class="descripcion-producto text-xs leading-relaxed text-neutral-400"></div>
+                <div id="modal-extra-info" class="descripcion-producto"></div>
                 <div id="modal-resenas"></div>
             </div>
         </div>

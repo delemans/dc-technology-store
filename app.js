@@ -184,6 +184,27 @@ function prepararImagen(img, src) {
     img.addEventListener('error', () => { clearTimeout(tope); img.classList.remove('limpiando'); }, { once: true });
 }
 
+// Pantallas táctiles (sin hover): cada tarjeta da su giro 360° una vez, al entrar en pantalla
+const observadorGiro = window.matchMedia('(hover: none)').matches
+    && !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    && 'IntersectionObserver' in window
+    ? new IntersectionObserver((entradas) => {
+        entradas.forEach((e) => {
+            if (!e.isIntersecting) return;
+            observadorGiro.unobserve(e.target);
+            const img = e.target.querySelector('.marco-img img');
+            if (!img) return;
+            const girar = () => {
+                img.classList.add('girar');
+                img.addEventListener('animationend', () => img.classList.remove('girar'), { once: true });
+            };
+            // Si todavía está quitando el fondo blanco, gira cuando ya sea visible
+            if (img.classList.contains('limpiando')) setTimeout(girar, 700);
+            else girar();
+        });
+    }, { threshold: 0.6 })
+    : null;
+
 // Auto-categorizador robusto (para productos sin 'tipo' o con tipo 'digital')
 function clasificarCategoria(prod) {
     if (prod.tipo && prod.tipo !== 'digital') return prod.tipo;
@@ -376,6 +397,7 @@ function crearTarjeta(prod) {
     const img = tarjeta.querySelector('img');
     img.addEventListener('error', () => { img.src = imagenRespaldo(prod.nombre); }, { once: true });
     prepararImagen(img, prod.imagen);
+    observadorGiro?.observe(tarjeta);
 
     tarjeta.addEventListener('click', () => abrirProducto(prod.id));
     tarjeta.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); abrirProducto(prod.id); } });
@@ -424,9 +446,7 @@ function abrirProducto(id) {
     pintarCupon();
     actualizarTotal();
 
-    // Descripción propia del catálogo (contenido de productos.json, controlado por la tienda)
-    $('modal-extra-info').innerHTML = prod.descripcion && prod.descripcion.trim().length > 20
-        ? `<div class="rounded-2xl bg-dcDarkBg/60 ring-1 ring-white/5 p-4">${prod.descripcion}</div>` : '';
+    pintarDescripcion(prod);
     pintarResenasProducto(prod);
 
     // Servicios: la cantidad y el cupón no aplican (se cotiza)
@@ -480,6 +500,104 @@ function pintarGaleria(prod) {
     galeria.scrollLeft = 0;
 }
 
+/* ---------- Descripción del producto ----------
+   Solo hechos de la operación real (los mismos del bot, las FAQ y los términos): cómo se compra, cómo se
+   recibe y qué reglas aplican. Nada de especificaciones inventadas. */
+const COMO_FUNCIONA = {
+    streaming: [
+        { icono: 'fa-cart-shopping', titulo: 'Pides', texto: 'Elige tu opción y confirmamos el pedido por WhatsApp.' },
+        { icono: 'fa-mobile-screen-button', titulo: 'Pagas', texto: 'Por Nequi o Daviplata y nos envías el comprobante.' },
+        { icono: 'fa-bolt', titulo: 'Recibes', texto: 'Tus accesos llegan por WhatsApp en máximo 15 minutos tras validar el pago.' },
+        { icono: 'fa-tv', titulo: 'Disfrutas', texto: 'Inicia sesión en la app oficial y entra solo a tu perfil asignado.' },
+    ],
+    licencias: [
+        { icono: 'fa-cart-shopping', titulo: 'Pides', texto: 'Elige la versión y confirmamos el pedido por WhatsApp.' },
+        { icono: 'fa-mobile-screen-button', titulo: 'Pagas', texto: 'Por Nequi o Daviplata y nos envías el comprobante.' },
+        { icono: 'fa-bolt', titulo: 'Recibes', texto: 'Tu licencia o acceso llega por WhatsApp en máximo 15 minutos tras validar el pago.' },
+        { icono: 'fa-key', titulo: 'Activas', texto: 'Copia el serial sin espacios y pégalo en "Activar licencia" o "Canjear código".' },
+    ],
+    pines: [
+        { icono: 'fa-cart-shopping', titulo: 'Pides', texto: 'Elige el valor y, si es una recarga, envíanos el número o ID exacto.' },
+        { icono: 'fa-mobile-screen-button', titulo: 'Pagas', texto: 'Por Nequi o Daviplata y nos envías el comprobante.' },
+        { icono: 'fa-bolt', titulo: 'Recibes', texto: 'El código o la recarga llegan en máximo 15 minutos tras validar el pago.' },
+    ],
+    tecnologia: [
+        { icono: 'fa-cart-shopping', titulo: 'Pides', texto: 'Elige el producto y confirmamos disponibilidad por WhatsApp.' },
+        { icono: 'fa-mobile-screen-button', titulo: 'Pagas', texto: 'Por Nequi o Daviplata y nos envías el comprobante.' },
+        { icono: 'fa-truck-fast', titulo: 'Recibes', texto: 'Coordinamos el envío a tu ciudad por WhatsApp.' },
+    ],
+};
+const pasosDe = (prod) => (esCotizable(prod) ? FASES_SERVICIO
+    : COMO_FUNCIONA[prod.tipo] ?? COMO_FUNCIONA[prod.tipo === 'recargas' ? 'pines' : 'streaming']);
+
+// Ícono según el título de cada punto de la descripción del catálogo
+const ICONOS_DETALLE = [
+    [/carga|bater|volt/i, 'fa-bolt'], [/tiempo|hora/i, 'fa-clock'], [/agua|ip6/i, 'fa-droplet'],
+    [/garant/i, 'fa-shield-halved'], [/compat/i, 'fa-plug'], [/env[ií]o/i, 'fa-truck-fast'],
+];
+
+// Convierte la descripción HTML del catálogo ("• <strong>Título:</strong> texto<br>…") en puntos con ícono
+function detallesCatalogo(html) {
+    const lineas = String(html ?? '').split(/<br\s*\/?>/i).map((l) => l.trim()).filter(Boolean);
+    const texto = (l) => new DOMParser().parseFromString(l, 'text/html').body.textContent.replace(/\s+/g, ' ').trim();
+    let encabezado = '';
+    const puntos = [];
+    lineas.forEach((l) => {
+        const limpio = texto(l).replace(/^[•\-–]\s*/, '');
+        if (!limpio) return;
+        const conTitulo = /^([^:]{2,40}):\s*(.+)$/.exec(limpio);
+        if (!/^[•\-–]/.test(texto(l)) && !puntos.length && !encabezado && /:$/.test(limpio)) { encabezado = limpio.replace(/:$/, ''); return; }
+        puntos.push(conTitulo ? { titulo: conTitulo[1], texto: conTitulo[2] } : { titulo: '', texto: limpio });
+    });
+    return { encabezado, puntos };
+}
+
+function pintarDescripcion(prod) {
+    const caja = $('modal-extra-info');
+    const pasos = pasosDe(prod);
+    const variantes = (prod.variantes ?? []).map((v) => String(v.nombre).toLowerCase()).join(' ');
+    const reglas = TERMINOS[grupoTerminos(prod.tipo)] ?? [];
+    const catalogo = prod.descripcion && prod.descripcion.trim().length > 20 ? detallesCatalogo(prod.descripcion) : null;
+    const seccion = (icono, titulo, contenido) => `
+        <section class="desc-seccion">
+            <h4 class="desc-titulo"><i class="fa-solid ${icono}"></i>${escaparHTML(titulo)}</h4>
+            ${contenido}
+        </section>`;
+
+    const bloques = [];
+    bloques.push(seccion(esCotizable(prod) ? 'fa-diagram-project' : 'fa-route', esCotizable(prod) ? 'Así trabajamos' : 'Cómo funciona', `
+        <ol class="desc-pasos">${pasos.map((p, i) => `
+            <li style="--i:${i}">
+                <span class="desc-paso-icono"><i class="fa-solid ${p.icono}"></i></span>
+                <span><b>${escaparHTML(p.titulo)}</b><span class="block">${escaparHTML(p.texto)}</span></span>
+            </li>`).join('')}
+        </ol>`));
+
+    // Streaming con ambas modalidades: se explica la diferencia (sale de los nombres reales de las variantes)
+    if (prod.tipo === 'streaming' && /pantalla|perfil/.test(variantes) && /cuenta completa/.test(variantes)) {
+        bloques.push(seccion('fa-layer-group', '¿Pantalla o cuenta completa?', `
+            <div class="desc-comparar">
+                <div><i class="fa-solid fa-user"></i><b>Pantalla / perfil</b><span>Un perfil de uso personal dentro de la cuenta.</span></div>
+                <div><i class="fa-solid fa-users"></i><b>Cuenta completa</b><span>Toda la cuenta del plan para ti y tu hogar.</span></div>
+            </div>`));
+    }
+
+    if (catalogo?.puntos.length) {
+        bloques.push(seccion('fa-circle-info', catalogo.encabezado || 'Detalles del producto', `
+            <ul class="desc-detalles">${catalogo.puntos.map((p) => {
+                const icono = ICONOS_DETALLE.find(([re]) => re.test(p.titulo))?.[1] ?? 'fa-circle-check';
+                return `<li><i class="fa-solid ${icono}"></i><span>${p.titulo ? `<b>${escaparHTML(p.titulo)}</b>` : ''}${escaparHTML(p.texto)}</span></li>`;
+            }).join('')}
+            </ul>`));
+    }
+
+    if (reglas.length) {
+        bloques.push(seccion('fa-scale-balanced', esCotizable(prod) ? 'Ten en cuenta' : 'Reglas y garantía', `
+            <ul class="desc-reglas">${reglas.map((r) => `<li>${r}</li>`).join('')}</ul>`)); // TERMINOS: texto propio con <b>
+    }
+    caja.innerHTML = bloques.join('');
+}
+
 // Ficha técnica para productos físicos (datos del propio catálogo, sin inventar stock)
 function pintarFicha(prod) {
     const caja = $('modal-ficha');
@@ -499,10 +617,7 @@ function pintarFicha(prod) {
     caja.innerHTML = `
         <dl class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 rounded-2xl bg-dcDarkBg/60 ring-1 ring-white/5 p-4 text-xs">
             ${filas.map(([k, v]) => `<dt class="text-neutral-500 font-bold uppercase tracking-wider text-[10px] pt-0.5">${k}</dt><dd class="text-neutral-200">${escaparHTML(v)}</dd>`).join('')}
-        </dl>
-        <p class="mt-2 flex items-start gap-2 rounded-2xl bg-amber-500/10 ring-1 ring-amber-500/30 px-4 py-3 text-xs text-amber-200">
-            <i class="fa-solid fa-plug-circle-exclamation mt-0.5"></i> Revisa la compatibilidad de voltaje y puerto con tu equipo antes de comprar.
-        </p>`;
+        </dl>`; // la compatibilidad y la garantía se explican en "Reglas y garantía" (pintarDescripcion)
 }
 
 function pintarVariantes() {
