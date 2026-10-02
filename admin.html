@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#0B0F19">
+    <title>DC TECHNOLOGY | Panel Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@700;800;900&display=swap" rel="stylesheet">
+    <!-- Tema claro/oscuro + colores de Tailwind (antes de pintar, sin destello) -->
+    <script src="tema.js"></script>
+    <link rel="stylesheet" href="tema.css">
+    <style>
+        html { -webkit-tap-highlight-color: transparent; }
+        [hidden] { display: none !important; } /* que 'hidden' gane a clases como flex/grid */
+
+        /* Fondo mesh neón animado: solo transform sobre capas difuminadas (GPU, sin repintados) */
+        .mesh { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
+        .mesh span { position: absolute; border-radius: 9999px; filter: blur(90px); will-change: transform; }
+        .mesh span:nth-child(1) { width: 40rem; height: 40rem; top: -14rem; left: -12rem; background: rgba(255, 0, 51, .16); animation: mesh-a 24s ease-in-out infinite alternate; }
+        .mesh span:nth-child(2) { width: 32rem; height: 32rem; bottom: -12rem; right: -10rem; background: rgba(255, 0, 51, .11); animation: mesh-b 28s ease-in-out infinite alternate; }
+        .mesh span:nth-child(3) { width: 26rem; height: 26rem; top: 35%; left: 40%; background: rgba(140, 0, 255, .07); animation: mesh-c 32s ease-in-out infinite alternate; }
+        @keyframes mesh-a { to { transform: translate(18vw, 22vh) scale(1.15); } }
+        @keyframes mesh-b { to { transform: translate(-16vw, -18vh) scale(1.2); } }
+        @keyframes mesh-c { to { transform: translate(-20vw, 12vh) scale(.85); } }
+        .bg-grid {
+            background-image:
+                linear-gradient(rgb(var(--rejilla) / .035) 1px, transparent 1px),
+                linear-gradient(90deg, rgb(var(--rejilla) / .035) 1px, transparent 1px);
+            background-size: 40px 40px;
+            -webkit-mask-image: radial-gradient(ellipse at 50% 30%, black 20%, transparent 70%);
+                    mask-image: radial-gradient(ellipse at 50% 30%, black 20%, transparent 70%);
+        }
+
+        /* Logo con pulso neón + interacción hover/tap */
+        @keyframes dc-neon {
+            0%, 100% { filter: drop-shadow(0 0 4px rgba(255, 0, 51, .6)) drop-shadow(0 0 12px rgba(255, 0, 51, .25)); }
+            50%      { filter: drop-shadow(0 0 8px rgba(255, 0, 51, .95)) drop-shadow(0 0 26px rgba(255, 0, 51, .5)); }
+        }
+        .dc-logo { animation: dc-neon 2.8s ease-in-out infinite; transition: transform .35s cubic-bezier(.34, 1.56, .64, 1); }
+        .dc-logo:hover { transform: scale(1.08) rotate(-4deg); }
+        .dc-logo:active { transform: scale(.92); }
+        .dc-text-glow { text-shadow: 0 0 12px rgba(255, 0, 51, .55); }
+
+        /* Botones Cyber-Glow: borde iluminado al pasar el cursor o tocar */
+        .btn-cyber { transition: transform .2s ease, box-shadow .25s ease, background-color .2s ease, color .2s ease; }
+        .btn-cyber:hover, .btn-cyber:focus-visible {
+            transform: scale(1.05);
+            box-shadow: 0 0 0 1px rgba(255, 0, 51, .65), 0 0 18px rgba(255, 0, 51, .45), 0 0 42px rgba(255, 0, 51, .18);
+        }
+        .btn-cyber.ancho:hover, .btn-cyber.ancho:focus-visible { transform: scale(1.02); }
+        .btn-cyber:active { transform: scale(.96); }
+
+        /* Badge metalizado VIP */
+        .badge-vip {
+            color: #1a1300;
+            background: linear-gradient(110deg, #8a6d1f 0%, #f5d76e 25%, #fff6c9 40%, #d4a937 55%, #8a6d1f 100%);
+            background-size: 250% 100%;
+            animation: brillo-metal 3.5s linear infinite;
+            box-shadow: 0 0 12px rgba(245, 215, 110, .35);
+        }
+        @keyframes brillo-metal { from { background-position: 100% 0; } to { background-position: -150% 0; } }
+
+        @keyframes fade-slide-in { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+        .vista-entrada { animation: fade-slide-in .45s cubic-bezier(.2, .8, .2, 1) both; }
+
+        /* Skeleton neón */
+        .skeleton { position: relative; overflow: hidden; background: rgb(var(--tinta) / .05); }
+        .skeleton::after {
+            content: ''; position: absolute; inset: 0; transform: translateX(-100%);
+            background: linear-gradient(90deg, transparent, rgba(255, 0, 51, .14), transparent);
+            animation: shimmer 1.4s infinite;
+        }
+        @keyframes shimmer { to { transform: translateX(100%); } }
+
+        @keyframes toast-progress { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+
+        /* Resplandor de tarjeta activa */
+        .glow-activo { box-shadow: 0 0 0 1px rgba(255, 0, 51, .35), 0 12px 40px -12px rgba(255, 0, 51, .45); }
+
+        .sin-scrollbar { scrollbar-width: none; }
+        .sin-scrollbar::-webkit-scrollbar { display: none; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-thumb { background: var(--scroll); border-radius: 10px; }
+        input[type=search]::-webkit-search-cancel-button { display: none; }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation: none !important; transition: none !important; }
+        }
+    </style>
+</head>
+<body class="bg-dcDarkBg text-white min-h-screen font-sans antialiased selection:bg-dcRed/40">
+    <div class="mesh" aria-hidden="true"><span></span><span></span><span></span></div>
+    <div class="bg-grid fixed inset-0 pointer-events-none" aria-hidden="true"></div>
+
+    <!-- Isotipo reutilizable -->
+    <svg width="0" height="0" class="absolute" aria-hidden="true">
+        <symbol id="dc-isotipo" viewBox="0 0 48 48">
+            <path d="M24 3 42 13.5v21L24 45 6 34.5v-21Z" fill="#0F111A" stroke="#FF0033" stroke-width="2.5" stroke-linejoin="round"/>
+            <path d="M24 9.5 36.5 16.75v14.5L24 38.5 11.5 31.25v-14.5Z" fill="#FF0033" opacity=".12"/>
+            <circle cx="24" cy="3" r="1.6" fill="#FF0033"/><circle cx="24" cy="45" r="1.6" fill="#FF0033"/>
+            <text x="24" y="29.5" text-anchor="middle" font-family="Outfit, Inter, sans-serif" font-weight="900" font-size="15" fill="#fff" letter-spacing="-.5">DC</text>
+        </symbol>
+    </svg>
+
+    <!-- ============ LOGIN ============ -->
+    <div id="vista-login" class="vista-entrada relative z-10 flex min-h-screen items-center justify-center p-4">
+        <div class="w-full max-w-md rounded-3xl bg-white/[0.03] backdrop-blur-xl ring-1 ring-white/10 shadow-2xl shadow-black/60 p-7 sm:p-10">
+            <div class="flex flex-col items-center text-center mb-8">
+                <svg class="dc-logo w-20 h-20 mb-4" role="img" aria-label="DC Technology"><use href="#dc-isotipo"/></svg>
+                <h1 class="font-tech font-black text-2xl tracking-[0.18em] uppercase">DC <span class="text-dcRed dc-text-glow">Technology</span></h1>
+                <p class="mt-2 inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.3em] text-neutral-400">
+                    <i class="fa-solid fa-shield-halved text-dcRed"></i> Acceso restringido
+                </p>
+            </div>
+
+            <form id="form-login" class="space-y-4">
+                <label class="relative block">
+                    <span class="sr-only">Correo de administrador</span>
+                    <i class="fa-solid fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500 text-sm"></i>
+                    <input type="email" id="login-email" placeholder="Correo de administrador" autocomplete="username" required
+                        class="w-full min-h-[56px] bg-dcDarkBg/70 ring-1 ring-white/10 rounded-2xl pl-11 pr-4 text-base sm:text-sm font-semibold text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-dcRed/70 transition-all">
+                </label>
+                <label class="relative block">
+                    <span class="sr-only">Contraseña</span>
+                    <i class="fa-solid fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500 text-sm"></i>
+                    <input type="password" id="login-password" placeholder="Contraseña" autocomplete="current-password" required
+                        class="w-full min-h-[56px] bg-dcDarkBg/70 ring-1 ring-white/10 rounded-2xl pl-11 pr-14 text-base sm:text-sm font-semibold tracking-widest text-white placeholder:text-neutral-500 placeholder:tracking-normal focus:outline-none focus:ring-2 focus:ring-dcRed/70 transition-all">
+                    <button type="button" data-ojo="login-password" aria-label="Mostrar contraseña"
+                        class="absolute right-1.5 top-1/2 -translate-y-1/2 w-12 h-12 grid place-items-center rounded-xl text-neutral-400 hover:text-white transition-colors">
+                        <i class="fa-solid fa-eye"></i>
+                    </button>
+                </label>
+
+                <div id="login-error" role="alert" class="hidden flex items-center justify-center gap-2 text-red-300 text-xs font-bold bg-red-500/10 ring-1 ring-red-500/30 p-3 rounded-2xl">
+                    <i class="fa-solid fa-circle-exclamation"></i> <span id="login-error-texto">Correo o contraseña incorrectos. Acceso denegado.</span>
+                </div>
+
+                <button type="submit" id="btn-login"
+                    class="btn-cyber ancho w-full min-h-[56px] bg-dcRed hover:bg-dcRedDark text-white font-black rounded-2xl text-xs tracking-[0.2em] uppercase shadow-lg shadow-red-600/30 disabled:opacity-60 disabled:cursor-wait">
+                    Desbloquear Panel
+                </button>
+            </form>
+
+            <div class="mt-8 text-center">
+                <a href="index.html" class="inline-flex items-center gap-2 min-h-[48px] px-4 text-xs text-neutral-500 hover:text-white transition-colors">
+                    <i class="fa-solid fa-arrow-left"></i> Volver a la tienda principal
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ DASHBOARD ============ -->
+    <div id="vista-dashboard" class="relative z-10 flex min-h-screen hidden">
+        <!-- Barra lateral (escritorio) -->
+        <aside class="hidden md:flex w-72 shrink-0 flex-col justify-between bg-black/30 backdrop-blur-xl border-r border-white/10 sticky top-0 h-screen">
+            <div>
+                <div class="flex items-center gap-3 p-6 border-b border-white/10">
+                    <svg class="dc-logo w-11 h-11 shrink-0" role="img" aria-label="DC Technology"><use href="#dc-isotipo"/></svg>
+                    <div class="leading-none">
+                        <span class="block font-tech font-black text-sm tracking-[0.16em] uppercase">DC <span class="text-dcRed dc-text-glow">Technology</span></span>
+                        <span class="block mt-1.5 text-[9px] font-bold uppercase tracking-[0.3em] text-neutral-500">Administración</span>
+                    </div>
+                </div>
+                <nav class="p-4 space-y-1">
+                    <button type="button" data-vista="pedidos" class="w-full flex items-center gap-3 px-4 min-h-[48px] rounded-xl ring-1 text-xs transition-colors">
+                        <i class="fa-solid fa-truck-fast w-4"></i> Pedidos
+                    </button>
+                    <button type="button" data-vista="pagos-bot" class="w-full flex items-center gap-3 px-4 min-h-[48px] rounded-xl ring-1 text-xs transition-colors">
+                        <i class="fa-solid fa-robot w-4"></i> Pagos &amp; Agente Bot
+                        <span data-contador-verificar class="ml-auto px-1.5 py-0.5 rounded-md bg-sky-500/15 text-sky-300 text-[10px] font-bold" hidden>0</span>
+                    </button>
+                    <a href="portal.html" target="_blank" class="flex items-center gap-3 px-4 min-h-[48px] rounded-xl text-neutral-400 hover:text-white hover:bg-white/5 font-semibold text-xs transition-colors">
+                        <i class="fa-solid fa-magnifying-glass-location w-4"></i> Portal de clientes
+                        <i class="fa-solid fa-arrow-up-right-from-square ml-auto text-[10px] opacity-60"></i>
+                    </a>
+                    <button type="button" data-abrir-ajustes class="w-full flex items-center gap-3 px-4 min-h-[48px] rounded-xl text-neutral-400 hover:text-white hover:bg-white/5 font-semibold text-xs transition-colors">
+                        <i class="fa-solid fa-gear w-4"></i> Ajustes
+                    </button>
+                </nav>
+            </div>
+            <div class="p-4 border-t border-white/10 space-y-2">
+                <button type="button" data-generar-prueba class="btn-cyber ancho w-full flex items-center justify-center gap-2 min-h-[44px] rounded-xl bg-white/[0.04] ring-1 ring-dcRed/40 text-dcRed text-xs font-black uppercase tracking-wider">
+                    <i class="fa-solid fa-flask"></i> Generar pedido de prueba
+                </button>
+                <button type="button" data-logout class="w-full flex items-center justify-center gap-2 min-h-[44px] rounded-xl bg-red-500/10 ring-1 ring-red-500/30 text-red-300 text-xs font-bold hover:bg-red-500/20 transition-colors">
+                    <i class="fa-solid fa-lock"></i> Bloquear Panel
+                </button>
+            </div>
+        </aside>
+
+        <div class="flex-1 min-w-0 flex flex-col">
+            <!-- Barra superior (móvil) -->
+            <header class="md:hidden sticky top-0 z-20 flex items-center justify-between gap-3 px-4 pt-[max(.75rem,env(safe-area-inset-top))] pb-3 bg-dcDarkBg/75 backdrop-blur-xl border-b border-white/10">
+                <div class="flex items-center gap-2.5">
+                    <svg class="dc-logo w-9 h-9" role="img" aria-label="DC Technology"><use href="#dc-isotipo"/></svg>
+                    <span class="font-tech font-black text-xs tracking-[0.16em] uppercase">DC <span class="text-dcRed dc-text-glow">Technology</span></span>
+                </div>
+                <span data-indicador-vivo></span>
+            </header>
+
+            <!-- Área central -->
+            <main id="zona-pedidos" class="flex-1 px-4 pt-6 pb-36 sm:px-8 md:pb-10 overflow-y-auto">
+              <div id="vista-pedidos">
+                <div class="flex flex-wrap items-end justify-between gap-4 mb-6">
+                    <div>
+                        <p class="text-[10px] font-bold uppercase tracking-[0.3em] text-neutral-500 mb-2">Gestión de ventas</p>
+                        <h2 class="font-tech text-2xl sm:text-3xl font-black uppercase tracking-wider">
+                            Flujo de <span class="text-dcRed dc-text-glow">Entregas</span>
+                        </h2>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span data-indicador-vivo class="hidden md:inline-flex"></span>
+                        <button type="button" data-generar-prueba title="Generar pedido de prueba" class="btn-cyber hidden md:inline-flex items-center gap-2 h-12 px-4 rounded-2xl bg-dcRed/10 ring-1 ring-dcRed/40 text-dcRed text-[11px] font-black uppercase tracking-wider">
+                            <i class="fa-solid fa-plus"></i> Pedido de prueba
+                        </button>
+                        <button type="button" data-alternar-tema class="btn-cyber w-12 h-12 text-neutral-300 grid place-items-center rounded-2xl bg-white/[0.04] ring-1 ring-white/10" aria-label="Cambiar tema"><i class="fa-solid fa-sun"></i></button>
+                        <button type="button" id="btn-exportar" title="Exportar a CSV" aria-label="Exportar a CSV"
+                            class="btn-cyber w-12 h-12 grid place-items-center rounded-2xl bg-white/[0.04] ring-1 ring-white/10 text-neutral-300 hover:text-white">
+                            <i class="fa-solid fa-file-csv"></i>
+                        </button>
+                        <button type="button" id="btn-pantalla-completa" title="Modo kiosco (pantalla completa)" aria-label="Pantalla completa"
+                            class="btn-cyber w-12 h-12 grid place-items-center rounded-2xl bg-white/[0.04] ring-1 ring-white/10 text-neutral-300 hover:text-white">
+                            <i class="fa-solid fa-expand"></i>
+                        </button>
+                        <button id="btn-recargar" type="button" title="Actualizar pedidos" aria-label="Actualizar pedidos"
+                            class="btn-cyber w-12 h-12 grid place-items-center rounded-2xl bg-white/[0.04] ring-1 ring-white/10 text-neutral-300 hover:text-white">
+                            <i class="fa-solid fa-rotate"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Micro-dashboard KPI -->
+                <section class="grid grid-cols-3 gap-2 sm:gap-4 mb-6" aria-label="Indicadores">
+                    <div class="rounded-2xl sm:rounded-3xl bg-white/[0.03] backdrop-blur-xl ring-1 ring-white/10 p-3 sm:p-5">
+                        <p class="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-neutral-500"><i class="fa-solid fa-calendar-day text-dcRed mr-1"></i> Pedidos hoy</p>
+                        <p id="kpi-hoy" class="mt-1.5 font-tech text-2xl sm:text-3xl font-black">—</p>
+                    </div>
+                    <div class="rounded-2xl sm:rounded-3xl bg-white/[0.03] backdrop-blur-xl ring-1 ring-white/10 p-3 sm:p-5">
+                        <p class="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-neutral-500"><i class="fa-solid fa-gears text-amber-400 mr-1"></i> Procesando</p>
+                        <p id="kpi-procesando" class="mt-1.5 font-tech text-2xl sm:text-3xl font-black text-amber-300">—</p>
+                    </div>
+                    <div class="rounded-2xl sm:rounded-3xl bg-white/[0.03] backdrop-blur-xl ring-1 ring-white/10 p-3 sm:p-5">
+                        <p class="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-neutral-500"><i class="fa-solid fa-stopwatch text-emerald-400 mr-1"></i> <span class="sm:hidden">T. entrega</span><span class="hidden sm:inline">Tiempo prom. entrega</span></p>
+                        <p id="kpi-tiempo" class="mt-1.5 font-tech text-2xl sm:text-3xl font-black text-emerald-300">—</p>
+                        <p id="kpi-tiempo-nota" class="mt-0.5 text-[9px] sm:text-[10px] text-neutral-500 leading-tight"></p>
+                    </div>
+                </section>
+
+                <!-- Buscador en tiempo real -->
+                <label class="relative block mb-4">
+                    <span class="sr-only">Buscar pedidos</span>
+                    <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500 text-sm"></i>
+                    <input type="search" id="buscador" placeholder="Buscar por pedido, ID, referencia o variante…" autocomplete="off"
+                        class="w-full min-h-[52px] bg-white/[0.03] backdrop-blur-xl ring-1 ring-white/10 rounded-2xl pl-11 pr-12 text-base sm:text-sm font-medium text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-dcRed/60 transition-all">
+                    <button type="button" id="btn-limpiar-busqueda" hidden aria-label="Limpiar búsqueda"
+                        class="absolute right-1.5 top-1/2 -translate-y-1/2 w-11 h-11 grid place-items-center rounded-xl text-neutral-400 hover:text-white">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </label>
+
+                <!-- Filtros por estado -->
+                <div role="tablist" aria-label="Filtrar por estado" class="relative grid grid-cols-3 gap-1 p-1 mb-3 rounded-2xl bg-white/[0.03] ring-1 ring-white/10 sm:max-w-md">
+                    <span id="tab-indicador" class="absolute top-1 bottom-1 left-1 rounded-xl bg-dcRed/15 ring-1 ring-dcRed/40 shadow-lg shadow-red-600/10 transition-transform duration-300 ease-out" style="width: calc((100% - 0.5rem - 0.5rem) / 3)"></span>
+                    <button type="button" role="tab" data-filtro="pendientes" class="relative z-10 min-h-[44px] rounded-xl text-[11px] font-bold uppercase tracking-wider text-white transition-colors">
+                        Pendientes <span data-contador="pendientes" class="ml-1 px-1.5 py-0.5 rounded-md bg-amber-500/15 text-amber-300 text-[10px]">0</span>
+                    </button>
+                    <button type="button" role="tab" data-filtro="entregados" class="relative z-10 min-h-[44px] rounded-xl text-[11px] font-bold uppercase tracking-wider text-neutral-400 transition-colors">
+                        Entregados <span data-contador="entregados" class="ml-1 px-1.5 py-0.5 rounded-md bg-emerald-500/15 text-emerald-300 text-[10px]">0</span>
+                    </button>
+                    <button type="button" role="tab" data-filtro="todos" class="relative z-10 min-h-[44px] rounded-xl text-[11px] font-bold uppercase tracking-wider text-neutral-400 transition-colors">
+                        Todos <span data-contador="todos" class="ml-1 px-1.5 py-0.5 rounded-md bg-white/10 text-neutral-300 text-[10px]">0</span>
+                    </button>
+                </div>
+
+                <!-- Filtros por categoría (los pinta admin.js) -->
+                <div id="filtro-categorias" class="sin-scrollbar flex gap-2 overflow-x-auto pb-1 mb-6 -mx-4 px-4 sm:mx-0 sm:px-0" aria-label="Filtrar por categoría"></div>
+
+                <!-- Tarjetas de pedidos (las pinta admin.js desde Supabase) -->
+                <div id="lista-pedidos" class="grid gap-4 sm:gap-5 lg:grid-cols-2 2xl:grid-cols-3"></div>
+              </div>
+
+              <!-- ============ VISTA: PAGOS & AGENTE BOT ============ -->
+              <div id="vista-pagos-bot" hidden>
+                <div class="flex flex-wrap items-end justify-between gap-4 mb-6">
+                    <div>
+                        <p class="text-[10px] font-bold uppercase tracking-[0.3em] text-neutral-500 mb-2">Ventas automatizadas</p>
+                        <h2 class="font-tech text-2xl sm:text-3xl font-black uppercase tracking-wider">
+                            Pagos &amp; <span class="text-dcRed dc-text-glow">Agente Bot</span>
+                        </h2>
+                    </div>
+                </div>
+
+                <!-- Métricas -->
+                <section class="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 mb-6" aria-label="Métricas de pagos y fidelización">
+                    <div class="rounded-2xl sm:rounded-3xl bg-white/[0.03] backdrop-blur-xl ring-1 ring-white/10 p-3 sm:p-5">
+                        <p class="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-neutral-500"><i class="fa-solid fa-receipt text-sky-400 mr-1"></i> Pagos por verificar</p>
+                        <p id="kpi-por-verificar" class="mt-1.5 font-tech text-2xl sm:text-3xl font-black text-sky-300">—</p>
+                    </div>
+                    <div class="rounded-2xl sm:rounded-3xl bg-white/[0.03] backdrop-blur-xl ring-1 ring-white/10 p-3 sm:p-5">
+                        <p class="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-neutral-500"><i class="fa-solid fa-face-smile text-emerald-400 mr-1"></i> Satisfacción 24 h</p>
+                        <p id="kpi-satisfaccion" class="mt-1.5 font-tech text-2xl sm:text-3xl font-black">—</p>
+                        <p class="text-[9px] sm:text-[10px] text-neutral-500">por enviar</p>
+                    </div>
+                    <div class="rounded-2xl sm:rounded-3xl bg-white/[0.03] backdrop-blur-xl ring-1 ring-white/10 p-3 sm:p-5">
+                        <p class="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-neutral-500"><i class="fa-solid fa-arrows-rotate text-amber-400 mr-1"></i> Renovaciones</p>
+                        <p id="kpi-renovacion" class="mt-1.5 font-tech text-2xl sm:text-3xl font-black text-amber-300">—</p>
+                        <p class="text-[9px] sm:text-[10px] text-neutral-500">vencen en ≤ 3 días</p>
+                    </div>
+                    <div class="rounded-2xl sm:rounded-3xl bg-white/[0.03] backdrop-blur-xl ring-1 ring-white/10 p-3 sm:p-5">
+                        <p class="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-neutral-500"><i class="fa-solid fa-ticket text-dcRed mr-1"></i> Cupones enviados</p>
+                        <p id="kpi-cupones" class="mt-1.5 font-tech text-2xl sm:text-3xl font-black">—</p>
+                        <p id="kpi-con-whatsapp" class="text-[9px] sm:text-[10px] text-neutral-500"></p>
+                    </div>
+                </section>
+
+                <div class="grid gap-4 sm:gap-5 xl:grid-cols-2">
+                    <!-- Referencias por verificar -->
+                    <section class="rounded-3xl bg-white/[0.03] backdrop-blur-xl ring-1 ring-white/10 p-5">
+                        <h3 class="font-tech text-lg font-black uppercase tracking-wider mb-1"><i class="fa-solid fa-receipt text-sky-400 mr-2"></i>Pagos por verificar</h3>
+                        <p class="text-xs text-neutral-500 mb-4">Comprobantes <b class="text-neutral-300">PENDIENTE</b> de la tabla <b class="text-neutral-300">pagos</b> (WhatsApp / n8n) y compras en <b class="text-neutral-300">PENDIENTE_PAGO</b> sin comprobante. Solo Nequi y Daviplata.</p>
+                        <div id="lista-por-verificar" class="space-y-2"></div>
+                    </section>
+
+                    <!-- Métodos de pago -->
+                    <section class="rounded-3xl bg-white/[0.03] backdrop-blur-xl ring-1 ring-white/10 p-5">
+                        <div class="flex items-center justify-between gap-3 mb-1">
+                            <h3 class="font-tech text-lg font-black uppercase tracking-wider"><i class="fa-solid fa-building-columns text-dcRed mr-2"></i>Métodos de pago</h3>
+                            <button type="button" id="btn-recargar-metodos" aria-label="Actualizar métodos de pago" class="btn-cyber w-11 h-11 grid place-items-center rounded-xl bg-white/[0.04] ring-1 ring-white/10 text-neutral-300">
+                                <i class="fa-solid fa-rotate"></i>
+                            </button>
+                        </div>
+                        <p class="text-xs text-neutral-500 mb-4">Cuentas de <b class="text-neutral-300">public.metodos_pago</b>. Solo las activas deben compartirse con clientes.</p>
+                        <div id="lista-metodos-pago" class="space-y-2"></div>
+                    </section>
+
+                    <!-- Seguimiento posventa -->
+                    <section class="rounded-3xl bg-white/[0.03] backdrop-blur-xl ring-1 ring-white/10 p-5 xl:col-span-2">
+                        <h3 class="font-tech text-lg font-black uppercase tracking-wider mb-1"><i class="fa-solid fa-heart text-dcRed mr-2"></i>Seguimiento posventa</h3>
+                        <p class="text-xs text-neutral-500 mb-4">Cada botón abre WhatsApp con el mensaje listo y registra el envío. Solo aparecen clientes con <b class="text-neutral-300">cliente_whatsapp</b>.</p>
+                        <div class="grid gap-4 lg:grid-cols-3">
+                            <div>
+                                <p class="text-[10px] font-black uppercase tracking-widest text-emerald-300 mb-2"><i class="fa-solid fa-face-smile mr-1"></i> Satisfacción (24 h)</p>
+                                <div id="cola-satisfaccion" class="space-y-2"></div>
+                            </div>
+                            <div>
+                                <p class="text-[10px] font-black uppercase tracking-widest text-amber-300 mb-2"><i class="fa-solid fa-arrows-rotate mr-1"></i> Renovación (3 días antes)</p>
+                                <div id="cola-renovacion" class="space-y-2"></div>
+                            </div>
+                            <div>
+                                <p class="text-[10px] font-black uppercase tracking-widest text-dcRed mb-2"><i class="fa-solid fa-ticket mr-1"></i> Cupón de fidelidad</p>
+                                <div id="cola-cupones" class="space-y-2"></div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Notificaciones automáticas (cola de n8n) -->
+                    <section class="rounded-3xl bg-white/[0.03] backdrop-blur-xl ring-1 ring-white/10 p-5 xl:col-span-2">
+                        <div class="flex flex-wrap items-center justify-between gap-3 mb-1">
+                            <h3 class="font-tech text-lg font-black uppercase tracking-wider"><i class="fa-solid fa-paper-plane text-sky-400 mr-2"></i>Notificaciones automáticas</h3>
+                            <div class="flex items-center gap-2">
+                                <span id="notif-resumen" class="text-[10px] font-bold uppercase tracking-widest text-neutral-500"></span>
+                                <button type="button" id="btn-recargar-notif" aria-label="Actualizar notificaciones" class="btn-cyber w-11 h-11 grid place-items-center rounded-xl bg-white/[0.04] ring-1 ring-white/10 text-neutral-300">
+                                    <i class="fa-solid fa-rotate"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <p class="text-xs text-neutral-500 mb-4">Pago confirmado, entrega y solicitud de reseña (24 h). Se encolan solas al cambiar el estado; n8n las envía con pausas anti-ráfaga. Las <b class="text-neutral-300">fallidas</b> se pueden reintentar.</p>
+                        <div id="lista-notificaciones" class="space-y-2"></div>
+                    </section>
+
+                    <!-- Agente bot -->
+                    <section class="rounded-3xl bg-white/[0.03] backdrop-blur-xl ring-1 ring-white/10 p-5 xl:col-span-2">
+                        <div class="flex flex-wrap items-center justify-between gap-3 mb-1">
+                            <h3 class="font-tech text-lg font-black uppercase tracking-wider"><i class="fa-solid fa-robot text-dcRed mr-2"></i>Agente Bot · Base de conocimiento</h3>
+                            <span id="bot-version" class="text-[10px] font-bold uppercase tracking-widest text-neutral-500"></span>
+                        </div>
+                        <p class="text-xs text-neutral-500 mb-4">Vista previa de <b class="text-neutral-300">bot-conocimiento.json</b> (lo consume n8n / Evolution API). Para actualizar el catálogo ejecuta <code class="text-neutral-300">node generar_bot_conocimiento.js</code>.</p>
+                        <div id="bot-avisos" class="space-y-2 mb-4"></div>
+
+                        <div class="grid gap-4 lg:grid-cols-2">
+                            <div>
+                                <p class="text-[10px] font-black uppercase tracking-widest text-neutral-400 mb-2">Preguntas frecuentes</p>
+                                <div id="bot-faq" class="space-y-2"></div>
+                            </div>
+                            <div>
+                                <p class="text-[10px] font-black uppercase tracking-widest text-neutral-400 mb-2">Plantillas de WhatsApp</p>
+                                <div id="bot-plantillas" class="space-y-2"></div>
+                            </div>
+                        </div>
+
+                        <div class="mt-5">
+                            <label class="relative block mb-3">
+                                <span class="sr-only">Buscar en el catálogo del bot</span>
+                                <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500 text-sm"></i>
+                                <input type="search" id="bot-buscar" placeholder="Buscar producto del catálogo (precio y plantilla 'Comprar ahora')…" autocomplete="off"
+                                    class="w-full min-h-[52px] bg-dcDarkBg/70 ring-1 ring-white/10 rounded-2xl pl-11 pr-4 text-base sm:text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-dcRed/60">
+                            </label>
+                            <div id="bot-catalogo" class="grid gap-2 sm:grid-cols-2"></div>
+                        </div>
+                    </section>
+                </div>
+              </div>
+            </main>
+        </div>
+
+        <!-- Dock flotante (móvil) -->
+        <nav class="md:hidden fixed z-30 inset-x-3 bottom-[max(.75rem,env(safe-area-inset-bottom))] rounded-3xl bg-black/60 backdrop-blur-xl ring-1 ring-white/10 shadow-2xl shadow-black/70" aria-label="Navegación principal">
+            <div class="grid grid-cols-5 items-center px-1">
+                <button type="button" data-vista-dock="pedidos" class="flex flex-col items-center justify-center gap-1 min-h-[64px] text-dcRed">
+                    <i class="fa-solid fa-truck-fast text-lg"></i><span class="text-[9px] font-bold uppercase tracking-wider">Pedidos</span>
+                </button>
+                <button type="button" data-vista-dock="pagos-bot" class="relative flex flex-col items-center justify-center gap-1 min-h-[64px] text-neutral-400">
+                    <i class="fa-solid fa-robot text-lg"></i><span class="text-[9px] font-bold uppercase tracking-wider">Pagos/Bot</span>
+                    <span data-contador-verificar class="absolute top-2 right-3 min-w-[18px] h-[18px] px-1 grid place-items-center rounded-full bg-sky-500 text-[9px] font-black text-white" hidden>0</span>
+                </button>
+                <div class="flex justify-center">
+                    <button type="button" data-generar-prueba aria-label="Generar pedido de prueba"
+                        class="btn-cyber -mt-7 w-14 h-14 grid place-items-center rounded-2xl bg-dcRed text-white text-xl shadow-[0_0_24px_rgba(255,0,51,.6)] ring-4 ring-dcDarkBg">
+                        <i class="fa-solid fa-plus"></i>
+                    </button>
+                </div>
+                <button type="button" data-exportar class="flex flex-col items-center justify-center gap-1 min-h-[64px] text-neutral-400 active:text-white">
+                    <i class="fa-solid fa-file-csv text-lg"></i><span class="text-[9px] font-bold uppercase tracking-wider">CSV</span>
+                </button>
+                <button type="button" data-abrir-ajustes class="flex flex-col items-center justify-center gap-1 min-h-[64px] text-neutral-400 active:text-white">
+                    <i class="fa-solid fa-gear text-lg"></i><span class="text-[9px] font-bold uppercase tracking-wider">Ajustes</span>
+                </button>
+            </div>
+        </nav>
+    </div>
+
+    <!-- ============ MODAL: EDICIÓN RÁPIDA ============ -->
+    <div id="modal-editar" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center" hidden role="dialog" aria-modal="true" aria-labelledby="modal-editar-titulo">
+        <div data-cerrar-modal class="modal-fondo absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
+        <form id="form-editar" class="modal-panel relative w-full sm:max-w-lg max-h-[92vh] overflow-y-auto rounded-t-3xl sm:rounded-3xl bg-dcDarkCard/95 backdrop-blur-xl ring-1 ring-white/10 shadow-2xl shadow-black/70 p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+            <div class="sm:hidden mx-auto mb-5 h-1.5 w-12 rounded-full bg-white/15"></div>
+            <div class="flex items-start justify-between gap-3 mb-6">
+                <div>
+                    <p class="text-[10px] font-black uppercase tracking-[0.25em] text-dcRed" id="modal-editar-ref">Pedido</p>
+                    <h3 id="modal-editar-titulo" class="font-tech text-xl font-black uppercase tracking-wider mt-1">Edición rápida</h3>
+                </div>
+                <button type="button" data-cerrar-modal aria-label="Cerrar" class="w-11 h-11 grid place-items-center rounded-xl bg-white/5 text-neutral-400 hover:text-white">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="space-y-4">
+                <label class="block">
+                    <span class="block text-[10px] font-bold uppercase tracking-wider text-neutral-400 mb-2"><i class="fa-solid fa-key mr-1 text-dcRed"></i> Clave / serial del producto</span>
+                    <span class="relative block">
+                        <input type="password" id="editar-clave" autocomplete="off" spellcheck="false" placeholder="Ej: usuario@correo.com / PIN 1234"
+                            class="w-full min-h-[52px] bg-dcDarkBg/70 ring-1 ring-white/10 rounded-2xl pl-4 pr-14 text-base sm:text-sm font-mono text-white placeholder:text-neutral-600 focus:outline-none focus:ring-2 focus:ring-dcRed/60">
+                        <button type="button" data-ojo="editar-clave" aria-label="Mostrar clave" class="absolute right-1.5 top-1/2 -translate-y-1/2 w-11 h-11 grid place-items-center rounded-xl text-neutral-400 hover:text-white">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                    </span>
+                </label>
+                <label class="block">
+                    <span class="block text-[10px] font-bold uppercase tracking-wider text-neutral-400 mb-2"><i class="fa-solid fa-tag mr-1"></i> Referencia externa (nombre del producto)</span>
+                    <input type="text" id="editar-referencia" autocomplete="off" placeholder="Ej: NETFLIX-4K-PANTALLA"
+                        class="w-full min-h-[52px] bg-dcDarkBg/70 ring-1 ring-white/10 rounded-2xl px-4 text-base sm:text-sm text-white placeholder:text-neutral-600 focus:outline-none focus:ring-2 focus:ring-dcRed/60">
+                </label>
+                <label class="block">
+                    <span class="block text-[10px] font-bold uppercase tracking-wider text-neutral-400 mb-2"><i class="fa-solid fa-coins mr-1"></i> Costo real (COP)</span>
+                    <input type="number" id="editar-costo" inputmode="numeric" min="0" step="1" placeholder="Ej: 9000"
+                        class="w-full min-h-[52px] bg-dcDarkBg/70 ring-1 ring-white/10 rounded-2xl px-4 text-base sm:text-sm text-white placeholder:text-neutral-600 focus:outline-none focus:ring-2 focus:ring-dcRed/60">
+                </label>
+                <!-- Campos de WO-011: solo se muestran si la tabla ya tiene esas columnas (supabase/wo-011.sql) -->
+                <div id="campos-wo011" class="grid grid-cols-3 gap-3">
+                    <label class="block col-span-2">
+                        <span class="block text-[10px] font-bold uppercase tracking-wider text-neutral-400 mb-2"><i class="fa-brands fa-whatsapp mr-1 text-emerald-400"></i> WhatsApp del cliente</span>
+                        <input type="tel" id="editar-whatsapp" inputmode="tel" autocomplete="off" placeholder="Ej: 300 123 4567"
+                            class="w-full min-h-[52px] bg-dcDarkBg/70 ring-1 ring-white/10 rounded-2xl px-4 text-base sm:text-sm text-white placeholder:text-neutral-600 focus:outline-none focus:ring-2 focus:ring-dcRed/60">
+                    </label>
+                    <label class="block">
+                        <span class="block text-[10px] font-bold uppercase tracking-wider text-neutral-400 mb-2"><i class="fa-solid fa-shield-halved mr-1"></i> Garantía</span>
+                        <input type="number" id="editar-garantia" inputmode="numeric" min="0" max="365" step="1" placeholder="30"
+                            class="w-full min-h-[52px] bg-dcDarkBg/70 ring-1 ring-white/10 rounded-2xl px-4 text-base sm:text-sm text-white placeholder:text-neutral-600 focus:outline-none focus:ring-2 focus:ring-dcRed/60">
+                    </label>
+                    <p id="editar-vencimiento" class="col-span-3 -mt-1 text-[11px] text-neutral-500"></p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 mt-7">
+                <button type="button" data-cerrar-modal class="min-h-[52px] rounded-2xl bg-white/5 ring-1 ring-white/10 text-xs font-bold uppercase tracking-wider text-neutral-300 hover:bg-white/10 transition-colors">Cancelar</button>
+                <button type="submit" id="btn-guardar-edicion" class="btn-cyber ancho min-h-[52px] rounded-2xl bg-dcRed hover:bg-dcRedDark text-xs font-black uppercase tracking-wider text-white shadow-lg shadow-red-600/30 disabled:opacity-60 disabled:cursor-wait">Guardar</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- ============ MODAL: REGISTRO DE PAGO ============ -->
+    <div id="modal-pago" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center" hidden role="dialog" aria-modal="true" aria-labelledby="modal-pago-titulo">
+        <div data-cerrar-modal class="modal-fondo absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
+        <form id="form-pago" class="modal-panel relative w-full sm:max-w-lg max-h-[92vh] overflow-y-auto rounded-t-3xl sm:rounded-3xl bg-dcDarkCard/95 backdrop-blur-xl ring-1 ring-white/10 shadow-2xl shadow-black/70 p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+            <div class="sm:hidden mx-auto mb-5 h-1.5 w-12 rounded-full bg-white/15"></div>
+            <div class="flex items-start justify-between gap-3 mb-6">
+                <div>
+                    <p id="modal-pago-ref" class="text-[10px] font-black uppercase tracking-[0.25em] text-dcRed">Pedido</p>
+                    <h3 id="modal-pago-titulo" class="font-tech text-xl font-black uppercase tracking-wider mt-1">Registrar pago</h3>
+                </div>
+                <button type="button" data-cerrar-modal aria-label="Cerrar" class="w-11 h-11 grid place-items-center rounded-xl bg-white/5 text-neutral-400 hover:text-white">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <fieldset>
+                <legend class="block text-[10px] font-bold uppercase tracking-wider text-neutral-400 mb-2"><i class="fa-solid fa-wallet mr-1 text-dcRed"></i> Método de pago</legend>
+                <div id="pago-metodos" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
+            </fieldset>
+
+            <div class="mt-4 space-y-4">
+                <label class="block">
+                    <span class="block text-[10px] font-bold uppercase tracking-wider text-neutral-400 mb-2"><i class="fa-solid fa-hashtag mr-1"></i> Referencia del comprobante</span>
+                    <input type="text" id="pago-referencia" required autocomplete="off" spellcheck="false" placeholder="Ej: M1234567 / hash de la transacción"
+                        class="w-full min-h-[52px] bg-dcDarkBg/70 ring-1 ring-white/10 rounded-2xl px-4 text-base sm:text-sm font-mono text-white placeholder:text-neutral-600 focus:outline-none focus:ring-2 focus:ring-dcRed/60">
+                </label>
+                <label class="block">
+                    <span class="block text-[10px] font-bold uppercase tracking-wider text-neutral-400 mb-2"><i class="fa-solid fa-money-bill-wave mr-1"></i> Monto recibido (COP)</span>
+                    <input type="number" id="pago-monto" required inputmode="numeric" min="1" step="1" placeholder="Ej: 15000"
+                        class="w-full min-h-[52px] bg-dcDarkBg/70 ring-1 ring-white/10 rounded-2xl px-4 text-base sm:text-sm text-white placeholder:text-neutral-600 focus:outline-none focus:ring-2 focus:ring-dcRed/60">
+                </label>
+                <label class="block">
+                    <span class="block text-[10px] font-bold uppercase tracking-wider text-neutral-400 mb-2"><i class="fa-solid fa-ticket mr-1"></i> Cupón que usó el cliente (opcional)</span>
+                    <input type="text" id="pago-cupon" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Ej: DCTECH2026 / DC-ABC123"
+                        class="w-full min-h-[52px] bg-dcDarkBg/70 ring-1 ring-white/10 rounded-2xl px-4 text-base sm:text-sm font-mono uppercase text-white placeholder:text-neutral-600 focus:outline-none focus:ring-2 focus:ring-dcRed/60">
+                    <span class="block mt-1 text-[10px] text-neutral-500">Se verifica y se consume en la base antes de validar el pago (DCTECH2026 exige que sea la primera compra de ese WhatsApp).</span>
+                </label>
+                <label class="flex items-start gap-3 rounded-2xl bg-dcDarkBg/60 ring-1 ring-white/5 p-4 cursor-pointer">
+                    <input type="checkbox" id="pago-confirmo" required class="mt-0.5 w-5 h-5 accent-[#FF0033] shrink-0">
+                    <span class="text-xs text-neutral-300">Verifiqué en la app del banco/billetera que el dinero <b>ya llegó</b> con esta referencia y este monto.</span>
+                </label>
+            </div>
+
+            <div class="grid gap-3 mt-7">
+                <button type="submit" data-destino="ESPERANDO_PROVEEDOR" class="btn-cyber ancho min-h-[52px] rounded-2xl bg-dcRed hover:bg-dcRedDark text-xs font-black uppercase tracking-wider text-white shadow-lg shadow-red-600/30 disabled:opacity-60 disabled:cursor-wait">
+                    <i class="fa-solid fa-check mr-1"></i> Validar · pasar a esperar proveedor
+                </button>
+                <button type="submit" id="btn-pago-entregar" data-destino="ENTREGADO_INMEDIATO" hidden class="btn-cyber verde ancho min-h-[52px] rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-xs font-black uppercase tracking-wider text-white disabled:opacity-60 disabled:cursor-wait">
+                    <i class="fa-solid fa-bolt mr-1"></i> Validar y entregar ya (cuenta asignada)
+                </button>
+                <button type="button" data-cerrar-modal class="min-h-[48px] rounded-2xl bg-white/5 ring-1 ring-white/10 text-xs font-bold uppercase tracking-wider text-neutral-300 hover:bg-white/10 transition-colors">Cancelar</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- ============ MODAL: QR DE WHATSAPP ============ -->
+    <div id="modal-qr" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center" hidden role="dialog" aria-modal="true" aria-labelledby="modal-qr-titulo">
+        <div data-cerrar-modal class="modal-fondo absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
+        <div class="modal-panel relative w-full sm:max-w-sm rounded-t-3xl sm:rounded-3xl bg-dcDarkCard/95 backdrop-blur-xl ring-1 ring-white/10 shadow-2xl shadow-black/70 p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] text-center">
+            <div class="sm:hidden mx-auto mb-5 h-1.5 w-12 rounded-full bg-white/15"></div>
+            <div class="flex items-start justify-between gap-3 mb-5 text-left">
+                <div>
+                    <p id="modal-qr-ref" class="text-[10px] font-black uppercase tracking-[0.25em] text-dcRed">Pedido</p>
+                    <h3 id="modal-qr-titulo" class="font-tech text-xl font-black uppercase tracking-wider mt-1">Enviar desde el celular</h3>
+                </div>
+                <button type="button" data-cerrar-modal aria-label="Cerrar" class="w-11 h-11 grid place-items-center rounded-xl bg-white/5 text-neutral-400 hover:text-white">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="mx-auto w-fit rounded-3xl bg-white p-4 shadow-[0_0_40px_rgba(255,0,51,.35)] ring-2 ring-dcRed/60">
+                <div id="qr-lienzo" class="w-[220px] h-[220px] grid place-items-center text-neutral-500 text-xs"></div>
+            </div>
+            <p class="mt-4 text-xs text-neutral-400">Escanéalo con la cámara del celular: abre WhatsApp con el pedido listo para el proveedor.</p>
+            <a id="qr-abrir" href="#" target="_blank" rel="noopener" class="btn-cyber ancho mt-5 w-full min-h-[52px] rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-xs font-black uppercase tracking-wider text-white flex items-center justify-center gap-2">
+                <i class="fa-brands fa-whatsapp text-base"></i> Abrir WhatsApp aquí
+            </a>
+        </div>
+    </div>
+
+    <!-- ============ HOJA: AJUSTES ============ -->
+    <div id="modal-ajustes" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center" hidden role="dialog" aria-modal="true" aria-labelledby="modal-ajustes-titulo">
+        <div data-cerrar-modal class="modal-fondo absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
+        <div class="modal-panel relative w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl bg-dcDarkCard/95 backdrop-blur-xl ring-1 ring-white/10 shadow-2xl shadow-black/70 p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+            <div class="sm:hidden mx-auto mb-5 h-1.5 w-12 rounded-full bg-white/15"></div>
+            <div class="flex items-center justify-between gap-3 mb-6">
+                <h3 id="modal-ajustes-titulo" class="font-tech text-xl font-black uppercase tracking-wider">Ajustes</h3>
+                <button type="button" data-cerrar-modal aria-label="Cerrar" class="w-11 h-11 grid place-items-center rounded-xl bg-white/5 text-neutral-400 hover:text-white">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <dl class="space-y-2 text-xs">
+                <div class="flex items-center justify-between gap-3 rounded-2xl bg-dcDarkBg/60 ring-1 ring-white/5 px-4 min-h-[52px]">
+                    <dt class="text-neutral-400 font-semibold"><i class="fa-solid fa-user-shield mr-2 text-dcRed"></i>Sesión</dt>
+                    <dd id="ajustes-email" class="font-bold text-white truncate">—</dd>
+                </div>
+                <div class="flex items-center justify-between gap-3 rounded-2xl bg-dcDarkBg/60 ring-1 ring-white/5 px-4 min-h-[52px]">
+                    <dt class="text-neutral-400 font-semibold"><i class="fa-solid fa-tower-broadcast mr-2 text-dcRed"></i>Tiempo real</dt>
+                    <dd data-indicador-vivo></dd>
+                </div>
+                <label class="flex items-center justify-between gap-3 rounded-2xl bg-dcDarkBg/60 ring-1 ring-white/5 px-4 min-h-[52px] cursor-pointer">
+                    <span class="text-neutral-400 font-semibold"><i class="fa-solid fa-volume-high mr-2 text-dcRed"></i>Efectos de sonido</span>
+                    <input type="checkbox" id="ajuste-sonido" class="w-5 h-5 accent-[#FF0033]">
+                </label>
+                <button type="button" id="ajuste-pantalla-completa" class="w-full flex items-center justify-between gap-3 rounded-2xl bg-dcDarkBg/60 ring-1 ring-white/5 px-4 min-h-[52px] text-left">
+                    <span class="text-neutral-400 font-semibold"><i class="fa-solid fa-tv mr-2 text-dcRed"></i>Modo kiosco (pantalla completa)</span>
+                    <i class="fa-solid fa-expand text-neutral-400"></i>
+                </button>
+            </dl>
+            <a href="portal.html" target="_blank" class="mt-2 w-full flex items-center justify-between gap-3 rounded-2xl bg-dcDarkBg/60 ring-1 ring-white/5 px-4 min-h-[52px] text-xs">
+                <span class="text-neutral-400 font-semibold"><i class="fa-solid fa-magnifying-glass-location mr-2 text-dcRed"></i>Abrir portal de clientes</span>
+                <i class="fa-solid fa-arrow-up-right-from-square text-neutral-400"></i>
+            </a>
+            <button type="button" data-logout class="mt-6 w-full flex items-center justify-center gap-2 min-h-[52px] rounded-2xl bg-red-500/10 ring-1 ring-red-500/30 text-red-300 text-xs font-bold uppercase tracking-wider hover:bg-red-500/20 transition-colors">
+                <i class="fa-solid fa-lock"></i> Bloquear Panel
+            </button>
+        </div>
+    </div>
+
+    <!-- Toasts (encima del dock en móvil) -->
+    <div id="toasts" class="fixed z-[60] right-4 left-4 sm:left-auto bottom-[calc(6.5rem+env(safe-area-inset-bottom))] md:bottom-6 flex flex-col items-end gap-2 pointer-events-none" aria-live="polite"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="plantillas-whatsapp.js"></script>
+    <script src="ui.js"></script>
+    <script src="admin.js"></script>
+</body>
+</html>

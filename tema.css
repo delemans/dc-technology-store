@@ -1,0 +1,91 @@
+/* tema.css — Paletas del tema oscuro (por defecto) y claro. Las usa tema.js vía Tailwind.
+   Valores en "R G B" para que Tailwind pueda aplicar opacidad (bg-white/10, ring-dcRed/40…). */
+
+:root {
+    --tinta: 255 255 255;      /* "white" de Tailwind: texto principal, bordes y velos */
+    --fondo: 11 15 25;         /* #0B0F19 */
+    --tarjeta: 18 24 38;       /* #121826 */
+    --borde: 39 44 61;
+    --rojo: 255 0 51;          /* #FF0033 */
+
+    --n200: 229 229 229; --n300: 212 212 212; --n400: 163 163 163; --n500: 115 115 115;
+    --n600: 82 82 82;    --n700: 64 64 64;    --n800: 38 38 38;
+    --em200: 167 243 208; --em300: 110 231 183; --em400: 52 211 153;
+    --am200: 253 230 138; --am300: 252 211 77;  --am400: 251 191 36;
+    --sk300: 125 211 252; --sk400: 56 189 248;
+    --rj200: 254 202 202; --rj300: 252 165 165; --rj400: 248 113 113;
+    --vi300: 196 181 253; --vi400: 167 139 250;
+
+    --rejilla: 255 255 255;
+    --scroll: #272C3D;
+}
+
+.tema-claro {
+    --tinta: 15 17 26;         /* #0F111A */
+    --fondo: 244 246 251;      /* #F4F6FB */
+    --tarjeta: 255 255 255;
+    --borde: 222 226 236;
+    --rojo: 224 0 45;          /* #E0002D: mismo rojo de marca, con contraste AA sobre blanco */
+
+    /* Grises invertidos: el texto secundario sigue siendo secundario, pero legible */
+    --n200: 38 38 38;    --n300: 55 55 55;    --n400: 82 82 82;    --n500: 107 107 107;
+    --n600: 150 150 150; --n700: 200 200 200; --n800: 229 229 229;
+    /* Tonos pensados para fondo negro → versiones oscuras del mismo color */
+    --em200: 4 120 87;   --em300: 4 120 87;   --em400: 5 150 105;
+    --am200: 180 83 9;   --am300: 180 83 9;   --am400: 217 119 6;
+    --sk300: 3 105 161;  --sk400: 2 132 199;
+    --rj200: 185 28 28;  --rj300: 185 28 28;  --rj400: 220 38 38;
+    --vi300: 109 40 217; --vi400: 124 58 237;
+
+    --rejilla: 15 17 26;
+    --scroll: #C9CFDC;
+}
+
+/* Sobre rellenos sólidos de color el texto sigue siendo blanco (botones rojos, verdes, insignias…) */
+.tema-claro :is([class~="bg-dcRed"], [class~="bg-dcRedDark"], [class~="bg-emerald-500"], [class~="bg-emerald-600"],
+    [class~="bg-red-500"], [class~="bg-red-600"], [class~="bg-sky-500"], [class~="bg-sky-600"], [class~="bg-violet-500"],
+    .btn-neon, .insignia-desc, [class*="from-dcNeon"], [class*="from-dcRed"]),
+.tema-claro :is([class~="hover:bg-dcRed"], [class~="hover:bg-emerald-500"], [class~="group-hover:bg-dcRed"]):hover {
+    --tinta: 255 255 255;
+}
+/* Un fondo blanco sólido (p. ej. el del código QR) es blanco en ambos temas */
+.tema-claro [class~="bg-white"] { background-color: #fff; }
+
+/* Tarjetas y paneles de vidrio: en claro son superficies blancas con sombra suave */
+.tema-claro :is([class*="bg-white/[0.02]"], [class*="bg-white/[0.03]"]) {
+    background-color: rgb(255 255 255 / .85);
+    --tw-shadow: 0 1px 2px rgb(15 17 26 / .05), 0 12px 32px -20px rgb(15 17 26 / .25);
+}
+/* Barras y menús que usaban negro translúcido */
+.tema-claro :is([class~="bg-black/30"], [class~="bg-black/50"], [class~="bg-black/60"]) { background-color: rgb(255 255 255 / .78); }
+.tema-claro .modal-fondo { background-color: rgb(15 17 26 / .45); }
+
+.tema-claro .mesh { opacity: .45; }
+.tema-claro [class*="color-scheme:dark"] { color-scheme: light; }
+
+/* Cambio de tema suave (solo mientras se alterna) */
+.tema-cambiando, .tema-cambiando *, .tema-cambiando *::before, .tema-cambiando *::after {
+    transition: background-color .35s ease, color .35s ease, border-color .35s ease, fill .35s ease !important;
+}
+
+/* Botón sol / luna */
+[data-alternar-tema] i { transition: transform .5s cubic-bezier(.34, 1.56, .64, 1); }
+[data-alternar-tema]:hover i { transform: rotate(40deg) scale(1.1); }
+.tema-claro [data-alternar-tema] i { color: #4f46e5; }
+:root:not(.tema-claro) [data-alternar-tema] i { color: #fbbf24; }
+
+@media (prefers-reduced-motion: reduce) {
+    .tema-cambiando, .tema-cambiando * { transition: none !important; }
+}
+
+/* Tienda: tarjetas de producto en claro. Las vitrinas de imagen (.marco-img) siguen oscuras a propósito:
+   muchos logos (DirecTV "prepago", Max…) son blancos y desaparecerían sobre fondo claro. */
+.tema-claro .tarjeta-3d {
+    background: linear-gradient(180deg, #FFFFFF, #F8F9FC);
+    box-shadow: 0 0 0 1px rgb(15 17 26 / .08), 0 12px 30px -20px rgb(15 17 26 / .3);
+}
+.tema-claro .tarjeta-3d .brillo { background: radial-gradient(400px circle at var(--mx, 50%) var(--my, 50%), rgb(255 42 95 / .07), transparent 40%); }
+.tema-claro .tarjeta-3d::before { opacity: .55; }
+/* En claro el vidrio translúcido sobre blanco se ve gris: la vitrina pasa a ser una "pantalla" oscura sólida */
+.tema-claro .marco-img { background: radial-gradient(closest-side, rgb(255 255 255 / .08), transparent), linear-gradient(180deg, #161D2E, #0E1320); }
+.tema-claro .zoom-caja { background: linear-gradient(180deg, #161D2E, #0E1320); }
