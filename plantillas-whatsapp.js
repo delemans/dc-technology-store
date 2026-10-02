@@ -9,6 +9,9 @@
     const NUMERO_TIENDA = '573223284622';
     const URL_PORTAL = 'https://dctecnology.xyz/portal.html';
     const DESCUENTO_RENOVACION = 10; // % prometido en el recordatorio de renovación
+    const ENTREGA_MAX_MIN = 15;      // minutos máximos de entrega tras validar el pago (en horario)
+    const HORARIO = 'lunes a sábado, 8:00 a.m. a 8:00 p.m.';
+    const FIRMA = '⚡ *DC Technology*';
 
     // Números colombianos: 3001234567 → 573001234567. Devuelve null si no parece un número válido.
     function normalizarNumero(numero) {
@@ -31,6 +34,8 @@
         NUMERO_TIENDA,
         URL_PORTAL,
         DESCUENTO_RENOVACION,
+        ENTREGA_MAX_MIN,
+        HORARIO,
         normalizarNumero,
         enlace,
         precioCOP,
@@ -100,6 +105,65 @@
 
         cuponFidelidad: ({ producto, cupon }) =>
             `¡Gracias por confiar en DC Technology! Por tu compra de ${producto}, aquí tienes un cupón para tu próxima compra: ${cupon}. Escríbenos cuando quieras usarlo.`,
+
+        /* ---- Posventa automática (n8n lee notificaciones_whatsapp y usa estos textos) ----
+           Formato WhatsApp: *negrita*, _cursiva_. Nunca incluyen credenciales: esas las entrega
+           un asesor por el chat (modo sombra). 'codigo' = id de la compra (lo que busca el portal). */
+
+        // ESPERANDO_PROVEEDOR: el pago fue validado y el pedido entra a proceso
+        pagoRecibido: ({ pedido, producto, metodo, codigo }) => [
+            `✅ *¡Pago confirmado!* · ${FIRMA}`,
+            '',
+            `Recibimos tu pago${metodo ? ` por *${metodo}*` : ''} y ya estamos procesando tu pedido.`,
+            '',
+            `📦 Pedido: *#${pedido}*`,
+            `🛒 Producto: ${producto}`,
+            `⏱️ Entrega: máximo *${ENTREGA_MAX_MIN} minutos* (${HORARIO}).`,
+            '',
+            '🔎 Sigue tu pedido en tiempo real:',
+            `${URL_PORTAL}?codigo=${codigo}`,
+            '',
+            'Gracias por confiar en nosotros 🙌',
+        ].join('\n'),
+
+        // ENTREGADO / ENTREGADO_INMEDIATO: confirma la entrega y activa la garantía
+        entregaConfirmada: ({ pedido, producto, garantiaDias, garantiaHasta, codigo }) => [
+            `🎉 *¡Tu pedido fue entregado!* · ${FIRMA}`,
+            '',
+            `📦 Pedido: *#${pedido}*`,
+            `🛒 Producto: ${producto}`,
+            `🛡️ Garantía activa: *${garantiaDias} días* (hasta el ${garantiaHasta}).`,
+            '',
+            '🔐 Tus datos de acceso se entregan *solo por este chat oficial*. Si no los ves arriba, responde *ACCESOS* y te los reenviamos.',
+            '📌 Para conservar tu garantía: no cambies correo ni contraseña y usa solo tu perfil asignado.',
+            '',
+            '🔎 Tu pedido y garantía:',
+            `${URL_PORTAL}?codigo=${codigo}`,
+            '',
+            '¿Necesitas ayuda? Responde *SOPORTE* 🛠️',
+        ].join('\n'),
+
+        // 24 h después de la entrega (solo en horario y si aún no dejó reseña)
+        solicitudResena: ({ producto, codigo }) => [
+            `⭐ *¿Cómo te fue con ${producto}?* · ${FIRMA}`,
+            '',
+            'Ya pasó un día desde tu entrega y queremos confirmar que todo funciona al 100%.',
+            '',
+            '👉 Califícanos en 30 segundos (reseña de compra verificada):',
+            `${URL_PORTAL}?codigo=${codigo}#resena`,
+            '_Solo necesitas los últimos 4 dígitos de tu WhatsApp._',
+            '',
+            '¿Algo no va bien? Responde *SOPORTE* y lo resolvemos de inmediato.',
+            '_Si prefieres no recibir estos mensajes, responde *NO*._',
+        ].join('\n'),
+
+        // Respuesta del bot al pasar la conversación a una persona
+        escalarAsesor: ({ pedido } = {}) => [
+            `🙋 *Te paso con un asesor humano* · ${FIRMA}`,
+            '',
+            `Nuestro equipo te responde por este chat en horario de atención (${HORARIO}).`,
+            pedido ? `Ya tenemos tu pedido *#${pedido}* a la mano.` : 'Para agilizar, envíanos tu número de pedido y una captura del problema.',
+        ].join('\n'),
 
         // Mensaje al proveedor (ALL NECESSARY COLOMBIA)
         pedidoProveedor: ({ pedido, producto, cantidad = 1 }) =>

@@ -1,6 +1,7 @@
 -- =====================================================================
 -- WO-014 · Validación de pagos centralizada en public.pagos
 -- Requiere: wo-011.sql y wo-012.sql aplicados.
+-- Requiere también public.es_admin() de wo-015.sql (si ya lo ejecutaste, no hace falta repetirlo).
 -- Ejecutar completo en Supabase → SQL Editor. Es idempotente.
 --
 -- Modelo:
@@ -12,6 +13,15 @@
 --   · compras_proveedor.pago_validado_at se CONSERVA: es la marca de tiempo del cambio de estado de la
 --     compra (la usan el cupón de primera compra y la posventa), no un dato del pago.
 -- =====================================================================
+
+-- Las funciones de admin usan public.es_admin() (definida en wo-015.sql)
+do $$
+begin
+    if to_regprocedure('public.es_admin()') is null then
+        raise exception 'Ejecuta primero supabase/wo-015.sql: define public.es_admin().';
+    end if;
+end;
+$$;
 
 -- 1) MIGRAR Y ELIMINAR LAS COLUMNAS DUPLICADAS DE WO-011 ----------------
 -- Si hay pagos registrados en compras_proveedor, se copian a 'pagos' antes de borrar las columnas.
@@ -92,7 +102,7 @@ declare
     v_ref       text := nullif(btrim(coalesce(p_referencia, '')), '');
     v_pago_id   text;
 begin
-    if auth.role() <> 'authenticated' then
+    if not public.es_admin() then
         return query select false, 'Solo el administrador puede validar pagos.', null::text;
         return;
     end if;
@@ -169,7 +179,7 @@ begin
 end;
 $$;
 
-revoke all on function public.validar_pago(text, text, text, numeric, text) from public;
+revoke all on function public.validar_pago(text, text, text, numeric, text) from public, anon;
 grant execute on function public.validar_pago(text, text, text, numeric, text) to authenticated;
 
 -- 3) RECHAZAR PAGO (solo admin autenticado) -----------------------------
@@ -181,7 +191,7 @@ security definer
 set search_path = ''
 as $$
 begin
-    if auth.role() <> 'authenticated' then
+    if not public.es_admin() then
         return query select false, 'Solo el administrador puede rechazar pagos.';
         return;
     end if;
@@ -205,7 +215,7 @@ begin
 end;
 $$;
 
-revoke all on function public.rechazar_pago(text, text) from public;
+revoke all on function public.rechazar_pago(text, text) from public, anon;
 grant execute on function public.rechazar_pago(text, text) to authenticated;
 
 -- 4) COMPROBANTES PENDIENTES (solo admin autenticado) -------------------
@@ -232,11 +242,11 @@ as $$
         order by c2.id
         limit 1
     ) c on true
-    where p.estado::text = 'PENDIENTE' and auth.role() = 'authenticated'
+    where p.estado::text = 'PENDIENTE' and public.es_admin()
     order by p.created_at;
 $$;
 
-revoke all on function public.pagos_pendientes() from public;
+revoke all on function public.pagos_pendientes() from public, anon;
 grant execute on function public.pagos_pendientes() to authenticated;
 
 -- 5) TIEMPO REAL: avisar al panel cuando n8n registre un comprobante -----

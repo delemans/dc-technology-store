@@ -119,6 +119,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         iniciarRealtime();
         cargarMetodosPago();
         cargarPagosPendientes();
+        cargarNotificaciones();
         cargarBaseConocimiento();
     }
 
@@ -227,6 +228,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
     pintarNavegacion();
     document.getElementById('btn-recargar-metodos').addEventListener('click', cargarMetodosPago);
+    document.getElementById('btn-recargar-notif').addEventListener('click', cargarNotificaciones);
     document.getElementById('bot-buscar').addEventListener('input', pintarCatalogoBot);
     document.getElementById('form-pago').addEventListener('submit', guardarPago);
     document.querySelectorAll('[data-abrir-ajustes]').forEach((btn) => {
@@ -551,6 +553,8 @@ function manejarCambio({ eventType, new: nuevo, old: viejo }) {
     }
 
     const esNuevo = eventType === 'INSERT' && !pedidos.has(id);
+    // Un cambio de estado real puede haber encolado notificaciones en la BD
+    if (!nuevo._prueba && pedidos.get(id)?.estado !== nuevo.estado) programarNotificaciones();
     pedidos.set(id, nuevo);
     pintarTabs();
 
@@ -927,6 +931,7 @@ async function avanzarEstado(id, btn, ref, { desde, hacia, aviso }) {
 
     pedidos.set(String(id), filaNueva);
     pintarTabs();
+    if (!filaNueva._prueba) programarNotificaciones();
 
     // Confirmación: badge del nuevo estado, botón "Listo"
     tarjeta.querySelector('.badge-estado').innerHTML = badgeEstado(hacia);
@@ -935,6 +940,10 @@ async function avanzarEstado(id, btn, ref, { desde, hacia, aviso }) {
     btn.innerHTML = '<i class="fa-solid fa-check text-sm"></i> Listo';
     btn.classList.replace('bg-dcRed', 'bg-emerald-600');
     mostrarToast(aviso, 'ok');
+    // Sin WhatsApp válido la BD no puede encolar la confirmación de entrega ni la reseña de 24 h
+    if (ESTADOS_ENTREGADOS.includes(hacia) && !filaNueva._prueba && !PlantillasWA.normalizarNumero(filaNueva.cliente_whatsapp)) {
+        mostrarToast(`#${ref} no tiene WhatsApp del cliente: no saldrá la confirmación automática. Agrégalo en "Editar".`, 'error', 7000);
+    }
     Sonidos.completar();
     navigator.vibrate?.(20);
 
@@ -1446,6 +1455,7 @@ async function guardarPago(e) {
     filasActualizadas.forEach((fila) => pedidos.set(String(fila.id), fila));
     renderLista();
     cargarPagosPendientes();
+    programarNotificaciones();
 
     cerrarModal(document.getElementById('modal-pago'));
     const p = normalizarPedido(filaActual);
@@ -1582,6 +1592,99 @@ async function enviarSeguimiento(tipo, fila, btn) {
     mostrarToast(cupon ? `Mensaje registrado · cupón ${cupon}` : 'Mensaje de satisfacción registrado.', 'ok', 4000);
 }
 
+/* ==================== NOTIFICACIONES AUTOMÁTICAS (public.notificaciones_whatsapp) ==================== */
+
+const LIMITE_NOTIFICACIONES = 25;
+const TIPOS_NOTIFICACION = {
+    PAGO_RECIBIDO:      { texto: 'Pago confirmado', icono: 'fa-circle-check', color: 'text-sky-300' },
+    ENTREGA_CONFIRMADA: { texto: 'Entrega',         icono: 'fa-box-open',     color: 'text-emerald-300' },
+    SOLICITUD_RESENA:   { texto: 'Reseña 24 h',     icono: 'fa-star',         color: 'text-amber-300' },
+};
+const ESTADOS_NOTIFICACION = {
+    PENDIENTE:  'text-neutral-300 ring-white/10 bg-white/[0.04]',
+    EN_PROCESO: 'text-sky-300 ring-sky-500/30 bg-sky-500/10',
+    ENVIADO:    'text-emerald-300 ring-emerald-500/30 bg-emerald-500/10',
+    FALLIDO:    'text-red-300 ring-red-500/40 bg-red-500/10',
+    CANCELADO:  'text-neutral-500 ring-white/10 bg-white/[0.02]',
+};
+let temporizadorNotificaciones = null;
+
+// Varios cambios seguidos (p. ej. aprobar un pedido con 3 compras) → una sola consulta
+function programarNotificaciones() {
+    clearTimeout(temporizadorNotificaciones);
+    temporizadorNotificaciones = setTimeout(cargarNotificaciones, 1200);
+}
+
+async function cargarNotificaciones() {
+    const caja = document.getElementById('lista-notificaciones');
+    if (!caja) return;
+    const { data, error } = await supabaseClient
+        .from('notificaciones_whatsapp')
+        .select('id, tipo, compra_id, pedido_id, destino, variables, estado, intentos, ultimo_error, enviar_despues, enviado_at, created_at')
+        .order('id', { ascending: false })
+        .limit(LIMITE_NOTIFICACIONES);
+
+    const resumen = document.getElementById('notif-resumen');
+    if (error) {
+        console.error('notificaciones_whatsapp:', error);
+        resumen.textContent = '';
+        caja.innerHTML = ['42P01', 'PGRST205'].includes(error.code)
+            ? filaVacia('Ejecuta supabase/wo-015.sql para activar las notificaciones automáticas.', 'fa-database')
+            : filaVacia(`No se pudieron leer las notificaciones: ${error.message}`, 'fa-triangle-exclamation');
+        return;
+    }
+
+    const filas = data ?? [];
+    const fallidas = filas.filter((n) => n.estado === 'FALLIDO').length;
+    const enCola = filas.filter((n) => ['PENDIENTE', 'EN_PROCESO'].includes(n.estado)).length;
+    resumen.textContent = `${enCola} en cola${fallidas ? ` · ${fallidas} fallida(s)` : ''}`;
+    resumen.className = `text-[10px] font-bold uppercase tracking-widest ${fallidas ? 'text-red-300' : 'text-neutral-500'}`;
+
+    if (filas.length === 0) {
+        caja.innerHTML = filaVacia('Aún no hay notificaciones. Se crean al validar pagos y marcar entregas de clientes con WhatsApp.', 'fa-paper-plane');
+        return;
+    }
+    caja.replaceChildren(...filas.map(itemNotificacion));
+}
+
+function itemNotificacion(n) {
+    const tipo = TIPOS_NOTIFICACION[n.tipo] ?? { texto: n.tipo, icono: 'fa-message', color: 'text-neutral-300' };
+    const programada = n.estado === 'PENDIENTE' && new Date(n.enviar_despues).getTime() > Date.now();
+    const cuando = n.enviado_at
+        ? `Enviada ${formatearFecha(n.enviado_at)}`
+        : programada ? `Programada ${formatearFecha(n.enviar_despues)}` : `Creada ${formatearFecha(n.created_at)}`;
+    const reintentable = ['FALLIDO', 'CANCELADO'].includes(n.estado);
+
+    const item = document.createElement('div');
+    item.className = 'flex items-center gap-3 rounded-2xl bg-dcDarkBg/60 ring-1 ring-white/5 px-4 py-3';
+    item.innerHTML = `
+        <i class="fa-solid ${tipo.icono} ${tipo.color} w-5 text-center shrink-0"></i>
+        <div class="flex-1 min-w-0">
+            <p class="text-sm font-bold text-white truncate">${escaparHTML(tipo.texto)} · ${escaparHTML(n.variables?.producto ?? '')}</p>
+            <p class="text-[11px] text-neutral-500 truncate">#${escaparHTML(n.pedido_id ?? n.compra_id)} · WhatsApp …${escaparHTML(String(n.destino).slice(-4))} · ${escaparHTML(cuando)}</p>
+            ${n.ultimo_error ? `<p class="text-[11px] text-red-300/80 truncate" title="${escaparHTML(n.ultimo_error)}">${escaparHTML(n.ultimo_error)}</p>` : ''}
+        </div>
+        <span class="shrink-0 rounded-lg ring-1 px-2 py-1 text-[9px] font-black uppercase tracking-widest ${ESTADOS_NOTIFICACION[n.estado] ?? ''}">${escaparHTML(n.estado)}</span>
+        ${reintentable ? `<button type="button" aria-label="Reintentar envío" class="btn-cyber shrink-0 w-11 h-11 grid place-items-center rounded-xl bg-white/[0.04] ring-1 ring-white/10 text-neutral-200"><i class="fa-solid fa-rotate-right"></i></button>` : ''}`;
+    item.querySelector('button')?.addEventListener('click', (e) => reintentarNotificacion(n, e.currentTarget));
+    return item;
+}
+
+async function reintentarNotificacion(n, btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+    const { data, error } = await supabaseClient.rpc('reintentar_notificacion', { p_id: n.id }).maybeSingle();
+    if (error || !data?.ok) {
+        console.error('reintentar_notificacion:', error ?? data);
+        mostrarToast(data?.mensaje ?? 'No se pudo reintentar. Revisa la consola.', 'error', 5000);
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-rotate-right"></i>';
+        return;
+    }
+    mostrarToast('Notificación en cola de nuevo. n8n la enviará en el próximo ciclo.', 'ok', 4000);
+    cargarNotificaciones();
+}
+
 /* ==================== AGENTE BOT · BASE DE CONOCIMIENTO ==================== */
 
 async function cargarBaseConocimiento() {
@@ -1600,6 +1703,8 @@ const NOMBRES_PLANTILLAS = {
     comprar_ahora: 'Comprar ahora', consultar_estado: 'Consultar estado', solicitar_soporte: 'Solicitar soporte',
     reclamar_garantia: 'Reclamar garantía', satisfaccion_24h: 'Satisfacción 24 h', renovacion_3d: 'Renovación 3 días',
     cupon_fidelidad: 'Cupón de fidelidad', pedido_proveedor: 'Pedido al proveedor',
+    pago_recibido: 'Auto · Pago confirmado', entrega_confirmada: 'Auto · Entrega', solicitud_resena: 'Auto · Reseña 24 h',
+    escalar_asesor: 'Escalar a asesor',
 };
 
 function bloqueCopiable(titulo, texto, { pendiente = false } = {}) {

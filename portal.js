@@ -121,9 +121,19 @@ function mostrarPedido(id, data, { actualizado = false } = {}) {
     mensajeSoporte: mensajeSoporteVIP({ ref, producto, estado: estado.texto }),
     actualizado,
   });
+  // El cliente puede escribir el id de la compra o el del pedido: la garantía y la reseña usan el de la compra
+  const idCompra = String(data.compra_id ?? id);
   pintarCredenciales(data);
-  pintarGarantia({ idCompra: id, ref, producto, data });
-  pintarFormResena(id, data.estado);
+  pintarGarantia({ idCompra, ref, producto, data });
+  pintarFormResena(idCompra, data.estado);
+
+  // Enlace de la solicitud de reseña por WhatsApp: portal.html?codigo=…#resena
+  if (!actualizado && location.hash === '#resena' && !formResena.hidden) {
+    setTimeout(() => {
+      formResena.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      document.getElementById('resena-whatsapp')?.focus({ preventScroll: true });
+    }, 400);
+  }
 }
 
 /* ==================== RESEÑA VERIFICADA ==================== */

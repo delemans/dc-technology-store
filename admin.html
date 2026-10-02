@@ -372,6 +372,21 @@
                         </div>
                     </section>
 
+                    <!-- Notificaciones automáticas (cola de n8n) -->
+                    <section class="rounded-3xl bg-white/[0.03] backdrop-blur-xl ring-1 ring-white/10 p-5 xl:col-span-2">
+                        <div class="flex flex-wrap items-center justify-between gap-3 mb-1">
+                            <h3 class="font-tech text-lg font-black uppercase tracking-wider"><i class="fa-solid fa-paper-plane text-sky-400 mr-2"></i>Notificaciones automáticas</h3>
+                            <div class="flex items-center gap-2">
+                                <span id="notif-resumen" class="text-[10px] font-bold uppercase tracking-widest text-neutral-500"></span>
+                                <button type="button" id="btn-recargar-notif" aria-label="Actualizar notificaciones" class="btn-cyber w-11 h-11 grid place-items-center rounded-xl bg-white/[0.04] ring-1 ring-white/10 text-neutral-300">
+                                    <i class="fa-solid fa-rotate"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <p class="text-xs text-neutral-500 mb-4">Pago confirmado, entrega y solicitud de reseña (24 h). Se encolan solas al cambiar el estado; n8n las envía con pausas anti-ráfaga. Las <b class="text-neutral-300">fallidas</b> se pueden reintentar.</p>
+                        <div id="lista-notificaciones" class="space-y-2"></div>
+                    </section>
+
                     <!-- Agente bot -->
                     <section class="rounded-3xl bg-white/[0.03] backdrop-blur-xl ring-1 ring-white/10 p-5 xl:col-span-2">
                         <div class="flex flex-wrap items-center justify-between gap-3 mb-1">

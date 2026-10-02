@@ -2,8 +2,18 @@
 -- WO-012 · Cupones, reseñas verificadas y estadísticas públicas reales
 -- Requiere: supabase/wo-011.sql aplicado y el enum public.estado_compra con
 -- PENDIENTE_PAGO, PEDIDO_REALIZADO, RECIBIDA, ENTREGADO, ENTREGADO_INMEDIATO, FALLIDA, CANCELADA.
+-- Requiere también public.es_admin() de wo-015.sql (si ya lo ejecutaste, no hace falta repetirlo).
 -- Ejecutar completo en Supabase → SQL Editor. Es idempotente.
 -- =====================================================================
+
+-- Las funciones de admin usan public.es_admin() (definida en wo-015.sql)
+do $$
+begin
+    if to_regprocedure('public.es_admin()') is null then
+        raise exception 'Ejecuta primero supabase/wo-015.sql: define public.es_admin().';
+    end if;
+end;
+$$;
 
 -- 1) CUPONES PROMOCIONALES ----------------------------------------------
 -- Los cupones de fidelidad (DC-XXXXXX) siguen viviendo en compras_proveedor.cupon_codigo.
@@ -115,7 +125,7 @@ declare
     v_compra   public.compras_proveedor%rowtype;
     c          public.cupones%rowtype;
 begin
-    if auth.role() <> 'authenticated' then
+    if not public.es_admin() then
         return query select false, 0, 'Solo el administrador puede canjear cupones.';
         return;
     end if;
@@ -173,7 +183,7 @@ begin
 end;
 $$;
 
-revoke all on function public.canjear_cupon(text, text) from public;
+revoke all on function public.canjear_cupon(text, text) from public, anon;
 grant execute on function public.canjear_cupon(text, text) to authenticated;
 
 -- 4) RESEÑAS VERIFICADAS ------------------------------------------------

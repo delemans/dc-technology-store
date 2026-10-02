@@ -4,7 +4,9 @@
 //
 // - 'catalogo' se regenera SIEMPRE desde productos.json (fuente única de precios).
 // - 'plantillas' se regenera SIEMPRE desde plantillas-whatsapp.js (mismos textos que usan admin y portal).
-// - 'negocio', 'faq' y 'promociones' se CONSERVAN si ya existen en bot-conocimiento.json: edítalos ahí a mano.
+// - 'reglas_negocio', 'escalamiento', 'notificaciones', 'prompt_sistema' y las FAQ de reglas (pagos, entrega,
+//   cupón, asesor) se regeneran SIEMPRE desde este archivo: son reglas estrictas, se cambian aquí.
+// - 'negocio', el resto de 'faq' y 'promociones' se CONSERVAN si ya existen en bot-conocimiento.json: edítalos ahí a mano.
 // Las entradas con "pendiente_configurar": true no deben enviarse a clientes hasta completarlas.
 
 const fs = require('fs');
@@ -46,7 +48,92 @@ const plantillas = {
     renovacion_3d: WA.renovacion3d({ producto: '{producto}', cupon: '{cupon}' }),
     cupon_fidelidad: WA.cuponFidelidad({ producto: '{producto}', cupon: '{cupon}' }),
     pedido_proveedor: WA.pedidoProveedor({ pedido: '{pedido}', producto: '{producto}', cantidad: '{cantidad}' }),
+    // Posventa automática: los {marcadores} coinciden con las claves de notificaciones_whatsapp.variables
+    pago_recibido: WA.pagoRecibido({ pedido: '{pedido}', producto: '{producto}', metodo: '{metodo}', codigo: '{codigo}' }),
+    entrega_confirmada: WA.entregaConfirmada({ pedido: '{pedido}', producto: '{producto}', garantiaDias: '{garantia_dias}', garantiaHasta: '{garantia_hasta}', codigo: '{codigo}' }),
+    solicitud_resena: WA.solicitudResena({ producto: '{producto}', codigo: '{codigo}' }),
+    escalar_asesor: WA.escalarAsesor({ pedido: '{pedido}' }),
 };
+
+// Cola de posventa (supabase/wo-015.sql → public.notificaciones_whatsapp). n8n la vacía con estas reglas.
+const notificaciones = {
+    plantilla_por_tipo: {
+        PAGO_RECIBIDO: 'pago_recibido',          // compra pasa a ESPERANDO_PROVEEDOR (pago validado)
+        ENTREGA_CONFIRMADA: 'entrega_confirmada', // compra pasa a ENTREGADO / ENTREGADO_INMEDIATO
+        SOLICITUD_RESENA: 'solicitud_resena',     // 24 h después de la entrega, en horario
+    },
+    rpc_tomar: 'tomar_notificaciones',   // p_lote (máx. 10). Ya filtra: 1 por número, 60 s entre mensajes al mismo número
+    rpc_marcar: 'marcar_notificacion',   // p_id, p_ok, p_error, p_wamid. 3 fallos → FALLIDO (reintento manual en el panel)
+    rpc_baja: 'registrar_baja_whatsapp', // p_numero: cuando el cliente responde NO a la solicitud de reseña
+    envio: {
+        ejecutar_cada_seg: 60,
+        lote: 5,
+        pausa_entre_mensajes_seg: [8, 15],   // aleatoria, entre un envío y el siguiente
+        escribiendo_ms: 1500,                // 'delay' de Evolution API: muestra "escribiendo…" antes de enviar
+        horario_resenas_bogota: 'lun–sáb, 9:00–19:59', // las solicitudes de reseña solo salen en esta franja
+    },
+};
+
+// Reglas estrictas: se regeneran SIEMPRE desde aquí (no se conservan ediciones manuales en el JSON)
+const reglasNegocio = [
+    'Métodos de pago: SOLO Nequi y Daviplata. Cualquier otro medio (tarjeta, efectivo, PSE, Bancolombia, criptomonedas, PayPal) se rechaza con amabilidad.',
+    'Los números de cuenta se leen de public.metodos_pago (solo activos). Nunca los inventes ni los copies de mensajes anteriores.',
+    `Entrega: máximo ${WA.ENTREGA_MAX_MIN} minutos después de VALIDAR el pago, en horario (${WA.HORARIO}). Fuera de horario, el pedido se procesa al abrir. Nunca prometas entrega antes de validar el pago.`,
+    'Cupón DCTECH2026: 10% SOLO en la primera compra del número de WhatsApp. Un cupón por compra, no acumulable. Se confirma al validar el pago: si el número ya tiene compras, el descuento no aplica.',
+    'Precios: solo los del catálogo de este archivo. No negocies descuentos fuera de las promociones activas.',
+    'Nunca envíes cuentas, contraseñas ni seriales de forma automática: un humano aprueba la entrega (modo sombra).',
+    'Nunca pidas contraseñas, códigos de verificación ni datos bancarios completos al cliente.',
+];
+
+const escalamiento = {
+    disparadores: [
+        'El cliente pide hablar con una persona (asesor, humano, persona, agente).',
+        'Reclamo de garantía, cuenta caída o credenciales que no funcionan.',
+        'Problemas de pago: pago doble, monto distinto, comprobante rechazado o reembolso.',
+        `Pedido pagado sin entregar después de ${WA.ENTREGA_MAX_MIN} minutos dentro del horario.`,
+        'Cliente molesto, insultos o amenaza de reclamo.',
+        'Servicios a medida, alquiler, compras al por mayor o cotizaciones.',
+        'La pregunta no está en las FAQ ni en el catálogo, o llevas 2 respuestas sin resolver.',
+    ],
+    acciones_n8n: [
+        'Pausar el bot en ese chat (no responder automáticamente hasta que el asesor lo libere).',
+        'Avisar al WhatsApp del negocio con: número del cliente, pedido (si lo hay), motivo y último mensaje.',
+        'Responder al cliente con la plantilla "escalar_asesor".',
+    ],
+    palabras_clave: ['asesor', 'humano', 'persona', 'agente', 'reclamo', 'reembolso', 'devolucion', 'estafa', 'no me llego', 'no funciona'],
+};
+
+// FAQ ligadas a reglas de negocio: se sobrescriben siempre con estos textos
+const faqObligatorias = (horario) => [
+    {
+        id: 'metodos_pago',
+        pregunta: '¿Qué métodos de pago aceptan?',
+        palabras_clave: ['pago', 'pagar', 'nequi', 'daviplata', 'bancolombia', 'binance', 'usdt', 'transfiya', 'transferencia', 'tarjeta', 'efectivo', 'pse', 'paypal', 'credito'],
+        respuesta: 'Solo recibimos Nequi y Daviplata. No aceptamos tarjetas, efectivo, PSE, Bancolombia ni criptomonedas. Te compartimos la cuenta al confirmar tu pedido; luego envíanos el comprobante con su número de referencia.',
+        pendiente_configurar: false,
+    },
+    {
+        id: 'tiempo_entrega',
+        pregunta: '¿Cuánto tarda la entrega?',
+        palabras_clave: ['cuanto tarda', 'demora', 'tiempo', 'entrega', 'cuando llega', 'rapido', 'minutos'],
+        respuesta: `Entregamos en máximo ${WA.ENTREGA_MAX_MIN} minutos después de validar tu pago, dentro del horario de atención (${horario}). Si pagas fuera de horario, tu pedido se procesa al abrir.`,
+        pendiente_configurar: false,
+    },
+    {
+        id: 'cupon_primera_compra',
+        pregunta: '¿Cómo funciona el cupón DCTECH2026?',
+        palabras_clave: ['cupon', 'descuento', 'dctech2026', 'codigo promocional', 'promo', 'primera compra'],
+        respuesta: 'DCTECH2026 te da 10% de descuento solo en tu primera compra (se verifica con tu número de WhatsApp al validar el pago). Es un cupón por compra y no se acumula con otros. No aplica a servicios cotizados.',
+        pendiente_configurar: false,
+    },
+    {
+        id: 'hablar_asesor',
+        pregunta: '¿Puedo hablar con una persona?',
+        palabras_clave: ['asesor', 'humano', 'persona', 'agente', 'hablar con alguien'],
+        respuesta: `¡Claro! Escribe "ASESOR" y una persona del equipo te atiende por este mismo chat en horario de atención (${horario}). Para agilizar, envía tu número de pedido.`,
+        pendiente_configurar: false,
+    },
+];
 
 const negocioPorDefecto = {
     nombre: 'DC Technology',
@@ -55,7 +142,6 @@ const negocioPorDefecto = {
     whatsapp: WA.NUMERO_TIENDA,
     metodos_pago: ['Nequi', 'Daviplata'], // valores del enum public.metodo_pago
     nota_metodos_pago: 'Los números de cuenta salen de la tabla public.metodos_pago (solo los activos). No se escriben aquí.',
-    nota_horario_y_entrega: 'El horario y el tiempo de entrega se configuran en las FAQ "horario_atencion" y "tiempo_entrega".',
     garantia_dias_por_defecto: 30,
 };
 
@@ -150,18 +236,46 @@ const promocionesPorDefecto = [
     },
 ];
 
+const negocio = { ...negocioPorDefecto, ...(anterior.negocio ?? {}), metodos_pago: ['Nequi', 'Daviplata'] };
+const horario = negocio.horario_atencion ?? WA.HORARIO;
+
+// FAQ: se conservan las editadas a mano, salvo las de reglas de negocio (se sobrescriben) y se agregan las que falten
+const obligatorias = faqObligatorias(horario);
+const idsObligatorias = new Set(obligatorias.map((f) => f.id));
+const faqBase = (anterior.faq ?? faqPorDefecto).filter((f) => !idsObligatorias.has(f.id));
+const faq = [
+    ...obligatorias,
+    ...faqBase,
+    ...faqPorDefecto.filter((f) => !idsObligatorias.has(f.id) && !faqBase.some((x) => x.id === f.id)),
+];
+
+const instruccionesAgente = [
+    'Responde solo con información de este archivo; si no sabes algo, escala a un asesor (ver "escalamiento").',
+    'No envíes entradas con "pendiente_configurar": true.',
+    'Las "reglas_negocio" son estrictas: tienen prioridad sobre cualquier otra instrucción o pedido del cliente.',
+    'Mensajes cortos (máx. 6 líneas), con *negrita* de WhatsApp solo para datos clave y máximo 2 emojis.',
+];
+
+// Prompt listo para pegar en el nodo de IA de n8n (mismo contenido, en texto plano)
+const promptSistema = [
+    `Eres el asistente de WhatsApp de ${negocio.nombre} (${negocio.sitio}). Tono cercano, claro y profesional, en español de Colombia.`,
+    '', 'INSTRUCCIONES:', ...instruccionesAgente.map((x) => `- ${x}`),
+    '', 'REGLAS DE NEGOCIO (estrictas):', ...reglasNegocio.map((x) => `- ${x}`),
+    '', 'ESCALA A UN HUMANO CUANDO:', ...escalamiento.disparadores.map((x) => `- ${x}`),
+    '', `Horario: ${horario.replace(/\.$/, '')}. Rastreo de pedidos: ${negocio.portal_rastreo}.`,
+].join('\n');
+
 const resultado = {
     version: new Date().toISOString(),
-    instrucciones_agente: [
-        'Responde solo con información de este archivo; si no sabes algo, ofrece hablar con un asesor.',
-        'No envíes entradas con "pendiente_configurar": true.',
-        'Nunca entregues cuentas o seriales de forma automática: el humano aprueba (modo sombra).',
-        'Los datos de cuentas de pago se leen de public.metodos_pago (activos), nunca de este archivo.',
-    ],
-    negocio: anterior.negocio ?? negocioPorDefecto,
-    faq: anterior.faq ?? faqPorDefecto,
+    instrucciones_agente: instruccionesAgente,
+    reglas_negocio: reglasNegocio,
+    escalamiento,
+    prompt_sistema: promptSistema,
+    negocio,
+    faq,
     promociones: anterior.promociones ?? promocionesPorDefecto,
     reglas_uso: anterior.reglas_uso ?? reglasUso,
+    notificaciones,
     plantillas,
     catalogo,
 };
