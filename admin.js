@@ -14,14 +14,25 @@ const GARANTIA_DIAS = 30;
 const ESTADOS = {
     PENDIENTE_PAGO:      { texto: 'Pendiente de pago',   clases: 'bg-sky-500/10 text-sky-300 ring-sky-500/30', punto: 'bg-sky-400', pulso: true },
     ESPERANDO_PROVEEDOR: { texto: 'Esperando proveedor', clases: 'bg-amber-500/10 text-amber-300 ring-amber-500/30', punto: 'bg-amber-400', pulso: true },
-    PEDIDO_REALIZADO:    { texto: 'Pedido realizado',    clases: 'bg-emerald-500/10 text-emerald-300 ring-emerald-500/30', punto: 'bg-emerald-400', pulso: true },
+    PEDIDO_REALIZADO:    { texto: 'Pedido al proveedor', clases: 'bg-violet-500/10 text-violet-300 ring-violet-500/30', punto: 'bg-violet-400', pulso: true },
+    RECIBIDA:            { texto: 'Recibida del proveedor', clases: 'bg-violet-500/10 text-violet-300 ring-violet-500/30', punto: 'bg-violet-400', pulso: true },
     ENTREGADO:           { texto: 'Entregado',           clases: 'bg-emerald-500/10 text-emerald-300 ring-emerald-500/30', punto: 'bg-emerald-400', pulso: false },
     ENTREGADO_INMEDIATO: { texto: 'Entregado inmediato', clases: 'bg-emerald-500/10 text-emerald-300 ring-emerald-500/30', punto: 'bg-emerald-400', pulso: false },
+    FALLIDA:             { texto: 'Fallida',             clases: 'bg-red-500/10 text-red-300 ring-red-500/30', punto: 'bg-red-400', pulso: false },
+    CANCELADA:           { texto: 'Cancelada',           clases: 'bg-white/5 text-neutral-400 ring-white/10', punto: 'bg-neutral-500', pulso: false },
 };
+// Enum public.estado_compra: PENDIENTE_PAGO → ESPERANDO_PROVEEDOR → PEDIDO_REALIZADO → RECIBIDA → ENTREGADO
+// (o ENTREGADO_INMEDIATO si había cuenta asignada al validar el pago); FALLIDA y CANCELADA cierran sin entrega.
 const ESTADO_PENDIENTE = 'ESPERANDO_PROVEEDOR';
 const ESTADO_PENDIENTE_PAGO = 'PENDIENTE_PAGO';
-// La pestaña "Pendientes" agrupa lo que aún requiere acción: pago por validar o compra al proveedor
-const ESTADOS_ACTIVOS = [ESTADO_PENDIENTE_PAGO, ESTADO_PENDIENTE];
+// "Pendientes" = todo lo que aún requiere una acción del admin
+const ESTADOS_ACTIVOS = [ESTADO_PENDIENTE_PAGO, ESTADO_PENDIENTE, 'PEDIDO_REALIZADO', 'RECIBIDA'];
+// En curso con el proveedor (KPI "Procesando")
+const ESTADOS_EN_PROCESO = [ESTADO_PENDIENTE, 'PEDIDO_REALIZADO', 'RECIBIDA'];
+// Listos para entregar al cliente (botón "Marcar como entregado")
+const ESTADOS_POR_ENTREGAR = ['PEDIDO_REALIZADO', 'RECIBIDA'];
+// Entregados al cliente: cuentan como venta completada, garantía y posventa
+const ESTADOS_ENTREGADOS = ['ENTREGADO', 'ENTREGADO_INMEDIATO'];
 
 // Métodos de pago que se pueden registrar (además de los que existan en public.metodos_pago)
 const METODOS_PAGO_BASE = ['Nequi', 'Daviplata', 'Bancolombia', 'Binance (USDT)', 'Transfiya'];
@@ -306,6 +317,10 @@ function esPendiente(fila) {
     return ESTADOS_ACTIVOS.includes(fila?.estado);
 }
 
+function esEntregado(fila) {
+    return ESTADOS_ENTREGADOS.includes(fila?.estado);
+}
+
 function categoriaDe(fila) {
     const nombre = ` ${String(leerCampo(fila, 'producto', '')).toLowerCase()} `;
     return CATEGORIAS.find((c) => c.palabras.some((p) => nombre.includes(p))) ?? CATEGORIA_OTROS;
@@ -313,7 +328,7 @@ function categoriaDe(fila) {
 
 function coincideFiltro(fila) {
     if (ui.filtro === 'pendientes' && !esPendiente(fila)) return false;
-    if (ui.filtro === 'entregados' && esPendiente(fila)) return false;
+    if (ui.filtro === 'entregados' && !esEntregado(fila)) return false;
     if (ui.categoria !== 'todas' && categoriaDe(fila).id !== ui.categoria) return false;
     if (!ui.busqueda) return true;
     const p = normalizarPedido(fila);
@@ -389,8 +404,7 @@ function cambiarCategoria(categoria) {
 // Pestañas de estado y categoría con contadores dinámicos + KPIs
 function pintarTabs() {
     const filas = [...pedidos.values()];
-    const pendientes = filas.filter(esPendiente).length;
-    const totales = { pendientes, entregados: filas.length - pendientes, todos: filas.length };
+    const totales = { pendientes: filas.filter(esPendiente).length, entregados: filas.filter(esEntregado).length, todos: filas.length };
 
     document.querySelectorAll('[data-contador]').forEach((el) => {
         el.textContent = totales[el.dataset.contador];
@@ -444,7 +458,7 @@ function pintarKPIs(filas) {
     }).length;
 
     document.getElementById('kpi-hoy').textContent = pedidosHoy;
-    document.getElementById('kpi-procesando').textContent = filas.filter((fila) => fila.estado === ESTADO_PENDIENTE).length;
+    document.getElementById('kpi-procesando').textContent = filas.filter((fila) => ESTADOS_EN_PROCESO.includes(fila.estado)).length;
 
     // Tiempo promedio = entregado_at − fecha de creación (requiere la columna entregado_at)
     const tiempos = filas
@@ -653,7 +667,10 @@ function diasParaVencer(fila) {
 // Garantía: usa fecha_vencimiento (la calcula la BD al asignar la clave); si no existe, cuenta desde la entrega
 function garantia(fila) {
     const dias = Number(leerCampo(fila, 'garantiaDias', GARANTIA_DIAS)) || GARANTIA_DIAS;
-    if (esPendiente(fila) && !leerCampo(fila, 'vencimiento', null)) {
+    if (['FALLIDA', 'CANCELADA'].includes(fila.estado)) {
+        return { texto: 'Sin garantía (compra no entregada)', clases: 'text-neutral-500 ring-white/10 bg-white/[0.03]', icono: 'fa-shield' };
+    }
+    if (!esEntregado(fila) && !leerCampo(fila, 'vencimiento', null)) {
         return { texto: `Garantía ${dias} días · se activa al asignar la cuenta`, clases: 'text-neutral-400 ring-white/10 bg-white/[0.03]', icono: 'fa-shield' };
     }
     let restantes = diasParaVencer(fila);
@@ -683,6 +700,7 @@ function crearTarjeta(fila) {
 
     tarjeta.querySelector('[data-accion="marcar"]')?.addEventListener('click', (e) => marcarComoPedido(String(p.id), e.currentTarget, p.ref));
     tarjeta.querySelector('[data-accion="pago"]')?.addEventListener('click', () => abrirPago(String(p.id)));
+    tarjeta.querySelector('[data-accion="entregar"]')?.addEventListener('click', (e) => marcarComoEntregado(String(p.id), e.currentTarget, p.ref));
     tarjeta.querySelector('[data-accion="copiar"]').addEventListener('click', () => copiarTexto(mensajeProveedor(p), 'Pedido copiado para el proveedor'));
     tarjeta.querySelector('[data-accion="resumen"]').addEventListener('click', () => copiarTexto(resumenChat(p), 'Resumen copiado para chat'));
     tarjeta.querySelector('[data-accion="qr"]').addEventListener('click', () => abrirQR(p));
@@ -798,6 +816,11 @@ function tarjetaPedido(fila) {
                 class="btn-cyber ancho relative flex items-center justify-center gap-2 min-h-[52px] rounded-2xl bg-dcRed hover:bg-dcRedDark text-xs font-black uppercase tracking-wider text-white shadow-lg shadow-red-600/25 disabled:opacity-70 disabled:cursor-wait">
                 <i class="fa-solid fa-truck-fast text-sm"></i> Marcar como Pedido
             </button>` : ''}
+            ${ESTADOS_POR_ENTREGAR.includes(fila.estado) ? `
+            <button type="button" data-accion="entregar"
+                class="btn-cyber verde ancho relative flex items-center justify-center gap-2 min-h-[52px] rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-xs font-black uppercase tracking-wider text-white shadow-lg shadow-emerald-600/25 disabled:opacity-70 disabled:cursor-wait">
+                <i class="fa-solid fa-box-open text-sm"></i> Marcar como entregado
+            </button>` : ''}
         </article>`;
 }
 
@@ -824,8 +847,26 @@ function badgeEstado(estado) {
 
 /* ==================== ACCIONES ==================== */
 
+// ESPERANDO_PROVEEDOR → PEDIDO_REALIZADO
+function marcarComoPedido(id, btn, ref = id) {
+    return avanzarEstado(id, btn, ref, {
+        desde: [ESTADO_PENDIENTE],
+        hacia: 'PEDIDO_REALIZADO',
+        aviso: `Pedido #${ref} enviado al proveedor.`,
+    });
+}
+
+// PEDIDO_REALIZADO / RECIBIDA → ENTREGADO (registra la hora de entrega: garantía, KPI y posventa)
+function marcarComoEntregado(id, btn, ref = id) {
+    return avanzarEstado(id, btn, ref, {
+        desde: ESTADOS_POR_ENTREGAR,
+        hacia: 'ENTREGADO',
+        aviso: `Pedido #${ref} entregado al cliente.`,
+    });
+}
+
 // id = clave de compras_proveedor (para el UPDATE); ref = pedido_id visible en los avisos
-async function marcarComoPedido(id, btn, ref = id) {
+async function avanzarEstado(id, btn, ref, { desde, hacia, aviso }) {
     const tarjeta = btn.closest('article');
     const contenidoOriginal = btn.innerHTML;
     const filaActual = pedidos.get(String(id));
@@ -835,9 +876,11 @@ async function marcarComoPedido(id, btn, ref = id) {
     btn.disabled = true;
     btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-sm"></i> Procesando...';
 
-    const cambios = { estado: 'PEDIDO_REALIZADO' };
-    // Registrar la hora de entrega si la tabla tiene la columna (alimenta el KPI de tiempo promedio)
-    if (filaActual?._prueba || tieneColumnaEntregado()) cambios.entregado_at = new Date().toISOString();
+    const cambios = { estado: hacia };
+    // La hora de entrega solo se registra cuando el CLIENTE recibe (alimenta KPI, garantía y posventa)
+    if (ESTADOS_ENTREGADOS.includes(hacia) && (filaActual?._prueba || tieneColumnaEntregado())) {
+        cambios.entregado_at = new Date().toISOString();
+    }
 
     let filaNueva;
     if (filaActual?._prueba) {
@@ -848,14 +891,14 @@ async function marcarComoPedido(id, btn, ref = id) {
             .from('compras_proveedor')
             .update(cambios)
             .eq('id', id)
-            .eq('estado', ESTADO_PENDIENTE) // solo si sigue pendiente
+            .in('estado', desde) // solo si sigue en el estado esperado
             .select('*');
 
         // Supabase no da error si RLS bloquea el update: devuelve 0 filas. Por eso se revisa data.length.
         if (error || !data || data.length === 0) {
             console.error(
-                `Error al marcar el pedido #${ref} como PEDIDO_REALIZADO:`,
-                error ?? 'No se actualizó ninguna fila (el id no existe, ya no está pendiente, o RLS bloqueó el UPDATE).'
+                `Error al pasar el pedido #${ref} a ${hacia}:`,
+                error ?? 'No se actualizó ninguna fila (el id no existe, cambió de estado, o RLS bloqueó el UPDATE).'
             );
             mostrarToast(`No se pudo actualizar el pedido #${ref}. Revisa la consola.`, 'error', 5000);
             Sonidos.error();
@@ -870,13 +913,13 @@ async function marcarComoPedido(id, btn, ref = id) {
     pedidos.set(String(id), filaNueva);
     pintarTabs();
 
-    // Confirmación: badge verde, botón "Listo"
-    tarjeta.querySelector('.badge-estado').innerHTML = badgeEstado('PEDIDO_REALIZADO');
+    // Confirmación: badge del nuevo estado, botón "Listo"
+    tarjeta.querySelector('.badge-estado').innerHTML = badgeEstado(hacia);
     tarjeta.classList.remove('glow-activo');
     tarjeta.classList.replace('ring-white/10', 'ring-emerald-500/50');
     btn.innerHTML = '<i class="fa-solid fa-check text-sm"></i> Listo';
     btn.classList.replace('bg-dcRed', 'bg-emerald-600');
-    mostrarToast(`Pedido #${ref} marcado como realizado.`, 'ok');
+    mostrarToast(aviso, 'ok');
     Sonidos.completar();
     navigator.vibrate?.(20);
 
@@ -1323,7 +1366,8 @@ function momentoEntrega(fila) {
 
 function colasFidelizacion(filas) {
     const ahora = Date.now();
-    const candidatas = filas.filter((fila) => !fila._prueba && !esPendiente(fila) && PlantillasWA.normalizarNumero(fila.cliente_whatsapp));
+    // Solo compras entregadas (nunca fallidas, canceladas o en curso)
+    const candidatas = filas.filter((fila) => !fila._prueba && esEntregado(fila) && PlantillasWA.normalizarNumero(fila.cliente_whatsapp));
 
     return {
         satisfaccion: candidatas.filter((fila) => {

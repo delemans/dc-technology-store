@@ -23,11 +23,14 @@ const ESTADOS = {
   ESPERANDO_PROVEEDOR: { ...LED.amarillo, texto: 'Procesando licencia', detalle: 'Recibimos tu pago y estamos gestionando tu servicio con el proveedor.' },
   PEDIDO_REALIZADO:    { ...LED.amarillo, texto: 'Procesando licencia', detalle: 'El proveedor ya tiene tu pedido. Pronto recibirás tus accesos.' },
   ENTREGADO:           { ...LED.verde,    texto: 'Listo para usar',     detalle: 'Tu servicio fue entregado y está activo. Si tienes fallas, contacta a soporte.' },
+  RECIBIDA:            { ...LED.amarillo, texto: 'Preparando tu entrega', detalle: 'Ya recibimos tu servicio del proveedor y lo estamos verificando para enviártelo.' },
+  FALLIDA:             { ...LED.rojo,     texto: 'Soporte requerido',   detalle: 'Hubo un problema con tu pedido. Escríbenos por WhatsApp y lo resolvemos de inmediato.' },
+  CANCELADA:           { ...LED.rojo,     texto: 'Pedido cancelado',    detalle: 'Este pedido fue cancelado. Si crees que es un error, escríbenos por WhatsApp.' },
 };
 const ESTADO_DESCONOCIDO = { ...LED.amarillo, texto: 'En revisión', detalle: 'Tu pedido está registrado. Escríbenos si necesitas más información.' };
 const ESTADO_LISTO = ESTADOS.ENTREGADO;
 // Estados finales: ya no hace falta seguir consultando
-const ESTADOS_FINALES = ['ENTREGADO', 'ENTREGADO_INMEDIATO'];
+const ESTADOS_FINALES = ['ENTREGADO', 'ENTREGADO_INMEDIATO', 'FALLIDA', 'CANCELADA'];
 
 // Credenciales que la consulta podría devolver (solo se muestran si vienen en la respuesta)
 const CAMPOS_CREDENCIALES = [
@@ -126,7 +129,8 @@ function mostrarPedido(id, data, { actualizado = false } = {}) {
 /* ==================== RESEÑA VERIFICADA ==================== */
 
 const formResena = document.getElementById('form-resena');
-const ESTADOS_RESENABLES = ['PEDIDO_REALIZADO', 'ENTREGADO', 'ENTREGADO_INMEDIATO'];
+// Solo compras que el cliente ya recibió (igual que dejar_resena en supabase/wo-012.sql)
+const ESTADOS_RESENABLES = ['ENTREGADO', 'ENTREGADO_INMEDIATO'];
 let resenaCompraId = null;
 let resenaCalificacion = 0;
 

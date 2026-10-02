@@ -1,6 +1,7 @@
 -- =====================================================================
 -- WO-012 · Cupones, reseñas verificadas y estadísticas públicas reales
--- Requiere haber ejecutado antes supabase/wo-011.sql.
+-- Requiere: supabase/wo-011.sql aplicado y el enum public.estado_compra con
+-- PENDIENTE_PAGO, PEDIDO_REALIZADO, RECIBIDA, ENTREGADO, ENTREGADO_INMEDIATO, FALLIDA, CANCELADA.
 -- Ejecutar completo en Supabase → SQL Editor. Es idempotente.
 -- =====================================================================
 
@@ -153,19 +154,15 @@ revoke all on function public.canjear_cupon(text, text) from public;
 grant execute on function public.canjear_cupon(text, text) to authenticated;
 
 -- 4) RESEÑAS VERIFICADAS ------------------------------------------------
--- La tabla 'resenas' ya existe; se añaden (si faltan) las columnas que usa la tienda.
+-- Se usa la tabla 'resenas' existente (id, producto_id, cliente_nombre, calificacion, comentario,
+-- verificado, created_at). Solo se añade compra_id: vincula la reseña con UNA compra entregada,
+-- permite verificarla y evita reseñas duplicadas. El nombre del producto se obtiene de la compra.
 alter table public.resenas
-    add column if not exists calificacion   integer,
-    add column if not exists comentario     text,
-    add column if not exists nombre_publico text,
-    add column if not exists producto       text,
-    add column if not exists compra_id      text,
-    add column if not exists visible        boolean not null default true,
-    add column if not exists created_at     timestamptz not null default now();
+    add column if not exists compra_id text;
 
 create unique index if not exists resenas_una_por_compra on public.resenas (compra_id) where compra_id is not null;
 
--- Solo se puede reseñar una compra ENTREGADA, probando que eres el cliente
+-- Solo se puede reseñar una compra ENTREGADA al cliente, probando que eres el cliente
 -- (ID de compra + últimos 4 dígitos del WhatsApp registrado en la compra).
 create or replace function public.dejar_resena(
     p_compra_id text, p_whatsapp_final text, p_calificacion integer, p_comentario text, p_nombre text
@@ -193,7 +190,7 @@ begin
         return query select false, 'No pudimos verificar tu compra. Revisa el ID y los últimos 4 dígitos de tu WhatsApp.';
         return;
     end if;
-    if v_compra.estado not in ('PEDIDO_REALIZADO', 'ENTREGADO', 'ENTREGADO_INMEDIATO') then
+    if v_compra.estado::text not in ('ENTREGADO', 'ENTREGADO_INMEDIATO') then
         return query select false, 'Podrás calificar cuando tu pedido haya sido entregado.';
         return;
     end if;
@@ -202,12 +199,13 @@ begin
         return;
     end if;
 
-    insert into public.resenas (calificacion, comentario, nombre_publico, producto, compra_id)
+    -- producto_id se deja vacío: el producto se lee de la compra (ver resenas_publicas)
+    insert into public.resenas (calificacion, comentario, cliente_nombre, verificado, compra_id)
     values (
         p_calificacion,
         nullif(btrim(p_comentario), ''),
         coalesce(nullif(btrim(p_nombre), ''), 'Cliente verificado'),
-        coalesce(nullif(v_compra.referencia_externa::text, ''), v_compra.variante_id::text),
+        true,
         p_compra_id
     );
     return query select true, '¡Gracias! Tu reseña fue publicada como compra verificada.';
@@ -217,7 +215,7 @@ $$;
 revoke all on function public.dejar_resena(text, text, integer, text, text) from public;
 grant execute on function public.dejar_resena(text, text, integer, text, text) to anon, authenticated;
 
--- Lectura pública: solo reseñas visibles y verificadas, sin datos del cliente
+-- Lectura pública: solo reseñas verificadas, sin datos del cliente (ni WhatsApp ni compra)
 create or replace function public.resenas_publicas(p_limite integer default 30)
 returns table (calificacion integer, comentario text, nombre_publico text, producto text, created_at timestamptz)
 language sql
@@ -225,9 +223,14 @@ stable
 security definer
 set search_path = ''
 as $$
-    select r.calificacion, r.comentario, r.nombre_publico, r.producto, r.created_at
+    select r.calificacion::integer,
+           r.comentario::text,
+           coalesce(nullif(r.cliente_nombre::text, ''), 'Cliente verificado'),
+           coalesce(nullif(c.referencia_externa::text, ''), c.variante_id::text),
+           r.created_at
     from public.resenas r
-    where r.visible and r.compra_id is not null and r.calificacion between 1 and 5
+    left join public.compras_proveedor c on c.id::text = r.compra_id
+    where r.verificado is true and r.calificacion between 1 and 5
     order by r.created_at desc
     limit least(greatest(coalesce(p_limite, 30), 1), 100);
 $$;
@@ -236,6 +239,8 @@ revoke all on function public.resenas_publicas(integer) from public;
 grant execute on function public.resenas_publicas(integer) to anon, authenticated;
 
 -- 5) ESTADÍSTICAS PÚBLICAS REALES ----------------------------------------
+-- "Venta completada" = el cliente recibió su producto (ENTREGADO / ENTREGADO_INMEDIATO).
+-- PEDIDO_REALIZADO y RECIBIDA aún están en curso; FALLIDA y CANCELADA nunca cuentan.
 create or replace function public.estadisticas_publicas()
 returns table (ventas_completadas bigint, clientes_unicos bigint, resenas bigint, promedio numeric)
 language sql
@@ -245,20 +250,12 @@ set search_path = ''
 as $$
     select
         (select count(*) from public.compras_proveedor
-          where estado in ('PEDIDO_REALIZADO', 'ENTREGADO', 'ENTREGADO_INMEDIATO')),
+          where estado::text in ('ENTREGADO', 'ENTREGADO_INMEDIATO')),
         (select count(distinct cliente_whatsapp) from public.compras_proveedor
-          where cliente_whatsapp is not null and estado in ('PEDIDO_REALIZADO', 'ENTREGADO', 'ENTREGADO_INMEDIATO')),
-        (select count(*) from public.resenas where visible and compra_id is not null and calificacion between 1 and 5),
-        (select round(avg(calificacion)::numeric, 1) from public.resenas where visible and compra_id is not null and calificacion between 1 and 5);
+          where cliente_whatsapp is not null and estado::text in ('ENTREGADO', 'ENTREGADO_INMEDIATO')),
+        (select count(*) from public.resenas where verificado is true and calificacion between 1 and 5),
+        (select round(avg(calificacion)::numeric, 1) from public.resenas where verificado is true and calificacion between 1 and 5);
 $$;
 
 revoke all on function public.estadisticas_publicas() from public;
 grant execute on function public.estadisticas_publicas() to anon, authenticated;
-
--- 6) COMPROBACIONES (solo lectura) ---------------------------------------
--- Columnas reales de 'resenas' y de 'pagos' (para revisar si hay columnas obligatorias
--- que dejar_resena no llene, y para decidir cómo unificar 'pagos').
-select table_name, column_name, data_type, is_nullable, column_default
-from information_schema.columns
-where table_schema = 'public' and table_name in ('resenas', 'pagos')
-order by table_name, ordinal_position;
