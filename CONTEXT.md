@@ -5,6 +5,7 @@ Somos un e-commerce de reventa de servicios digitales (streaming, pines, licenci
 
 ## Arquitectura Actual
 - **Frontend:** HTML + JS Vanilla + Tailwind (index.html, app.js, admin.html, admin.js).
+- **Estilos:** Tailwind COMPILADO (sin CDN). Si agregas o cambias clases en HTML/JS, ejecuta `npm run css` y sube `estilos/tailwind.css`; si no, esas clases no tendrán estilo en producción. Tras cambiar `productos.json`, ejecuta `npm run seo` (páginas p/, sitemap). `npm run compilar` hace ambas.
 - **Backend:** Supabase (PostgreSQL).
 - **Orquestación (En desarrollo):** n8n self-hosted + Evolution API para WhatsApp.
 

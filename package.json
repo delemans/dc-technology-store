@@ -1,0 +1,14 @@
+{
+  "name": "dc-technology-store",
+  "private": true,
+  "description": "Herramientas de compilación de DC Technology (el sitio publicado no usa Node).",
+  "scripts": {
+    "css": "tailwindcss -c tailwind.config.js -i estilos/entrada.css -o estilos/tailwind.css --minify",
+    "css:vigilar": "tailwindcss -c tailwind.config.js -i estilos/entrada.css -o estilos/tailwind.css --watch",
+    "seo": "node herramientas/generar_seo.js",
+    "compilar": "npm run css && npm run seo"
+  },
+  "devDependencies": {
+    "tailwindcss": "3.4.19"
+  }
+}

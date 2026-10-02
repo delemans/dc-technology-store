@@ -5,3 +5,6 @@ n8n/respaldos/
 # Secretos locales: nunca al repositorio
 .env
 herramientas/.n8n-credenciales.json
+
+# Dependencias de compilación (se instalan con npm install)
+node_modules/

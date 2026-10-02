@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <!-- Seguridad: solo se ejecuta JavaScript propio y de CDNs fijados con hash (ningún script en línea) -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.tailwindcss.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src 'self' data: https://cdnjs.cloudflare.com https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://vyqcizwfmjlflncdwzve.supabase.co wss://vyqcizwfmjlflncdwzve.supabase.co https://cdn.jsdelivr.net; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src 'self' data: https://cdnjs.cloudflare.com https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://vyqcizwfmjlflncdwzve.supabase.co wss://vyqcizwfmjlflncdwzve.supabase.co https://cdn.jsdelivr.net; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <!-- Necesario para que carguen las imágenes del catálogo alojadas en Tiendanube -->
     <meta name="referrer" content="no-referrer">
@@ -53,10 +53,11 @@
     }
     </script>
 
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Estilos compilados con Tailwind (npm run css): sin CDN de desarrollo -->
+    <link rel="stylesheet" href="estilos/tailwind.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" integrity="sha384-iw3OoTErCYJJB9mCa8LNS2hbsQ7M3C0EpIsO/H5+EGAkPGc6rk+V8i04oW/K5xq0" crossorigin="anonymous" referrerpolicy="no-referrer">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;700;800;900&display=swap" rel="stylesheet">
-    <!-- Tema claro/oscuro + colores de Tailwind (antes de pintar, sin destello) -->
+    <!-- Tema claro/oscuro (antes de pintar, sin destello) -->
     <script src="tema.js"></script>
     <link rel="stylesheet" href="tema.css">
     <style>
