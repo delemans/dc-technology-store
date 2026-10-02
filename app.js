@@ -83,6 +83,107 @@ const formatearPrecio = (valor) => {
 const imagenRespaldo = (nombre) =>
     `https://ui-avatars.com/api/?name=${encodeURIComponent(String(nombre).slice(0, 2))}&background=181B26&color=FF0033&font-size=0.4&bold=true`;
 
+/* ---------- Fondos blancos → transparentes ----------
+   Muchas fotos (smartwatches, audífonos) traen un cuadro blanco que rompe el vidrio oscuro.
+   mix-blend-mode: multiply sobre #121826 borraría el blanco pero oscurecería todo el producto,
+   así que se recorta de verdad: se rellena desde los bordes solo el blanco CONECTADO al borde
+   (el blanco dentro del producto se conserva) y se suaviza el contorno. Requiere CORS (Tiendanube
+   y Unsplash lo permiten); si algo falla, se muestra la imagen original. */
+const fondosLimpios = new Map(); // src → Promise<dataURL | null>
+
+function quitarFondoBlanco(im) {
+    const escala = Math.min(1, 560 / Math.max(im.naturalWidth, im.naturalHeight));
+    const w = Math.max(1, Math.round(im.naturalWidth * escala));
+    const h = Math.max(1, Math.round(im.naturalHeight * escala));
+    const lienzo = document.createElement('canvas');
+    lienzo.width = w;
+    lienzo.height = h;
+    const ctx = lienzo.getContext('2d', { willReadFrequently: true });
+    ctx.drawImage(im, 0, 0, w, h);
+    const datos = ctx.getImageData(0, 0, w, h);
+    const px = datos.data;
+    const esBlanco = (p) => {
+        const i = p * 4;
+        const min = Math.min(px[i], px[i + 1], px[i + 2]);
+        return px[i + 3] > 20 && min >= 228 && Math.max(px[i], px[i + 1], px[i + 2]) - min <= 20;
+    };
+
+    // 1) Solo si el borde es mayoritariamente blanco (logos transparentes o de color no se tocan)
+    const borde = [];
+    for (let x = 0; x < w; x++) borde.push(x, (h - 1) * w + x);
+    for (let y = 1; y < h - 1; y++) borde.push(y * w, y * w + w - 1);
+    const blancos = borde.filter(esBlanco).length;
+    if (blancos / borde.length < 0.6) return null;
+
+    // 2) Relleno por inundación desde el borde
+    const visto = new Uint8Array(w * h);
+    const cola = new Int32Array(w * h);
+    let ini = 0;
+    let fin = 0;
+    borde.forEach((p) => { if (!visto[p] && esBlanco(p)) { visto[p] = 1; cola[fin++] = p; } });
+    while (ini < fin) {
+        const p = cola[ini++];
+        px[p * 4 + 3] = 0;
+        const x = p % w;
+        const vecinos = [x > 0 ? p - 1 : -1, x < w - 1 ? p + 1 : -1, p - w, p + w];
+        for (const v of vecinos) {
+            if (v >= 0 && v < w * h && !visto[v] && esBlanco(v)) { visto[v] = 1; cola[fin++] = v; }
+        }
+    }
+
+    // 3) Contorno suave: los píxeles claros pegados al fondo quedan semitransparentes (sin halo blanco)
+    for (let p = 0; p < w * h; p++) {
+        if (visto[p]) continue;
+        const x = p % w;
+        if (!((x > 0 && visto[p - 1]) || (x < w - 1 && visto[p + 1]) || (p >= w && visto[p - w]) || (p + w < w * h && visto[p + w]))) continue;
+        const i = p * 4;
+        const min = Math.min(px[i], px[i + 1], px[i + 2]);
+        if (min > 170) px[i + 3] = Math.min(px[i + 3], Math.round(255 * (255 - min) / 85));
+    }
+    ctx.putImageData(datos, 0, 0);
+    return lienzo.toDataURL('image/webp', 0.92); // Safari sin WebP → devuelve PNG automáticamente
+}
+
+function fondoLimpio(src) {
+    if (!fondosLimpios.has(src)) {
+        fondosLimpios.set(src, new Promise((resolve) => {
+            const im = new Image();
+            im.crossOrigin = 'anonymous';
+            im.decoding = 'async';
+            im.onload = () => {
+                // Fuera del hilo de pintura inmediato para no trabar el scroll
+                (window.requestIdleCallback ?? ((fn) => setTimeout(fn, 0)))(() => {
+                    try { resolve(quitarFondoBlanco(im)); } catch { resolve(null); } // canvas "contaminado" (sin CORS)
+                }, { timeout: 600 });
+            };
+            im.onerror = () => resolve(null);
+            im.src = src;
+        }));
+    }
+    return fondosLimpios.get(src);
+}
+
+// La imagen queda oculta hasta tener su versión limpia (o 1,5 s como máximo): sin destello del cuadro blanco
+function prepararImagen(img, src) {
+    if (!src || src.startsWith('data:') || src.includes('ui-avatars.com')) return;
+    img.classList.add('limpiando');
+    const mostrar = (limpia) => {
+        if (!img.classList.contains('limpiando')) return;
+        if (limpia) { img.src = limpia; img.classList.add('sin-fondo'); }
+        img.classList.remove('limpiando');
+    };
+    let tope = null;
+    // El tope cuenta desde que la imagen cargó (con lazy puede tardar en empezar)
+    const empezar = () => {
+        tope = setTimeout(() => mostrar(null), 1500);
+        fondoLimpio(src).then((limpia) => { clearTimeout(tope); mostrar(limpia); });
+    };
+    // Con loading="lazy" se espera a que el navegador decida cargarla (la tarjeta ya está cerca)
+    if (img.complete && img.naturalWidth) empezar();
+    else img.addEventListener('load', empezar, { once: true });
+    img.addEventListener('error', () => { clearTimeout(tope); img.classList.remove('limpiando'); }, { once: true });
+}
+
 // Auto-categorizador robusto (para productos sin 'tipo' o con tipo 'digital')
 function clasificarCategoria(prod) {
     if (prod.tipo && prod.tipo !== 'digital') return prod.tipo;
@@ -126,7 +227,7 @@ function insignias(prod) {
 }
 
 const htmlInsignia = ({ icono, texto, clase }) =>
-    `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full ring-1 text-[10px] font-bold ${clase}"><i class="fa-solid ${icono}"></i>${escaparHTML(texto)}</span>`;
+    `<span class="insignia inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full ring-1 text-[10px] font-bold ${clase}"><i class="fa-solid ${icono}"></i>${escaparHTML(texto)}</span>`;
 
 /* ==================== CATÁLOGO ==================== */
 
@@ -215,12 +316,26 @@ function renderizar() {
             </div>`;
         return;
     }
-    grid.replaceChildren(...lista.map(crearTarjeta));
-    grid.querySelectorAll('article').forEach((t, i) => {
+    // Sin cambios en la lista (p. ej. un espacio extra en la búsqueda): no se toca el DOM
+    const ids = lista.map((p) => p.id).join('|');
+    if (ids === idsPintados && grid.querySelector('article')) return;
+    const antes = new Set(idsPintados.split('|'));
+    idsPintados = ids;
+
+    // Las tarjetas se reutilizan: al filtrar no se recrean ni recargan imágenes (sin parpadeo)
+    const tarjetas = lista.map((p) => {
+        if (!tarjetasCache.has(p.id)) tarjetasCache.set(p.id, crearTarjeta(p));
+        return tarjetasCache.get(p.id);
+    });
+    grid.replaceChildren(...tarjetas);
+    // Solo entran animadas las que no estaban visibles antes
+    tarjetas.filter((t, i) => !antes.has(lista[i].id)).forEach((t, i) => {
         t.animate([{ opacity: 0, transform: 'translateY(14px)' }, { opacity: 1, transform: 'none' }],
-            { duration: 380, delay: Math.min(i, 10) * 40, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'backwards' });
+            { duration: 340, delay: Math.min(i, 10) * 35, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'backwards' });
     });
 }
+const tarjetasCache = new Map(); // id → <article>
+let idsPintados = '';
 
 function crearTarjeta(prod) {
     const base = prod.variantes?.[0] ?? { precio: 0 };
@@ -240,7 +355,7 @@ function crearTarjeta(prod) {
     tarjeta.setAttribute('aria-label', `${prod.nombre}, ${cotizacion ? 'a cotizar' : `desde ${formatearPrecio(desde)}`}`);
     tarjeta.innerHTML = `
         <div class="brillo pointer-events-none absolute inset-0"></div>
-        ${descuento ? `<span class="absolute top-3 left-3 z-10 px-2.5 py-1 rounded-full bg-gradient-to-br from-dcNeon to-dcNeonDark text-[10px] font-black shadow-[0_0_14px_rgba(255,42,95,.6)]">-${descuento}%</span>` : ''}
+        ${descuento ? `<span class="insignia-desc absolute top-3 left-3 z-10 px-2.5 py-1 rounded-full bg-gradient-to-br from-dcNeon to-dcNeonDark text-[10px] font-black shadow-[0_0_14px_rgba(255,42,95,.6)]">-${descuento}%</span>` : ''}
         <div class="marco-img ${esLogo ? 'marco-logo' : 'marco-foto'} mb-4">
             <img src="${escaparHTML(prod.imagen || imagenRespaldo(prod.nombre))}" alt="${escaparHTML(prod.nombre)}" loading="lazy" decoding="async"
                 class="${esLogo ? '' : 'rounded-xl'}">
@@ -260,6 +375,7 @@ function crearTarjeta(prod) {
         </div>`;
     const img = tarjeta.querySelector('img');
     img.addEventListener('error', () => { img.src = imagenRespaldo(prod.nombre); }, { once: true });
+    prepararImagen(img, prod.imagen);
 
     tarjeta.addEventListener('click', () => abrirProducto(prod.id));
     tarjeta.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); abrirProducto(prod.id); } });
@@ -334,9 +450,10 @@ function pintarGaleria(prod) {
     galeria.replaceChildren(...imagenes.map((src, i) => {
         const caja = document.createElement('div');
         caja.className = 'zoom-caja snap-center shrink-0 w-full h-64 sm:h-80 grid place-items-center overflow-hidden rounded-2xl bg-gradient-to-b from-white/[0.04] to-transparent';
-        caja.innerHTML = `<img src="${escaparHTML(src)}" alt="${escaparHTML(prod.nombre)} — imagen ${i + 1}" class="w-full h-full object-contain select-none" draggable="false">`;
+        caja.innerHTML = `<img src="${escaparHTML(src)}" alt="${escaparHTML(prod.nombre)} — imagen ${i + 1}" class="w-full h-full object-contain select-none transition-opacity duration-300" draggable="false">`;
         const img = caja.querySelector('img');
         img.addEventListener('error', () => { img.src = imagenRespaldo(prod.nombre); }, { once: true });
+        prepararImagen(img, src);
         // Zoom: sigue el cursor en escritorio; toque para activar/desactivar en móvil
         caja.addEventListener('pointermove', (e) => {
             const r = caja.getBoundingClientRect();
@@ -703,10 +820,28 @@ function abrirDesdeEnlace() {
 
 /* ==================== MODALES ==================== */
 
+function bloquearScroll(bloquear) {
+    if (bloquear) {
+        // Se compensa el ancho de la barra de scroll: el contenido de fondo no "salta"
+        const barra = window.innerWidth - document.documentElement.clientWidth;
+        if (barra > 0) document.body.style.paddingRight = `${barra}px`;
+        document.body.style.overflow = 'hidden';
+    } else {
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
+    }
+}
+
 function abrirModal(modal) {
+    // Si se estaba cerrando (doble clic rápido), se cancela el cierre y se reabre limpio
+    if (modal.dataset.cerrando) {
+        modal.getAnimations({ subtree: true }).forEach((a) => a.cancel());
+        delete modal.dataset.cerrando;
+        modal.hidden = true;
+    }
     if (!modal.hidden) return;
     modal.hidden = false;
-    document.body.style.overflow = 'hidden';
+    bloquearScroll(true);
     modal.querySelector('.modal-fondo').animate([{ opacity: 0 }, { opacity: 1 }], { duration: 250 });
     modal.querySelector('.modal-panel').animate(
         [{ opacity: 0, transform: 'translateY(40px) scale(.98)' }, { opacity: 1, transform: 'none' }],
@@ -716,15 +851,19 @@ function abrirModal(modal) {
 async function cerrarModal(modal) {
     if (!modal || modal.hidden || modal.dataset.cerrando) return;
     modal.dataset.cerrando = '1';
-    await Promise.all([
-        modal.querySelector('.modal-fondo').animate([{ opacity: 1 }, { opacity: 0 }], { duration: 200, fill: 'forwards' }).finished,
-        modal.querySelector('.modal-panel').animate([{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'translateY(40px) scale(.98)' }],
-            { duration: 220, easing: 'ease-in', fill: 'forwards' }).finished,
-    ]);
+    try {
+        await Promise.all([
+            modal.querySelector('.modal-fondo').animate([{ opacity: 1 }, { opacity: 0 }], { duration: 200, fill: 'forwards' }).finished,
+            modal.querySelector('.modal-panel').animate([{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'translateY(40px) scale(.98)' }],
+                { duration: 220, easing: 'ease-in', fill: 'forwards' }).finished,
+        ]);
+    } catch {
+        return; // animación cancelada: el modal se reabrió mientras se cerraba
+    }
     modal.hidden = true;
     delete modal.dataset.cerrando;
     modal.getAnimations({ subtree: true }).forEach((a) => a.cancel());
-    if (!document.querySelector('[role="dialog"]:not([hidden])')) document.body.style.overflow = '';
+    if (!document.querySelector('[role="dialog"]:not([hidden])')) bloquearScroll(false);
     if (modal.id === 'product-modal') {
         try { history.replaceState(null, '', location.pathname); } catch { /* sin historial */ }
     }

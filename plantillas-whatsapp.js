@@ -26,6 +26,35 @@
         return `https://wa.me/${destino}?text=${encodeURIComponent(texto)}`;
     }
 
+    // Dato de cliente/BD seguro para WhatsApp: sin * _ ~ ` (no rompe la negrita ni la cursiva),
+    // espacios colapsados y largo acotado
+    const limpiarVariable = (valor, max = 120) => String(valor ?? '')
+        .replace(/[*_~`]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .slice(0, max);
+
+    // Rellena {marcadores}. Si un marcador queda vacío se omite SU línea completa
+    // (p. ej. "• Cupón: {cupon}" cuando no hay cupón) y se compactan los saltos de línea.
+    // n8n usa esta misma lógica (ver n8n/notificaciones-posventa.md).
+    function rellenar(plantilla, variables = {}) {
+        return String(plantilla ?? '')
+            .split('\n')
+            .map((linea) => {
+                let incompleta = false;
+                const texto = linea.replace(/\{(\w+)\}/g, (_, clave) => {
+                    const valor = limpiarVariable(variables[clave]);
+                    if (!valor) incompleta = true;
+                    return valor;
+                });
+                return incompleta ? null : texto.replace(/[ \t]+$/, '');
+            })
+            .filter((linea) => linea !== null)
+            .join('\n')
+            .replace(/\n{3,}/g, '\n\n')
+            .trim();
+    }
+
     const precioCOP = (valor) => Number.isFinite(Number(valor))
         ? Number(valor).toLocaleString('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 })
         : String(valor ?? '');
@@ -37,6 +66,8 @@
         ENTREGA_MAX_MIN,
         HORARIO,
         normalizarNumero,
+        limpiarVariable,
+        rellenar,
         enlace,
         precioCOP,
 
@@ -49,8 +80,8 @@
 
         comprarAhora: ({ producto, variante, precio }) => [
             'Hola DC Technology, quiero comprar:',
-            `• Producto: ${producto}`,
-            variante ? `• Opción: ${variante}` : null,
+            `• Producto: ${limpiarVariable(producto)}`,
+            variante ? `• Opción: ${limpiarVariable(variante)}` : null,
             precio !== undefined && precio !== '' ? `• Valor: ${precioCOP(precio)}` : null,
             '¿Me indican los datos para realizar el pago?',
         ].filter(Boolean).join('\n'),
@@ -59,12 +90,12 @@
         // Pedido desde la tienda con cantidad y cupón. El descuento se confirma al validar el pago.
         pedidoTienda: ({ producto, variante, cantidad = 1, precioUnitario, cupon, porcentaje, total }) => [
             'Hola DC Technology, quiero comprar:',
-            `• Producto: ${producto}`,
-            variante ? `• Opción: ${variante}` : null,
+            `• Producto: ${limpiarVariable(producto)}`,
+            variante ? `• Opción: ${limpiarVariable(variante)}` : null,
             `• Cantidad: ${cantidad}`,
             precioUnitario !== undefined ? `• Precio unitario: ${precioCOP(precioUnitario)}` : null,
             cupon ? `• Cupón: ${cupon} (-${porcentaje}%)` : null,
-            total !== undefined ? `• Total${cupon ? ' con descuento' : ''}: ${precioCOP(total)}` : null,
+            total !== undefined ? `• Total a pagar: ${precioCOP(total)}` : null, // la línea del cupón ya indica el descuento
             'Acepté los términos de uso. ¿Me indican los datos para realizar el pago?',
         ].filter(Boolean).join('\n'),
 

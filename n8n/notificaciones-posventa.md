@@ -34,12 +34,21 @@ Los mensajes **nunca** llevan credenciales. Las cuentas y seriales los entrega u
 4. **Loop Over Items** (tamaño de lote **1**): un mensaje a la vez.
 5. **Code · Armar texto**:
    ```js
+   // Misma lógica que PlantillasWA.rellenar (plantillas-whatsapp.js): variables sin * _ ~ `,
+   // y si un {marcador} queda vacío se omite su línea entera.
+   const limpiar = (v) => String(v ?? '').replace(/[*_~`]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 120);
+   const rellenar = (plantilla, vars) => plantilla.split('\n').map((linea) => {
+       let incompleta = false;
+       const texto = linea.replace(/\{(\w+)\}/g, (_, k) => { const v = limpiar(vars[k]); if (!v) incompleta = true; return v; });
+       return incompleta ? null : texto.replace(/[ \t]+$/, '');
+   }).filter((l) => l !== null).join('\n').replace(/\n{3,}/g, '\n\n').trim();
+
    const kb = $('Plantillas').first().json;
    const n = $json;
-   const clave = kb.notificaciones.plantilla_por_tipo[n.tipo];
-   const plantilla = kb.plantillas[clave];
-   if (!plantilla) throw new Error(`Sin plantilla para ${n.tipo}`);
-   const texto = plantilla.replace(/\{(\w+)\}/g, (_, k) => String(n.variables?.[k] ?? ''));
+   const plantilla = kb.plantillas[kb.notificaciones.plantilla_por_tipo[n.tipo]];
+   if (!plantilla) throw new Error(`Sin plantilla para ${n.tipo}`);   // va a la salida de error → marcar_notificacion(p_ok=false)
+   const texto = rellenar(plantilla, n.variables ?? {});
+   if (texto.length < 20) throw new Error('Mensaje vacío o incompleto');
    return { id: n.id, numero: n.destino, texto };
    ```
 6. **HTTP Request · Enviar (Evolution API)**, con **On Error → Continue (using error output)**

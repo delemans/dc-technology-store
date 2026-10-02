@@ -1,5 +1,5 @@
 {
-  "version": "2026-10-02T15:44:07.759Z",
+  "version": "2026-10-02T16:44:51.043Z",
   "instrucciones_agente": [
     "Responde solo con información de este archivo; si no sabes algo, escala a un asesor (ver \"escalamiento\").",
     "No envíes entradas con \"pendiente_configurar\": true.",
@@ -289,7 +289,7 @@
       }
     ],
     "comprar_ahora": "Hola DC Technology, quiero comprar:\n• Producto: {producto}\n• Opción: {variante}\n• Valor: {precio}\n¿Me indican los datos para realizar el pago?",
-    "pedido_tienda": "Hola DC Technology, quiero comprar:\n• Producto: {producto}\n• Opción: {variante}\n• Cantidad: {cantidad}\n• Precio unitario: {precio_unitario}\n• Cupón: {cupon} (-{porcentaje}%)\n• Total con descuento: {total}\nAcepté los términos de uso. ¿Me indican los datos para realizar el pago?",
+    "pedido_tienda": "Hola DC Technology, quiero comprar:\n• Producto: {producto}\n• Opción: {variante}\n• Cantidad: {cantidad}\n• Precio unitario: {precio_unitario}\n• Cupón: {cupon} (-{porcentaje}%)\n• Total a pagar: {total}\nAcepté los términos de uso. ¿Me indican los datos para realizar el pago?",
     "agendar_servicio": "Hola DC Technology, quiero agendar un servicio:\n• Servicio: {servicio}\n• Opción: {opcion}\n• Fecha preferida: {fecha}\n• Franja: {franja}\n• Valor estimado: {estimado}\n• Detalle: {detalle}\n¿Me confirman disponibilidad?",
     "consultar_estado": "Hola, quiero consultar el estado de mi pedido #{pedido}.\nTambién puedo verlo aquí: https://dctecnology.xyz/portal.html?codigo={pedido}",
     "solicitar_soporte": "Hola, requiero soporte sobre mi pedido #{pedido} ({producto}).",

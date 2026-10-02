@@ -230,7 +230,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('btn-recargar-metodos').addEventListener('click', cargarMetodosPago);
     document.getElementById('btn-recargar-notif').addEventListener('click', cargarNotificaciones);
     document.getElementById('bot-buscar').addEventListener('input', pintarCatalogoBot);
-    document.getElementById('form-pago').addEventListener('submit', guardarPago);
+    document.getElementById('form-pago').addEventListener('submit', protegido(guardarPago, 'modal-pago'));
     document.querySelectorAll('[data-abrir-ajustes]').forEach((btn) => {
         btn.addEventListener('click', () => abrirModal(document.getElementById('modal-ajustes')));
     });
@@ -243,7 +243,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (e.key !== 'Escape') return;
         document.querySelectorAll('[role="dialog"]:not([hidden])').forEach(cerrarModal);
     });
-    document.getElementById('form-editar').addEventListener('submit', guardarEdicion);
+    document.getElementById('form-editar').addEventListener('submit', protegido(guardarEdicion, 'modal-editar'));
 
     // 8. Ojo de visibilidad para campos de contraseña / clave
     document.querySelectorAll('[data-ojo]').forEach((btn) => {
@@ -867,6 +867,35 @@ function badgeEstado(estado) {
 /* ==================== ACCIONES ==================== */
 
 // ESPERANDO_PROVEEDOR → PEDIDO_REALIZADO
+/* ==================== OPERACIONES EN CURSO (cierre defensivo) ==================== */
+
+let operacionesEnCurso = 0;
+
+// Envuelve un flujo: cuenta la operación, marca el modal como ocupado y libera todo aunque falle
+function protegido(fn, idModal = null) {
+    return async (...args) => {
+        const modal = idModal ? document.getElementById(idModal) : null;
+        if (modal?.dataset.ocupado) return; // doble envío (Enter + clic)
+        operacionesEnCurso += 1;
+        if (modal) modal.dataset.ocupado = '1';
+        try {
+            return await fn(...args);
+        } catch (error) {
+            console.error('Operación interrumpida:', error);
+            mostrarToast('Algo falló a mitad de la operación. Recarga y verifica el estado del pedido.', 'error', 7000);
+            Sonidos.error();
+        } finally {
+            operacionesEnCurso -= 1;
+            if (modal) delete modal.dataset.ocupado;
+        }
+    };
+}
+
+// Cerrar o recargar la pestaña con un guardado en vuelo deja el resultado sin confirmar
+window.addEventListener('beforeunload', (e) => {
+    if (operacionesEnCurso > 0) { e.preventDefault(); e.returnValue = ''; }
+});
+
 function marcarComoPedido(id, btn, ref = id) {
     return avanzarEstado(id, btn, ref, {
         desde: [ESTADO_PENDIENTE],
@@ -876,7 +905,34 @@ function marcarComoPedido(id, btn, ref = id) {
 }
 
 // PEDIDO_REALIZADO / RECIBIDA → ENTREGADO (registra la hora de entrega: garantía, KPI y posventa)
+const ESPERA_CONFIRMACION_MS = 4000;
+
 function marcarComoEntregado(id, btn, ref = id) {
+    const fila = pedidos.get(String(id));
+    // 1.er toque: pide confirmación (la entrega envía WhatsApp al cliente y activa la garantía)
+    if (!fila?._prueba && btn.dataset.confirmar !== '1') {
+        const avisos = [
+            !fila?.clave_serial && ['streaming', 'licencias', 'combos'].includes(categoriaDe(fila).id) ? 'sin cuenta asignada' : null,
+            !PlantillasWA.normalizarNumero(fila?.cliente_whatsapp) ? 'sin WhatsApp' : null,
+        ].filter(Boolean);
+        btn.dataset.confirmar = '1';
+        btn.dataset.original = btn.innerHTML;
+        btn.innerHTML = `<i class="fa-solid fa-circle-question text-sm"></i> ¿Confirmar entrega?${avisos.length ? ` <span class="text-[10px] font-bold normal-case opacity-90">(${avisos.join(' · ')})</span>` : ''}`;
+        btn.classList.add('ring-2', 'ring-amber-400');
+        clearTimeout(Number(btn.dataset.temporizador));
+        btn.dataset.temporizador = String(setTimeout(() => {
+            if (btn.dataset.confirmar !== '1') return;
+            delete btn.dataset.confirmar;
+            btn.innerHTML = btn.dataset.original;
+            btn.classList.remove('ring-2', 'ring-amber-400');
+        }, ESPERA_CONFIRMACION_MS));
+        return;
+    }
+    // 2.º toque: se restaura el botón y se procesa
+    clearTimeout(Number(btn.dataset.temporizador));
+    if (btn.dataset.original) btn.innerHTML = btn.dataset.original;
+    delete btn.dataset.confirmar;
+    btn.classList.remove('ring-2', 'ring-amber-400');
     return avanzarEstado(id, btn, ref, {
         desde: ESTADOS_POR_ENTREGAR,
         hacia: 'ENTREGADO',
@@ -885,7 +941,18 @@ function marcarComoEntregado(id, btn, ref = id) {
 }
 
 // id = clave de compras_proveedor (para el UPDATE); ref = pedido_id visible en los avisos
-async function avanzarEstado(id, btn, ref, { desde, hacia, aviso }) {
+async function avanzarEstado(id, btn, ref, opciones) {
+    const tarjeta = btn.closest('article');
+    if (tarjeta?.dataset.procesando) return; // doble clic
+    operacionesEnCurso += 1;
+    try {
+        await avanzarEstadoSeguro(id, btn, ref, opciones);
+    } finally {
+        operacionesEnCurso -= 1;
+    }
+}
+
+async function avanzarEstadoSeguro(id, btn, ref, { desde, hacia, aviso }) {
     const tarjeta = btn.closest('article');
     const contenidoOriginal = btn.innerHTML;
     const filaActual = pedidos.get(String(id));
@@ -1084,7 +1151,7 @@ async function guardarEdicion(e) {
     } else if (tarjeta) {
         retirarTarjeta(tarjeta); // p. ej. cambió de categoría y ya no coincide con el filtro
     }
-    cerrarModal(document.getElementById('modal-editar'));
+    cerrarModal(document.getElementById('modal-editar'), { forzar: true });
     mostrarToast('Cambios guardados.', 'ok');
     Sonidos.completar();
 }
@@ -1410,6 +1477,9 @@ async function guardarPago(e) {
             return;
         }
         mostrarToast(`${canje.mensaje} (-${canje.porcentaje}%)`, 'ok', 4000);
+        // El canje ya quedó en la BD: si validar_pago falla y se reintenta, no se vuelve a canjear
+        // (la BD respondería "ya tiene un cupón aplicado" y bloquearía el pago)
+        pedidos.set(id, { ...filaActual, cupon_aplicado: cupon });
     }
 
     let filasActualizadas;
@@ -1457,7 +1527,7 @@ async function guardarPago(e) {
     cargarPagosPendientes();
     programarNotificaciones();
 
-    cerrarModal(document.getElementById('modal-pago'));
+    cerrarModal(document.getElementById('modal-pago'), { forzar: true });
     const p = normalizarPedido(filaActual);
     mostrarToast(destino === 'ENTREGADO_INMEDIATO'
         ? `Pago aprobado y pedido #${p.ref} entregado.`
@@ -1465,7 +1535,21 @@ async function guardarPago(e) {
     Sonidos.completar();
 }
 
+const rechazosEnCurso = new Set();
+
 async function rechazarPago(pago, motivo) {
+    if (rechazosEnCurso.has(pago.pago_id)) return;
+    rechazosEnCurso.add(pago.pago_id);
+    operacionesEnCurso += 1;
+    try {
+        await rechazarPagoSeguro(pago, motivo);
+    } finally {
+        rechazosEnCurso.delete(pago.pago_id);
+        operacionesEnCurso -= 1;
+    }
+}
+
+async function rechazarPagoSeguro(pago, motivo) {
     const { data: r, error } = await supabaseClient.rpc('rechazar_pago', { p_pago_id: pago.pago_id, p_motivo: motivo }).maybeSingle();
     if (error || !r?.ok) {
         console.error('rechazar_pago:', error ?? r);
@@ -1855,8 +1939,13 @@ function abrirModal(modal) {
     modal.querySelector('input, button:not([data-cerrar-modal])')?.focus({ preventScroll: true });
 }
 
-async function cerrarModal(modal) {
+async function cerrarModal(modal, { forzar = false } = {}) {
     if (!modal || modal.hidden || modal.dataset.cerrando) return;
+    // No se cierra a mitad de una operación (el resultado se perdería de vista); el propio flujo lo cierra al terminar
+    if (modal.dataset.ocupado && !forzar) {
+        mostrarToast('Espera a que termine la operación en curso.', 'info', 2500);
+        return;
+    }
     modal.dataset.cerrando = '1';
     await Promise.all([
         modal.querySelector('.modal-fondo').animate([{ opacity: 1 }, { opacity: 0 }], { duration: 200, fill: 'forwards' }).finished,
