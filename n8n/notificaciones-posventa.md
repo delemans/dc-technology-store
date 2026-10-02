@@ -1,5 +1,7 @@
 # n8n · Notificaciones posventa (WO-015)
 
+> **Listo para importar:** `n8n/flujo_bot_dctechnology.json` incluye esta rama de posventa y el bot de WhatsApp con IA (DeepSeek-V3 en SiliconFlow). Se regenera con `node n8n/generar_flujo_n8n.js` después de `node generar_bot_conocimiento.js`; las instrucciones de credenciales están en la nota "Leeme" dentro del flujo.
+
 La base de datos decide **qué** enviar y **cuándo**; n8n solo entrega. Así no se duplican mensajes ni se envían en ráfaga.
 
 ```

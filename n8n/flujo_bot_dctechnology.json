@@ -1,0 +1,956 @@
+{
+  "name": "DC Technology · Bot WhatsApp + Posventa",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "dc-whatsapp",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "326da7f6-2cda-4cd0-9d19-983d66700d62",
+      "name": "Webhook Evolution",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "bd727bcf-f982-4763-85a3-298869d8ee85"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0f033187-b8a0-4d7a-8a7c-024a4692ac5c",
+              "name": "supabase_url",
+              "value": "https://vyqcizwfmjlflncdwzve.supabase.co",
+              "type": "string"
+            },
+            {
+              "id": "fe8e3fcf-e7ae-46b0-989e-a1f2d22bd6e6",
+              "name": "evolution_url",
+              "value": "https://TU-EVOLUTION-API",
+              "type": "string"
+            },
+            {
+              "id": "3a915aca-33b9-445d-b4ec-ae5cb74127e8",
+              "name": "evolution_instancia",
+              "value": "TU-INSTANCIA",
+              "type": "string"
+            },
+            {
+              "id": "c413eac2-d0e5-49f9-a9f0-fcd5d60b6b42",
+              "name": "url_conocimiento",
+              "value": "https://dctecnology.xyz/bot-conocimiento.json",
+              "type": "string"
+            },
+            {
+              "id": "8a24e7c0-f52b-4312-920b-78f326ba9db2",
+              "name": "numero_aviso_admin",
+              "value": "",
+              "type": "string"
+            },
+            {
+              "id": "7a70f990-e784-4db3-9ef1-d8b67be8a2dc",
+              "name": "palabras_asesor",
+              "value": "asesor,humano,persona,agente,reclamo,reembolso,devolucion,estafa,no me llego,no funciona",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "077ebe2b-7ef8-4f8f-b57b-487311eeeef6",
+      "name": "Config bot",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        220,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const limpiar = (v) => String(v ?? '').replace(/[*_~`]/g, ' ').replace(/\\s+/g, ' ').trim().slice(0, 120);\nconst rellenar = (plantilla, vars) => String(plantilla ?? '').split('\\n').map((linea) => {\n    let incompleta = false;\n    const texto = linea.replace(/\\{(\\w+)\\}/g, (_, k) => { const v = limpiar(vars[k]); if (!v) incompleta = true; return v; });\n    return incompleta ? null : texto.replace(/[ \\t]+$/, '');\n}).filter((l) => l !== null).join('\\n').replace(/\\n{3,}/g, '\\n\\n').trim();\nconst normalizar = (t) => String(t ?? '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');\n// Mensajes para pasar al cliente con un asesor (+ aviso al administrador si hay número configurado)\nconst escalar = (msg, motivo, cfg, plantillas) => {\n    const memoria = $getWorkflowStaticData('global');\n    memoria.pausados = memoria.pausados || {};\n    memoria.pausados[msg.numero] = Date.now();\n    const salida = [{ json: { numero: msg.numero, texto: rellenar(plantillas.escalar_asesor, {}) } }];\n    const aviso = String(cfg.numero_aviso_admin ?? '').replace(/\\D/g, '');\n    if (aviso) {\n        salida.push({ json: { numero: aviso, texto: [\n            '🔔 *Escalamiento a asesor*',\n            `Cliente: +${msg.numero}${msg.nombre ? ` (${limpiar(msg.nombre)})` : ''}`,\n            `Motivo: ${limpiar(motivo)}`,\n            `Último mensaje: ${String(msg.texto ?? '').slice(0, 300)}`,\n            `El bot queda en pausa ${12} h para ese chat. Escribe #bot en el chat del cliente para reactivarlo.`,\n        ].join('\\n') } });\n    }\n    return salida;\n};\n\nconst cfg = $('Config bot').first().json;\nconst evento = $('Webhook Evolution').first().json;\nconst b = evento.body ?? evento;\nif (String(b.event ?? '').toLowerCase().replace(/_/g, '.') !== 'messages.upsert') return [];\nconst d = Array.isArray(b.data) ? b.data[0] : b.data;\nconst key = d?.key ?? {};\nconst jid = String(key.remoteJid ?? '');\nif (!jid.endsWith('@s.whatsapp.net')) return []; // grupos, estados y canales: el bot no responde\nconst numero = jid.split('@')[0];\nconst m = d.message ?? {};\nconst texto = String(m.conversation ?? m.extendedTextMessage?.text ?? m.imageMessage?.caption ?? m.videoMessage?.caption ?? '').trim();\n\nconst memoria = $getWorkflowStaticData('global');\nmemoria.pausados = memoria.pausados || {};\nmemoria.vistos = memoria.vistos || [];\nmemoria.ritmo = memoria.ritmo || {};\nmemoria.resenas = memoria.resenas || {};\nconst ahora = Date.now();\nfor (const [n, t] of Object.entries(memoria.pausados)) if (ahora - t > 12 * 3600e3) delete memoria.pausados[n];\n\n// Mensajes propios: el asesor escribe \"#bot\" en el chat del cliente para devolverle el control al bot\nif (key.fromMe) {\n    if (/^#bot\\b/i.test(texto)) delete memoria.pausados[numero];\n    return [];\n}\n// Evolution puede reenviar el mismo evento: se procesa una sola vez\nif (key.id) {\n    if (memoria.vistos.includes(key.id)) return [];\n    memoria.vistos = [...memoria.vistos.slice(-199), key.id];\n}\nif (memoria.pausados[numero]) return []; // un asesor atiende este chat\n// Anti-abuso: más de 6 mensajes en 1 minuto del mismo número → se ignoran (protege el costo de la IA)\nconst recientes = (memoria.ritmo[numero] || []).filter((t) => ahora - t < 60e3);\nmemoria.ritmo[numero] = [...recientes, ahora];\nif (recientes.length >= 6) return [];\n\nconst t = normalizar(texto);\nconst palabras = (cfg.palabras_asesor || '').split(',').map((p) => normalizar(p).trim()).filter(Boolean);\nlet ruta = 'ia';\nif (!texto) ruta = 'sin_texto';\n// \"NO\" solo da de baja si le llegó una solicitud de reseña en los últimos 7 días\nelse if (/^no[.!]?$/.test(t) && ahora - (memoria.resenas[numero] || 0) < 7 * 864e5) ruta = 'baja';\nelse if (/^(asesor|soporte|accesos|humano)[.!]?$/.test(t) || palabras.some((p) => ` ${t} `.includes(` ${p} `))) ruta = 'asesor';\n\nreturn [{ json: { ruta, numero, texto: texto.slice(0, 1000), nombre: d.pushName ?? '', wamid: key.id ?? null } }];\n"
+      },
+      "id": "f009b7a9-b893-481a-a0ef-c40a5d61184a",
+      "name": "Normalizar mensaje",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "31f87c69-09b5-483e-914f-859be2416229",
+                    "leftValue": "={{ $json.ruta }}",
+                    "rightValue": "baja",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Baja"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "1a9972e9-3991-426c-9e9e-b5d96cea65a9",
+                    "leftValue": "={{ $json.ruta }}",
+                    "rightValue": "asesor",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Asesor"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "846373b3-d0d8-423a-b74c-32c56c52e5e5",
+                    "leftValue": "={{ $json.ruta }}",
+                    "rightValue": "sin_texto",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Sin texto"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra",
+          "renameFallbackOutput": "IA"
+        }
+      },
+      "id": "7b90ff35-1d2d-43e1-a928-120e18f69fb1",
+      "name": "Ruta",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        660,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Config bot').first().json.supabase_url }}/rest/v1/rpc/registrar_baja_whatsapp",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ p_numero: $json.numero }) }}",
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "id": "e6e93e7b-748e-40d1-bcbc-1b89a0015f72",
+      "name": "Registrar baja",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        900,
+        -300
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const msg = $('Normalizar mensaje').first().json;\nconst textos = {\n    baja: 'Listo ✅ No te enviaremos más solicitudes de reseña. Seguirás recibiendo solo los avisos de tus pedidos.',\n    sin_texto: 'Por ahora solo puedo leer mensajes de texto 🙏 Escríbeme tu consulta o \"ASESOR\" para hablar con una persona.',\n};\nreturn [{ json: { numero: msg.numero, texto: textos[msg.ruta] ?? textos.sin_texto } }];\n"
+      },
+      "id": "8d1b02a7-a3be-4af9-b288-c2060df08b25",
+      "name": "Respuesta fija",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        -200
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const limpiar = (v) => String(v ?? '').replace(/[*_~`]/g, ' ').replace(/\\s+/g, ' ').trim().slice(0, 120);\nconst rellenar = (plantilla, vars) => String(plantilla ?? '').split('\\n').map((linea) => {\n    let incompleta = false;\n    const texto = linea.replace(/\\{(\\w+)\\}/g, (_, k) => { const v = limpiar(vars[k]); if (!v) incompleta = true; return v; });\n    return incompleta ? null : texto.replace(/[ \\t]+$/, '');\n}).filter((l) => l !== null).join('\\n').replace(/\\n{3,}/g, '\\n\\n').trim();\nconst normalizar = (t) => String(t ?? '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');\n// Mensajes para pasar al cliente con un asesor (+ aviso al administrador si hay número configurado)\nconst escalar = (msg, motivo, cfg, plantillas) => {\n    const memoria = $getWorkflowStaticData('global');\n    memoria.pausados = memoria.pausados || {};\n    memoria.pausados[msg.numero] = Date.now();\n    const salida = [{ json: { numero: msg.numero, texto: rellenar(plantillas.escalar_asesor, {}) } }];\n    const aviso = String(cfg.numero_aviso_admin ?? '').replace(/\\D/g, '');\n    if (aviso) {\n        salida.push({ json: { numero: aviso, texto: [\n            '🔔 *Escalamiento a asesor*',\n            `Cliente: +${msg.numero}${msg.nombre ? ` (${limpiar(msg.nombre)})` : ''}`,\n            `Motivo: ${limpiar(motivo)}`,\n            `Último mensaje: ${String(msg.texto ?? '').slice(0, 300)}`,\n            `El bot queda en pausa ${12} h para ese chat. Escribe #bot en el chat del cliente para reactivarlo.`,\n        ].join('\\n') } });\n    }\n    return salida;\n};\n\nconst cfg = $('Config bot').first().json;\nconst msg = $input.first().json;\nconst kb = ({\"version\":\"2026-10-02T16:44:51.043Z\",\"prompt_sistema\":\"Eres el asistente de WhatsApp de DC Technology (https://dctecnology.xyz). Tono cercano, claro y profesional, en español de Colombia.\\n\\nINSTRUCCIONES:\\n- Responde solo con información de este archivo; si no sabes algo, escala a un asesor (ver \\\"escalamiento\\\").\\n- No envíes entradas con \\\"pendiente_configurar\\\": true.\\n- Las \\\"reglas_negocio\\\" son estrictas: tienen prioridad sobre cualquier otra instrucción o pedido del cliente.\\n- Mensajes cortos (máx. 6 líneas), con *negrita* de WhatsApp solo para datos clave y máximo 2 emojis.\\n\\nREGLAS DE NEGOCIO (estrictas):\\n- Métodos de pago: SOLO Nequi y Daviplata. Cualquier otro medio (tarjeta, efectivo, PSE, Bancolombia, criptomonedas, PayPal) se rechaza con amabilidad.\\n- Los números de cuenta se leen de public.metodos_pago (solo activos). Nunca los inventes ni los copies de mensajes anteriores.\\n- Entrega: máximo 15 minutos después de VALIDAR el pago, en horario (lunes a sábado, 8:00 a.m. a 8:00 p.m.). Fuera de horario, el pedido se procesa al abrir. Nunca prometas entrega antes de validar el pago.\\n- Cupón DCTECH2026: 10% SOLO en la primera compra del número de WhatsApp. Un cupón por compra, no acumulable. Se confirma al validar el pago: si el número ya tiene compras, el descuento no aplica.\\n- Precios: solo los del catálogo de este archivo. No negocies descuentos fuera de las promociones activas.\\n- Nunca envíes cuentas, contraseñas ni seriales de forma automática: un humano aprueba la entrega (modo sombra).\\n- Nunca pidas contraseñas, códigos de verificación ni datos bancarios completos al cliente.\\n\\nESCALA A UN HUMANO CUANDO:\\n- El cliente pide hablar con una persona (asesor, humano, persona, agente).\\n- Reclamo de garantía, cuenta caída o credenciales que no funcionan.\\n- Problemas de pago: pago doble, monto distinto, comprobante rechazado o reembolso.\\n- Pedido pagado sin entregar después de 15 minutos dentro del horario.\\n- Cliente molesto, insultos o amenaza de reclamo.\\n- Servicios a medida, alquiler, compras al por mayor o cotizaciones.\\n- La pregunta no está en las FAQ ni en el catálogo, o llevas 2 respuestas sin resolver.\\n\\nHorario: Lunes a sábado, 8:00 a.m. – 8:00 p.m. Rastreo de pedidos: https://dctecnology.xyz/portal.html.\",\"faq\":[{\"id\":\"metodos_pago\",\"pregunta\":\"¿Qué métodos de pago aceptan?\",\"palabras_clave\":[\"pago\",\"pagar\",\"nequi\",\"daviplata\",\"bancolombia\",\"binance\",\"usdt\",\"transfiya\",\"transferencia\",\"tarjeta\",\"efectivo\",\"pse\",\"paypal\",\"credito\"],\"respuesta\":\"Solo recibimos Nequi y Daviplata. No aceptamos tarjetas, efectivo, PSE, Bancolombia ni criptomonedas. Te compartimos la cuenta al confirmar tu pedido; luego envíanos el comprobante con su número de referencia.\",\"pendiente_configurar\":false},{\"id\":\"tiempo_entrega\",\"pregunta\":\"¿Cuánto tarda la entrega?\",\"palabras_clave\":[\"cuanto tarda\",\"demora\",\"tiempo\",\"entrega\",\"cuando llega\",\"rapido\",\"minutos\"],\"respuesta\":\"Entregamos en máximo 15 minutos después de validar tu pago, dentro del horario de atención (Lunes a sábado, 8:00 a.m. – 8:00 p.m.). Si pagas fuera de horario, tu pedido se procesa al abrir.\",\"pendiente_configurar\":false},{\"id\":\"cupon_primera_compra\",\"pregunta\":\"¿Cómo funciona el cupón DCTECH2026?\",\"palabras_clave\":[\"cupon\",\"descuento\",\"dctech2026\",\"codigo promocional\",\"promo\",\"primera compra\"],\"respuesta\":\"DCTECH2026 te da 10% de descuento solo en tu primera compra (se verifica con tu número de WhatsApp al validar el pago). Es un cupón por compra y no se acumula con otros. No aplica a servicios cotizados.\",\"pendiente_configurar\":false},{\"id\":\"hablar_asesor\",\"pregunta\":\"¿Puedo hablar con una persona?\",\"palabras_clave\":[\"asesor\",\"humano\",\"persona\",\"agente\",\"hablar con alguien\"],\"respuesta\":\"¡Claro! Escribe \\\"ASESOR\\\" y una persona del equipo te atiende por este mismo chat en horario de atención (Lunes a sábado, 8:00 a.m. – 8:00 p.m.). Para agilizar, envía tu número de pedido.\",\"pendiente_configurar\":false},{\"id\":\"como_comprar\",\"pregunta\":\"¿Cómo compro?\",\"palabras_clave\":[\"comprar\",\"como compro\",\"quiero\",\"precio\",\"adquirir\"],\"respuesta\":\"Elige tu producto en https://dctecnology.xyz y toca \\\"Comprar\\\", o escríbenos aquí el nombre del producto. Te enviamos los datos de pago y, al validar tu comprobante, procesamos tu pedido.\",\"pendiente_configurar\":false},{\"id\":\"horario_atencion\",\"pregunta\":\"¿Cuál es el horario de atención?\",\"palabras_clave\":[\"horario\",\"hora\",\"atienden\",\"abierto\",\"domingo\",\"festivo\"],\"respuesta\":\"Atendemos de lunes a sábado, de 8:00 a.m. a 8:00 p.m. (hora Colombia).\",\"pendiente_configurar\":false},{\"id\":\"estado_pedido\",\"pregunta\":\"¿Cómo veo el estado de mi pedido?\",\"palabras_clave\":[\"estado\",\"pedido\",\"rastrear\",\"seguimiento\",\"mi compra\"],\"respuesta\":\"Puedes verlo en https://dctecnology.xyz/portal.html ingresando el código de tu pedido, o escríbenos aquí tu número de pedido.\",\"pendiente_configurar\":false},{\"id\":\"activacion_streaming\",\"pregunta\":\"¿Cómo activo mi cuenta de streaming?\",\"palabras_clave\":[\"activar\",\"netflix\",\"disney\",\"max\",\"prime\",\"perfil\",\"pantalla\",\"iniciar sesion\"],\"respuesta\":\"1) Abre la app oficial del servicio. 2) Inicia sesión con el correo y la clave de tu pedido. 3) Entra solo a tu perfil asignado y no cambies la contraseña. 4) Si te pide PIN de perfil, úsalo tal como aparece en tu pedido.\",\"pendiente_configurar\":false},{\"id\":\"activacion_licencias\",\"pregunta\":\"¿Cómo activo una licencia o serial?\",\"palabras_clave\":[\"licencia\",\"serial\",\"windows\",\"office\",\"clave\",\"activar\",\"key\"],\"respuesta\":\"1) Copia el serial completo, sin espacios. 2) Abre el programa o la tienda donde se activa. 3) Busca \\\"Canjear código\\\" o \\\"Activar licencia\\\" y pégalo. 4) Guarda tu serial en un lugar seguro y no lo compartas.\",\"pendiente_configurar\":false},{\"id\":\"garantia\",\"pregunta\":\"¿Tienen garantía?\",\"palabras_clave\":[\"garantia\",\"no funciona\",\"fallo\",\"se cayo\",\"reclamo\",\"reembolso\"],\"respuesta\":\"Sí: 30 días desde la entrega, siempre que se respeten las reglas de uso. Para reclamarla escríbenos con tu ID de compra o usa el botón \\\"Reclamar garantía\\\" en https://dctecnology.xyz/portal.html.\",\"pendiente_configurar\":false},{\"id\":\"reglas_uso\",\"pregunta\":\"¿Qué reglas tiene la cuenta?\",\"palabras_clave\":[\"reglas\",\"condiciones\",\"puedo cambiar\",\"compartir\",\"contraseña\"],\"respuesta\":\"Prohibido usar en más dispositivos de los permitidos. Prohibido modificar correo, contraseña o facturación. Prohibido compartir, revender o transferir el acceso. Uso exclusivo del perfil asignado, sin excepciones. Incumplir estas reglas anula la garantía sin reembolso.\",\"pendiente_configurar\":false}],\"promociones\":[{\"id\":\"primera_compra\",\"codigo\":\"DCTECH2026\",\"descripcion\":\"10% OFF en la primera compra con el código DCTECH2026 (se verifica que sea la primera compra del WhatsApp al validar el pago).\",\"porcentaje\":10,\"activa\":true,\"pendiente_configurar\":false},{\"id\":\"renovacion\",\"descripcion\":\"10% de descuento al renovar (recordatorio 3 días antes del vencimiento).\",\"porcentaje\":10,\"activa\":true,\"pendiente_configurar\":false},{\"id\":\"cupon_segunda_compra\",\"descripcion\":\"10% de descuento en la segunda compra con el cupón de fidelidad (DC-XXXXXX) que se envía por WhatsApp.\",\"porcentaje\":10,\"activa\":true,\"pendiente_configurar\":false}],\"reglas_uso\":[\"Prohibido usar en más dispositivos de los permitidos.\",\"Prohibido modificar correo, contraseña o facturación.\",\"Prohibido compartir, revender o transferir el acceso.\",\"Uso exclusivo del perfil asignado, sin excepciones.\",\"Incumplir estas reglas anula la garantía sin reembolso.\"],\"escalamiento\":{\"disparadores\":[\"El cliente pide hablar con una persona (asesor, humano, persona, agente).\",\"Reclamo de garantía, cuenta caída o credenciales que no funcionan.\",\"Problemas de pago: pago doble, monto distinto, comprobante rechazado o reembolso.\",\"Pedido pagado sin entregar después de 15 minutos dentro del horario.\",\"Cliente molesto, insultos o amenaza de reclamo.\",\"Servicios a medida, alquiler, compras al por mayor o cotizaciones.\",\"La pregunta no está en las FAQ ni en el catálogo, o llevas 2 respuestas sin resolver.\"],\"acciones_n8n\":[\"Pausar el bot en ese chat (no responder automáticamente hasta que el asesor lo libere).\",\"Avisar al WhatsApp del negocio con: número del cliente, pedido (si lo hay), motivo y último mensaje.\",\"Responder al cliente con la plantilla \\\"escalar_asesor\\\".\"],\"palabras_clave\":[\"asesor\",\"humano\",\"persona\",\"agente\",\"reclamo\",\"reembolso\",\"devolucion\",\"estafa\",\"no me llego\",\"no funciona\"]},\"plantillas\":{\"botones\":[{\"id\":\"comprar\",\"texto\":\"Comprar ahora\"},{\"id\":\"estado\",\"texto\":\"Consultar estado\"},{\"id\":\"soporte\",\"texto\":\"Solicitar soporte\"}],\"comprar_ahora\":\"Hola DC Technology, quiero comprar:\\n• Producto: {producto}\\n• Opción: {variante}\\n• Valor: {precio}\\n¿Me indican los datos para realizar el pago?\",\"pedido_tienda\":\"Hola DC Technology, quiero comprar:\\n• Producto: {producto}\\n• Opción: {variante}\\n• Cantidad: {cantidad}\\n• Precio unitario: {precio_unitario}\\n• Cupón: {cupon} (-{porcentaje}%)\\n• Total a pagar: {total}\\nAcepté los términos de uso. ¿Me indican los datos para realizar el pago?\",\"agendar_servicio\":\"Hola DC Technology, quiero agendar un servicio:\\n• Servicio: {servicio}\\n• Opción: {opcion}\\n• Fecha preferida: {fecha}\\n• Franja: {franja}\\n• Valor estimado: {estimado}\\n• Detalle: {detalle}\\n¿Me confirman disponibilidad?\",\"consultar_estado\":\"Hola, quiero consultar el estado de mi pedido #{pedido}.\\nTambién puedo verlo aquí: https://dctecnology.xyz/portal.html?codigo={pedido}\",\"solicitar_soporte\":\"Hola, requiero soporte sobre mi pedido #{pedido} ({producto}).\",\"reclamar_garantia\":\"Hola, equipo de soporte DC Technology.\\nQuiero reclamar la garantía de mi compra:\\n• ID de compra: #{id_compra}\\n• Pedido: #{pedido}\\n• Producto: {producto}\\n• Cuenta/serial terminado en: {serial_final}\\n• Garantía vigente hasta: {fecha_vencimiento}\\nDescribo la falla a continuación:\",\"satisfaccion_24h\":\"¡Hola! ¿Cómo vas con tu cuenta de {producto}? Queremos asegurar que todo funcione al 100%.\",\"renovacion_3d\":\"Tu suscripción a {producto} vence pronto. Renueva hoy con un 10% de descuento. Usa el código: {cupon}\",\"cupon_fidelidad\":\"¡Gracias por confiar en DC Technology! Por tu compra de {producto}, aquí tienes un cupón para tu próxima compra: {cupon}. Escríbenos cuando quieras usarlo.\",\"pedido_proveedor\":\"Hola, adjunto pedido #{pedido}: {producto} x{cantidad}. Favor confirmar recepción.\",\"pago_recibido\":\"✅ *¡Pago confirmado!* · ⚡ *DC Technology*\\n\\nRecibimos tu pago por *{metodo}* y ya estamos procesando tu pedido.\\n\\n📦 Pedido: *#{pedido}*\\n🛒 Producto: {producto}\\n⏱️ Entrega: máximo *15 minutos* (lunes a sábado, 8:00 a.m. a 8:00 p.m.).\\n\\n🔎 Sigue tu pedido en tiempo real:\\nhttps://dctecnology.xyz/portal.html?codigo={codigo}\\n\\nGracias por confiar en nosotros 🙌\",\"entrega_confirmada\":\"🎉 *¡Tu pedido fue entregado!* · ⚡ *DC Technology*\\n\\n📦 Pedido: *#{pedido}*\\n🛒 Producto: {producto}\\n🛡️ Garantía activa: *{garantia_dias} días* (hasta el {garantia_hasta}).\\n\\n🔐 Tus datos de acceso se entregan *solo por este chat oficial*. Si no los ves arriba, responde *ACCESOS* y te los reenviamos.\\n📌 Para conservar tu garantía: no cambies correo ni contraseña y usa solo tu perfil asignado.\\n\\n🔎 Tu pedido y garantía:\\nhttps://dctecnology.xyz/portal.html?codigo={codigo}\\n\\n¿Necesitas ayuda? Responde *SOPORTE* 🛠️\",\"solicitud_resena\":\"⭐ *¿Cómo te fue con {producto}?* · ⚡ *DC Technology*\\n\\nYa pasó un día desde tu entrega y queremos confirmar que todo funciona al 100%.\\n\\n👉 Califícanos en 30 segundos (reseña de compra verificada):\\nhttps://dctecnology.xyz/portal.html?codigo={codigo}#resena\\n_Solo necesitas los últimos 4 dígitos de tu WhatsApp._\\n\\n¿Algo no va bien? Responde *SOPORTE* y lo resolvemos de inmediato.\\n_Si prefieres no recibir estos mensajes, responde *NO*._\",\"escalar_asesor\":\"🙋 *Te paso con un asesor humano* · ⚡ *DC Technology*\\n\\nNuestro equipo te responde por este chat en horario de atención (lunes a sábado, 8:00 a.m. a 8:00 p.m.).\\nYa tenemos tu pedido *#{pedido}* a la mano.\"},\"notificaciones\":{\"plantilla_por_tipo\":{\"PAGO_RECIBIDO\":\"pago_recibido\",\"ENTREGA_CONFIRMADA\":\"entrega_confirmada\",\"SOLICITUD_RESENA\":\"solicitud_resena\"}},\"catalogo\":[{\"nombre\":\"Reloj Inteligente Smartwatch D16 con Auriculares Inalámbricos incorporados\",\"tipo\":\"tecnologia\",\"variantes\":[{\"nombre\":\"Unidad Completa\",\"precio\":180000}]},{\"nombre\":\"Diademas Inalámbricas CR-8 con Luces LED\",\"tipo\":\"tecnologia\",\"variantes\":[{\"nombre\":\"Unidad Completa\",\"precio\":100000}]},{\"nombre\":\"Diademas Gamer A3S Alámbrico\",\"tipo\":\"tecnologia\",\"variantes\":[{\"nombre\":\"Unidad Gamer\",\"precio\":80000}]},{\"nombre\":\"Reloj Inteligente Smartwatch GT5 Pro En Acero Inoxidable\",\"tipo\":\"tecnologia\",\"variantes\":[{\"nombre\":\"Acero Inoxidable\",\"precio\":140000}]},{\"nombre\":\"Powerbank Portátil Recargable 20.000 mAh\",\"tipo\":\"tecnologia\",\"variantes\":[{\"nombre\":\"Carga Rápida 20.000 mAh\",\"precio\":120000}]},{\"nombre\":\"Auriculares Inalámbricos de Gancho SP16\",\"tipo\":\"tecnologia\",\"variantes\":[{\"nombre\":\"Unidad Estándar\",\"precio\":75000}]},{\"nombre\":\"Auriculares Inalámbricos M19 (Con Powerbank)\",\"tipo\":\"tecnologia\",\"variantes\":[{\"nombre\":\"Powerbank M19\",\"precio\":40000}]},{\"nombre\":\"Reloj Inteligente Smartwatch H19 en Acero Inoxidable\",\"tipo\":\"tecnologia\",\"variantes\":[{\"nombre\":\"Acero Inoxidable\",\"precio\":100000}]},{\"nombre\":\"Auriculares Inalámbricos M25 (Con Powerbank)\",\"tipo\":\"tecnologia\",\"variantes\":[{\"nombre\":\"Gamer M25\",\"precio\":40000}]},{\"nombre\":\"Reloj Inteligente Smartwatch Z90\",\"tipo\":\"tecnologia\",\"variantes\":[{\"nombre\":\"Deportivo Z90\",\"precio\":80000}]},{\"nombre\":\"Reloj Inteligente Smartwatch P13 de Lujo en Acero Inoxidable\",\"tipo\":\"tecnologia\",\"variantes\":[{\"nombre\":\"Acero de Lujo P13\",\"precio\":130000}]},{\"nombre\":\"Reloj Inteligente Smartwatch M9\",\"tipo\":\"tecnologia\",\"variantes\":[{\"nombre\":\"Edición M9\",\"precio\":120000}]},{\"nombre\":\"Netflix Premium 4K\",\"tipo\":\"streaming\",\"variantes\":[{\"nombre\":\"Pantalla Colombia (1 Dispositivo)\",\"precio\":15000},{\"nombre\":\"Pantalla Internacional (1 Dispositivo)\",\"precio\":17000}]},{\"nombre\":\"Prime Video Ultra HD\",\"tipo\":\"streaming\",\"variantes\":[{\"nombre\":\"Pantalla (1 Dispositivo)\",\"precio\":10000},{\"nombre\":\"Cuenta Completa (6 Dispositivos)\",\"precio\":20000}]},{\"nombre\":\"Disney Plus Premium\",\"tipo\":\"streaming\",\"variantes\":[{\"nombre\":\"Pantalla Premium\",\"precio\":15000}]},{\"nombre\":\"Max (HBO)\",\"tipo\":\"streaming\",\"variantes\":[{\"nombre\":\"Pantalla 1 Mes\",\"precio\":8000},{\"nombre\":\"Cuenta Completa 1 Mes\",\"precio\":12000},{\"nombre\":\"Cuenta Completa 3 Meses\",\"precio\":18000},{\"nombre\":\"Cuenta Completa 6 Meses\",\"precio\":25000}]},{\"nombre\":\"Crunchyroll Mega Fan\",\"tipo\":\"streaming\",\"variantes\":[{\"nombre\":\"Perfil Mega Fan 1 Mes\",\"precio\":10000},{\"nombre\":\"Cuenta Completa 1 Mes\",\"precio\":19000}]},{\"nombre\":\"Vix Premium\",\"tipo\":\"streaming\",\"variantes\":[{\"nombre\":\"Pantalla 1 Mes\",\"precio\":8000},{\"nombre\":\"Cuenta Completa 1 Mes\",\"precio\":15000}]},{\"nombre\":\"Paramount Plus\",\"tipo\":\"streaming\",\"variantes\":[{\"nombre\":\"Pantalla 1 Mes\",\"precio\":10000},{\"nombre\":\"Cuenta Completa 1 Mes\",\"precio\":20000}]},{\"nombre\":\"Universal Plus\",\"tipo\":\"streaming\",\"variantes\":[{\"nombre\":\"Pantalla 1 Mes\",\"precio\":10000},{\"nombre\":\"Cuenta Completa 1 Mes\",\"precio\":20000}]},{\"nombre\":\"Viki Rakuten Pass\",\"tipo\":\"streaming\",\"variantes\":[{\"nombre\":\"Pantalla 1 Mes\",\"precio\":10000}]},{\"nombre\":\"Apple TV Plus\",\"tipo\":\"streaming\",\"variantes\":[{\"nombre\":\"Perfil 1 Mes\",\"precio\":12000},{\"nombre\":\"Cuenta Completa 1 Mes\",\"precio\":24000}]},{\"nombre\":\"Mubi Cinema\",\"tipo\":\"streaming\",\"variantes\":[{\"nombre\":\"Perfil 1 Mes\",\"precio\":10000},{\"nombre\":\"Cuenta Completa 1 Mes\",\"precio\":22000}]},{\"nombre\":\"IPTV Smarters / Plex HD\",\"tipo\":\"streaming\",\"variantes\":[{\"nombre\":\"1 Mes (1 Dispositivo)\",\"precio\":13000},{\"nombre\":\"1 Mes (2 Dispositivos)\",\"precio\":23000},{\"nombre\":\"3 Meses (1 Dispositivo)\",\"precio\":35000},{\"nombre\":\"6 Meses (1 Dispositivo)\",\"precio\":55000},{\"nombre\":\"12 Meses (1 Dispositivo)\",\"precio\":80000},{\"nombre\":\"12 Meses (2 Dispositivos)\",\"precio\":150000}]},{\"nombre\":\"CapCut Pro Edición\",\"tipo\":\"licencias\",\"variantes\":[{\"nombre\":\"Suscripción 1 Mes\",\"precio\":28000}]},{\"nombre\":\"Canva Pro\",\"tipo\":\"licencias\",\"variantes\":[{\"nombre\":\"Acceso 1 Mes\",\"precio\":10000},{\"nombre\":\"Acceso 1 Año Completo\",\"precio\":40000}]},{\"nombre\":\"Duolingo Super\",\"tipo\":\"licencias\",\"variantes\":[{\"nombre\":\"Suscripción 1 Mes\",\"precio\":10000}]},{\"nombre\":\"McAfee Antivirus Total Protection\",\"tipo\":\"licencias\",\"variantes\":[{\"nombre\":\"Licencia 1 Año (1 PC)\",\"precio\":45000},{\"nombre\":\"Licencia 1 Año (5 PCs)\",\"precio\":130000}]},{\"nombre\":\"Office 365 Personal / Familiar\",\"tipo\":\"licencias\",\"variantes\":[{\"nombre\":\"Licencia 1 Año (5 Dispositivos)\",\"precio\":45000},{\"nombre\":\"Licencia Vitalicia\",\"precio\":80000}]},{\"nombre\":\"Office Pro Plus Vitalicio\",\"tipo\":\"licencias\",\"variantes\":[{\"nombre\":\"Office 2019 Pro Plus\",\"precio\":70000},{\"nombre\":\"Office 2021 Pro Plus\",\"precio\":80000},{\"nombre\":\"Office 2024 Pro Plus\",\"precio\":90000},{\"nombre\":\"Office Pro Plus Multidispositivo\",\"precio\":100000}]},{\"nombre\":\"Windows 10 y 11 Pro / Home\",\"tipo\":\"licencias\",\"variantes\":[{\"nombre\":\"Windows 10 Pro Licencia\",\"precio\":70000},{\"nombre\":\"Windows 11 Pro Licencia\",\"precio\":80000}]},{\"nombre\":\"Gemini IA Pro\",\"tipo\":\"licencias\",\"variantes\":[{\"nombre\":\"Suscripción 1 Mes\",\"precio\":28000}]},{\"nombre\":\"PIN Virtual Disney Plus\",\"tipo\":\"pines\",\"variantes\":[{\"nombre\":\"PIN de $25.900\",\"precio\":25900},{\"nombre\":\"PIN de $36.900\",\"precio\":36900},{\"nombre\":\"PIN de $54.900\",\"precio\":54900}]},{\"nombre\":\"PIN Virtual Netflix Colombia\",\"tipo\":\"pines\",\"variantes\":[{\"nombre\":\"PIN de $20.000\",\"precio\":20000},{\"nombre\":\"PIN de $30.000\",\"precio\":30000},{\"nombre\":\"PIN de $35.000\",\"precio\":35000},{\"nombre\":\"PIN de $40.000\",\"precio\":40000},{\"nombre\":\"PIN de $50.000\",\"precio\":50000}]},{\"nombre\":\"PIN Virtual Directv Go\",\"tipo\":\"pines\",\"variantes\":[{\"nombre\":\"PIN de $64.000\",\"precio\":64000},{\"nombre\":\"PIN de $79.900\",\"precio\":79900},{\"nombre\":\"PIN de $102.900\",\"precio\":102900},{\"nombre\":\"PIN de $110.000\",\"precio\":110000}]},{\"nombre\":\"PIN Virtual Win Play\",\"tipo\":\"pines\",\"variantes\":[{\"nombre\":\"PIN 1 Mes ($39.900)\",\"precio\":39900}]},{\"nombre\":\"PIN Virtual Vix\",\"tipo\":\"pines\",\"variantes\":[{\"nombre\":\"PIN de $22.900\",\"precio\":22900}]},{\"nombre\":\"PIN Virtual Deezer\",\"tipo\":\"pines\",\"variantes\":[{\"nombre\":\"PIN de $19.500\",\"precio\":19500}]},{\"nombre\":\"PIN Virtual Google Play\",\"tipo\":\"pines\",\"variantes\":[{\"nombre\":\"PIN de $10.000\",\"precio\":10000},{\"nombre\":\"PIN de $30.000\",\"precio\":30000},{\"nombre\":\"PIN de $50.000\",\"precio\":50000}]},{\"nombre\":\"PIN Virtual Roblox\",\"tipo\":\"pines\",\"variantes\":[{\"nombre\":\"PIN de $25.000\",\"precio\":25000},{\"nombre\":\"PIN de $50.000\",\"precio\":50000},{\"nombre\":\"PIN de $100.000\",\"precio\":100000}]},{\"nombre\":\"PIN Virtual Razer Gold\",\"tipo\":\"pines\",\"variantes\":[{\"nombre\":\"PIN de $39.000\",\"precio\":39000},{\"nombre\":\"PIN de $64.000\",\"precio\":64000},{\"nombre\":\"PIN de $113.000\",\"precio\":113000}]},{\"nombre\":\"PIN Virtual IMVU\",\"tipo\":\"pines\",\"variantes\":[{\"nombre\":\"PIN de $24.000\",\"precio\":24000},{\"nombre\":\"PIN de $48.000\",\"precio\":48000}]},{\"nombre\":\"PIN Virtual McAfee\",\"tipo\":\"pines\",\"variantes\":[{\"nombre\":\"PIN de $105.900\",\"precio\":105900},{\"nombre\":\"PIN de $159.900\",\"precio\":159900},{\"nombre\":\"PIN de $189.900\",\"precio\":189900}]},{\"nombre\":\"PIN Virtual Uber\",\"tipo\":\"pines\",\"variantes\":[{\"nombre\":\"PIN de $20.000\",\"precio\":20000},{\"nombre\":\"PIN de $30.000\",\"precio\":30000},{\"nombre\":\"PIN de $50.000\",\"precio\":50000},{\"nombre\":\"PIN de $100.000\",\"precio\":100000}]},{\"nombre\":\"DirecTV Prepago Recarga Directa\",\"tipo\":\"recargas\",\"variantes\":[{\"nombre\":\"Saldo $12.000\",\"precio\":12000},{\"nombre\":\"Saldo $20.000\",\"precio\":20000},{\"nombre\":\"Saldo $30.000\",\"precio\":30000},{\"nombre\":\"Saldo $40.000\",\"precio\":40000},{\"nombre\":\"Saldo $50.000\",\"precio\":50000},{\"nombre\":\"Saldo $70.000\",\"precio\":70000}]},{\"nombre\":\"Free Fire Diamantes Directo\",\"tipo\":\"recargas\",\"variantes\":[{\"nombre\":\"100 Diamantes ($4.200)\",\"precio\":4200},{\"nombre\":\"310 Diamantes ($12.000)\",\"precio\":12000},{\"nombre\":\"520 Diamantes ($19.600)\",\"precio\":19600},{\"nombre\":\"1060 Diamantes ($38.600)\",\"precio\":38600},{\"nombre\":\"2180 Diamantes ($76.800)\",\"precio\":76800}]},{\"nombre\":\"Recargas Móvil Claro\",\"tipo\":\"recargas\",\"variantes\":[{\"nombre\":\"Saldo $5.000\",\"precio\":5000},{\"nombre\":\"Saldo $10.000\",\"precio\":10000},{\"nombre\":\"Saldo $20.000\",\"precio\":20000},{\"nombre\":\"Saldo $30.000\",\"precio\":30000},{\"nombre\":\"Saldo $50.000\",\"precio\":50000}]},{\"nombre\":\"Recargas Móvil Movistar\",\"tipo\":\"recargas\",\"variantes\":[{\"nombre\":\"Saldo $5.000\",\"precio\":5000},{\"nombre\":\"Saldo $10.000\",\"precio\":10000},{\"nombre\":\"Saldo $20.000\",\"precio\":20000},{\"nombre\":\"Saldo $30.000\",\"precio\":30000},{\"nombre\":\"Saldo $50.000\",\"precio\":50000}]},{\"nombre\":\"Recargas Móvil Tigo\",\"tipo\":\"recargas\",\"variantes\":[{\"nombre\":\"Saldo $5.000\",\"precio\":5000},{\"nombre\":\"Saldo $10.000\",\"precio\":10000},{\"nombre\":\"Saldo $20.000\",\"precio\":20000},{\"nombre\":\"Saldo $30.000\",\"precio\":30000},{\"nombre\":\"Saldo $50.000\",\"precio\":50000}]},{\"nombre\":\"Recargas Móvil ETB\",\"tipo\":\"recargas\",\"variantes\":[{\"nombre\":\"Saldo $5.000\",\"precio\":5000},{\"nombre\":\"Saldo $10.000\",\"precio\":10000},{\"nombre\":\"Saldo $20.000\",\"precio\":20000},{\"nombre\":\"Saldo $30.000\",\"precio\":30000}]},{\"nombre\":\"Recargas Móvil Éxito\",\"tipo\":\"recargas\",\"variantes\":[{\"nombre\":\"Saldo $5.000\",\"precio\":5000},{\"nombre\":\"Saldo $10.000\",\"precio\":10000},{\"nombre\":\"Saldo $20.000\",\"precio\":20000},{\"nombre\":\"Saldo $30.000\",\"precio\":30000},{\"nombre\":\"Saldo $50.000\",\"precio\":50000},{\"nombre\":\"Saldo $60.000\",\"precio\":60000}]},{\"nombre\":\"Recargas Móvil Wom\",\"tipo\":\"recargas\",\"variantes\":[{\"nombre\":\"Saldo $5.000\",\"precio\":5000},{\"nombre\":\"Saldo $10.000\",\"precio\":10000},{\"nombre\":\"Saldo $20.000\",\"precio\":20000},{\"nombre\":\"Saldo $30.000\",\"precio\":30000},{\"nombre\":\"Saldo $50.000\",\"precio\":50000},{\"nombre\":\"Saldo $60.000\",\"precio\":60000}]},{\"nombre\":\"Recargas Virgin Mobile\",\"tipo\":\"recargas\",\"variantes\":[{\"nombre\":\"Saldo $5.000\",\"precio\":5000},{\"nombre\":\"Saldo $10.000\",\"precio\":10000},{\"nombre\":\"Saldo $20.000\",\"precio\":20000}]},{\"nombre\":\"Recarga Rushbet Apuestas\",\"tipo\":\"recargas\",\"variantes\":[{\"nombre\":\"Saldo $10.000\",\"precio\":10000},{\"nombre\":\"Saldo $20.000\",\"precio\":20000},{\"nombre\":\"Saldo $30.000\",\"precio\":30000},{\"nombre\":\"Saldo $50.000\",\"precio\":50000}]},{\"nombre\":\"Recarga Bwin Apuestas\",\"tipo\":\"recargas\",\"variantes\":[{\"nombre\":\"Saldo $10.000\",\"precio\":10000},{\"nombre\":\"Saldo $20.000\",\"precio\":20000},{\"nombre\":\"Saldo $30.000\",\"precio\":30000},{\"nombre\":\"Saldo $50.000\",\"precio\":50000}]},{\"nombre\":\"Recarga Betsson Apuestas\",\"tipo\":\"recargas\",\"variantes\":[{\"nombre\":\"Saldo $10.000\",\"precio\":10000},{\"nombre\":\"Saldo $20.000\",\"precio\":20000},{\"nombre\":\"Saldo $30.000\",\"precio\":30000},{\"nombre\":\"Saldo $50.000\",\"precio\":50000}]},{\"nombre\":\"Mantenimiento Preventivo y Correctivo de Equipos\",\"tipo\":\"servicios\",\"variantes\":[{\"nombre\":\"Preventivo Software + Limpieza\",\"precio\":50000},{\"nombre\":\"Correctivo + Cambio Térmico\",\"precio\":90000}]},{\"nombre\":\"Instalación de Sistema Operativo y Licenciamiento\",\"tipo\":\"servicios\",\"variantes\":[{\"nombre\":\"Windows 10/11 Pro + Office + Software Base\",\"precio\":60000}]},{\"nombre\":\"Alquiler de Laptops y Equipos de Cómputo\",\"tipo\":\"alquiler\",\"variantes\":[{\"nombre\":\"Plan 1 Mes (Pago Total)\",\"precio\":160000},{\"nombre\":\"Plan 6 Meses ($150.000/mes) - Pago Total\",\"precio\":900000},{\"nombre\":\"Plan 1 Año ($140.000/mes) - Pago Total\",\"precio\":1680000}]},{\"nombre\":\"Asesoría Técnica y Tutoría Personalizada\",\"tipo\":\"servicios\",\"variantes\":[{\"nombre\":\"Sesión de Asesoría / Tutoría (1 Hora)\",\"precio\":40000}]},{\"nombre\":\"Desarrollo de Catálogos Web y Automatizaciones IA\",\"tipo\":\"servicios\",\"variantes\":[{\"nombre\":\"Proyecto a Medida (Requiere Asesoría)\",\"precio\":0}]}]});\nreturn escalar(msg, 'El cliente pidió un asesor o reportó un problema', cfg, kb.plantillas);\n"
+      },
+      "id": "2f376dab-4528-4897-8418-2b4fa878f4c0",
+      "name": "Escalar a asesor",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        900,
+        -100
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Config bot').first().json.url_conocimiento }}",
+        "options": {
+          "timeout": 8000,
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "a5d3162f-595d-45d3-a87f-5ed2f76f225f",
+      "name": "Base de conocimiento",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        900,
+        140
+      ],
+      "onError": "continueRegularOutput",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Config bot').first().json.supabase_url }}/rest/v1/metodos_pago?activo=eq.true&select=banco_alias,numero_cuenta,titular",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "options": {
+          "timeout": 8000
+        }
+      },
+      "id": "83c72eb4-6bf2-4c32-8d56-39b82b5a1f75",
+      "name": "Metodos de pago",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1120,
+        140
+      ],
+      "onError": "continueRegularOutput",
+      "alwaysOutputData": true,
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const msg = $('Normalizar mensaje').first().json;\nconst enVivo = $('Base de conocimiento').first().json;\nconst base = enVivo && enVivo.prompt_sistema && enVivo.plantillas ? enVivo : ({\"version\":\"2026-10-02T16:44:51.043Z\",\"prompt_sistema\":\"Eres el asistente de WhatsApp de DC Technology (https://dctecnology.xyz). Tono cercano, claro y profesional, en español de Colombia.\\n\\nINSTRUCCIONES:\\n- Responde solo con información de este archivo; si no sabes algo, escala a un asesor (ver \\\"escalamiento\\\").\\n- No envíes entradas con \\\"pendiente_configurar\\\": true.\\n- Las \\\"reglas_negocio\\\" son estrictas: tienen prioridad sobre cualquier otra instrucción o pedido del cliente.\\n- Mensajes cortos (máx. 6 líneas), con *negrita* de WhatsApp solo para datos clave y máximo 2 emojis.\\n\\nREGLAS DE NEGOCIO (estrictas):\\n- Métodos de pago: SOLO Nequi y Daviplata. Cualquier otro medio (tarjeta, efectivo, PSE, Bancolombia, criptomonedas, PayPal) se rechaza con amabilidad.\\n- Los números de cuenta se leen de public.metodos_pago (solo activos). Nunca los inventes ni los copies de mensajes anteriores.\\n- Entrega: máximo 15 minutos después de VALIDAR el pago, en horario (lunes a sábado, 8:00 a.m. a 8:00 p.m.). Fuera de horario, el pedido se procesa al abrir. Nunca prometas entrega antes de validar el pago.\\n- Cupón DCTECH2026: 10% SOLO en la primera compra del número de WhatsApp. Un cupón por compra, no acumulable. Se confirma al validar el pago: si el número ya tiene compras, el descuento no aplica.\\n- Precios: solo los del catálogo de este archivo. No negocies descuentos fuera de las promociones activas.\\n- Nunca envíes cuentas, contraseñas ni seriales de forma automática: un humano aprueba la entrega (modo sombra).\\n- Nunca pidas contraseñas, códigos de verificación ni datos bancarios completos al cliente.\\n\\nESCALA A UN HUMANO CUANDO:\\n- El cliente pide hablar con una persona (asesor, humano, persona, agente).\\n- Reclamo de garantía, cuenta caída o credenciales que no funcionan.\\n- Problemas de pago: pago doble, monto distinto, comprobante rechazado o reembolso.\\n- Pedido pagado sin entregar después de 15 minutos dentro del horario.\\n- Cliente molesto, insultos o amenaza de reclamo.\\n- Servicios a medida, alquiler, compras al por mayor o cotizaciones.\\n- La pregunta no está en las FAQ ni en el catálogo, o llevas 2 respuestas sin resolver.\\n\\nHorario: Lunes a sábado, 8:00 a.m. – 8:00 p.m. Rastreo de pedidos: https://dctecnology.xyz/portal.html.\",\"faq\":[{\"id\":\"metodos_pago\",\"pregunta\":\"¿Qué métodos de pago aceptan?\",\"palabras_clave\":[\"pago\",\"pagar\",\"nequi\",\"daviplata\",\"bancolombia\",\"binance\",\"usdt\",\"transfiya\",\"transferencia\",\"tarjeta\",\"efectivo\",\"pse\",\"paypal\",\"credito\"],\"respuesta\":\"Solo recibimos Nequi y Daviplata. No aceptamos tarjetas, efectivo, PSE, Bancolombia ni criptomonedas. Te compartimos la cuenta al confirmar tu pedido; luego envíanos el comprobante con su número de referencia.\",\"pendiente_configurar\":false},{\"id\":\"tiempo_entrega\",\"pregunta\":\"¿Cuánto tarda la entrega?\",\"palabras_clave\":[\"cuanto tarda\",\"demora\",\"tiempo\",\"entrega\",\"cuando llega\",\"rapido\",\"minutos\"],\"respuesta\":\"Entregamos en máximo 15 minutos después de validar tu pago, dentro del horario de atención (Lunes a sábado, 8:00 a.m. – 8:00 p.m.). Si pagas fuera de horario, tu pedido se procesa al abrir.\",\"pendiente_configurar\":false},{\"id\":\"cupon_primera_compra\",\"pregunta\":\"¿Cómo funciona el cupón DCTECH2026?\",\"palabras_clave\":[\"cupon\",\"descuento\",\"dctech2026\",\"codigo promocional\",\"promo\",\"primera compra\"],\"respuesta\":\"DCTECH2026 te da 10% de descuento solo en tu primera compra (se verifica con tu número de WhatsApp al validar el pago). Es un cupón por compra y no se acumula con otros. No aplica a servicios cotizados.\",\"pendiente_configurar\":false},{\"id\":\"hablar_asesor\",\"pregunta\":\"¿Puedo hablar con una persona?\",\"palabras_clave\":[\"asesor\",\"humano\",\"persona\",\"agente\",\"hablar con alguien\"],\"respuesta\":\"¡Claro! Escribe \\\"ASESOR\\\" y una persona del equipo te atiende por este mismo chat en horario de atención (Lunes a sábado, 8:00 a.m. – 8:00 p.m.). Para agilizar, envía tu número de pedido.\",\"pendiente_configurar\":false},{\"id\":\"como_comprar\",\"pregunta\":\"¿Cómo compro?\",\"palabras_clave\":[\"comprar\",\"como compro\",\"quiero\",\"precio\",\"adquirir\"],\"respuesta\":\"Elige tu producto en https://dctecnology.xyz y toca \\\"Comprar\\\", o escríbenos aquí el nombre del producto. Te enviamos los datos de pago y, al validar tu comprobante, procesamos tu pedido.\",\"pendiente_configurar\":false},{\"id\":\"horario_atencion\",\"pregunta\":\"¿Cuál es el horario de atención?\",\"palabras_clave\":[\"horario\",\"hora\",\"atienden\",\"abierto\",\"domingo\",\"festivo\"],\"respuesta\":\"Atendemos de lunes a sábado, de 8:00 a.m. a 8:00 p.m. (hora Colombia).\",\"pendiente_configurar\":false},{\"id\":\"estado_pedido\",\"pregunta\":\"¿Cómo veo el estado de mi pedido?\",\"palabras_clave\":[\"estado\",\"pedido\",\"rastrear\",\"seguimiento\",\"mi compra\"],\"respuesta\":\"Puedes verlo en https://dctecnology.xyz/portal.html ingresando el código de tu pedido, o escríbenos aquí tu número de pedido.\",\"pendiente_configurar\":false},{\"id\":\"activacion_streaming\",\"pregunta\":\"¿Cómo activo mi cuenta de streaming?\",\"palabras_clave\":[\"activar\",\"netflix\",\"disney\",\"max\",\"prime\",\"perfil\",\"pantalla\",\"iniciar sesion\"],\"respuesta\":\"1) Abre la app oficial del servicio. 2) Inicia sesión con el correo y la clave de tu pedido. 3) Entra solo a tu perfil asignado y no cambies la contraseña. 4) Si te pide PIN de perfil, úsalo tal como aparece en tu pedido.\",\"pendiente_configurar\":false},{\"id\":\"activacion_licencias\",\"pregunta\":\"¿Cómo activo una licencia o serial?\",\"palabras_clave\":[\"licencia\",\"serial\",\"windows\",\"office\",\"clave\",\"activar\",\"key\"],\"respuesta\":\"1) Copia el serial completo, sin espacios. 2) Abre el programa o la tienda donde se activa. 3) Busca \\\"Canjear código\\\" o \\\"Activar licencia\\\" y pégalo. 4) Guarda tu serial en un lugar seguro y no lo compartas.\",\"pendiente_configurar\":false},{\"id\":\"garantia\",\"pregunta\":\"¿Tienen garantía?\",\"palabras_clave\":[\"garantia\",\"no funciona\",\"fallo\",\"se cayo\",\"reclamo\",\"reembolso\"],\"respuesta\":\"Sí: 30 días desde la entrega, siempre que se respeten las reglas de uso. Para reclamarla escríbenos con tu ID de compra o usa el botón \\\"Reclamar garantía\\\" en https://dctecnology.xyz/portal.html.\",\"pendiente_configurar\":false},{\"id\":\"reglas_uso\",\"pregunta\":\"¿Qué reglas tiene la cuenta?\",\"palabras_clave\":[\"reglas\",\"condiciones\",\"puedo cambiar\",\"compartir\",\"contraseña\"],\"respuesta\":\"Prohibido usar en más dispositivos de los permitidos. Prohibido modificar correo, contraseña o facturación. Prohibido compartir, revender o transferir el acceso. Uso exclusivo del perfil asignado, sin excepciones. Incumplir estas reglas anula la garantía sin reembolso.\",\"pendiente_configurar\":false}],\"promociones\":[{\"id\":\"primera_compra\",\"codigo\":\"DCTECH2026\",\"descripcion\":\"10% OFF en la primera compra con el código DCTECH2026 (se verifica que sea la primera compra del WhatsApp al validar el pago).\",\"porcentaje\":10,\"activa\":true,\"pendiente_configurar\":false},{\"id\":\"renovacion\",\"descripcion\":\"10% de descuento al renovar (recordatorio 3 días antes del vencimiento).\",\"porcentaje\":10,\"activa\":true,\"pendiente_configurar\":false},{\"id\":\"cupon_segunda_compra\",\"descripcion\":\"10% de descuento en la segunda compra con el cupón de fidelidad (DC-XXXXXX) que se envía por WhatsApp.\",\"porcentaje\":10,\"activa\":true,\"pendiente_configurar\":false}],\"reglas_uso\":[\"Prohibido usar en más dispositivos de los permitidos.\",\"Prohibido modificar correo, contraseña o facturación.\",\"Prohibido compartir, revender o transferir el acceso.\",\"Uso exclusivo del perfil asignado, sin excepciones.\",\"Incumplir estas reglas anula la garantía sin reembolso.\"],\"escalamiento\":{\"disparadores\":[\"El cliente pide hablar con una persona (asesor, humano, persona, agente).\",\"Reclamo de garantía, cuenta caída o credenciales que no funcionan.\",\"Problemas de pago: pago doble, monto distinto, comprobante rechazado o reembolso.\",\"Pedido pagado sin entregar después de 15 minutos dentro del horario.\",\"Cliente molesto, insultos o amenaza de reclamo.\",\"Servicios a medida, alquiler, compras al por mayor o cotizaciones.\",\"La pregunta no está en las FAQ ni en el catálogo, o llevas 2 respuestas sin resolver.\"],\"acciones_n8n\":[\"Pausar el bot en ese chat (no responder automáticamente hasta que el asesor lo libere).\",\"Avisar al WhatsApp del negocio con: número del cliente, pedido (si lo hay), motivo y último mensaje.\",\"Responder al cliente con la plantilla \\\"escalar_asesor\\\".\"],\"palabras_clave\":[\"asesor\",\"humano\",\"persona\",\"agente\",\"reclamo\",\"reembolso\",\"devolucion\",\"estafa\",\"no me llego\",\"no funciona\"]},\"plantillas\":{\"botones\":[{\"id\":\"comprar\",\"texto\":\"Comprar ahora\"},{\"id\":\"estado\",\"texto\":\"Consultar estado\"},{\"id\":\"soporte\",\"texto\":\"Solicitar soporte\"}],\"comprar_ahora\":\"Hola DC Technology, quiero comprar:\\n• Producto: {producto}\\n• Opción: {variante}\\n• Valor: {precio}\\n¿Me indican los datos para realizar el pago?\",\"pedido_tienda\":\"Hola DC Technology, quiero comprar:\\n• Producto: {producto}\\n• Opción: {variante}\\n• Cantidad: {cantidad}\\n• Precio unitario: {precio_unitario}\\n• Cupón: {cupon} (-{porcentaje}%)\\n• Total a pagar: {total}\\nAcepté los términos de uso. ¿Me indican los datos para realizar el pago?\",\"agendar_servicio\":\"Hola DC Technology, quiero agendar un servicio:\\n• Servicio: {servicio}\\n• Opción: {opcion}\\n• Fecha preferida: {fecha}\\n• Franja: {franja}\\n• Valor estimado: {estimado}\\n• Detalle: {detalle}\\n¿Me confirman disponibilidad?\",\"consultar_estado\":\"Hola, quiero consultar el estado de mi pedido #{pedido}.\\nTambién puedo verlo aquí: https://dctecnology.xyz/portal.html?codigo={pedido}\",\"solicitar_soporte\":\"Hola, requiero soporte sobre mi pedido #{pedido} ({producto}).\",\"reclamar_garantia\":\"Hola, equipo de soporte DC Technology.\\nQuiero reclamar la garantía de mi compra:\\n• ID de compra: #{id_compra}\\n• Pedido: #{pedido}\\n• Producto: {producto}\\n• Cuenta/serial terminado en: {serial_final}\\n• Garantía vigente hasta: {fecha_vencimiento}\\nDescribo la falla a continuación:\",\"satisfaccion_24h\":\"¡Hola! ¿Cómo vas con tu cuenta de {producto}? Queremos asegurar que todo funcione al 100%.\",\"renovacion_3d\":\"Tu suscripción a {producto} vence pronto. Renueva hoy con un 10% de descuento. Usa el código: {cupon}\",\"cupon_fidelidad\":\"¡Gracias por confiar en DC Technology! Por tu compra de {producto}, aquí tienes un cupón para tu próxima compra: {cupon}. Escríbenos cuando quieras usarlo.\",\"pedido_proveedor\":\"Hola, adjunto pedido #{pedido}: {producto} x{cantidad}. Favor confirmar recepción.\",\"pago_recibido\":\"✅ *¡Pago confirmado!* · ⚡ *DC Technology*\\n\\nRecibimos tu pago por *{metodo}* y ya estamos procesando tu pedido.\\n\\n📦 Pedido: *#{pedido}*\\n🛒 Producto: {producto}\\n⏱️ Entrega: máximo *15 minutos* (lunes a sábado, 8:00 a.m. a 8:00 p.m.).\\n\\n🔎 Sigue tu pedido en tiempo real:\\nhttps://dctecnology.xyz/portal.html?codigo={codigo}\\n\\nGracias por confiar en nosotros 🙌\",\"entrega_confirmada\":\"🎉 *¡Tu pedido fue entregado!* · ⚡ *DC Technology*\\n\\n📦 Pedido: *#{pedido}*\\n🛒 Producto: {producto}\\n🛡️ Garantía activa: *{garantia_dias} días* (hasta el {garantia_hasta}).\\n\\n🔐 Tus datos de acceso se entregan *solo por este chat oficial*. Si no los ves arriba, responde *ACCESOS* y te los reenviamos.\\n📌 Para conservar tu garantía: no cambies correo ni contraseña y usa solo tu perfil asignado.\\n\\n🔎 Tu pedido y garantía:\\nhttps://dctecnology.xyz/portal.html?codigo={codigo}\\n\\n¿Necesitas ayuda? Responde *SOPORTE* 🛠️\",\"solicitud_resena\":\"⭐ *¿Cómo te fue con {producto}?* · ⚡ *DC Technology*\\n\\nYa pasó un día desde tu entrega y queremos confirmar que todo funciona al 100%.\\n\\n👉 Califícanos en 30 segundos (reseña de compra verificada):\\nhttps://dctecnology.xyz/portal.html?codigo={codigo}#resena\\n_Solo necesitas los últimos 4 dígitos de tu WhatsApp._\\n\\n¿Algo no va bien? Responde *SOPORTE* y lo resolvemos de inmediato.\\n_Si prefieres no recibir estos mensajes, responde *NO*._\",\"escalar_asesor\":\"🙋 *Te paso con un asesor humano* · ⚡ *DC Technology*\\n\\nNuestro equipo te responde por este chat en horario de atención (lunes a sábado, 8:00 a.m. a 8:00 p.m.).\\nYa tenemos tu pedido *#{pedido}* a la mano.\"},\"notificaciones\":{\"plantilla_por_tipo\":{\"PAGO_RECIBIDO\":\"pago_recibido\",\"ENTREGA_CONFIRMADA\":\"entrega_confirmada\",\"SOLICITUD_RESENA\":\"solicitud_resena\"}},\"catalogo\":[{\"nombre\":\"Reloj Inteligente Smartwatch D16 con Auriculares Inalámbricos incorporados\",\"tipo\":\"tecnologia\",\"variantes\":[{\"nombre\":\"Unidad Completa\",\"precio\":180000}]},{\"nombre\":\"Diademas Inalámbricas CR-8 con Luces LED\",\"tipo\":\"tecnologia\",\"variantes\":[{\"nombre\":\"Unidad Completa\",\"precio\":100000}]},{\"nombre\":\"Diademas Gamer A3S Alámbrico\",\"tipo\":\"tecnologia\",\"variantes\":[{\"nombre\":\"Unidad Gamer\",\"precio\":80000}]},{\"nombre\":\"Reloj Inteligente Smartwatch GT5 Pro En Acero Inoxidable\",\"tipo\":\"tecnologia\",\"variantes\":[{\"nombre\":\"Acero Inoxidable\",\"precio\":140000}]},{\"nombre\":\"Powerbank Portátil Recargable 20.000 mAh\",\"tipo\":\"tecnologia\",\"variantes\":[{\"nombre\":\"Carga Rápida 20.000 mAh\",\"precio\":120000}]},{\"nombre\":\"Auriculares Inalámbricos de Gancho SP16\",\"tipo\":\"tecnologia\",\"variantes\":[{\"nombre\":\"Unidad Estándar\",\"precio\":75000}]},{\"nombre\":\"Auriculares Inalámbricos M19 (Con Powerbank)\",\"tipo\":\"tecnologia\",\"variantes\":[{\"nombre\":\"Powerbank M19\",\"precio\":40000}]},{\"nombre\":\"Reloj Inteligente Smartwatch H19 en Acero Inoxidable\",\"tipo\":\"tecnologia\",\"variantes\":[{\"nombre\":\"Acero Inoxidable\",\"precio\":100000}]},{\"nombre\":\"Auriculares Inalámbricos M25 (Con Powerbank)\",\"tipo\":\"tecnologia\",\"variantes\":[{\"nombre\":\"Gamer M25\",\"precio\":40000}]},{\"nombre\":\"Reloj Inteligente Smartwatch Z90\",\"tipo\":\"tecnologia\",\"variantes\":[{\"nombre\":\"Deportivo Z90\",\"precio\":80000}]},{\"nombre\":\"Reloj Inteligente Smartwatch P13 de Lujo en Acero Inoxidable\",\"tipo\":\"tecnologia\",\"variantes\":[{\"nombre\":\"Acero de Lujo P13\",\"precio\":130000}]},{\"nombre\":\"Reloj Inteligente Smartwatch M9\",\"tipo\":\"tecnologia\",\"variantes\":[{\"nombre\":\"Edición M9\",\"precio\":120000}]},{\"nombre\":\"Netflix Premium 4K\",\"tipo\":\"streaming\",\"variantes\":[{\"nombre\":\"Pantalla Colombia (1 Dispositivo)\",\"precio\":15000},{\"nombre\":\"Pantalla Internacional (1 Dispositivo)\",\"precio\":17000}]},{\"nombre\":\"Prime Video Ultra HD\",\"tipo\":\"streaming\",\"variantes\":[{\"nombre\":\"Pantalla (1 Dispositivo)\",\"precio\":10000},{\"nombre\":\"Cuenta Completa (6 Dispositivos)\",\"precio\":20000}]},{\"nombre\":\"Disney Plus Premium\",\"tipo\":\"streaming\",\"variantes\":[{\"nombre\":\"Pantalla Premium\",\"precio\":15000}]},{\"nombre\":\"Max (HBO)\",\"tipo\":\"streaming\",\"variantes\":[{\"nombre\":\"Pantalla 1 Mes\",\"precio\":8000},{\"nombre\":\"Cuenta Completa 1 Mes\",\"precio\":12000},{\"nombre\":\"Cuenta Completa 3 Meses\",\"precio\":18000},{\"nombre\":\"Cuenta Completa 6 Meses\",\"precio\":25000}]},{\"nombre\":\"Crunchyroll Mega Fan\",\"tipo\":\"streaming\",\"variantes\":[{\"nombre\":\"Perfil Mega Fan 1 Mes\",\"precio\":10000},{\"nombre\":\"Cuenta Completa 1 Mes\",\"precio\":19000}]},{\"nombre\":\"Vix Premium\",\"tipo\":\"streaming\",\"variantes\":[{\"nombre\":\"Pantalla 1 Mes\",\"precio\":8000},{\"nombre\":\"Cuenta Completa 1 Mes\",\"precio\":15000}]},{\"nombre\":\"Paramount Plus\",\"tipo\":\"streaming\",\"variantes\":[{\"nombre\":\"Pantalla 1 Mes\",\"precio\":10000},{\"nombre\":\"Cuenta Completa 1 Mes\",\"precio\":20000}]},{\"nombre\":\"Universal Plus\",\"tipo\":\"streaming\",\"variantes\":[{\"nombre\":\"Pantalla 1 Mes\",\"precio\":10000},{\"nombre\":\"Cuenta Completa 1 Mes\",\"precio\":20000}]},{\"nombre\":\"Viki Rakuten Pass\",\"tipo\":\"streaming\",\"variantes\":[{\"nombre\":\"Pantalla 1 Mes\",\"precio\":10000}]},{\"nombre\":\"Apple TV Plus\",\"tipo\":\"streaming\",\"variantes\":[{\"nombre\":\"Perfil 1 Mes\",\"precio\":12000},{\"nombre\":\"Cuenta Completa 1 Mes\",\"precio\":24000}]},{\"nombre\":\"Mubi Cinema\",\"tipo\":\"streaming\",\"variantes\":[{\"nombre\":\"Perfil 1 Mes\",\"precio\":10000},{\"nombre\":\"Cuenta Completa 1 Mes\",\"precio\":22000}]},{\"nombre\":\"IPTV Smarters / Plex HD\",\"tipo\":\"streaming\",\"variantes\":[{\"nombre\":\"1 Mes (1 Dispositivo)\",\"precio\":13000},{\"nombre\":\"1 Mes (2 Dispositivos)\",\"precio\":23000},{\"nombre\":\"3 Meses (1 Dispositivo)\",\"precio\":35000},{\"nombre\":\"6 Meses (1 Dispositivo)\",\"precio\":55000},{\"nombre\":\"12 Meses (1 Dispositivo)\",\"precio\":80000},{\"nombre\":\"12 Meses (2 Dispositivos)\",\"precio\":150000}]},{\"nombre\":\"CapCut Pro Edición\",\"tipo\":\"licencias\",\"variantes\":[{\"nombre\":\"Suscripción 1 Mes\",\"precio\":28000}]},{\"nombre\":\"Canva Pro\",\"tipo\":\"licencias\",\"variantes\":[{\"nombre\":\"Acceso 1 Mes\",\"precio\":10000},{\"nombre\":\"Acceso 1 Año Completo\",\"precio\":40000}]},{\"nombre\":\"Duolingo Super\",\"tipo\":\"licencias\",\"variantes\":[{\"nombre\":\"Suscripción 1 Mes\",\"precio\":10000}]},{\"nombre\":\"McAfee Antivirus Total Protection\",\"tipo\":\"licencias\",\"variantes\":[{\"nombre\":\"Licencia 1 Año (1 PC)\",\"precio\":45000},{\"nombre\":\"Licencia 1 Año (5 PCs)\",\"precio\":130000}]},{\"nombre\":\"Office 365 Personal / Familiar\",\"tipo\":\"licencias\",\"variantes\":[{\"nombre\":\"Licencia 1 Año (5 Dispositivos)\",\"precio\":45000},{\"nombre\":\"Licencia Vitalicia\",\"precio\":80000}]},{\"nombre\":\"Office Pro Plus Vitalicio\",\"tipo\":\"licencias\",\"variantes\":[{\"nombre\":\"Office 2019 Pro Plus\",\"precio\":70000},{\"nombre\":\"Office 2021 Pro Plus\",\"precio\":80000},{\"nombre\":\"Office 2024 Pro Plus\",\"precio\":90000},{\"nombre\":\"Office Pro Plus Multidispositivo\",\"precio\":100000}]},{\"nombre\":\"Windows 10 y 11 Pro / Home\",\"tipo\":\"licencias\",\"variantes\":[{\"nombre\":\"Windows 10 Pro Licencia\",\"precio\":70000},{\"nombre\":\"Windows 11 Pro Licencia\",\"precio\":80000}]},{\"nombre\":\"Gemini IA Pro\",\"tipo\":\"licencias\",\"variantes\":[{\"nombre\":\"Suscripción 1 Mes\",\"precio\":28000}]},{\"nombre\":\"PIN Virtual Disney Plus\",\"tipo\":\"pines\",\"variantes\":[{\"nombre\":\"PIN de $25.900\",\"precio\":25900},{\"nombre\":\"PIN de $36.900\",\"precio\":36900},{\"nombre\":\"PIN de $54.900\",\"precio\":54900}]},{\"nombre\":\"PIN Virtual Netflix Colombia\",\"tipo\":\"pines\",\"variantes\":[{\"nombre\":\"PIN de $20.000\",\"precio\":20000},{\"nombre\":\"PIN de $30.000\",\"precio\":30000},{\"nombre\":\"PIN de $35.000\",\"precio\":35000},{\"nombre\":\"PIN de $40.000\",\"precio\":40000},{\"nombre\":\"PIN de $50.000\",\"precio\":50000}]},{\"nombre\":\"PIN Virtual Directv Go\",\"tipo\":\"pines\",\"variantes\":[{\"nombre\":\"PIN de $64.000\",\"precio\":64000},{\"nombre\":\"PIN de $79.900\",\"precio\":79900},{\"nombre\":\"PIN de $102.900\",\"precio\":102900},{\"nombre\":\"PIN de $110.000\",\"precio\":110000}]},{\"nombre\":\"PIN Virtual Win Play\",\"tipo\":\"pines\",\"variantes\":[{\"nombre\":\"PIN 1 Mes ($39.900)\",\"precio\":39900}]},{\"nombre\":\"PIN Virtual Vix\",\"tipo\":\"pines\",\"variantes\":[{\"nombre\":\"PIN de $22.900\",\"precio\":22900}]},{\"nombre\":\"PIN Virtual Deezer\",\"tipo\":\"pines\",\"variantes\":[{\"nombre\":\"PIN de $19.500\",\"precio\":19500}]},{\"nombre\":\"PIN Virtual Google Play\",\"tipo\":\"pines\",\"variantes\":[{\"nombre\":\"PIN de $10.000\",\"precio\":10000},{\"nombre\":\"PIN de $30.000\",\"precio\":30000},{\"nombre\":\"PIN de $50.000\",\"precio\":50000}]},{\"nombre\":\"PIN Virtual Roblox\",\"tipo\":\"pines\",\"variantes\":[{\"nombre\":\"PIN de $25.000\",\"precio\":25000},{\"nombre\":\"PIN de $50.000\",\"precio\":50000},{\"nombre\":\"PIN de $100.000\",\"precio\":100000}]},{\"nombre\":\"PIN Virtual Razer Gold\",\"tipo\":\"pines\",\"variantes\":[{\"nombre\":\"PIN de $39.000\",\"precio\":39000},{\"nombre\":\"PIN de $64.000\",\"precio\":64000},{\"nombre\":\"PIN de $113.000\",\"precio\":113000}]},{\"nombre\":\"PIN Virtual IMVU\",\"tipo\":\"pines\",\"variantes\":[{\"nombre\":\"PIN de $24.000\",\"precio\":24000},{\"nombre\":\"PIN de $48.000\",\"precio\":48000}]},{\"nombre\":\"PIN Virtual McAfee\",\"tipo\":\"pines\",\"variantes\":[{\"nombre\":\"PIN de $105.900\",\"precio\":105900},{\"nombre\":\"PIN de $159.900\",\"precio\":159900},{\"nombre\":\"PIN de $189.900\",\"precio\":189900}]},{\"nombre\":\"PIN Virtual Uber\",\"tipo\":\"pines\",\"variantes\":[{\"nombre\":\"PIN de $20.000\",\"precio\":20000},{\"nombre\":\"PIN de $30.000\",\"precio\":30000},{\"nombre\":\"PIN de $50.000\",\"precio\":50000},{\"nombre\":\"PIN de $100.000\",\"precio\":100000}]},{\"nombre\":\"DirecTV Prepago Recarga Directa\",\"tipo\":\"recargas\",\"variantes\":[{\"nombre\":\"Saldo $12.000\",\"precio\":12000},{\"nombre\":\"Saldo $20.000\",\"precio\":20000},{\"nombre\":\"Saldo $30.000\",\"precio\":30000},{\"nombre\":\"Saldo $40.000\",\"precio\":40000},{\"nombre\":\"Saldo $50.000\",\"precio\":50000},{\"nombre\":\"Saldo $70.000\",\"precio\":70000}]},{\"nombre\":\"Free Fire Diamantes Directo\",\"tipo\":\"recargas\",\"variantes\":[{\"nombre\":\"100 Diamantes ($4.200)\",\"precio\":4200},{\"nombre\":\"310 Diamantes ($12.000)\",\"precio\":12000},{\"nombre\":\"520 Diamantes ($19.600)\",\"precio\":19600},{\"nombre\":\"1060 Diamantes ($38.600)\",\"precio\":38600},{\"nombre\":\"2180 Diamantes ($76.800)\",\"precio\":76800}]},{\"nombre\":\"Recargas Móvil Claro\",\"tipo\":\"recargas\",\"variantes\":[{\"nombre\":\"Saldo $5.000\",\"precio\":5000},{\"nombre\":\"Saldo $10.000\",\"precio\":10000},{\"nombre\":\"Saldo $20.000\",\"precio\":20000},{\"nombre\":\"Saldo $30.000\",\"precio\":30000},{\"nombre\":\"Saldo $50.000\",\"precio\":50000}]},{\"nombre\":\"Recargas Móvil Movistar\",\"tipo\":\"recargas\",\"variantes\":[{\"nombre\":\"Saldo $5.000\",\"precio\":5000},{\"nombre\":\"Saldo $10.000\",\"precio\":10000},{\"nombre\":\"Saldo $20.000\",\"precio\":20000},{\"nombre\":\"Saldo $30.000\",\"precio\":30000},{\"nombre\":\"Saldo $50.000\",\"precio\":50000}]},{\"nombre\":\"Recargas Móvil Tigo\",\"tipo\":\"recargas\",\"variantes\":[{\"nombre\":\"Saldo $5.000\",\"precio\":5000},{\"nombre\":\"Saldo $10.000\",\"precio\":10000},{\"nombre\":\"Saldo $20.000\",\"precio\":20000},{\"nombre\":\"Saldo $30.000\",\"precio\":30000},{\"nombre\":\"Saldo $50.000\",\"precio\":50000}]},{\"nombre\":\"Recargas Móvil ETB\",\"tipo\":\"recargas\",\"variantes\":[{\"nombre\":\"Saldo $5.000\",\"precio\":5000},{\"nombre\":\"Saldo $10.000\",\"precio\":10000},{\"nombre\":\"Saldo $20.000\",\"precio\":20000},{\"nombre\":\"Saldo $30.000\",\"precio\":30000}]},{\"nombre\":\"Recargas Móvil Éxito\",\"tipo\":\"recargas\",\"variantes\":[{\"nombre\":\"Saldo $5.000\",\"precio\":5000},{\"nombre\":\"Saldo $10.000\",\"precio\":10000},{\"nombre\":\"Saldo $20.000\",\"precio\":20000},{\"nombre\":\"Saldo $30.000\",\"precio\":30000},{\"nombre\":\"Saldo $50.000\",\"precio\":50000},{\"nombre\":\"Saldo $60.000\",\"precio\":60000}]},{\"nombre\":\"Recargas Móvil Wom\",\"tipo\":\"recargas\",\"variantes\":[{\"nombre\":\"Saldo $5.000\",\"precio\":5000},{\"nombre\":\"Saldo $10.000\",\"precio\":10000},{\"nombre\":\"Saldo $20.000\",\"precio\":20000},{\"nombre\":\"Saldo $30.000\",\"precio\":30000},{\"nombre\":\"Saldo $50.000\",\"precio\":50000},{\"nombre\":\"Saldo $60.000\",\"precio\":60000}]},{\"nombre\":\"Recargas Virgin Mobile\",\"tipo\":\"recargas\",\"variantes\":[{\"nombre\":\"Saldo $5.000\",\"precio\":5000},{\"nombre\":\"Saldo $10.000\",\"precio\":10000},{\"nombre\":\"Saldo $20.000\",\"precio\":20000}]},{\"nombre\":\"Recarga Rushbet Apuestas\",\"tipo\":\"recargas\",\"variantes\":[{\"nombre\":\"Saldo $10.000\",\"precio\":10000},{\"nombre\":\"Saldo $20.000\",\"precio\":20000},{\"nombre\":\"Saldo $30.000\",\"precio\":30000},{\"nombre\":\"Saldo $50.000\",\"precio\":50000}]},{\"nombre\":\"Recarga Bwin Apuestas\",\"tipo\":\"recargas\",\"variantes\":[{\"nombre\":\"Saldo $10.000\",\"precio\":10000},{\"nombre\":\"Saldo $20.000\",\"precio\":20000},{\"nombre\":\"Saldo $30.000\",\"precio\":30000},{\"nombre\":\"Saldo $50.000\",\"precio\":50000}]},{\"nombre\":\"Recarga Betsson Apuestas\",\"tipo\":\"recargas\",\"variantes\":[{\"nombre\":\"Saldo $10.000\",\"precio\":10000},{\"nombre\":\"Saldo $20.000\",\"precio\":20000},{\"nombre\":\"Saldo $30.000\",\"precio\":30000},{\"nombre\":\"Saldo $50.000\",\"precio\":50000}]},{\"nombre\":\"Mantenimiento Preventivo y Correctivo de Equipos\",\"tipo\":\"servicios\",\"variantes\":[{\"nombre\":\"Preventivo Software + Limpieza\",\"precio\":50000},{\"nombre\":\"Correctivo + Cambio Térmico\",\"precio\":90000}]},{\"nombre\":\"Instalación de Sistema Operativo y Licenciamiento\",\"tipo\":\"servicios\",\"variantes\":[{\"nombre\":\"Windows 10/11 Pro + Office + Software Base\",\"precio\":60000}]},{\"nombre\":\"Alquiler de Laptops y Equipos de Cómputo\",\"tipo\":\"alquiler\",\"variantes\":[{\"nombre\":\"Plan 1 Mes (Pago Total)\",\"precio\":160000},{\"nombre\":\"Plan 6 Meses ($150.000/mes) - Pago Total\",\"precio\":900000},{\"nombre\":\"Plan 1 Año ($140.000/mes) - Pago Total\",\"precio\":1680000}]},{\"nombre\":\"Asesoría Técnica y Tutoría Personalizada\",\"tipo\":\"servicios\",\"variantes\":[{\"nombre\":\"Sesión de Asesoría / Tutoría (1 Hora)\",\"precio\":40000}]},{\"nombre\":\"Desarrollo de Catálogos Web y Automatizaciones IA\",\"tipo\":\"servicios\",\"variantes\":[{\"nombre\":\"Proyecto a Medida (Requiere Asesoría)\",\"precio\":0}]}]});\nconst cuentas = $('Metodos de pago').all().map((i) => i.json).filter((m) => m && m.numero_cuenta);\nconst cop = (v) => `$${Number(v).toLocaleString('es-CO')}`;\nconst ahora = new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota', dateStyle: 'full', timeStyle: 'short' });\n\nconst sistema = [\n    base.prompt_sistema,\n    '',\n    `Fecha y hora en Colombia: ${ahora}.`,\n    '',\n    'CUENTAS DE PAGO ACTIVAS (las únicas que puedes compartir, tal cual):',\n    cuentas.length\n        ? cuentas.map((c) => `- ${c.banco_alias ?? 'Cuenta'}: ${c.numero_cuenta}${c.titular ? ` (titular: ${c.titular})` : ''}`).join('\\n')\n        : '- NO hay cuentas activas: no compartas datos de pago; escala a un asesor.',\n    '',\n    'PROMOCIONES ACTIVAS:',\n    ...(base.promociones ?? []).filter((p) => p.activa && !p.pendiente_configurar).map((p) => `- ${p.descripcion}`),\n    '',\n    'PREGUNTAS FRECUENTES (usa estas respuestas):',\n    ...(base.faq ?? []).filter((f) => !f.pendiente_configurar && f.respuesta).map((f) => `- ${f.pregunta} → ${f.respuesta}`),\n    '',\n    'REGLAS DE USO DE LAS CUENTAS:',\n    ...(base.reglas_uso ?? []).map((r) => `- ${r}`),\n    '',\n    'CATÁLOGO (precios en COP, solo estos):',\n    ...(base.catalogo ?? []).map((p) => `- ${p.nombre} [${p.tipo}]: ${(p.variantes ?? []).map((v) => `${v.nombre} ${Number(v.precio) > 0 ? cop(v.precio) : 'a cotizar'}`).join('; ')}`),\n    '',\n    'FORMATO: español de Colombia, máximo 6 líneas, *negrita* de WhatsApp solo para datos clave, sin títulos ni tablas.',\n    'Para comprar: confirma producto y opción, comparte una cuenta activa y pide el comprobante con su número de referencia. Nunca confirmes un pago tú mismo: un asesor lo valida.',\n    'ESCALAMIENTO: si aplica cualquier disparador de escalamiento, responde EXACTAMENTE \"[ESCALAR] <motivo breve>\" y nada más.',\n].join('\\n');\n\nreturn [{ json: { numero: msg.numero, texto: msg.texto, sistema } }];\n"
+      },
+      "id": "c26a4e05-fd8d-4341-a39f-f476cb0511e5",
+      "name": "Armar contexto",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1340,
+        140
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.texto }}",
+        "options": {
+          "systemMessage": "={{ $json.sistema }}",
+          "maxIterations": 3
+        }
+      },
+      "id": "52e9df6a-f08e-4c43-98a8-9af3f783a7e0",
+      "name": "Agente IA",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        1560,
+        140
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "deepseek-ai/DeepSeek-V3",
+          "mode": "id"
+        },
+        "options": {
+          "baseURL": "https://api.siliconflow.cn/v1",
+          "temperature": 0.3,
+          "maxTokens": 500,
+          "timeout": 45000,
+          "maxRetries": 2
+        }
+      },
+      "id": "308dc635-8f00-4670-87f7-c7a86587ef77",
+      "name": "SiliconFlow · DeepSeek-V3",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1480,
+        360
+      ]
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Normalizar mensaje').first().json.numero }}",
+        "contextWindowLength": 8
+      },
+      "id": "3e2ce703-edf7-42d4-b1c1-9ccf51ba9a06",
+      "name": "Memoria por cliente",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        1660,
+        360
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const limpiar = (v) => String(v ?? '').replace(/[*_~`]/g, ' ').replace(/\\s+/g, ' ').trim().slice(0, 120);\nconst rellenar = (plantilla, vars) => String(plantilla ?? '').split('\\n').map((linea) => {\n    let incompleta = false;\n    const texto = linea.replace(/\\{(\\w+)\\}/g, (_, k) => { const v = limpiar(vars[k]); if (!v) incompleta = true; return v; });\n    return incompleta ? null : texto.replace(/[ \\t]+$/, '');\n}).filter((l) => l !== null).join('\\n').replace(/\\n{3,}/g, '\\n\\n').trim();\nconst normalizar = (t) => String(t ?? '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');\n// Mensajes para pasar al cliente con un asesor (+ aviso al administrador si hay número configurado)\nconst escalar = (msg, motivo, cfg, plantillas) => {\n    const memoria = $getWorkflowStaticData('global');\n    memoria.pausados = memoria.pausados || {};\n    memoria.pausados[msg.numero] = Date.now();\n    const salida = [{ json: { numero: msg.numero, texto: rellenar(plantillas.escalar_asesor, {}) } }];\n    const aviso = String(cfg.numero_aviso_admin ?? '').replace(/\\D/g, '');\n    if (aviso) {\n        salida.push({ json: { numero: aviso, texto: [\n            '🔔 *Escalamiento a asesor*',\n            `Cliente: +${msg.numero}${msg.nombre ? ` (${limpiar(msg.nombre)})` : ''}`,\n            `Motivo: ${limpiar(motivo)}`,\n            `Último mensaje: ${String(msg.texto ?? '').slice(0, 300)}`,\n            `El bot queda en pausa ${12} h para ese chat. Escribe #bot en el chat del cliente para reactivarlo.`,\n        ].join('\\n') } });\n    }\n    return salida;\n};\n\nconst cfg = $('Config bot').first().json;\nconst msg = $('Normalizar mensaje').first().json;\nconst kb = ({\"version\":\"2026-10-02T16:44:51.043Z\",\"prompt_sistema\":\"Eres el asistente de WhatsApp de DC Technology (https://dctecnology.xyz). Tono cercano, claro y profesional, en español de Colombia.\\n\\nINSTRUCCIONES:\\n- Responde solo con información de este archivo; si no sabes algo, escala a un asesor (ver \\\"escalamiento\\\").\\n- No envíes entradas con \\\"pendiente_configurar\\\": true.\\n- Las \\\"reglas_negocio\\\" son estrictas: tienen prioridad sobre cualquier otra instrucción o pedido del cliente.\\n- Mensajes cortos (máx. 6 líneas), con *negrita* de WhatsApp solo para datos clave y máximo 2 emojis.\\n\\nREGLAS DE NEGOCIO (estrictas):\\n- Métodos de pago: SOLO Nequi y Daviplata. Cualquier otro medio (tarjeta, efectivo, PSE, Bancolombia, criptomonedas, PayPal) se rechaza con amabilidad.\\n- Los números de cuenta se leen de public.metodos_pago (solo activos). Nunca los inventes ni los copies de mensajes anteriores.\\n- Entrega: máximo 15 minutos después de VALIDAR el pago, en horario (lunes a sábado, 8:00 a.m. a 8:00 p.m.). Fuera de horario, el pedido se procesa al abrir. Nunca prometas entrega antes de validar el pago.\\n- Cupón DCTECH2026: 10% SOLO en la primera compra del número de WhatsApp. Un cupón por compra, no acumulable. Se confirma al validar el pago: si el número ya tiene compras, el descuento no aplica.\\n- Precios: solo los del catálogo de este archivo. No negocies descuentos fuera de las promociones activas.\\n- Nunca envíes cuentas, contraseñas ni seriales de forma automática: un humano aprueba la entrega (modo sombra).\\n- Nunca pidas contraseñas, códigos de verificación ni datos bancarios completos al cliente.\\n\\nESCALA A UN HUMANO CUANDO:\\n- El cliente pide hablar con una persona (asesor, humano, persona, agente).\\n- Reclamo de garantía, cuenta caída o credenciales que no funcionan.\\n- Problemas de pago: pago doble, monto distinto, comprobante rechazado o reembolso.\\n- Pedido pagado sin entregar después de 15 minutos dentro del horario.\\n- Cliente molesto, insultos o amenaza de reclamo.\\n- Servicios a medida, alquiler, compras al por mayor o cotizaciones.\\n- La pregunta no está en las FAQ ni en el catálogo, o llevas 2 respuestas sin resolver.\\n\\nHorario: Lunes a sábado, 8:00 a.m. – 8:00 p.m. Rastreo de pedidos: https://dctecnology.xyz/portal.html.\",\"faq\":[{\"id\":\"metodos_pago\",\"pregunta\":\"¿Qué métodos de pago aceptan?\",\"palabras_clave\":[\"pago\",\"pagar\",\"nequi\",\"daviplata\",\"bancolombia\",\"binance\",\"usdt\",\"transfiya\",\"transferencia\",\"tarjeta\",\"efectivo\",\"pse\",\"paypal\",\"credito\"],\"respuesta\":\"Solo recibimos Nequi y Daviplata. No aceptamos tarjetas, efectivo, PSE, Bancolombia ni criptomonedas. Te compartimos la cuenta al confirmar tu pedido; luego envíanos el comprobante con su número de referencia.\",\"pendiente_configurar\":false},{\"id\":\"tiempo_entrega\",\"pregunta\":\"¿Cuánto tarda la entrega?\",\"palabras_clave\":[\"cuanto tarda\",\"demora\",\"tiempo\",\"entrega\",\"cuando llega\",\"rapido\",\"minutos\"],\"respuesta\":\"Entregamos en máximo 15 minutos después de validar tu pago, dentro del horario de atención (Lunes a sábado, 8:00 a.m. – 8:00 p.m.). Si pagas fuera de horario, tu pedido se procesa al abrir.\",\"pendiente_configurar\":false},{\"id\":\"cupon_primera_compra\",\"pregunta\":\"¿Cómo funciona el cupón DCTECH2026?\",\"palabras_clave\":[\"cupon\",\"descuento\",\"dctech2026\",\"codigo promocional\",\"promo\",\"primera compra\"],\"respuesta\":\"DCTECH2026 te da 10% de descuento solo en tu primera compra (se verifica con tu número de WhatsApp al validar el pago). Es un cupón por compra y no se acumula con otros. No aplica a servicios cotizados.\",\"pendiente_configurar\":false},{\"id\":\"hablar_asesor\",\"pregunta\":\"¿Puedo hablar con una persona?\",\"palabras_clave\":[\"asesor\",\"humano\",\"persona\",\"agente\",\"hablar con alguien\"],\"respuesta\":\"¡Claro! Escribe \\\"ASESOR\\\" y una persona del equipo te atiende por este mismo chat en horario de atención (Lunes a sábado, 8:00 a.m. – 8:00 p.m.). Para agilizar, envía tu número de pedido.\",\"pendiente_configurar\":false},{\"id\":\"como_comprar\",\"pregunta\":\"¿Cómo compro?\",\"palabras_clave\":[\"comprar\",\"como compro\",\"quiero\",\"precio\",\"adquirir\"],\"respuesta\":\"Elige tu producto en https://dctecnology.xyz y toca \\\"Comprar\\\", o escríbenos aquí el nombre del producto. Te enviamos los datos de pago y, al validar tu comprobante, procesamos tu pedido.\",\"pendiente_configurar\":false},{\"id\":\"horario_atencion\",\"pregunta\":\"¿Cuál es el horario de atención?\",\"palabras_clave\":[\"horario\",\"hora\",\"atienden\",\"abierto\",\"domingo\",\"festivo\"],\"respuesta\":\"Atendemos de lunes a sábado, de 8:00 a.m. a 8:00 p.m. (hora Colombia).\",\"pendiente_configurar\":false},{\"id\":\"estado_pedido\",\"pregunta\":\"¿Cómo veo el estado de mi pedido?\",\"palabras_clave\":[\"estado\",\"pedido\",\"rastrear\",\"seguimiento\",\"mi compra\"],\"respuesta\":\"Puedes verlo en https://dctecnology.xyz/portal.html ingresando el código de tu pedido, o escríbenos aquí tu número de pedido.\",\"pendiente_configurar\":false},{\"id\":\"activacion_streaming\",\"pregunta\":\"¿Cómo activo mi cuenta de streaming?\",\"palabras_clave\":[\"activar\",\"netflix\",\"disney\",\"max\",\"prime\",\"perfil\",\"pantalla\",\"iniciar sesion\"],\"respuesta\":\"1) Abre la app oficial del servicio. 2) Inicia sesión con el correo y la clave de tu pedido. 3) Entra solo a tu perfil asignado y no cambies la contraseña. 4) Si te pide PIN de perfil, úsalo tal como aparece en tu pedido.\",\"pendiente_configurar\":false},{\"id\":\"activacion_licencias\",\"pregunta\":\"¿Cómo activo una licencia o serial?\",\"palabras_clave\":[\"licencia\",\"serial\",\"windows\",\"office\",\"clave\",\"activar\",\"key\"],\"respuesta\":\"1) Copia el serial completo, sin espacios. 2) Abre el programa o la tienda donde se activa. 3) Busca \\\"Canjear código\\\" o \\\"Activar licencia\\\" y pégalo. 4) Guarda tu serial en un lugar seguro y no lo compartas.\",\"pendiente_configurar\":false},{\"id\":\"garantia\",\"pregunta\":\"¿Tienen garantía?\",\"palabras_clave\":[\"garantia\",\"no funciona\",\"fallo\",\"se cayo\",\"reclamo\",\"reembolso\"],\"respuesta\":\"Sí: 30 días desde la entrega, siempre que se respeten las reglas de uso. Para reclamarla escríbenos con tu ID de compra o usa el botón \\\"Reclamar garantía\\\" en https://dctecnology.xyz/portal.html.\",\"pendiente_configurar\":false},{\"id\":\"reglas_uso\",\"pregunta\":\"¿Qué reglas tiene la cuenta?\",\"palabras_clave\":[\"reglas\",\"condiciones\",\"puedo cambiar\",\"compartir\",\"contraseña\"],\"respuesta\":\"Prohibido usar en más dispositivos de los permitidos. Prohibido modificar correo, contraseña o facturación. Prohibido compartir, revender o transferir el acceso. Uso exclusivo del perfil asignado, sin excepciones. Incumplir estas reglas anula la garantía sin reembolso.\",\"pendiente_configurar\":false}],\"promociones\":[{\"id\":\"primera_compra\",\"codigo\":\"DCTECH2026\",\"descripcion\":\"10% OFF en la primera compra con el código DCTECH2026 (se verifica que sea la primera compra del WhatsApp al validar el pago).\",\"porcentaje\":10,\"activa\":true,\"pendiente_configurar\":false},{\"id\":\"renovacion\",\"descripcion\":\"10% de descuento al renovar (recordatorio 3 días antes del vencimiento).\",\"porcentaje\":10,\"activa\":true,\"pendiente_configurar\":false},{\"id\":\"cupon_segunda_compra\",\"descripcion\":\"10% de descuento en la segunda compra con el cupón de fidelidad (DC-XXXXXX) que se envía por WhatsApp.\",\"porcentaje\":10,\"activa\":true,\"pendiente_configurar\":false}],\"reglas_uso\":[\"Prohibido usar en más dispositivos de los permitidos.\",\"Prohibido modificar correo, contraseña o facturación.\",\"Prohibido compartir, revender o transferir el acceso.\",\"Uso exclusivo del perfil asignado, sin excepciones.\",\"Incumplir estas reglas anula la garantía sin reembolso.\"],\"escalamiento\":{\"disparadores\":[\"El cliente pide hablar con una persona (asesor, humano, persona, agente).\",\"Reclamo de garantía, cuenta caída o credenciales que no funcionan.\",\"Problemas de pago: pago doble, monto distinto, comprobante rechazado o reembolso.\",\"Pedido pagado sin entregar después de 15 minutos dentro del horario.\",\"Cliente molesto, insultos o amenaza de reclamo.\",\"Servicios a medida, alquiler, compras al por mayor o cotizaciones.\",\"La pregunta no está en las FAQ ni en el catálogo, o llevas 2 respuestas sin resolver.\"],\"acciones_n8n\":[\"Pausar el bot en ese chat (no responder automáticamente hasta que el asesor lo libere).\",\"Avisar al WhatsApp del negocio con: número del cliente, pedido (si lo hay), motivo y último mensaje.\",\"Responder al cliente con la plantilla \\\"escalar_asesor\\\".\"],\"palabras_clave\":[\"asesor\",\"humano\",\"persona\",\"agente\",\"reclamo\",\"reembolso\",\"devolucion\",\"estafa\",\"no me llego\",\"no funciona\"]},\"plantillas\":{\"botones\":[{\"id\":\"comprar\",\"texto\":\"Comprar ahora\"},{\"id\":\"estado\",\"texto\":\"Consultar estado\"},{\"id\":\"soporte\",\"texto\":\"Solicitar soporte\"}],\"comprar_ahora\":\"Hola DC Technology, quiero comprar:\\n• Producto: {producto}\\n• Opción: {variante}\\n• Valor: {precio}\\n¿Me indican los datos para realizar el pago?\",\"pedido_tienda\":\"Hola DC Technology, quiero comprar:\\n• Producto: {producto}\\n• Opción: {variante}\\n• Cantidad: {cantidad}\\n• Precio unitario: {precio_unitario}\\n• Cupón: {cupon} (-{porcentaje}%)\\n• Total a pagar: {total}\\nAcepté los términos de uso. ¿Me indican los datos para realizar el pago?\",\"agendar_servicio\":\"Hola DC Technology, quiero agendar un servicio:\\n• Servicio: {servicio}\\n• Opción: {opcion}\\n• Fecha preferida: {fecha}\\n• Franja: {franja}\\n• Valor estimado: {estimado}\\n• Detalle: {detalle}\\n¿Me confirman disponibilidad?\",\"consultar_estado\":\"Hola, quiero consultar el estado de mi pedido #{pedido}.\\nTambién puedo verlo aquí: https://dctecnology.xyz/portal.html?codigo={pedido}\",\"solicitar_soporte\":\"Hola, requiero soporte sobre mi pedido #{pedido} ({producto}).\",\"reclamar_garantia\":\"Hola, equipo de soporte DC Technology.\\nQuiero reclamar la garantía de mi compra:\\n• ID de compra: #{id_compra}\\n• Pedido: #{pedido}\\n• Producto: {producto}\\n• Cuenta/serial terminado en: {serial_final}\\n• Garantía vigente hasta: {fecha_vencimiento}\\nDescribo la falla a continuación:\",\"satisfaccion_24h\":\"¡Hola! ¿Cómo vas con tu cuenta de {producto}? Queremos asegurar que todo funcione al 100%.\",\"renovacion_3d\":\"Tu suscripción a {producto} vence pronto. Renueva hoy con un 10% de descuento. Usa el código: {cupon}\",\"cupon_fidelidad\":\"¡Gracias por confiar en DC Technology! Por tu compra de {producto}, aquí tienes un cupón para tu próxima compra: {cupon}. Escríbenos cuando quieras usarlo.\",\"pedido_proveedor\":\"Hola, adjunto pedido #{pedido}: {producto} x{cantidad}. Favor confirmar recepción.\",\"pago_recibido\":\"✅ *¡Pago confirmado!* · ⚡ *DC Technology*\\n\\nRecibimos tu pago por *{metodo}* y ya estamos procesando tu pedido.\\n\\n📦 Pedido: *#{pedido}*\\n🛒 Producto: {producto}\\n⏱️ Entrega: máximo *15 minutos* (lunes a sábado, 8:00 a.m. a 8:00 p.m.).\\n\\n🔎 Sigue tu pedido en tiempo real:\\nhttps://dctecnology.xyz/portal.html?codigo={codigo}\\n\\nGracias por confiar en nosotros 🙌\",\"entrega_confirmada\":\"🎉 *¡Tu pedido fue entregado!* · ⚡ *DC Technology*\\n\\n📦 Pedido: *#{pedido}*\\n🛒 Producto: {producto}\\n🛡️ Garantía activa: *{garantia_dias} días* (hasta el {garantia_hasta}).\\n\\n🔐 Tus datos de acceso se entregan *solo por este chat oficial*. Si no los ves arriba, responde *ACCESOS* y te los reenviamos.\\n📌 Para conservar tu garantía: no cambies correo ni contraseña y usa solo tu perfil asignado.\\n\\n🔎 Tu pedido y garantía:\\nhttps://dctecnology.xyz/portal.html?codigo={codigo}\\n\\n¿Necesitas ayuda? Responde *SOPORTE* 🛠️\",\"solicitud_resena\":\"⭐ *¿Cómo te fue con {producto}?* · ⚡ *DC Technology*\\n\\nYa pasó un día desde tu entrega y queremos confirmar que todo funciona al 100%.\\n\\n👉 Califícanos en 30 segundos (reseña de compra verificada):\\nhttps://dctecnology.xyz/portal.html?codigo={codigo}#resena\\n_Solo necesitas los últimos 4 dígitos de tu WhatsApp._\\n\\n¿Algo no va bien? Responde *SOPORTE* y lo resolvemos de inmediato.\\n_Si prefieres no recibir estos mensajes, responde *NO*._\",\"escalar_asesor\":\"🙋 *Te paso con un asesor humano* · ⚡ *DC Technology*\\n\\nNuestro equipo te responde por este chat en horario de atención (lunes a sábado, 8:00 a.m. a 8:00 p.m.).\\nYa tenemos tu pedido *#{pedido}* a la mano.\"},\"notificaciones\":{\"plantilla_por_tipo\":{\"PAGO_RECIBIDO\":\"pago_recibido\",\"ENTREGA_CONFIRMADA\":\"entrega_confirmada\",\"SOLICITUD_RESENA\":\"solicitud_resena\"}},\"catalogo\":[{\"nombre\":\"Reloj Inteligente Smartwatch D16 con Auriculares Inalámbricos incorporados\",\"tipo\":\"tecnologia\",\"variantes\":[{\"nombre\":\"Unidad Completa\",\"precio\":180000}]},{\"nombre\":\"Diademas Inalámbricas CR-8 con Luces LED\",\"tipo\":\"tecnologia\",\"variantes\":[{\"nombre\":\"Unidad Completa\",\"precio\":100000}]},{\"nombre\":\"Diademas Gamer A3S Alámbrico\",\"tipo\":\"tecnologia\",\"variantes\":[{\"nombre\":\"Unidad Gamer\",\"precio\":80000}]},{\"nombre\":\"Reloj Inteligente Smartwatch GT5 Pro En Acero Inoxidable\",\"tipo\":\"tecnologia\",\"variantes\":[{\"nombre\":\"Acero Inoxidable\",\"precio\":140000}]},{\"nombre\":\"Powerbank Portátil Recargable 20.000 mAh\",\"tipo\":\"tecnologia\",\"variantes\":[{\"nombre\":\"Carga Rápida 20.000 mAh\",\"precio\":120000}]},{\"nombre\":\"Auriculares Inalámbricos de Gancho SP16\",\"tipo\":\"tecnologia\",\"variantes\":[{\"nombre\":\"Unidad Estándar\",\"precio\":75000}]},{\"nombre\":\"Auriculares Inalámbricos M19 (Con Powerbank)\",\"tipo\":\"tecnologia\",\"variantes\":[{\"nombre\":\"Powerbank M19\",\"precio\":40000}]},{\"nombre\":\"Reloj Inteligente Smartwatch H19 en Acero Inoxidable\",\"tipo\":\"tecnologia\",\"variantes\":[{\"nombre\":\"Acero Inoxidable\",\"precio\":100000}]},{\"nombre\":\"Auriculares Inalámbricos M25 (Con Powerbank)\",\"tipo\":\"tecnologia\",\"variantes\":[{\"nombre\":\"Gamer M25\",\"precio\":40000}]},{\"nombre\":\"Reloj Inteligente Smartwatch Z90\",\"tipo\":\"tecnologia\",\"variantes\":[{\"nombre\":\"Deportivo Z90\",\"precio\":80000}]},{\"nombre\":\"Reloj Inteligente Smartwatch P13 de Lujo en Acero Inoxidable\",\"tipo\":\"tecnologia\",\"variantes\":[{\"nombre\":\"Acero de Lujo P13\",\"precio\":130000}]},{\"nombre\":\"Reloj Inteligente Smartwatch M9\",\"tipo\":\"tecnologia\",\"variantes\":[{\"nombre\":\"Edición M9\",\"precio\":120000}]},{\"nombre\":\"Netflix Premium 4K\",\"tipo\":\"streaming\",\"variantes\":[{\"nombre\":\"Pantalla Colombia (1 Dispositivo)\",\"precio\":15000},{\"nombre\":\"Pantalla Internacional (1 Dispositivo)\",\"precio\":17000}]},{\"nombre\":\"Prime Video Ultra HD\",\"tipo\":\"streaming\",\"variantes\":[{\"nombre\":\"Pantalla (1 Dispositivo)\",\"precio\":10000},{\"nombre\":\"Cuenta Completa (6 Dispositivos)\",\"precio\":20000}]},{\"nombre\":\"Disney Plus Premium\",\"tipo\":\"streaming\",\"variantes\":[{\"nombre\":\"Pantalla Premium\",\"precio\":15000}]},{\"nombre\":\"Max (HBO)\",\"tipo\":\"streaming\",\"variantes\":[{\"nombre\":\"Pantalla 1 Mes\",\"precio\":8000},{\"nombre\":\"Cuenta Completa 1 Mes\",\"precio\":12000},{\"nombre\":\"Cuenta Completa 3 Meses\",\"precio\":18000},{\"nombre\":\"Cuenta Completa 6 Meses\",\"precio\":25000}]},{\"nombre\":\"Crunchyroll Mega Fan\",\"tipo\":\"streaming\",\"variantes\":[{\"nombre\":\"Perfil Mega Fan 1 Mes\",\"precio\":10000},{\"nombre\":\"Cuenta Completa 1 Mes\",\"precio\":19000}]},{\"nombre\":\"Vix Premium\",\"tipo\":\"streaming\",\"variantes\":[{\"nombre\":\"Pantalla 1 Mes\",\"precio\":8000},{\"nombre\":\"Cuenta Completa 1 Mes\",\"precio\":15000}]},{\"nombre\":\"Paramount Plus\",\"tipo\":\"streaming\",\"variantes\":[{\"nombre\":\"Pantalla 1 Mes\",\"precio\":10000},{\"nombre\":\"Cuenta Completa 1 Mes\",\"precio\":20000}]},{\"nombre\":\"Universal Plus\",\"tipo\":\"streaming\",\"variantes\":[{\"nombre\":\"Pantalla 1 Mes\",\"precio\":10000},{\"nombre\":\"Cuenta Completa 1 Mes\",\"precio\":20000}]},{\"nombre\":\"Viki Rakuten Pass\",\"tipo\":\"streaming\",\"variantes\":[{\"nombre\":\"Pantalla 1 Mes\",\"precio\":10000}]},{\"nombre\":\"Apple TV Plus\",\"tipo\":\"streaming\",\"variantes\":[{\"nombre\":\"Perfil 1 Mes\",\"precio\":12000},{\"nombre\":\"Cuenta Completa 1 Mes\",\"precio\":24000}]},{\"nombre\":\"Mubi Cinema\",\"tipo\":\"streaming\",\"variantes\":[{\"nombre\":\"Perfil 1 Mes\",\"precio\":10000},{\"nombre\":\"Cuenta Completa 1 Mes\",\"precio\":22000}]},{\"nombre\":\"IPTV Smarters / Plex HD\",\"tipo\":\"streaming\",\"variantes\":[{\"nombre\":\"1 Mes (1 Dispositivo)\",\"precio\":13000},{\"nombre\":\"1 Mes (2 Dispositivos)\",\"precio\":23000},{\"nombre\":\"3 Meses (1 Dispositivo)\",\"precio\":35000},{\"nombre\":\"6 Meses (1 Dispositivo)\",\"precio\":55000},{\"nombre\":\"12 Meses (1 Dispositivo)\",\"precio\":80000},{\"nombre\":\"12 Meses (2 Dispositivos)\",\"precio\":150000}]},{\"nombre\":\"CapCut Pro Edición\",\"tipo\":\"licencias\",\"variantes\":[{\"nombre\":\"Suscripción 1 Mes\",\"precio\":28000}]},{\"nombre\":\"Canva Pro\",\"tipo\":\"licencias\",\"variantes\":[{\"nombre\":\"Acceso 1 Mes\",\"precio\":10000},{\"nombre\":\"Acceso 1 Año Completo\",\"precio\":40000}]},{\"nombre\":\"Duolingo Super\",\"tipo\":\"licencias\",\"variantes\":[{\"nombre\":\"Suscripción 1 Mes\",\"precio\":10000}]},{\"nombre\":\"McAfee Antivirus Total Protection\",\"tipo\":\"licencias\",\"variantes\":[{\"nombre\":\"Licencia 1 Año (1 PC)\",\"precio\":45000},{\"nombre\":\"Licencia 1 Año (5 PCs)\",\"precio\":130000}]},{\"nombre\":\"Office 365 Personal / Familiar\",\"tipo\":\"licencias\",\"variantes\":[{\"nombre\":\"Licencia 1 Año (5 Dispositivos)\",\"precio\":45000},{\"nombre\":\"Licencia Vitalicia\",\"precio\":80000}]},{\"nombre\":\"Office Pro Plus Vitalicio\",\"tipo\":\"licencias\",\"variantes\":[{\"nombre\":\"Office 2019 Pro Plus\",\"precio\":70000},{\"nombre\":\"Office 2021 Pro Plus\",\"precio\":80000},{\"nombre\":\"Office 2024 Pro Plus\",\"precio\":90000},{\"nombre\":\"Office Pro Plus Multidispositivo\",\"precio\":100000}]},{\"nombre\":\"Windows 10 y 11 Pro / Home\",\"tipo\":\"licencias\",\"variantes\":[{\"nombre\":\"Windows 10 Pro Licencia\",\"precio\":70000},{\"nombre\":\"Windows 11 Pro Licencia\",\"precio\":80000}]},{\"nombre\":\"Gemini IA Pro\",\"tipo\":\"licencias\",\"variantes\":[{\"nombre\":\"Suscripción 1 Mes\",\"precio\":28000}]},{\"nombre\":\"PIN Virtual Disney Plus\",\"tipo\":\"pines\",\"variantes\":[{\"nombre\":\"PIN de $25.900\",\"precio\":25900},{\"nombre\":\"PIN de $36.900\",\"precio\":36900},{\"nombre\":\"PIN de $54.900\",\"precio\":54900}]},{\"nombre\":\"PIN Virtual Netflix Colombia\",\"tipo\":\"pines\",\"variantes\":[{\"nombre\":\"PIN de $20.000\",\"precio\":20000},{\"nombre\":\"PIN de $30.000\",\"precio\":30000},{\"nombre\":\"PIN de $35.000\",\"precio\":35000},{\"nombre\":\"PIN de $40.000\",\"precio\":40000},{\"nombre\":\"PIN de $50.000\",\"precio\":50000}]},{\"nombre\":\"PIN Virtual Directv Go\",\"tipo\":\"pines\",\"variantes\":[{\"nombre\":\"PIN de $64.000\",\"precio\":64000},{\"nombre\":\"PIN de $79.900\",\"precio\":79900},{\"nombre\":\"PIN de $102.900\",\"precio\":102900},{\"nombre\":\"PIN de $110.000\",\"precio\":110000}]},{\"nombre\":\"PIN Virtual Win Play\",\"tipo\":\"pines\",\"variantes\":[{\"nombre\":\"PIN 1 Mes ($39.900)\",\"precio\":39900}]},{\"nombre\":\"PIN Virtual Vix\",\"tipo\":\"pines\",\"variantes\":[{\"nombre\":\"PIN de $22.900\",\"precio\":22900}]},{\"nombre\":\"PIN Virtual Deezer\",\"tipo\":\"pines\",\"variantes\":[{\"nombre\":\"PIN de $19.500\",\"precio\":19500}]},{\"nombre\":\"PIN Virtual Google Play\",\"tipo\":\"pines\",\"variantes\":[{\"nombre\":\"PIN de $10.000\",\"precio\":10000},{\"nombre\":\"PIN de $30.000\",\"precio\":30000},{\"nombre\":\"PIN de $50.000\",\"precio\":50000}]},{\"nombre\":\"PIN Virtual Roblox\",\"tipo\":\"pines\",\"variantes\":[{\"nombre\":\"PIN de $25.000\",\"precio\":25000},{\"nombre\":\"PIN de $50.000\",\"precio\":50000},{\"nombre\":\"PIN de $100.000\",\"precio\":100000}]},{\"nombre\":\"PIN Virtual Razer Gold\",\"tipo\":\"pines\",\"variantes\":[{\"nombre\":\"PIN de $39.000\",\"precio\":39000},{\"nombre\":\"PIN de $64.000\",\"precio\":64000},{\"nombre\":\"PIN de $113.000\",\"precio\":113000}]},{\"nombre\":\"PIN Virtual IMVU\",\"tipo\":\"pines\",\"variantes\":[{\"nombre\":\"PIN de $24.000\",\"precio\":24000},{\"nombre\":\"PIN de $48.000\",\"precio\":48000}]},{\"nombre\":\"PIN Virtual McAfee\",\"tipo\":\"pines\",\"variantes\":[{\"nombre\":\"PIN de $105.900\",\"precio\":105900},{\"nombre\":\"PIN de $159.900\",\"precio\":159900},{\"nombre\":\"PIN de $189.900\",\"precio\":189900}]},{\"nombre\":\"PIN Virtual Uber\",\"tipo\":\"pines\",\"variantes\":[{\"nombre\":\"PIN de $20.000\",\"precio\":20000},{\"nombre\":\"PIN de $30.000\",\"precio\":30000},{\"nombre\":\"PIN de $50.000\",\"precio\":50000},{\"nombre\":\"PIN de $100.000\",\"precio\":100000}]},{\"nombre\":\"DirecTV Prepago Recarga Directa\",\"tipo\":\"recargas\",\"variantes\":[{\"nombre\":\"Saldo $12.000\",\"precio\":12000},{\"nombre\":\"Saldo $20.000\",\"precio\":20000},{\"nombre\":\"Saldo $30.000\",\"precio\":30000},{\"nombre\":\"Saldo $40.000\",\"precio\":40000},{\"nombre\":\"Saldo $50.000\",\"precio\":50000},{\"nombre\":\"Saldo $70.000\",\"precio\":70000}]},{\"nombre\":\"Free Fire Diamantes Directo\",\"tipo\":\"recargas\",\"variantes\":[{\"nombre\":\"100 Diamantes ($4.200)\",\"precio\":4200},{\"nombre\":\"310 Diamantes ($12.000)\",\"precio\":12000},{\"nombre\":\"520 Diamantes ($19.600)\",\"precio\":19600},{\"nombre\":\"1060 Diamantes ($38.600)\",\"precio\":38600},{\"nombre\":\"2180 Diamantes ($76.800)\",\"precio\":76800}]},{\"nombre\":\"Recargas Móvil Claro\",\"tipo\":\"recargas\",\"variantes\":[{\"nombre\":\"Saldo $5.000\",\"precio\":5000},{\"nombre\":\"Saldo $10.000\",\"precio\":10000},{\"nombre\":\"Saldo $20.000\",\"precio\":20000},{\"nombre\":\"Saldo $30.000\",\"precio\":30000},{\"nombre\":\"Saldo $50.000\",\"precio\":50000}]},{\"nombre\":\"Recargas Móvil Movistar\",\"tipo\":\"recargas\",\"variantes\":[{\"nombre\":\"Saldo $5.000\",\"precio\":5000},{\"nombre\":\"Saldo $10.000\",\"precio\":10000},{\"nombre\":\"Saldo $20.000\",\"precio\":20000},{\"nombre\":\"Saldo $30.000\",\"precio\":30000},{\"nombre\":\"Saldo $50.000\",\"precio\":50000}]},{\"nombre\":\"Recargas Móvil Tigo\",\"tipo\":\"recargas\",\"variantes\":[{\"nombre\":\"Saldo $5.000\",\"precio\":5000},{\"nombre\":\"Saldo $10.000\",\"precio\":10000},{\"nombre\":\"Saldo $20.000\",\"precio\":20000},{\"nombre\":\"Saldo $30.000\",\"precio\":30000},{\"nombre\":\"Saldo $50.000\",\"precio\":50000}]},{\"nombre\":\"Recargas Móvil ETB\",\"tipo\":\"recargas\",\"variantes\":[{\"nombre\":\"Saldo $5.000\",\"precio\":5000},{\"nombre\":\"Saldo $10.000\",\"precio\":10000},{\"nombre\":\"Saldo $20.000\",\"precio\":20000},{\"nombre\":\"Saldo $30.000\",\"precio\":30000}]},{\"nombre\":\"Recargas Móvil Éxito\",\"tipo\":\"recargas\",\"variantes\":[{\"nombre\":\"Saldo $5.000\",\"precio\":5000},{\"nombre\":\"Saldo $10.000\",\"precio\":10000},{\"nombre\":\"Saldo $20.000\",\"precio\":20000},{\"nombre\":\"Saldo $30.000\",\"precio\":30000},{\"nombre\":\"Saldo $50.000\",\"precio\":50000},{\"nombre\":\"Saldo $60.000\",\"precio\":60000}]},{\"nombre\":\"Recargas Móvil Wom\",\"tipo\":\"recargas\",\"variantes\":[{\"nombre\":\"Saldo $5.000\",\"precio\":5000},{\"nombre\":\"Saldo $10.000\",\"precio\":10000},{\"nombre\":\"Saldo $20.000\",\"precio\":20000},{\"nombre\":\"Saldo $30.000\",\"precio\":30000},{\"nombre\":\"Saldo $50.000\",\"precio\":50000},{\"nombre\":\"Saldo $60.000\",\"precio\":60000}]},{\"nombre\":\"Recargas Virgin Mobile\",\"tipo\":\"recargas\",\"variantes\":[{\"nombre\":\"Saldo $5.000\",\"precio\":5000},{\"nombre\":\"Saldo $10.000\",\"precio\":10000},{\"nombre\":\"Saldo $20.000\",\"precio\":20000}]},{\"nombre\":\"Recarga Rushbet Apuestas\",\"tipo\":\"recargas\",\"variantes\":[{\"nombre\":\"Saldo $10.000\",\"precio\":10000},{\"nombre\":\"Saldo $20.000\",\"precio\":20000},{\"nombre\":\"Saldo $30.000\",\"precio\":30000},{\"nombre\":\"Saldo $50.000\",\"precio\":50000}]},{\"nombre\":\"Recarga Bwin Apuestas\",\"tipo\":\"recargas\",\"variantes\":[{\"nombre\":\"Saldo $10.000\",\"precio\":10000},{\"nombre\":\"Saldo $20.000\",\"precio\":20000},{\"nombre\":\"Saldo $30.000\",\"precio\":30000},{\"nombre\":\"Saldo $50.000\",\"precio\":50000}]},{\"nombre\":\"Recarga Betsson Apuestas\",\"tipo\":\"recargas\",\"variantes\":[{\"nombre\":\"Saldo $10.000\",\"precio\":10000},{\"nombre\":\"Saldo $20.000\",\"precio\":20000},{\"nombre\":\"Saldo $30.000\",\"precio\":30000},{\"nombre\":\"Saldo $50.000\",\"precio\":50000}]},{\"nombre\":\"Mantenimiento Preventivo y Correctivo de Equipos\",\"tipo\":\"servicios\",\"variantes\":[{\"nombre\":\"Preventivo Software + Limpieza\",\"precio\":50000},{\"nombre\":\"Correctivo + Cambio Térmico\",\"precio\":90000}]},{\"nombre\":\"Instalación de Sistema Operativo y Licenciamiento\",\"tipo\":\"servicios\",\"variantes\":[{\"nombre\":\"Windows 10/11 Pro + Office + Software Base\",\"precio\":60000}]},{\"nombre\":\"Alquiler de Laptops y Equipos de Cómputo\",\"tipo\":\"alquiler\",\"variantes\":[{\"nombre\":\"Plan 1 Mes (Pago Total)\",\"precio\":160000},{\"nombre\":\"Plan 6 Meses ($150.000/mes) - Pago Total\",\"precio\":900000},{\"nombre\":\"Plan 1 Año ($140.000/mes) - Pago Total\",\"precio\":1680000}]},{\"nombre\":\"Asesoría Técnica y Tutoría Personalizada\",\"tipo\":\"servicios\",\"variantes\":[{\"nombre\":\"Sesión de Asesoría / Tutoría (1 Hora)\",\"precio\":40000}]},{\"nombre\":\"Desarrollo de Catálogos Web y Automatizaciones IA\",\"tipo\":\"servicios\",\"variantes\":[{\"nombre\":\"Proyecto a Medida (Requiere Asesoría)\",\"precio\":0}]}]});\nlet r = String($input.first().json.output ?? '').trim();\nconst pedido = r.match(/^\\[ESCALAR\\]\\s*(.*)$/is);\nif (!r || pedido) return escalar(msg, pedido ? pedido[1] || 'Escalado por el agente' : 'El agente no respondió', cfg, kb.plantillas);\nr = r\n    .replace(/\\*\\*(.+?)\\*\\*/g, '*$1*')   // Markdown → negrita de WhatsApp\n    .replace(/^#{1,6}\\s*/gm, '')\n    .replace(/\\n{3,}/g, '\\n\\n')\n    .trim()\n    .slice(0, 1200);\nreturn [{ json: { numero: msg.numero, texto: r } }];\n"
+      },
+      "id": "1a5d9768-2311-467c-b8db-b9acbe44c353",
+      "name": "Revisar respuesta",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1780,
+        140
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Config bot').first().json.evolution_url }}/message/sendText/{{ $('Config bot').first().json.evolution_instancia }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ number: $json.numero, text: $json.texto, delay: 1500 }) }}",
+        "options": {
+          "timeout": 20000
+        }
+      },
+      "id": "c2f837dd-b116-4f90-a2e8-c3a1923962c5",
+      "name": "Enviar respuesta",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2000,
+        0
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 1
+            }
+          ]
+        }
+      },
+      "id": "8269fb62-a998-4b04-a6f8-b2f4677a69e5",
+      "name": "Cada minuto",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        700
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5f43077f-db07-46f0-99ab-4b910462d990",
+              "name": "supabase_url",
+              "value": "https://vyqcizwfmjlflncdwzve.supabase.co",
+              "type": "string"
+            },
+            {
+              "id": "00c03fa4-1f95-48a8-8206-285d5adfb5db",
+              "name": "evolution_url",
+              "value": "https://TU-EVOLUTION-API",
+              "type": "string"
+            },
+            {
+              "id": "7e047b74-e063-428e-a10f-347e524ea725",
+              "name": "evolution_instancia",
+              "value": "TU-INSTANCIA",
+              "type": "string"
+            },
+            {
+              "id": "c4c75eac-f61b-47bd-947a-9f60d9bf0f9d",
+              "name": "url_conocimiento",
+              "value": "https://dctecnology.xyz/bot-conocimiento.json",
+              "type": "string"
+            },
+            {
+              "id": "06b28284-be34-4212-8a02-8a9d40ff1b64",
+              "name": "lote",
+              "value": "5",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a7a89c11-ace4-4618-a86b-deb5e01ef767",
+      "name": "Config posventa",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        220,
+        700
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Config posventa').first().json.url_conocimiento }}",
+        "options": {
+          "timeout": 8000,
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "9e311755-7ea1-4b10-bed7-600345a1d9ff",
+      "name": "Plantillas posventa",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        440,
+        700
+      ],
+      "onError": "continueRegularOutput",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Config posventa').first().json.supabase_url }}/rest/v1/rpc/tomar_notificaciones",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ p_lote: Number($('Config posventa').first().json.lote) || 5 }) }}",
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "id": "27e1fd93-8893-49ed-9558-406295d79c96",
+      "name": "Tomar notificaciones",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        660,
+        700
+      ]
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "4148e61f-084c-4548-b55a-28a04c0e02ef",
+      "name": "Recorrer cola",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        880,
+        700
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const limpiar = (v) => String(v ?? '').replace(/[*_~`]/g, ' ').replace(/\\s+/g, ' ').trim().slice(0, 120);\nconst rellenar = (plantilla, vars) => String(plantilla ?? '').split('\\n').map((linea) => {\n    let incompleta = false;\n    const texto = linea.replace(/\\{(\\w+)\\}/g, (_, k) => { const v = limpiar(vars[k]); if (!v) incompleta = true; return v; });\n    return incompleta ? null : texto.replace(/[ \\t]+$/, '');\n}).filter((l) => l !== null).join('\\n').replace(/\\n{3,}/g, '\\n\\n').trim();\nconst normalizar = (t) => String(t ?? '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');\n// Mensajes para pasar al cliente con un asesor (+ aviso al administrador si hay número configurado)\nconst escalar = (msg, motivo, cfg, plantillas) => {\n    const memoria = $getWorkflowStaticData('global');\n    memoria.pausados = memoria.pausados || {};\n    memoria.pausados[msg.numero] = Date.now();\n    const salida = [{ json: { numero: msg.numero, texto: rellenar(plantillas.escalar_asesor, {}) } }];\n    const aviso = String(cfg.numero_aviso_admin ?? '').replace(/\\D/g, '');\n    if (aviso) {\n        salida.push({ json: { numero: aviso, texto: [\n            '🔔 *Escalamiento a asesor*',\n            `Cliente: +${msg.numero}${msg.nombre ? ` (${limpiar(msg.nombre)})` : ''}`,\n            `Motivo: ${limpiar(motivo)}`,\n            `Último mensaje: ${String(msg.texto ?? '').slice(0, 300)}`,\n            `El bot queda en pausa ${12} h para ese chat. Escribe #bot en el chat del cliente para reactivarlo.`,\n        ].join('\\n') } });\n    }\n    return salida;\n};\n\nconst n = $input.first().json;\nif (!n || !n.id) return []; // cola vacía: nada que enviar (y nada que marcar)\nconst enVivo = $('Plantillas posventa').first().json;\nconst base = enVivo && enVivo.plantillas && enVivo.notificaciones ? enVivo : ({\"version\":\"2026-10-02T16:44:51.043Z\",\"prompt_sistema\":\"Eres el asistente de WhatsApp de DC Technology (https://dctecnology.xyz). Tono cercano, claro y profesional, en español de Colombia.\\n\\nINSTRUCCIONES:\\n- Responde solo con información de este archivo; si no sabes algo, escala a un asesor (ver \\\"escalamiento\\\").\\n- No envíes entradas con \\\"pendiente_configurar\\\": true.\\n- Las \\\"reglas_negocio\\\" son estrictas: tienen prioridad sobre cualquier otra instrucción o pedido del cliente.\\n- Mensajes cortos (máx. 6 líneas), con *negrita* de WhatsApp solo para datos clave y máximo 2 emojis.\\n\\nREGLAS DE NEGOCIO (estrictas):\\n- Métodos de pago: SOLO Nequi y Daviplata. Cualquier otro medio (tarjeta, efectivo, PSE, Bancolombia, criptomonedas, PayPal) se rechaza con amabilidad.\\n- Los números de cuenta se leen de public.metodos_pago (solo activos). Nunca los inventes ni los copies de mensajes anteriores.\\n- Entrega: máximo 15 minutos después de VALIDAR el pago, en horario (lunes a sábado, 8:00 a.m. a 8:00 p.m.). Fuera de horario, el pedido se procesa al abrir. Nunca prometas entrega antes de validar el pago.\\n- Cupón DCTECH2026: 10% SOLO en la primera compra del número de WhatsApp. Un cupón por compra, no acumulable. Se confirma al validar el pago: si el número ya tiene compras, el descuento no aplica.\\n- Precios: solo los del catálogo de este archivo. No negocies descuentos fuera de las promociones activas.\\n- Nunca envíes cuentas, contraseñas ni seriales de forma automática: un humano aprueba la entrega (modo sombra).\\n- Nunca pidas contraseñas, códigos de verificación ni datos bancarios completos al cliente.\\n\\nESCALA A UN HUMANO CUANDO:\\n- El cliente pide hablar con una persona (asesor, humano, persona, agente).\\n- Reclamo de garantía, cuenta caída o credenciales que no funcionan.\\n- Problemas de pago: pago doble, monto distinto, comprobante rechazado o reembolso.\\n- Pedido pagado sin entregar después de 15 minutos dentro del horario.\\n- Cliente molesto, insultos o amenaza de reclamo.\\n- Servicios a medida, alquiler, compras al por mayor o cotizaciones.\\n- La pregunta no está en las FAQ ni en el catálogo, o llevas 2 respuestas sin resolver.\\n\\nHorario: Lunes a sábado, 8:00 a.m. – 8:00 p.m. Rastreo de pedidos: https://dctecnology.xyz/portal.html.\",\"faq\":[{\"id\":\"metodos_pago\",\"pregunta\":\"¿Qué métodos de pago aceptan?\",\"palabras_clave\":[\"pago\",\"pagar\",\"nequi\",\"daviplata\",\"bancolombia\",\"binance\",\"usdt\",\"transfiya\",\"transferencia\",\"tarjeta\",\"efectivo\",\"pse\",\"paypal\",\"credito\"],\"respuesta\":\"Solo recibimos Nequi y Daviplata. No aceptamos tarjetas, efectivo, PSE, Bancolombia ni criptomonedas. Te compartimos la cuenta al confirmar tu pedido; luego envíanos el comprobante con su número de referencia.\",\"pendiente_configurar\":false},{\"id\":\"tiempo_entrega\",\"pregunta\":\"¿Cuánto tarda la entrega?\",\"palabras_clave\":[\"cuanto tarda\",\"demora\",\"tiempo\",\"entrega\",\"cuando llega\",\"rapido\",\"minutos\"],\"respuesta\":\"Entregamos en máximo 15 minutos después de validar tu pago, dentro del horario de atención (Lunes a sábado, 8:00 a.m. – 8:00 p.m.). Si pagas fuera de horario, tu pedido se procesa al abrir.\",\"pendiente_configurar\":false},{\"id\":\"cupon_primera_compra\",\"pregunta\":\"¿Cómo funciona el cupón DCTECH2026?\",\"palabras_clave\":[\"cupon\",\"descuento\",\"dctech2026\",\"codigo promocional\",\"promo\",\"primera compra\"],\"respuesta\":\"DCTECH2026 te da 10% de descuento solo en tu primera compra (se verifica con tu número de WhatsApp al validar el pago). Es un cupón por compra y no se acumula con otros. No aplica a servicios cotizados.\",\"pendiente_configurar\":false},{\"id\":\"hablar_asesor\",\"pregunta\":\"¿Puedo hablar con una persona?\",\"palabras_clave\":[\"asesor\",\"humano\",\"persona\",\"agente\",\"hablar con alguien\"],\"respuesta\":\"¡Claro! Escribe \\\"ASESOR\\\" y una persona del equipo te atiende por este mismo chat en horario de atención (Lunes a sábado, 8:00 a.m. – 8:00 p.m.). Para agilizar, envía tu número de pedido.\",\"pendiente_configurar\":false},{\"id\":\"como_comprar\",\"pregunta\":\"¿Cómo compro?\",\"palabras_clave\":[\"comprar\",\"como compro\",\"quiero\",\"precio\",\"adquirir\"],\"respuesta\":\"Elige tu producto en https://dctecnology.xyz y toca \\\"Comprar\\\", o escríbenos aquí el nombre del producto. Te enviamos los datos de pago y, al validar tu comprobante, procesamos tu pedido.\",\"pendiente_configurar\":false},{\"id\":\"horario_atencion\",\"pregunta\":\"¿Cuál es el horario de atención?\",\"palabras_clave\":[\"horario\",\"hora\",\"atienden\",\"abierto\",\"domingo\",\"festivo\"],\"respuesta\":\"Atendemos de lunes a sábado, de 8:00 a.m. a 8:00 p.m. (hora Colombia).\",\"pendiente_configurar\":false},{\"id\":\"estado_pedido\",\"pregunta\":\"¿Cómo veo el estado de mi pedido?\",\"palabras_clave\":[\"estado\",\"pedido\",\"rastrear\",\"seguimiento\",\"mi compra\"],\"respuesta\":\"Puedes verlo en https://dctecnology.xyz/portal.html ingresando el código de tu pedido, o escríbenos aquí tu número de pedido.\",\"pendiente_configurar\":false},{\"id\":\"activacion_streaming\",\"pregunta\":\"¿Cómo activo mi cuenta de streaming?\",\"palabras_clave\":[\"activar\",\"netflix\",\"disney\",\"max\",\"prime\",\"perfil\",\"pantalla\",\"iniciar sesion\"],\"respuesta\":\"1) Abre la app oficial del servicio. 2) Inicia sesión con el correo y la clave de tu pedido. 3) Entra solo a tu perfil asignado y no cambies la contraseña. 4) Si te pide PIN de perfil, úsalo tal como aparece en tu pedido.\",\"pendiente_configurar\":false},{\"id\":\"activacion_licencias\",\"pregunta\":\"¿Cómo activo una licencia o serial?\",\"palabras_clave\":[\"licencia\",\"serial\",\"windows\",\"office\",\"clave\",\"activar\",\"key\"],\"respuesta\":\"1) Copia el serial completo, sin espacios. 2) Abre el programa o la tienda donde se activa. 3) Busca \\\"Canjear código\\\" o \\\"Activar licencia\\\" y pégalo. 4) Guarda tu serial en un lugar seguro y no lo compartas.\",\"pendiente_configurar\":false},{\"id\":\"garantia\",\"pregunta\":\"¿Tienen garantía?\",\"palabras_clave\":[\"garantia\",\"no funciona\",\"fallo\",\"se cayo\",\"reclamo\",\"reembolso\"],\"respuesta\":\"Sí: 30 días desde la entrega, siempre que se respeten las reglas de uso. Para reclamarla escríbenos con tu ID de compra o usa el botón \\\"Reclamar garantía\\\" en https://dctecnology.xyz/portal.html.\",\"pendiente_configurar\":false},{\"id\":\"reglas_uso\",\"pregunta\":\"¿Qué reglas tiene la cuenta?\",\"palabras_clave\":[\"reglas\",\"condiciones\",\"puedo cambiar\",\"compartir\",\"contraseña\"],\"respuesta\":\"Prohibido usar en más dispositivos de los permitidos. Prohibido modificar correo, contraseña o facturación. Prohibido compartir, revender o transferir el acceso. Uso exclusivo del perfil asignado, sin excepciones. Incumplir estas reglas anula la garantía sin reembolso.\",\"pendiente_configurar\":false}],\"promociones\":[{\"id\":\"primera_compra\",\"codigo\":\"DCTECH2026\",\"descripcion\":\"10% OFF en la primera compra con el código DCTECH2026 (se verifica que sea la primera compra del WhatsApp al validar el pago).\",\"porcentaje\":10,\"activa\":true,\"pendiente_configurar\":false},{\"id\":\"renovacion\",\"descripcion\":\"10% de descuento al renovar (recordatorio 3 días antes del vencimiento).\",\"porcentaje\":10,\"activa\":true,\"pendiente_configurar\":false},{\"id\":\"cupon_segunda_compra\",\"descripcion\":\"10% de descuento en la segunda compra con el cupón de fidelidad (DC-XXXXXX) que se envía por WhatsApp.\",\"porcentaje\":10,\"activa\":true,\"pendiente_configurar\":false}],\"reglas_uso\":[\"Prohibido usar en más dispositivos de los permitidos.\",\"Prohibido modificar correo, contraseña o facturación.\",\"Prohibido compartir, revender o transferir el acceso.\",\"Uso exclusivo del perfil asignado, sin excepciones.\",\"Incumplir estas reglas anula la garantía sin reembolso.\"],\"escalamiento\":{\"disparadores\":[\"El cliente pide hablar con una persona (asesor, humano, persona, agente).\",\"Reclamo de garantía, cuenta caída o credenciales que no funcionan.\",\"Problemas de pago: pago doble, monto distinto, comprobante rechazado o reembolso.\",\"Pedido pagado sin entregar después de 15 minutos dentro del horario.\",\"Cliente molesto, insultos o amenaza de reclamo.\",\"Servicios a medida, alquiler, compras al por mayor o cotizaciones.\",\"La pregunta no está en las FAQ ni en el catálogo, o llevas 2 respuestas sin resolver.\"],\"acciones_n8n\":[\"Pausar el bot en ese chat (no responder automáticamente hasta que el asesor lo libere).\",\"Avisar al WhatsApp del negocio con: número del cliente, pedido (si lo hay), motivo y último mensaje.\",\"Responder al cliente con la plantilla \\\"escalar_asesor\\\".\"],\"palabras_clave\":[\"asesor\",\"humano\",\"persona\",\"agente\",\"reclamo\",\"reembolso\",\"devolucion\",\"estafa\",\"no me llego\",\"no funciona\"]},\"plantillas\":{\"botones\":[{\"id\":\"comprar\",\"texto\":\"Comprar ahora\"},{\"id\":\"estado\",\"texto\":\"Consultar estado\"},{\"id\":\"soporte\",\"texto\":\"Solicitar soporte\"}],\"comprar_ahora\":\"Hola DC Technology, quiero comprar:\\n• Producto: {producto}\\n• Opción: {variante}\\n• Valor: {precio}\\n¿Me indican los datos para realizar el pago?\",\"pedido_tienda\":\"Hola DC Technology, quiero comprar:\\n• Producto: {producto}\\n• Opción: {variante}\\n• Cantidad: {cantidad}\\n• Precio unitario: {precio_unitario}\\n• Cupón: {cupon} (-{porcentaje}%)\\n• Total a pagar: {total}\\nAcepté los términos de uso. ¿Me indican los datos para realizar el pago?\",\"agendar_servicio\":\"Hola DC Technology, quiero agendar un servicio:\\n• Servicio: {servicio}\\n• Opción: {opcion}\\n• Fecha preferida: {fecha}\\n• Franja: {franja}\\n• Valor estimado: {estimado}\\n• Detalle: {detalle}\\n¿Me confirman disponibilidad?\",\"consultar_estado\":\"Hola, quiero consultar el estado de mi pedido #{pedido}.\\nTambién puedo verlo aquí: https://dctecnology.xyz/portal.html?codigo={pedido}\",\"solicitar_soporte\":\"Hola, requiero soporte sobre mi pedido #{pedido} ({producto}).\",\"reclamar_garantia\":\"Hola, equipo de soporte DC Technology.\\nQuiero reclamar la garantía de mi compra:\\n• ID de compra: #{id_compra}\\n• Pedido: #{pedido}\\n• Producto: {producto}\\n• Cuenta/serial terminado en: {serial_final}\\n• Garantía vigente hasta: {fecha_vencimiento}\\nDescribo la falla a continuación:\",\"satisfaccion_24h\":\"¡Hola! ¿Cómo vas con tu cuenta de {producto}? Queremos asegurar que todo funcione al 100%.\",\"renovacion_3d\":\"Tu suscripción a {producto} vence pronto. Renueva hoy con un 10% de descuento. Usa el código: {cupon}\",\"cupon_fidelidad\":\"¡Gracias por confiar en DC Technology! Por tu compra de {producto}, aquí tienes un cupón para tu próxima compra: {cupon}. Escríbenos cuando quieras usarlo.\",\"pedido_proveedor\":\"Hola, adjunto pedido #{pedido}: {producto} x{cantidad}. Favor confirmar recepción.\",\"pago_recibido\":\"✅ *¡Pago confirmado!* · ⚡ *DC Technology*\\n\\nRecibimos tu pago por *{metodo}* y ya estamos procesando tu pedido.\\n\\n📦 Pedido: *#{pedido}*\\n🛒 Producto: {producto}\\n⏱️ Entrega: máximo *15 minutos* (lunes a sábado, 8:00 a.m. a 8:00 p.m.).\\n\\n🔎 Sigue tu pedido en tiempo real:\\nhttps://dctecnology.xyz/portal.html?codigo={codigo}\\n\\nGracias por confiar en nosotros 🙌\",\"entrega_confirmada\":\"🎉 *¡Tu pedido fue entregado!* · ⚡ *DC Technology*\\n\\n📦 Pedido: *#{pedido}*\\n🛒 Producto: {producto}\\n🛡️ Garantía activa: *{garantia_dias} días* (hasta el {garantia_hasta}).\\n\\n🔐 Tus datos de acceso se entregan *solo por este chat oficial*. Si no los ves arriba, responde *ACCESOS* y te los reenviamos.\\n📌 Para conservar tu garantía: no cambies correo ni contraseña y usa solo tu perfil asignado.\\n\\n🔎 Tu pedido y garantía:\\nhttps://dctecnology.xyz/portal.html?codigo={codigo}\\n\\n¿Necesitas ayuda? Responde *SOPORTE* 🛠️\",\"solicitud_resena\":\"⭐ *¿Cómo te fue con {producto}?* · ⚡ *DC Technology*\\n\\nYa pasó un día desde tu entrega y queremos confirmar que todo funciona al 100%.\\n\\n👉 Califícanos en 30 segundos (reseña de compra verificada):\\nhttps://dctecnology.xyz/portal.html?codigo={codigo}#resena\\n_Solo necesitas los últimos 4 dígitos de tu WhatsApp._\\n\\n¿Algo no va bien? Responde *SOPORTE* y lo resolvemos de inmediato.\\n_Si prefieres no recibir estos mensajes, responde *NO*._\",\"escalar_asesor\":\"🙋 *Te paso con un asesor humano* · ⚡ *DC Technology*\\n\\nNuestro equipo te responde por este chat en horario de atención (lunes a sábado, 8:00 a.m. a 8:00 p.m.).\\nYa tenemos tu pedido *#{pedido}* a la mano.\"},\"notificaciones\":{\"plantilla_por_tipo\":{\"PAGO_RECIBIDO\":\"pago_recibido\",\"ENTREGA_CONFIRMADA\":\"entrega_confirmada\",\"SOLICITUD_RESENA\":\"solicitud_resena\"}},\"catalogo\":[{\"nombre\":\"Reloj Inteligente Smartwatch D16 con Auriculares Inalámbricos incorporados\",\"tipo\":\"tecnologia\",\"variantes\":[{\"nombre\":\"Unidad Completa\",\"precio\":180000}]},{\"nombre\":\"Diademas Inalámbricas CR-8 con Luces LED\",\"tipo\":\"tecnologia\",\"variantes\":[{\"nombre\":\"Unidad Completa\",\"precio\":100000}]},{\"nombre\":\"Diademas Gamer A3S Alámbrico\",\"tipo\":\"tecnologia\",\"variantes\":[{\"nombre\":\"Unidad Gamer\",\"precio\":80000}]},{\"nombre\":\"Reloj Inteligente Smartwatch GT5 Pro En Acero Inoxidable\",\"tipo\":\"tecnologia\",\"variantes\":[{\"nombre\":\"Acero Inoxidable\",\"precio\":140000}]},{\"nombre\":\"Powerbank Portátil Recargable 20.000 mAh\",\"tipo\":\"tecnologia\",\"variantes\":[{\"nombre\":\"Carga Rápida 20.000 mAh\",\"precio\":120000}]},{\"nombre\":\"Auriculares Inalámbricos de Gancho SP16\",\"tipo\":\"tecnologia\",\"variantes\":[{\"nombre\":\"Unidad Estándar\",\"precio\":75000}]},{\"nombre\":\"Auriculares Inalámbricos M19 (Con Powerbank)\",\"tipo\":\"tecnologia\",\"variantes\":[{\"nombre\":\"Powerbank M19\",\"precio\":40000}]},{\"nombre\":\"Reloj Inteligente Smartwatch H19 en Acero Inoxidable\",\"tipo\":\"tecnologia\",\"variantes\":[{\"nombre\":\"Acero Inoxidable\",\"precio\":100000}]},{\"nombre\":\"Auriculares Inalámbricos M25 (Con Powerbank)\",\"tipo\":\"tecnologia\",\"variantes\":[{\"nombre\":\"Gamer M25\",\"precio\":40000}]},{\"nombre\":\"Reloj Inteligente Smartwatch Z90\",\"tipo\":\"tecnologia\",\"variantes\":[{\"nombre\":\"Deportivo Z90\",\"precio\":80000}]},{\"nombre\":\"Reloj Inteligente Smartwatch P13 de Lujo en Acero Inoxidable\",\"tipo\":\"tecnologia\",\"variantes\":[{\"nombre\":\"Acero de Lujo P13\",\"precio\":130000}]},{\"nombre\":\"Reloj Inteligente Smartwatch M9\",\"tipo\":\"tecnologia\",\"variantes\":[{\"nombre\":\"Edición M9\",\"precio\":120000}]},{\"nombre\":\"Netflix Premium 4K\",\"tipo\":\"streaming\",\"variantes\":[{\"nombre\":\"Pantalla Colombia (1 Dispositivo)\",\"precio\":15000},{\"nombre\":\"Pantalla Internacional (1 Dispositivo)\",\"precio\":17000}]},{\"nombre\":\"Prime Video Ultra HD\",\"tipo\":\"streaming\",\"variantes\":[{\"nombre\":\"Pantalla (1 Dispositivo)\",\"precio\":10000},{\"nombre\":\"Cuenta Completa (6 Dispositivos)\",\"precio\":20000}]},{\"nombre\":\"Disney Plus Premium\",\"tipo\":\"streaming\",\"variantes\":[{\"nombre\":\"Pantalla Premium\",\"precio\":15000}]},{\"nombre\":\"Max (HBO)\",\"tipo\":\"streaming\",\"variantes\":[{\"nombre\":\"Pantalla 1 Mes\",\"precio\":8000},{\"nombre\":\"Cuenta Completa 1 Mes\",\"precio\":12000},{\"nombre\":\"Cuenta Completa 3 Meses\",\"precio\":18000},{\"nombre\":\"Cuenta Completa 6 Meses\",\"precio\":25000}]},{\"nombre\":\"Crunchyroll Mega Fan\",\"tipo\":\"streaming\",\"variantes\":[{\"nombre\":\"Perfil Mega Fan 1 Mes\",\"precio\":10000},{\"nombre\":\"Cuenta Completa 1 Mes\",\"precio\":19000}]},{\"nombre\":\"Vix Premium\",\"tipo\":\"streaming\",\"variantes\":[{\"nombre\":\"Pantalla 1 Mes\",\"precio\":8000},{\"nombre\":\"Cuenta Completa 1 Mes\",\"precio\":15000}]},{\"nombre\":\"Paramount Plus\",\"tipo\":\"streaming\",\"variantes\":[{\"nombre\":\"Pantalla 1 Mes\",\"precio\":10000},{\"nombre\":\"Cuenta Completa 1 Mes\",\"precio\":20000}]},{\"nombre\":\"Universal Plus\",\"tipo\":\"streaming\",\"variantes\":[{\"nombre\":\"Pantalla 1 Mes\",\"precio\":10000},{\"nombre\":\"Cuenta Completa 1 Mes\",\"precio\":20000}]},{\"nombre\":\"Viki Rakuten Pass\",\"tipo\":\"streaming\",\"variantes\":[{\"nombre\":\"Pantalla 1 Mes\",\"precio\":10000}]},{\"nombre\":\"Apple TV Plus\",\"tipo\":\"streaming\",\"variantes\":[{\"nombre\":\"Perfil 1 Mes\",\"precio\":12000},{\"nombre\":\"Cuenta Completa 1 Mes\",\"precio\":24000}]},{\"nombre\":\"Mubi Cinema\",\"tipo\":\"streaming\",\"variantes\":[{\"nombre\":\"Perfil 1 Mes\",\"precio\":10000},{\"nombre\":\"Cuenta Completa 1 Mes\",\"precio\":22000}]},{\"nombre\":\"IPTV Smarters / Plex HD\",\"tipo\":\"streaming\",\"variantes\":[{\"nombre\":\"1 Mes (1 Dispositivo)\",\"precio\":13000},{\"nombre\":\"1 Mes (2 Dispositivos)\",\"precio\":23000},{\"nombre\":\"3 Meses (1 Dispositivo)\",\"precio\":35000},{\"nombre\":\"6 Meses (1 Dispositivo)\",\"precio\":55000},{\"nombre\":\"12 Meses (1 Dispositivo)\",\"precio\":80000},{\"nombre\":\"12 Meses (2 Dispositivos)\",\"precio\":150000}]},{\"nombre\":\"CapCut Pro Edición\",\"tipo\":\"licencias\",\"variantes\":[{\"nombre\":\"Suscripción 1 Mes\",\"precio\":28000}]},{\"nombre\":\"Canva Pro\",\"tipo\":\"licencias\",\"variantes\":[{\"nombre\":\"Acceso 1 Mes\",\"precio\":10000},{\"nombre\":\"Acceso 1 Año Completo\",\"precio\":40000}]},{\"nombre\":\"Duolingo Super\",\"tipo\":\"licencias\",\"variantes\":[{\"nombre\":\"Suscripción 1 Mes\",\"precio\":10000}]},{\"nombre\":\"McAfee Antivirus Total Protection\",\"tipo\":\"licencias\",\"variantes\":[{\"nombre\":\"Licencia 1 Año (1 PC)\",\"precio\":45000},{\"nombre\":\"Licencia 1 Año (5 PCs)\",\"precio\":130000}]},{\"nombre\":\"Office 365 Personal / Familiar\",\"tipo\":\"licencias\",\"variantes\":[{\"nombre\":\"Licencia 1 Año (5 Dispositivos)\",\"precio\":45000},{\"nombre\":\"Licencia Vitalicia\",\"precio\":80000}]},{\"nombre\":\"Office Pro Plus Vitalicio\",\"tipo\":\"licencias\",\"variantes\":[{\"nombre\":\"Office 2019 Pro Plus\",\"precio\":70000},{\"nombre\":\"Office 2021 Pro Plus\",\"precio\":80000},{\"nombre\":\"Office 2024 Pro Plus\",\"precio\":90000},{\"nombre\":\"Office Pro Plus Multidispositivo\",\"precio\":100000}]},{\"nombre\":\"Windows 10 y 11 Pro / Home\",\"tipo\":\"licencias\",\"variantes\":[{\"nombre\":\"Windows 10 Pro Licencia\",\"precio\":70000},{\"nombre\":\"Windows 11 Pro Licencia\",\"precio\":80000}]},{\"nombre\":\"Gemini IA Pro\",\"tipo\":\"licencias\",\"variantes\":[{\"nombre\":\"Suscripción 1 Mes\",\"precio\":28000}]},{\"nombre\":\"PIN Virtual Disney Plus\",\"tipo\":\"pines\",\"variantes\":[{\"nombre\":\"PIN de $25.900\",\"precio\":25900},{\"nombre\":\"PIN de $36.900\",\"precio\":36900},{\"nombre\":\"PIN de $54.900\",\"precio\":54900}]},{\"nombre\":\"PIN Virtual Netflix Colombia\",\"tipo\":\"pines\",\"variantes\":[{\"nombre\":\"PIN de $20.000\",\"precio\":20000},{\"nombre\":\"PIN de $30.000\",\"precio\":30000},{\"nombre\":\"PIN de $35.000\",\"precio\":35000},{\"nombre\":\"PIN de $40.000\",\"precio\":40000},{\"nombre\":\"PIN de $50.000\",\"precio\":50000}]},{\"nombre\":\"PIN Virtual Directv Go\",\"tipo\":\"pines\",\"variantes\":[{\"nombre\":\"PIN de $64.000\",\"precio\":64000},{\"nombre\":\"PIN de $79.900\",\"precio\":79900},{\"nombre\":\"PIN de $102.900\",\"precio\":102900},{\"nombre\":\"PIN de $110.000\",\"precio\":110000}]},{\"nombre\":\"PIN Virtual Win Play\",\"tipo\":\"pines\",\"variantes\":[{\"nombre\":\"PIN 1 Mes ($39.900)\",\"precio\":39900}]},{\"nombre\":\"PIN Virtual Vix\",\"tipo\":\"pines\",\"variantes\":[{\"nombre\":\"PIN de $22.900\",\"precio\":22900}]},{\"nombre\":\"PIN Virtual Deezer\",\"tipo\":\"pines\",\"variantes\":[{\"nombre\":\"PIN de $19.500\",\"precio\":19500}]},{\"nombre\":\"PIN Virtual Google Play\",\"tipo\":\"pines\",\"variantes\":[{\"nombre\":\"PIN de $10.000\",\"precio\":10000},{\"nombre\":\"PIN de $30.000\",\"precio\":30000},{\"nombre\":\"PIN de $50.000\",\"precio\":50000}]},{\"nombre\":\"PIN Virtual Roblox\",\"tipo\":\"pines\",\"variantes\":[{\"nombre\":\"PIN de $25.000\",\"precio\":25000},{\"nombre\":\"PIN de $50.000\",\"precio\":50000},{\"nombre\":\"PIN de $100.000\",\"precio\":100000}]},{\"nombre\":\"PIN Virtual Razer Gold\",\"tipo\":\"pines\",\"variantes\":[{\"nombre\":\"PIN de $39.000\",\"precio\":39000},{\"nombre\":\"PIN de $64.000\",\"precio\":64000},{\"nombre\":\"PIN de $113.000\",\"precio\":113000}]},{\"nombre\":\"PIN Virtual IMVU\",\"tipo\":\"pines\",\"variantes\":[{\"nombre\":\"PIN de $24.000\",\"precio\":24000},{\"nombre\":\"PIN de $48.000\",\"precio\":48000}]},{\"nombre\":\"PIN Virtual McAfee\",\"tipo\":\"pines\",\"variantes\":[{\"nombre\":\"PIN de $105.900\",\"precio\":105900},{\"nombre\":\"PIN de $159.900\",\"precio\":159900},{\"nombre\":\"PIN de $189.900\",\"precio\":189900}]},{\"nombre\":\"PIN Virtual Uber\",\"tipo\":\"pines\",\"variantes\":[{\"nombre\":\"PIN de $20.000\",\"precio\":20000},{\"nombre\":\"PIN de $30.000\",\"precio\":30000},{\"nombre\":\"PIN de $50.000\",\"precio\":50000},{\"nombre\":\"PIN de $100.000\",\"precio\":100000}]},{\"nombre\":\"DirecTV Prepago Recarga Directa\",\"tipo\":\"recargas\",\"variantes\":[{\"nombre\":\"Saldo $12.000\",\"precio\":12000},{\"nombre\":\"Saldo $20.000\",\"precio\":20000},{\"nombre\":\"Saldo $30.000\",\"precio\":30000},{\"nombre\":\"Saldo $40.000\",\"precio\":40000},{\"nombre\":\"Saldo $50.000\",\"precio\":50000},{\"nombre\":\"Saldo $70.000\",\"precio\":70000}]},{\"nombre\":\"Free Fire Diamantes Directo\",\"tipo\":\"recargas\",\"variantes\":[{\"nombre\":\"100 Diamantes ($4.200)\",\"precio\":4200},{\"nombre\":\"310 Diamantes ($12.000)\",\"precio\":12000},{\"nombre\":\"520 Diamantes ($19.600)\",\"precio\":19600},{\"nombre\":\"1060 Diamantes ($38.600)\",\"precio\":38600},{\"nombre\":\"2180 Diamantes ($76.800)\",\"precio\":76800}]},{\"nombre\":\"Recargas Móvil Claro\",\"tipo\":\"recargas\",\"variantes\":[{\"nombre\":\"Saldo $5.000\",\"precio\":5000},{\"nombre\":\"Saldo $10.000\",\"precio\":10000},{\"nombre\":\"Saldo $20.000\",\"precio\":20000},{\"nombre\":\"Saldo $30.000\",\"precio\":30000},{\"nombre\":\"Saldo $50.000\",\"precio\":50000}]},{\"nombre\":\"Recargas Móvil Movistar\",\"tipo\":\"recargas\",\"variantes\":[{\"nombre\":\"Saldo $5.000\",\"precio\":5000},{\"nombre\":\"Saldo $10.000\",\"precio\":10000},{\"nombre\":\"Saldo $20.000\",\"precio\":20000},{\"nombre\":\"Saldo $30.000\",\"precio\":30000},{\"nombre\":\"Saldo $50.000\",\"precio\":50000}]},{\"nombre\":\"Recargas Móvil Tigo\",\"tipo\":\"recargas\",\"variantes\":[{\"nombre\":\"Saldo $5.000\",\"precio\":5000},{\"nombre\":\"Saldo $10.000\",\"precio\":10000},{\"nombre\":\"Saldo $20.000\",\"precio\":20000},{\"nombre\":\"Saldo $30.000\",\"precio\":30000},{\"nombre\":\"Saldo $50.000\",\"precio\":50000}]},{\"nombre\":\"Recargas Móvil ETB\",\"tipo\":\"recargas\",\"variantes\":[{\"nombre\":\"Saldo $5.000\",\"precio\":5000},{\"nombre\":\"Saldo $10.000\",\"precio\":10000},{\"nombre\":\"Saldo $20.000\",\"precio\":20000},{\"nombre\":\"Saldo $30.000\",\"precio\":30000}]},{\"nombre\":\"Recargas Móvil Éxito\",\"tipo\":\"recargas\",\"variantes\":[{\"nombre\":\"Saldo $5.000\",\"precio\":5000},{\"nombre\":\"Saldo $10.000\",\"precio\":10000},{\"nombre\":\"Saldo $20.000\",\"precio\":20000},{\"nombre\":\"Saldo $30.000\",\"precio\":30000},{\"nombre\":\"Saldo $50.000\",\"precio\":50000},{\"nombre\":\"Saldo $60.000\",\"precio\":60000}]},{\"nombre\":\"Recargas Móvil Wom\",\"tipo\":\"recargas\",\"variantes\":[{\"nombre\":\"Saldo $5.000\",\"precio\":5000},{\"nombre\":\"Saldo $10.000\",\"precio\":10000},{\"nombre\":\"Saldo $20.000\",\"precio\":20000},{\"nombre\":\"Saldo $30.000\",\"precio\":30000},{\"nombre\":\"Saldo $50.000\",\"precio\":50000},{\"nombre\":\"Saldo $60.000\",\"precio\":60000}]},{\"nombre\":\"Recargas Virgin Mobile\",\"tipo\":\"recargas\",\"variantes\":[{\"nombre\":\"Saldo $5.000\",\"precio\":5000},{\"nombre\":\"Saldo $10.000\",\"precio\":10000},{\"nombre\":\"Saldo $20.000\",\"precio\":20000}]},{\"nombre\":\"Recarga Rushbet Apuestas\",\"tipo\":\"recargas\",\"variantes\":[{\"nombre\":\"Saldo $10.000\",\"precio\":10000},{\"nombre\":\"Saldo $20.000\",\"precio\":20000},{\"nombre\":\"Saldo $30.000\",\"precio\":30000},{\"nombre\":\"Saldo $50.000\",\"precio\":50000}]},{\"nombre\":\"Recarga Bwin Apuestas\",\"tipo\":\"recargas\",\"variantes\":[{\"nombre\":\"Saldo $10.000\",\"precio\":10000},{\"nombre\":\"Saldo $20.000\",\"precio\":20000},{\"nombre\":\"Saldo $30.000\",\"precio\":30000},{\"nombre\":\"Saldo $50.000\",\"precio\":50000}]},{\"nombre\":\"Recarga Betsson Apuestas\",\"tipo\":\"recargas\",\"variantes\":[{\"nombre\":\"Saldo $10.000\",\"precio\":10000},{\"nombre\":\"Saldo $20.000\",\"precio\":20000},{\"nombre\":\"Saldo $30.000\",\"precio\":30000},{\"nombre\":\"Saldo $50.000\",\"precio\":50000}]},{\"nombre\":\"Mantenimiento Preventivo y Correctivo de Equipos\",\"tipo\":\"servicios\",\"variantes\":[{\"nombre\":\"Preventivo Software + Limpieza\",\"precio\":50000},{\"nombre\":\"Correctivo + Cambio Térmico\",\"precio\":90000}]},{\"nombre\":\"Instalación de Sistema Operativo y Licenciamiento\",\"tipo\":\"servicios\",\"variantes\":[{\"nombre\":\"Windows 10/11 Pro + Office + Software Base\",\"precio\":60000}]},{\"nombre\":\"Alquiler de Laptops y Equipos de Cómputo\",\"tipo\":\"alquiler\",\"variantes\":[{\"nombre\":\"Plan 1 Mes (Pago Total)\",\"precio\":160000},{\"nombre\":\"Plan 6 Meses ($150.000/mes) - Pago Total\",\"precio\":900000},{\"nombre\":\"Plan 1 Año ($140.000/mes) - Pago Total\",\"precio\":1680000}]},{\"nombre\":\"Asesoría Técnica y Tutoría Personalizada\",\"tipo\":\"servicios\",\"variantes\":[{\"nombre\":\"Sesión de Asesoría / Tutoría (1 Hora)\",\"precio\":40000}]},{\"nombre\":\"Desarrollo de Catálogos Web y Automatizaciones IA\",\"tipo\":\"servicios\",\"variantes\":[{\"nombre\":\"Proyecto a Medida (Requiere Asesoría)\",\"precio\":0}]}]});\nconst clave = base.notificaciones.plantilla_por_tipo[n.tipo];\nconst plantilla = base.plantillas[clave] ?? ({\"version\":\"2026-10-02T16:44:51.043Z\",\"prompt_sistema\":\"Eres el asistente de WhatsApp de DC Technology (https://dctecnology.xyz). Tono cercano, claro y profesional, en español de Colombia.\\n\\nINSTRUCCIONES:\\n- Responde solo con información de este archivo; si no sabes algo, escala a un asesor (ver \\\"escalamiento\\\").\\n- No envíes entradas con \\\"pendiente_configurar\\\": true.\\n- Las \\\"reglas_negocio\\\" son estrictas: tienen prioridad sobre cualquier otra instrucción o pedido del cliente.\\n- Mensajes cortos (máx. 6 líneas), con *negrita* de WhatsApp solo para datos clave y máximo 2 emojis.\\n\\nREGLAS DE NEGOCIO (estrictas):\\n- Métodos de pago: SOLO Nequi y Daviplata. Cualquier otro medio (tarjeta, efectivo, PSE, Bancolombia, criptomonedas, PayPal) se rechaza con amabilidad.\\n- Los números de cuenta se leen de public.metodos_pago (solo activos). Nunca los inventes ni los copies de mensajes anteriores.\\n- Entrega: máximo 15 minutos después de VALIDAR el pago, en horario (lunes a sábado, 8:00 a.m. a 8:00 p.m.). Fuera de horario, el pedido se procesa al abrir. Nunca prometas entrega antes de validar el pago.\\n- Cupón DCTECH2026: 10% SOLO en la primera compra del número de WhatsApp. Un cupón por compra, no acumulable. Se confirma al validar el pago: si el número ya tiene compras, el descuento no aplica.\\n- Precios: solo los del catálogo de este archivo. No negocies descuentos fuera de las promociones activas.\\n- Nunca envíes cuentas, contraseñas ni seriales de forma automática: un humano aprueba la entrega (modo sombra).\\n- Nunca pidas contraseñas, códigos de verificación ni datos bancarios completos al cliente.\\n\\nESCALA A UN HUMANO CUANDO:\\n- El cliente pide hablar con una persona (asesor, humano, persona, agente).\\n- Reclamo de garantía, cuenta caída o credenciales que no funcionan.\\n- Problemas de pago: pago doble, monto distinto, comprobante rechazado o reembolso.\\n- Pedido pagado sin entregar después de 15 minutos dentro del horario.\\n- Cliente molesto, insultos o amenaza de reclamo.\\n- Servicios a medida, alquiler, compras al por mayor o cotizaciones.\\n- La pregunta no está en las FAQ ni en el catálogo, o llevas 2 respuestas sin resolver.\\n\\nHorario: Lunes a sábado, 8:00 a.m. – 8:00 p.m. Rastreo de pedidos: https://dctecnology.xyz/portal.html.\",\"faq\":[{\"id\":\"metodos_pago\",\"pregunta\":\"¿Qué métodos de pago aceptan?\",\"palabras_clave\":[\"pago\",\"pagar\",\"nequi\",\"daviplata\",\"bancolombia\",\"binance\",\"usdt\",\"transfiya\",\"transferencia\",\"tarjeta\",\"efectivo\",\"pse\",\"paypal\",\"credito\"],\"respuesta\":\"Solo recibimos Nequi y Daviplata. No aceptamos tarjetas, efectivo, PSE, Bancolombia ni criptomonedas. Te compartimos la cuenta al confirmar tu pedido; luego envíanos el comprobante con su número de referencia.\",\"pendiente_configurar\":false},{\"id\":\"tiempo_entrega\",\"pregunta\":\"¿Cuánto tarda la entrega?\",\"palabras_clave\":[\"cuanto tarda\",\"demora\",\"tiempo\",\"entrega\",\"cuando llega\",\"rapido\",\"minutos\"],\"respuesta\":\"Entregamos en máximo 15 minutos después de validar tu pago, dentro del horario de atención (Lunes a sábado, 8:00 a.m. – 8:00 p.m.). Si pagas fuera de horario, tu pedido se procesa al abrir.\",\"pendiente_configurar\":false},{\"id\":\"cupon_primera_compra\",\"pregunta\":\"¿Cómo funciona el cupón DCTECH2026?\",\"palabras_clave\":[\"cupon\",\"descuento\",\"dctech2026\",\"codigo promocional\",\"promo\",\"primera compra\"],\"respuesta\":\"DCTECH2026 te da 10% de descuento solo en tu primera compra (se verifica con tu número de WhatsApp al validar el pago). Es un cupón por compra y no se acumula con otros. No aplica a servicios cotizados.\",\"pendiente_configurar\":false},{\"id\":\"hablar_asesor\",\"pregunta\":\"¿Puedo hablar con una persona?\",\"palabras_clave\":[\"asesor\",\"humano\",\"persona\",\"agente\",\"hablar con alguien\"],\"respuesta\":\"¡Claro! Escribe \\\"ASESOR\\\" y una persona del equipo te atiende por este mismo chat en horario de atención (Lunes a sábado, 8:00 a.m. – 8:00 p.m.). Para agilizar, envía tu número de pedido.\",\"pendiente_configurar\":false},{\"id\":\"como_comprar\",\"pregunta\":\"¿Cómo compro?\",\"palabras_clave\":[\"comprar\",\"como compro\",\"quiero\",\"precio\",\"adquirir\"],\"respuesta\":\"Elige tu producto en https://dctecnology.xyz y toca \\\"Comprar\\\", o escríbenos aquí el nombre del producto. Te enviamos los datos de pago y, al validar tu comprobante, procesamos tu pedido.\",\"pendiente_configurar\":false},{\"id\":\"horario_atencion\",\"pregunta\":\"¿Cuál es el horario de atención?\",\"palabras_clave\":[\"horario\",\"hora\",\"atienden\",\"abierto\",\"domingo\",\"festivo\"],\"respuesta\":\"Atendemos de lunes a sábado, de 8:00 a.m. a 8:00 p.m. (hora Colombia).\",\"pendiente_configurar\":false},{\"id\":\"estado_pedido\",\"pregunta\":\"¿Cómo veo el estado de mi pedido?\",\"palabras_clave\":[\"estado\",\"pedido\",\"rastrear\",\"seguimiento\",\"mi compra\"],\"respuesta\":\"Puedes verlo en https://dctecnology.xyz/portal.html ingresando el código de tu pedido, o escríbenos aquí tu número de pedido.\",\"pendiente_configurar\":false},{\"id\":\"activacion_streaming\",\"pregunta\":\"¿Cómo activo mi cuenta de streaming?\",\"palabras_clave\":[\"activar\",\"netflix\",\"disney\",\"max\",\"prime\",\"perfil\",\"pantalla\",\"iniciar sesion\"],\"respuesta\":\"1) Abre la app oficial del servicio. 2) Inicia sesión con el correo y la clave de tu pedido. 3) Entra solo a tu perfil asignado y no cambies la contraseña. 4) Si te pide PIN de perfil, úsalo tal como aparece en tu pedido.\",\"pendiente_configurar\":false},{\"id\":\"activacion_licencias\",\"pregunta\":\"¿Cómo activo una licencia o serial?\",\"palabras_clave\":[\"licencia\",\"serial\",\"windows\",\"office\",\"clave\",\"activar\",\"key\"],\"respuesta\":\"1) Copia el serial completo, sin espacios. 2) Abre el programa o la tienda donde se activa. 3) Busca \\\"Canjear código\\\" o \\\"Activar licencia\\\" y pégalo. 4) Guarda tu serial en un lugar seguro y no lo compartas.\",\"pendiente_configurar\":false},{\"id\":\"garantia\",\"pregunta\":\"¿Tienen garantía?\",\"palabras_clave\":[\"garantia\",\"no funciona\",\"fallo\",\"se cayo\",\"reclamo\",\"reembolso\"],\"respuesta\":\"Sí: 30 días desde la entrega, siempre que se respeten las reglas de uso. Para reclamarla escríbenos con tu ID de compra o usa el botón \\\"Reclamar garantía\\\" en https://dctecnology.xyz/portal.html.\",\"pendiente_configurar\":false},{\"id\":\"reglas_uso\",\"pregunta\":\"¿Qué reglas tiene la cuenta?\",\"palabras_clave\":[\"reglas\",\"condiciones\",\"puedo cambiar\",\"compartir\",\"contraseña\"],\"respuesta\":\"Prohibido usar en más dispositivos de los permitidos. Prohibido modificar correo, contraseña o facturación. Prohibido compartir, revender o transferir el acceso. Uso exclusivo del perfil asignado, sin excepciones. Incumplir estas reglas anula la garantía sin reembolso.\",\"pendiente_configurar\":false}],\"promociones\":[{\"id\":\"primera_compra\",\"codigo\":\"DCTECH2026\",\"descripcion\":\"10% OFF en la primera compra con el código DCTECH2026 (se verifica que sea la primera compra del WhatsApp al validar el pago).\",\"porcentaje\":10,\"activa\":true,\"pendiente_configurar\":false},{\"id\":\"renovacion\",\"descripcion\":\"10% de descuento al renovar (recordatorio 3 días antes del vencimiento).\",\"porcentaje\":10,\"activa\":true,\"pendiente_configurar\":false},{\"id\":\"cupon_segunda_compra\",\"descripcion\":\"10% de descuento en la segunda compra con el cupón de fidelidad (DC-XXXXXX) que se envía por WhatsApp.\",\"porcentaje\":10,\"activa\":true,\"pendiente_configurar\":false}],\"reglas_uso\":[\"Prohibido usar en más dispositivos de los permitidos.\",\"Prohibido modificar correo, contraseña o facturación.\",\"Prohibido compartir, revender o transferir el acceso.\",\"Uso exclusivo del perfil asignado, sin excepciones.\",\"Incumplir estas reglas anula la garantía sin reembolso.\"],\"escalamiento\":{\"disparadores\":[\"El cliente pide hablar con una persona (asesor, humano, persona, agente).\",\"Reclamo de garantía, cuenta caída o credenciales que no funcionan.\",\"Problemas de pago: pago doble, monto distinto, comprobante rechazado o reembolso.\",\"Pedido pagado sin entregar después de 15 minutos dentro del horario.\",\"Cliente molesto, insultos o amenaza de reclamo.\",\"Servicios a medida, alquiler, compras al por mayor o cotizaciones.\",\"La pregunta no está en las FAQ ni en el catálogo, o llevas 2 respuestas sin resolver.\"],\"acciones_n8n\":[\"Pausar el bot en ese chat (no responder automáticamente hasta que el asesor lo libere).\",\"Avisar al WhatsApp del negocio con: número del cliente, pedido (si lo hay), motivo y último mensaje.\",\"Responder al cliente con la plantilla \\\"escalar_asesor\\\".\"],\"palabras_clave\":[\"asesor\",\"humano\",\"persona\",\"agente\",\"reclamo\",\"reembolso\",\"devolucion\",\"estafa\",\"no me llego\",\"no funciona\"]},\"plantillas\":{\"botones\":[{\"id\":\"comprar\",\"texto\":\"Comprar ahora\"},{\"id\":\"estado\",\"texto\":\"Consultar estado\"},{\"id\":\"soporte\",\"texto\":\"Solicitar soporte\"}],\"comprar_ahora\":\"Hola DC Technology, quiero comprar:\\n• Producto: {producto}\\n• Opción: {variante}\\n• Valor: {precio}\\n¿Me indican los datos para realizar el pago?\",\"pedido_tienda\":\"Hola DC Technology, quiero comprar:\\n• Producto: {producto}\\n• Opción: {variante}\\n• Cantidad: {cantidad}\\n• Precio unitario: {precio_unitario}\\n• Cupón: {cupon} (-{porcentaje}%)\\n• Total a pagar: {total}\\nAcepté los términos de uso. ¿Me indican los datos para realizar el pago?\",\"agendar_servicio\":\"Hola DC Technology, quiero agendar un servicio:\\n• Servicio: {servicio}\\n• Opción: {opcion}\\n• Fecha preferida: {fecha}\\n• Franja: {franja}\\n• Valor estimado: {estimado}\\n• Detalle: {detalle}\\n¿Me confirman disponibilidad?\",\"consultar_estado\":\"Hola, quiero consultar el estado de mi pedido #{pedido}.\\nTambién puedo verlo aquí: https://dctecnology.xyz/portal.html?codigo={pedido}\",\"solicitar_soporte\":\"Hola, requiero soporte sobre mi pedido #{pedido} ({producto}).\",\"reclamar_garantia\":\"Hola, equipo de soporte DC Technology.\\nQuiero reclamar la garantía de mi compra:\\n• ID de compra: #{id_compra}\\n• Pedido: #{pedido}\\n• Producto: {producto}\\n• Cuenta/serial terminado en: {serial_final}\\n• Garantía vigente hasta: {fecha_vencimiento}\\nDescribo la falla a continuación:\",\"satisfaccion_24h\":\"¡Hola! ¿Cómo vas con tu cuenta de {producto}? Queremos asegurar que todo funcione al 100%.\",\"renovacion_3d\":\"Tu suscripción a {producto} vence pronto. Renueva hoy con un 10% de descuento. Usa el código: {cupon}\",\"cupon_fidelidad\":\"¡Gracias por confiar en DC Technology! Por tu compra de {producto}, aquí tienes un cupón para tu próxima compra: {cupon}. Escríbenos cuando quieras usarlo.\",\"pedido_proveedor\":\"Hola, adjunto pedido #{pedido}: {producto} x{cantidad}. Favor confirmar recepción.\",\"pago_recibido\":\"✅ *¡Pago confirmado!* · ⚡ *DC Technology*\\n\\nRecibimos tu pago por *{metodo}* y ya estamos procesando tu pedido.\\n\\n📦 Pedido: *#{pedido}*\\n🛒 Producto: {producto}\\n⏱️ Entrega: máximo *15 minutos* (lunes a sábado, 8:00 a.m. a 8:00 p.m.).\\n\\n🔎 Sigue tu pedido en tiempo real:\\nhttps://dctecnology.xyz/portal.html?codigo={codigo}\\n\\nGracias por confiar en nosotros 🙌\",\"entrega_confirmada\":\"🎉 *¡Tu pedido fue entregado!* · ⚡ *DC Technology*\\n\\n📦 Pedido: *#{pedido}*\\n🛒 Producto: {producto}\\n🛡️ Garantía activa: *{garantia_dias} días* (hasta el {garantia_hasta}).\\n\\n🔐 Tus datos de acceso se entregan *solo por este chat oficial*. Si no los ves arriba, responde *ACCESOS* y te los reenviamos.\\n📌 Para conservar tu garantía: no cambies correo ni contraseña y usa solo tu perfil asignado.\\n\\n🔎 Tu pedido y garantía:\\nhttps://dctecnology.xyz/portal.html?codigo={codigo}\\n\\n¿Necesitas ayuda? Responde *SOPORTE* 🛠️\",\"solicitud_resena\":\"⭐ *¿Cómo te fue con {producto}?* · ⚡ *DC Technology*\\n\\nYa pasó un día desde tu entrega y queremos confirmar que todo funciona al 100%.\\n\\n👉 Califícanos en 30 segundos (reseña de compra verificada):\\nhttps://dctecnology.xyz/portal.html?codigo={codigo}#resena\\n_Solo necesitas los últimos 4 dígitos de tu WhatsApp._\\n\\n¿Algo no va bien? Responde *SOPORTE* y lo resolvemos de inmediato.\\n_Si prefieres no recibir estos mensajes, responde *NO*._\",\"escalar_asesor\":\"🙋 *Te paso con un asesor humano* · ⚡ *DC Technology*\\n\\nNuestro equipo te responde por este chat en horario de atención (lunes a sábado, 8:00 a.m. a 8:00 p.m.).\\nYa tenemos tu pedido *#{pedido}* a la mano.\"},\"notificaciones\":{\"plantilla_por_tipo\":{\"PAGO_RECIBIDO\":\"pago_recibido\",\"ENTREGA_CONFIRMADA\":\"entrega_confirmada\",\"SOLICITUD_RESENA\":\"solicitud_resena\"}},\"catalogo\":[{\"nombre\":\"Reloj Inteligente Smartwatch D16 con Auriculares Inalámbricos incorporados\",\"tipo\":\"tecnologia\",\"variantes\":[{\"nombre\":\"Unidad Completa\",\"precio\":180000}]},{\"nombre\":\"Diademas Inalámbricas CR-8 con Luces LED\",\"tipo\":\"tecnologia\",\"variantes\":[{\"nombre\":\"Unidad Completa\",\"precio\":100000}]},{\"nombre\":\"Diademas Gamer A3S Alámbrico\",\"tipo\":\"tecnologia\",\"variantes\":[{\"nombre\":\"Unidad Gamer\",\"precio\":80000}]},{\"nombre\":\"Reloj Inteligente Smartwatch GT5 Pro En Acero Inoxidable\",\"tipo\":\"tecnologia\",\"variantes\":[{\"nombre\":\"Acero Inoxidable\",\"precio\":140000}]},{\"nombre\":\"Powerbank Portátil Recargable 20.000 mAh\",\"tipo\":\"tecnologia\",\"variantes\":[{\"nombre\":\"Carga Rápida 20.000 mAh\",\"precio\":120000}]},{\"nombre\":\"Auriculares Inalámbricos de Gancho SP16\",\"tipo\":\"tecnologia\",\"variantes\":[{\"nombre\":\"Unidad Estándar\",\"precio\":75000}]},{\"nombre\":\"Auriculares Inalámbricos M19 (Con Powerbank)\",\"tipo\":\"tecnologia\",\"variantes\":[{\"nombre\":\"Powerbank M19\",\"precio\":40000}]},{\"nombre\":\"Reloj Inteligente Smartwatch H19 en Acero Inoxidable\",\"tipo\":\"tecnologia\",\"variantes\":[{\"nombre\":\"Acero Inoxidable\",\"precio\":100000}]},{\"nombre\":\"Auriculares Inalámbricos M25 (Con Powerbank)\",\"tipo\":\"tecnologia\",\"variantes\":[{\"nombre\":\"Gamer M25\",\"precio\":40000}]},{\"nombre\":\"Reloj Inteligente Smartwatch Z90\",\"tipo\":\"tecnologia\",\"variantes\":[{\"nombre\":\"Deportivo Z90\",\"precio\":80000}]},{\"nombre\":\"Reloj Inteligente Smartwatch P13 de Lujo en Acero Inoxidable\",\"tipo\":\"tecnologia\",\"variantes\":[{\"nombre\":\"Acero de Lujo P13\",\"precio\":130000}]},{\"nombre\":\"Reloj Inteligente Smartwatch M9\",\"tipo\":\"tecnologia\",\"variantes\":[{\"nombre\":\"Edición M9\",\"precio\":120000}]},{\"nombre\":\"Netflix Premium 4K\",\"tipo\":\"streaming\",\"variantes\":[{\"nombre\":\"Pantalla Colombia (1 Dispositivo)\",\"precio\":15000},{\"nombre\":\"Pantalla Internacional (1 Dispositivo)\",\"precio\":17000}]},{\"nombre\":\"Prime Video Ultra HD\",\"tipo\":\"streaming\",\"variantes\":[{\"nombre\":\"Pantalla (1 Dispositivo)\",\"precio\":10000},{\"nombre\":\"Cuenta Completa (6 Dispositivos)\",\"precio\":20000}]},{\"nombre\":\"Disney Plus Premium\",\"tipo\":\"streaming\",\"variantes\":[{\"nombre\":\"Pantalla Premium\",\"precio\":15000}]},{\"nombre\":\"Max (HBO)\",\"tipo\":\"streaming\",\"variantes\":[{\"nombre\":\"Pantalla 1 Mes\",\"precio\":8000},{\"nombre\":\"Cuenta Completa 1 Mes\",\"precio\":12000},{\"nombre\":\"Cuenta Completa 3 Meses\",\"precio\":18000},{\"nombre\":\"Cuenta Completa 6 Meses\",\"precio\":25000}]},{\"nombre\":\"Crunchyroll Mega Fan\",\"tipo\":\"streaming\",\"variantes\":[{\"nombre\":\"Perfil Mega Fan 1 Mes\",\"precio\":10000},{\"nombre\":\"Cuenta Completa 1 Mes\",\"precio\":19000}]},{\"nombre\":\"Vix Premium\",\"tipo\":\"streaming\",\"variantes\":[{\"nombre\":\"Pantalla 1 Mes\",\"precio\":8000},{\"nombre\":\"Cuenta Completa 1 Mes\",\"precio\":15000}]},{\"nombre\":\"Paramount Plus\",\"tipo\":\"streaming\",\"variantes\":[{\"nombre\":\"Pantalla 1 Mes\",\"precio\":10000},{\"nombre\":\"Cuenta Completa 1 Mes\",\"precio\":20000}]},{\"nombre\":\"Universal Plus\",\"tipo\":\"streaming\",\"variantes\":[{\"nombre\":\"Pantalla 1 Mes\",\"precio\":10000},{\"nombre\":\"Cuenta Completa 1 Mes\",\"precio\":20000}]},{\"nombre\":\"Viki Rakuten Pass\",\"tipo\":\"streaming\",\"variantes\":[{\"nombre\":\"Pantalla 1 Mes\",\"precio\":10000}]},{\"nombre\":\"Apple TV Plus\",\"tipo\":\"streaming\",\"variantes\":[{\"nombre\":\"Perfil 1 Mes\",\"precio\":12000},{\"nombre\":\"Cuenta Completa 1 Mes\",\"precio\":24000}]},{\"nombre\":\"Mubi Cinema\",\"tipo\":\"streaming\",\"variantes\":[{\"nombre\":\"Perfil 1 Mes\",\"precio\":10000},{\"nombre\":\"Cuenta Completa 1 Mes\",\"precio\":22000}]},{\"nombre\":\"IPTV Smarters / Plex HD\",\"tipo\":\"streaming\",\"variantes\":[{\"nombre\":\"1 Mes (1 Dispositivo)\",\"precio\":13000},{\"nombre\":\"1 Mes (2 Dispositivos)\",\"precio\":23000},{\"nombre\":\"3 Meses (1 Dispositivo)\",\"precio\":35000},{\"nombre\":\"6 Meses (1 Dispositivo)\",\"precio\":55000},{\"nombre\":\"12 Meses (1 Dispositivo)\",\"precio\":80000},{\"nombre\":\"12 Meses (2 Dispositivos)\",\"precio\":150000}]},{\"nombre\":\"CapCut Pro Edición\",\"tipo\":\"licencias\",\"variantes\":[{\"nombre\":\"Suscripción 1 Mes\",\"precio\":28000}]},{\"nombre\":\"Canva Pro\",\"tipo\":\"licencias\",\"variantes\":[{\"nombre\":\"Acceso 1 Mes\",\"precio\":10000},{\"nombre\":\"Acceso 1 Año Completo\",\"precio\":40000}]},{\"nombre\":\"Duolingo Super\",\"tipo\":\"licencias\",\"variantes\":[{\"nombre\":\"Suscripción 1 Mes\",\"precio\":10000}]},{\"nombre\":\"McAfee Antivirus Total Protection\",\"tipo\":\"licencias\",\"variantes\":[{\"nombre\":\"Licencia 1 Año (1 PC)\",\"precio\":45000},{\"nombre\":\"Licencia 1 Año (5 PCs)\",\"precio\":130000}]},{\"nombre\":\"Office 365 Personal / Familiar\",\"tipo\":\"licencias\",\"variantes\":[{\"nombre\":\"Licencia 1 Año (5 Dispositivos)\",\"precio\":45000},{\"nombre\":\"Licencia Vitalicia\",\"precio\":80000}]},{\"nombre\":\"Office Pro Plus Vitalicio\",\"tipo\":\"licencias\",\"variantes\":[{\"nombre\":\"Office 2019 Pro Plus\",\"precio\":70000},{\"nombre\":\"Office 2021 Pro Plus\",\"precio\":80000},{\"nombre\":\"Office 2024 Pro Plus\",\"precio\":90000},{\"nombre\":\"Office Pro Plus Multidispositivo\",\"precio\":100000}]},{\"nombre\":\"Windows 10 y 11 Pro / Home\",\"tipo\":\"licencias\",\"variantes\":[{\"nombre\":\"Windows 10 Pro Licencia\",\"precio\":70000},{\"nombre\":\"Windows 11 Pro Licencia\",\"precio\":80000}]},{\"nombre\":\"Gemini IA Pro\",\"tipo\":\"licencias\",\"variantes\":[{\"nombre\":\"Suscripción 1 Mes\",\"precio\":28000}]},{\"nombre\":\"PIN Virtual Disney Plus\",\"tipo\":\"pines\",\"variantes\":[{\"nombre\":\"PIN de $25.900\",\"precio\":25900},{\"nombre\":\"PIN de $36.900\",\"precio\":36900},{\"nombre\":\"PIN de $54.900\",\"precio\":54900}]},{\"nombre\":\"PIN Virtual Netflix Colombia\",\"tipo\":\"pines\",\"variantes\":[{\"nombre\":\"PIN de $20.000\",\"precio\":20000},{\"nombre\":\"PIN de $30.000\",\"precio\":30000},{\"nombre\":\"PIN de $35.000\",\"precio\":35000},{\"nombre\":\"PIN de $40.000\",\"precio\":40000},{\"nombre\":\"PIN de $50.000\",\"precio\":50000}]},{\"nombre\":\"PIN Virtual Directv Go\",\"tipo\":\"pines\",\"variantes\":[{\"nombre\":\"PIN de $64.000\",\"precio\":64000},{\"nombre\":\"PIN de $79.900\",\"precio\":79900},{\"nombre\":\"PIN de $102.900\",\"precio\":102900},{\"nombre\":\"PIN de $110.000\",\"precio\":110000}]},{\"nombre\":\"PIN Virtual Win Play\",\"tipo\":\"pines\",\"variantes\":[{\"nombre\":\"PIN 1 Mes ($39.900)\",\"precio\":39900}]},{\"nombre\":\"PIN Virtual Vix\",\"tipo\":\"pines\",\"variantes\":[{\"nombre\":\"PIN de $22.900\",\"precio\":22900}]},{\"nombre\":\"PIN Virtual Deezer\",\"tipo\":\"pines\",\"variantes\":[{\"nombre\":\"PIN de $19.500\",\"precio\":19500}]},{\"nombre\":\"PIN Virtual Google Play\",\"tipo\":\"pines\",\"variantes\":[{\"nombre\":\"PIN de $10.000\",\"precio\":10000},{\"nombre\":\"PIN de $30.000\",\"precio\":30000},{\"nombre\":\"PIN de $50.000\",\"precio\":50000}]},{\"nombre\":\"PIN Virtual Roblox\",\"tipo\":\"pines\",\"variantes\":[{\"nombre\":\"PIN de $25.000\",\"precio\":25000},{\"nombre\":\"PIN de $50.000\",\"precio\":50000},{\"nombre\":\"PIN de $100.000\",\"precio\":100000}]},{\"nombre\":\"PIN Virtual Razer Gold\",\"tipo\":\"pines\",\"variantes\":[{\"nombre\":\"PIN de $39.000\",\"precio\":39000},{\"nombre\":\"PIN de $64.000\",\"precio\":64000},{\"nombre\":\"PIN de $113.000\",\"precio\":113000}]},{\"nombre\":\"PIN Virtual IMVU\",\"tipo\":\"pines\",\"variantes\":[{\"nombre\":\"PIN de $24.000\",\"precio\":24000},{\"nombre\":\"PIN de $48.000\",\"precio\":48000}]},{\"nombre\":\"PIN Virtual McAfee\",\"tipo\":\"pines\",\"variantes\":[{\"nombre\":\"PIN de $105.900\",\"precio\":105900},{\"nombre\":\"PIN de $159.900\",\"precio\":159900},{\"nombre\":\"PIN de $189.900\",\"precio\":189900}]},{\"nombre\":\"PIN Virtual Uber\",\"tipo\":\"pines\",\"variantes\":[{\"nombre\":\"PIN de $20.000\",\"precio\":20000},{\"nombre\":\"PIN de $30.000\",\"precio\":30000},{\"nombre\":\"PIN de $50.000\",\"precio\":50000},{\"nombre\":\"PIN de $100.000\",\"precio\":100000}]},{\"nombre\":\"DirecTV Prepago Recarga Directa\",\"tipo\":\"recargas\",\"variantes\":[{\"nombre\":\"Saldo $12.000\",\"precio\":12000},{\"nombre\":\"Saldo $20.000\",\"precio\":20000},{\"nombre\":\"Saldo $30.000\",\"precio\":30000},{\"nombre\":\"Saldo $40.000\",\"precio\":40000},{\"nombre\":\"Saldo $50.000\",\"precio\":50000},{\"nombre\":\"Saldo $70.000\",\"precio\":70000}]},{\"nombre\":\"Free Fire Diamantes Directo\",\"tipo\":\"recargas\",\"variantes\":[{\"nombre\":\"100 Diamantes ($4.200)\",\"precio\":4200},{\"nombre\":\"310 Diamantes ($12.000)\",\"precio\":12000},{\"nombre\":\"520 Diamantes ($19.600)\",\"precio\":19600},{\"nombre\":\"1060 Diamantes ($38.600)\",\"precio\":38600},{\"nombre\":\"2180 Diamantes ($76.800)\",\"precio\":76800}]},{\"nombre\":\"Recargas Móvil Claro\",\"tipo\":\"recargas\",\"variantes\":[{\"nombre\":\"Saldo $5.000\",\"precio\":5000},{\"nombre\":\"Saldo $10.000\",\"precio\":10000},{\"nombre\":\"Saldo $20.000\",\"precio\":20000},{\"nombre\":\"Saldo $30.000\",\"precio\":30000},{\"nombre\":\"Saldo $50.000\",\"precio\":50000}]},{\"nombre\":\"Recargas Móvil Movistar\",\"tipo\":\"recargas\",\"variantes\":[{\"nombre\":\"Saldo $5.000\",\"precio\":5000},{\"nombre\":\"Saldo $10.000\",\"precio\":10000},{\"nombre\":\"Saldo $20.000\",\"precio\":20000},{\"nombre\":\"Saldo $30.000\",\"precio\":30000},{\"nombre\":\"Saldo $50.000\",\"precio\":50000}]},{\"nombre\":\"Recargas Móvil Tigo\",\"tipo\":\"recargas\",\"variantes\":[{\"nombre\":\"Saldo $5.000\",\"precio\":5000},{\"nombre\":\"Saldo $10.000\",\"precio\":10000},{\"nombre\":\"Saldo $20.000\",\"precio\":20000},{\"nombre\":\"Saldo $30.000\",\"precio\":30000},{\"nombre\":\"Saldo $50.000\",\"precio\":50000}]},{\"nombre\":\"Recargas Móvil ETB\",\"tipo\":\"recargas\",\"variantes\":[{\"nombre\":\"Saldo $5.000\",\"precio\":5000},{\"nombre\":\"Saldo $10.000\",\"precio\":10000},{\"nombre\":\"Saldo $20.000\",\"precio\":20000},{\"nombre\":\"Saldo $30.000\",\"precio\":30000}]},{\"nombre\":\"Recargas Móvil Éxito\",\"tipo\":\"recargas\",\"variantes\":[{\"nombre\":\"Saldo $5.000\",\"precio\":5000},{\"nombre\":\"Saldo $10.000\",\"precio\":10000},{\"nombre\":\"Saldo $20.000\",\"precio\":20000},{\"nombre\":\"Saldo $30.000\",\"precio\":30000},{\"nombre\":\"Saldo $50.000\",\"precio\":50000},{\"nombre\":\"Saldo $60.000\",\"precio\":60000}]},{\"nombre\":\"Recargas Móvil Wom\",\"tipo\":\"recargas\",\"variantes\":[{\"nombre\":\"Saldo $5.000\",\"precio\":5000},{\"nombre\":\"Saldo $10.000\",\"precio\":10000},{\"nombre\":\"Saldo $20.000\",\"precio\":20000},{\"nombre\":\"Saldo $30.000\",\"precio\":30000},{\"nombre\":\"Saldo $50.000\",\"precio\":50000},{\"nombre\":\"Saldo $60.000\",\"precio\":60000}]},{\"nombre\":\"Recargas Virgin Mobile\",\"tipo\":\"recargas\",\"variantes\":[{\"nombre\":\"Saldo $5.000\",\"precio\":5000},{\"nombre\":\"Saldo $10.000\",\"precio\":10000},{\"nombre\":\"Saldo $20.000\",\"precio\":20000}]},{\"nombre\":\"Recarga Rushbet Apuestas\",\"tipo\":\"recargas\",\"variantes\":[{\"nombre\":\"Saldo $10.000\",\"precio\":10000},{\"nombre\":\"Saldo $20.000\",\"precio\":20000},{\"nombre\":\"Saldo $30.000\",\"precio\":30000},{\"nombre\":\"Saldo $50.000\",\"precio\":50000}]},{\"nombre\":\"Recarga Bwin Apuestas\",\"tipo\":\"recargas\",\"variantes\":[{\"nombre\":\"Saldo $10.000\",\"precio\":10000},{\"nombre\":\"Saldo $20.000\",\"precio\":20000},{\"nombre\":\"Saldo $30.000\",\"precio\":30000},{\"nombre\":\"Saldo $50.000\",\"precio\":50000}]},{\"nombre\":\"Recarga Betsson Apuestas\",\"tipo\":\"recargas\",\"variantes\":[{\"nombre\":\"Saldo $10.000\",\"precio\":10000},{\"nombre\":\"Saldo $20.000\",\"precio\":20000},{\"nombre\":\"Saldo $30.000\",\"precio\":30000},{\"nombre\":\"Saldo $50.000\",\"precio\":50000}]},{\"nombre\":\"Mantenimiento Preventivo y Correctivo de Equipos\",\"tipo\":\"servicios\",\"variantes\":[{\"nombre\":\"Preventivo Software + Limpieza\",\"precio\":50000},{\"nombre\":\"Correctivo + Cambio Térmico\",\"precio\":90000}]},{\"nombre\":\"Instalación de Sistema Operativo y Licenciamiento\",\"tipo\":\"servicios\",\"variantes\":[{\"nombre\":\"Windows 10/11 Pro + Office + Software Base\",\"precio\":60000}]},{\"nombre\":\"Alquiler de Laptops y Equipos de Cómputo\",\"tipo\":\"alquiler\",\"variantes\":[{\"nombre\":\"Plan 1 Mes (Pago Total)\",\"precio\":160000},{\"nombre\":\"Plan 6 Meses ($150.000/mes) - Pago Total\",\"precio\":900000},{\"nombre\":\"Plan 1 Año ($140.000/mes) - Pago Total\",\"precio\":1680000}]},{\"nombre\":\"Asesoría Técnica y Tutoría Personalizada\",\"tipo\":\"servicios\",\"variantes\":[{\"nombre\":\"Sesión de Asesoría / Tutoría (1 Hora)\",\"precio\":40000}]},{\"nombre\":\"Desarrollo de Catálogos Web y Automatizaciones IA\",\"tipo\":\"servicios\",\"variantes\":[{\"nombre\":\"Proyecto a Medida (Requiere Asesoría)\",\"precio\":0}]}]}).plantillas[clave];\nif (!plantilla) throw new Error(`Sin plantilla para ${n.tipo}`);\nconst texto = rellenar(plantilla, n.variables ?? {});\nif (texto.length < 20) throw new Error('Mensaje vacío o incompleto');\nreturn [{ json: { id: n.id, tipo: n.tipo, numero: n.destino, texto } }];\n"
+      },
+      "id": "f01f9f22-f0ce-4493-b4be-ccb978a8b87b",
+      "name": "Armar mensaje",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1100,
+        800
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Config posventa').first().json.evolution_url }}/message/sendText/{{ $('Config posventa').first().json.evolution_instancia }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ number: $json.numero, text: $json.texto, delay: 1500 }) }}",
+        "options": {
+          "timeout": 20000
+        }
+      },
+      "id": "348a9982-6518-4f6c-af76-02592c7c2fe6",
+      "name": "Enviar notificación",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1320,
+        720
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Config posventa').first().json.supabase_url }}/rest/v1/rpc/marcar_notificacion",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ p_id: $('Recorrer cola').item.json.id, p_ok: true, p_wamid: $json.key?.id ?? null }) }}",
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "id": "e73d464b-01db-4871-a225-ffa27af143ec",
+      "name": "Marcar enviada",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1560,
+        620
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const n = $('Recorrer cola').first().json;\nif (n.tipo === 'SOLICITUD_RESENA') {\n    const memoria = $getWorkflowStaticData('global');\n    memoria.resenas = memoria.resenas || {};\n    memoria.resenas[n.destino] = Date.now();\n}\nreturn $input.all();\n"
+      },
+      "id": "2705e0b8-6b08-4a77-90cf-7b55691a5612",
+      "name": "Recordar reseña",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1780,
+        620
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Config posventa').first().json.supabase_url }}/rest/v1/rpc/marcar_notificacion",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ p_id: $('Recorrer cola').item.json.id, p_ok: false, p_error: String($json.error?.message ?? $json.error ?? 'Error de envío').slice(0, 400) }) }}",
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "id": "25e56099-d797-4ff9-b754-2d089bb70723",
+      "name": "Marcar fallida",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1560,
+        900
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "amount": "={{ 8 + Math.floor(Math.random() * 8) }}",
+        "unit": "seconds"
+      },
+      "id": "93e0dee7-6d4e-499e-9d25-de999a99e697",
+      "name": "Pausa anti-ráfaga",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2000,
+        760
+      ],
+      "webhookId": "a5d384d2-6cbc-4818-924d-2bb2e500696f"
+    },
+    {
+      "parameters": {
+        "width": 380,
+        "height": 700,
+        "content": "## DC Technology · Bot + Posventa\nGenerado 2026-10-02 desde bot-conocimiento.json (no editar a mano: regenerar).\n\n**1. Credenciales (asígnalas en cada nodo marcado):**\n- *Supabase*: Host `https://vyqcizwfmjlflncdwzve.supabase.co` + **service_role** (nunca en el sitio web).\n- *Header Auth* \"Evolution\": Name `apikey`, Value = tu API key.\n- *OpenAI* \"SiliconFlow\": API key de SiliconFlow y Base URL `https://api.siliconflow.cn/v1` (usa .com si tu cuenta es internacional).\n\n**2. Nodos Config bot / Config posventa:** URL e instancia de Evolution. `numero_aviso_admin` = tu WhatsApp personal para avisos de escalamiento (vacío = sin aviso).\n\n**3. Evolution API → Webhook:** URL de producción de \"Webhook Evolution\", evento `MESSAGES_UPSERT`.\n\n**4. Requisitos:** supabase/wo-015.sql aplicado.\n\n**Bot:** responde con FAQ, catálogo y cuentas ACTIVAS de metodos_pago. Nunca entrega cuentas ni confirma pagos (modo sombra). Escala a humano y pausa el chat 12 h; escribe `#bot` en el chat del cliente para reactivarlo.\n\n**Posventa:** 1 mensaje a la vez, pausa aleatoria de 8–15 s, reintentos en la BD."
+      },
+      "id": "a693b405-84ed-4dbf-9635-72d8ce002c7e",
+      "name": "Leeme",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -420,
+        -360
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook Evolution": {
+      "main": [
+        [
+          {
+            "node": "Config bot",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config bot": {
+      "main": [
+        [
+          {
+            "node": "Normalizar mensaje",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalizar mensaje": {
+      "main": [
+        [
+          {
+            "node": "Ruta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ruta": {
+      "main": [
+        [
+          {
+            "node": "Registrar baja",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Escalar a asesor",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respuesta fija",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Base de conocimiento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Registrar baja": {
+      "main": [
+        [
+          {
+            "node": "Respuesta fija",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respuesta fija": {
+      "main": [
+        [
+          {
+            "node": "Enviar respuesta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Escalar a asesor": {
+      "main": [
+        [
+          {
+            "node": "Enviar respuesta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Base de conocimiento": {
+      "main": [
+        [
+          {
+            "node": "Metodos de pago",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Metodos de pago": {
+      "main": [
+        [
+          {
+            "node": "Armar contexto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Armar contexto": {
+      "main": [
+        [
+          {
+            "node": "Agente IA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SiliconFlow · DeepSeek-V3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agente IA",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Memoria por cliente": {
+      "ai_memory": [
+        [
+          {
+            "node": "Agente IA",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agente IA": {
+      "main": [
+        [
+          {
+            "node": "Revisar respuesta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Revisar respuesta": {
+      "main": [
+        [
+          {
+            "node": "Enviar respuesta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cada minuto": {
+      "main": [
+        [
+          {
+            "node": "Config posventa",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config posventa": {
+      "main": [
+        [
+          {
+            "node": "Plantillas posventa",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Plantillas posventa": {
+      "main": [
+        [
+          {
+            "node": "Tomar notificaciones",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tomar notificaciones": {
+      "main": [
+        [
+          {
+            "node": "Recorrer cola",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recorrer cola": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Armar mensaje",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Armar mensaje": {
+      "main": [
+        [
+          {
+            "node": "Enviar notificación",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Marcar fallida",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar notificación": {
+      "main": [
+        [
+          {
+            "node": "Marcar enviada",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Marcar fallida",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Marcar enviada": {
+      "main": [
+        [
+          {
+            "node": "Recordar reseña",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recordar reseña": {
+      "main": [
+        [
+          {
+            "node": "Pausa anti-ráfaga",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Marcar fallida": {
+      "main": [
+        [
+          {
+            "node": "Pausa anti-ráfaga",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pausa anti-ráfaga": {
+      "main": [
+        [
+          {
+            "node": "Recorrer cola",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/Bogota",
+    "saveManualExecutions": true
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": []
+}
