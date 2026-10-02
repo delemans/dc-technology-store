@@ -134,7 +134,7 @@ async function cargarCatalogo() {
     const grid = $('product-grid');
     grid.innerHTML = Array.from({ length: 8 }, () => `
         <div class="rounded-3xl bg-white/[0.03] ring-1 ring-white/10 p-4 space-y-3" aria-hidden="true">
-            <div class="skeleton h-40 rounded-2xl"></div><div class="skeleton h-3 w-20 rounded"></div>
+            <div class="skeleton h-[8.25rem] rounded-2xl"></div><div class="skeleton h-3 w-20 rounded"></div>
             <div class="skeleton h-5 w-3/4 rounded"></div><div class="skeleton h-12 rounded-2xl"></div>
         </div>`).join('');
 
@@ -232,26 +232,29 @@ function crearTarjeta(prod) {
     const cotizacion = desde === 0;
 
     const tarjeta = document.createElement('article');
-    tarjeta.className = 'tarjeta-3d group relative overflow-hidden rounded-3xl bg-white/[0.03] backdrop-blur-xl ring-1 ring-white/10 p-4 flex flex-col cursor-pointer';
+    // Digitales = logos de marca (marco compacto); tecnología y servicios = fotos (marco más alto)
+    const esLogo = MODULOS.digitales.tipos.includes(prod.tipo);
+
+    tarjeta.className = 'tarjeta-3d group relative overflow-hidden rounded-3xl p-4 flex flex-col cursor-pointer';
     tarjeta.tabIndex = 0;
     tarjeta.setAttribute('aria-label', `${prod.nombre}, ${cotizacion ? 'a cotizar' : `desde ${formatearPrecio(desde)}`}`);
     tarjeta.innerHTML = `
         <div class="brillo pointer-events-none absolute inset-0"></div>
-        ${descuento ? `<span class="absolute top-3 left-3 z-10 px-2.5 py-1 rounded-full bg-dcRed text-[10px] font-black shadow-[0_0_14px_rgba(255,0,51,.6)]">-${descuento}%</span>` : ''}
-        <div class="relative h-40 sm:h-44 mb-4 grid place-items-center rounded-2xl bg-gradient-to-b from-white/[0.04] to-transparent overflow-hidden">
+        ${descuento ? `<span class="absolute top-3 left-3 z-10 px-2.5 py-1 rounded-full bg-gradient-to-br from-dcNeon to-dcNeonDark text-[10px] font-black shadow-[0_0_14px_rgba(255,42,95,.6)]">-${descuento}%</span>` : ''}
+        <div class="marco-img ${esLogo ? 'marco-logo' : 'marco-foto'} mb-4">
             <img src="${escaparHTML(prod.imagen || imagenRespaldo(prod.nombre))}" alt="${escaparHTML(prod.nombre)}" loading="lazy" decoding="async"
-                class="w-full h-full object-contain p-1 transition-transform duration-500 group-hover:scale-110 ${prod.tipo === 'tecnologia' || esCotizable(prod) ? 'rounded-xl' : ''}">
+                class="${esLogo ? '' : 'rounded-xl'}">
         </div>
-        <p class="text-[10px] font-black uppercase tracking-[0.2em] text-dcRed">${escaparHTML(prod.marca || 'DC Technology')}</p>
-        <h3 class="mt-1 font-tech font-bold text-base leading-snug line-clamp-2">${escaparHTML(prod.nombre)}</h3>
-        <div class="mt-2 flex flex-wrap gap-1.5">${insignias(prod).slice(0, 2).map(htmlInsignia).join('')}</div>
-        <div class="mt-auto pt-4 flex items-end justify-between gap-2">
-            <div>
-                ${descuento ? `<p class="text-[11px] text-neutral-500 line-through">${formatearPrecio(anterior)}</p>` : ''}
-                <p class="font-tech text-xl font-black text-dcRed leading-none">${cotizacion ? 'A cotizar'
-                    : `${precios.length > 1 ? '<span class="text-[10px] text-neutral-400 font-semibold mr-1">Desde</span>' : ''}${formatearPrecio(desde)}`}</p>
+        <p class="text-[10px] font-black uppercase tracking-[0.22em] text-dcNeon">${escaparHTML(prod.marca || 'DC Technology')}</p>
+        <h3 class="mt-1 font-tech font-bold text-[15px] sm:text-base leading-snug text-white line-clamp-2">${escaparHTML(prod.nombre)}</h3>
+        <div class="mt-2.5 flex flex-wrap gap-1.5">${insignias(prod).slice(0, 2).map(htmlInsignia).join('')}</div>
+        <div class="mt-auto pt-4 border-t border-white/[0.06] flex items-end justify-between gap-3">
+            <div class="min-w-0">
+                <p class="text-[9px] font-bold uppercase tracking-[0.2em] text-neutral-500">${cotizacion ? 'Precio' : precios.length > 1 ? 'Desde' : 'Precio'}</p>
+                <p class="mt-1 font-tech text-[22px] font-black text-white leading-none tracking-tight">${cotizacion ? 'A cotizar' : formatearPrecio(desde)}</p>
+                ${descuento && Number(base.precio) === desde ? `<p class="mt-1 text-[11px] text-neutral-500"><span class="line-through">${formatearPrecio(anterior)}</span> <span class="ml-1 font-bold text-emerald-300">Ahorras ${formatearPrecio(anterior - base.precio)}</span></p>` : ''}
             </div>
-            <span class="btn-cyber shrink-0 inline-flex items-center gap-1.5 min-h-[44px] px-3.5 rounded-2xl bg-white/[0.06] ring-1 ring-white/10 text-[11px] font-black uppercase tracking-wider group-hover:bg-dcRed group-hover:ring-dcRed">
+            <span class="btn-neon shrink-0 inline-flex items-center gap-2 min-h-[44px] px-4 rounded-2xl text-[11px] font-black uppercase tracking-[0.14em]">
                 ${esCotizable(prod) ? 'Cotizar' : 'Comprar'} <i class="fa-solid fa-arrow-right"></i>
             </span>
         </div>`;

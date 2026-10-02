@@ -62,8 +62,10 @@
                     colors: {
                         dcRed: '#FF0033',
                         dcRedDark: '#CC0029',
-                        dcDarkBg: '#0F111A',
-                        dcDarkCard: '#181B26',
+                        dcNeon: '#FF2A5F',
+                        dcNeonDark: '#E50914',
+                        dcDarkBg: '#0B0F19',
+                        dcDarkCard: '#121826',
                         dcBorder: '#272C3D'
                     },
                     fontFamily: {
@@ -98,9 +100,12 @@
 
         .dc-text-glow { text-shadow: 0 0 14px rgba(255, 0, 51, .55); }
         @keyframes logo-neon { 0%, 100% { filter: drop-shadow(0 0 4px rgba(255, 0, 51, .45)); } 50% { filter: drop-shadow(0 0 12px rgba(255, 0, 51, .85)); } }
-        .logo-neon { animation: logo-neon 2.8s ease-in-out infinite; transition: transform .35s cubic-bezier(.34, 1.56, .64, 1); }
-        .logo-neon:hover { transform: scale(1.06) rotate(-3deg); }
-        .logo-neon:active { transform: scale(.94); }
+        /* Logo: pulso neón continuo + un giro 3D sutil cada 9 s; al pasar el cursor, giro completo */
+        @keyframes logo-giro { 0%, 86% { transform: perspective(400px) rotateY(0); } 100% { transform: perspective(400px) rotateY(360deg); } }
+        @keyframes logo-giro-ya { from { transform: perspective(400px) rotateY(0) scale(1.06); } to { transform: perspective(400px) rotateY(360deg) scale(1.06); } }
+        .logo-neon { animation: logo-neon 2.8s ease-in-out infinite, logo-giro 9s cubic-bezier(.65, 0, .35, 1) infinite; transform-style: preserve-3d; }
+        .logo-marca:hover .logo-neon, .logo-marca:focus-visible .logo-neon { animation: logo-neon 1.4s ease-in-out infinite, logo-giro-ya .9s cubic-bezier(.34, 1.56, .64, 1) 1 both; }
+        .logo-marca:active .logo-neon { transform: scale(.94); }
 
         /* Botones Cyber-Glow */
         .btn-cyber { transition: transform .2s ease, box-shadow .25s ease, background-color .2s ease, color .2s ease; }
@@ -119,9 +124,57 @@
         @keyframes marquesina { to { transform: translateX(-50%); } }
 
         /* Tarjetas con inclinación 3D (las variables las mueve app.js con el puntero) */
-        .tarjeta-3d { transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateY(var(--ty, 0)); transition: transform .25s ease, box-shadow .3s ease, border-color .3s ease; will-change: transform; }
-        .tarjeta-3d:hover { --ty: -4px; box-shadow: 0 0 0 1px rgba(255, 0, 51, .45), 0 18px 50px -12px rgba(255, 0, 51, .35); }
+        .tarjeta-3d {
+            transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateY(var(--ty, 0));
+            transition: transform .25s ease, box-shadow .3s ease; will-change: transform;
+            background: linear-gradient(180deg, rgba(18, 24, 38, .85), rgba(11, 15, 25, .9));
+            box-shadow: 0 0 0 1px rgba(255, 255, 255, .07), 0 10px 30px -18px rgba(0, 0, 0, .8);
+        }
+        /* Borde neón de 1 px: degradado enmascarado, se enciende al pasar el cursor o con el teclado */
+        .tarjeta-3d::before {
+            content: ''; position: absolute; inset: 0; border-radius: inherit; padding: 1px; pointer-events: none; z-index: 1;
+            background: linear-gradient(140deg, rgba(255, 42, 95, .55), rgba(255, 42, 95, 0) 35%, rgba(255, 42, 95, 0) 65%, rgba(229, 9, 20, .45));
+            -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
+                    mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+            opacity: .35; transition: opacity .3s ease;
+        }
+        .tarjeta-3d:hover, .tarjeta-3d:focus-visible {
+            --ty: -4px; outline: none;
+            box-shadow: 0 0 0 1px rgba(255, 42, 95, .5), 0 0 22px -4px rgba(255, 42, 95, .45), 0 22px 50px -18px rgba(255, 42, 95, .4);
+        }
+        .tarjeta-3d:hover::before, .tarjeta-3d:focus-visible::before { opacity: 1; }
         .tarjeta-3d .brillo { background: radial-gradient(400px circle at var(--mx, 50%) var(--my, 50%), rgba(255, 255, 255, .08), transparent 40%); }
+
+        /* Marco de imagen: alto FIJO en px. (Con h-full dentro de un grid el 100% no se resolvía y los
+           logos cuadrados de 640 px se desbordaban y se cortaban.) */
+        .marco-img {
+            position: relative; display: grid; place-items: center; overflow: hidden; border-radius: 1rem; padding: 12px;
+            background: rgba(18, 24, 38, .7); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .06), inset 0 -26px 40px -26px rgba(255, 42, 95, .35);
+        }
+        .marco-img::after { content: ''; position: absolute; inset: auto 15% 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(255, 42, 95, .7), transparent); }
+        .marco-img img { display: block; width: 100%; object-fit: contain; transition: transform .5s cubic-bezier(.2, .8, .2, 1); }
+        /* Halo claro detrás del logo + contorno sutil: los logos oscuros (Free Fire) también se leen */
+        .marco-logo { height: 8.25rem; padding: 10px; background: radial-gradient(closest-side, rgba(255, 255, 255, .10), transparent), rgba(18, 24, 38, .7); }
+        .marco-logo img { height: 95px; transform: scale(1.18); filter: drop-shadow(0 0 1px rgba(255, 255, 255, .45)) drop-shadow(0 4px 10px rgba(0, 0, 0, .45)); }
+        .tarjeta-3d:hover .marco-logo img { transform: scale(1.26); }
+        .marco-foto { height: 11rem; padding: 8px; }
+        .marco-foto img { height: 100%; position: absolute; inset: 0; padding: 10px; }
+        .tarjeta-3d:hover .marco-img img { transform: scale(1.07); }
+
+        /* Botón COMPRAR neón */
+        .btn-neon {
+            background: linear-gradient(135deg, #FF2A5F, #E50914); color: #fff;
+            box-shadow: 0 0 0 1px rgba(255, 42, 95, .7), 0 6px 18px -6px rgba(255, 42, 95, .8), inset 0 1px 0 rgba(255, 255, 255, .25);
+            text-shadow: 0 1px 0 rgba(0, 0, 0, .25);
+            transition: box-shadow .25s ease, transform .2s ease, filter .2s ease;
+        }
+        .btn-neon i { transition: transform .25s ease; }
+        .tarjeta-3d:hover .btn-neon, .btn-neon:hover, .btn-neon:focus-visible {
+            filter: brightness(1.08);
+            box-shadow: 0 0 0 1px rgba(255, 120, 150, .9), 0 0 18px rgba(255, 42, 95, .75), 0 0 42px rgba(255, 42, 95, .35), inset 0 1px 0 rgba(255, 255, 255, .3);
+        }
+        .tarjeta-3d:hover .btn-neon i, .btn-neon:hover i { transform: translateX(3px); }
 
         /* Zoom de galería */
         .zoom-caja { cursor: zoom-in; touch-action: pan-y; }
@@ -164,7 +217,7 @@
     <header class="sticky top-0 z-40 bg-dcDarkBg/75 backdrop-blur-xl border-b border-white/10 pt-[env(safe-area-inset-top)]">
         <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
             <!-- Logo (6 clics abren el panel admin) -->
-            <a href="#" id="secret-admin-logo" class="flex items-center gap-3 min-h-[48px]" aria-label="DC Technology, inicio">
+            <a href="#" id="secret-admin-logo" class="logo-marca flex items-center gap-3 min-h-[48px]" aria-label="DC Technology, inicio">
                 <img src="https://i.ibb.co/LDN4xyW0/Mesa-de-trabajo-1.png" alt="DC Technology" class="logo-neon h-10 md:h-12 w-auto object-contain" width="48" height="48">
                 <span class="hidden sm:flex flex-col leading-none font-tech font-black text-xl uppercase tracking-tight">DC <span class="text-dcRed dc-text-glow">Technology</span></span>
             </a>
