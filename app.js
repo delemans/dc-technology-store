@@ -276,6 +276,49 @@ async function cargarCatalogo() {
     pintarCotizador();
     inyectarSEO();
     abrirDesdeEnlace();
+    cargarPromocionesDia();
+}
+
+/* ==================== PROMOCIONES DEL DÍA (supabase/wo-025-promociones.sql) ==================== */
+
+let relojPromos = null;
+
+// Solo productos que el administrador marcó y que siguen vigentes; precios y descuentos del catálogo
+async function cargarPromocionesDia() {
+    const seccion = $('promociones-dia');
+    if (!seccion || !supabaseTienda) return;
+    const { data, error } = await supabaseTienda.rpc('promociones_del_dia');
+    const porId = new Map(estado.productos.map((p) => [p.id, p]));
+    const vigentes = (error ? [] : data ?? []).filter((d) => porId.has(d.producto_id) && new Date(d.vence_at).getTime() > Date.now());
+    if (error && error.code !== 'PGRST202') console.warn('promociones_del_dia:', error.message);
+    estado.promociones = vigentes.map((d) => porId.get(d.producto_id));
+    clearInterval(relojPromos);
+    if (!vigentes.length) {
+        seccion.hidden = true;
+        return;
+    }
+
+    // Tarjetas propias (no las del catálogo: un mismo nodo no puede estar en dos lugares)
+    $('promos-grid').replaceChildren(...estado.promociones.map((p) => {
+        const t = crearTarjeta(p);
+        t.insertAdjacentHTML('afterbegin', '<span class="cinta-promo"><i class="fa-solid fa-fire"></i> Promo del día</span>');
+        return t;
+    }));
+    seccion.hidden = false;
+
+    // Cuenta regresiva real: hasta el vencimiento más próximo guardado en la base (medianoche de Colombia)
+    const fin = Math.min(...vigentes.map((d) => new Date(d.vence_at).getTime()));
+    const pintar = () => {
+        const s = Math.max(0, Math.floor((fin - Date.now()) / 1000));
+        $('promos-reloj').textContent = [Math.floor(s / 3600), Math.floor((s % 3600) / 60), s % 60].map((n) => String(n).padStart(2, '0')).join(':');
+        if (s === 0) {
+            clearInterval(relojPromos);
+            seccion.hidden = true;
+            setTimeout(cargarPromocionesDia, 5000); // por si quedan otras vigentes
+        }
+    };
+    pintar();
+    relojPromos = setInterval(pintar, 1000);
 }
 
 function productosFiltrados() {
@@ -439,6 +482,7 @@ function abrirProducto(id) {
 
     $('modal-brand').textContent = prod.marca || 'DC Technology';
     $('modal-title').textContent = prod.nombre;
+    metaProducto(prod);
     $('modal-badges').innerHTML = insignias(prod).map(htmlInsignia).join('');
     pintarGaleria(prod);
     pintarFicha(prod);
@@ -912,10 +956,10 @@ function inyectarSEO() {
         const precios = (p.variantes ?? []).map((v) => Number(v.precio)).filter((n) => n > 0);
         const item = esCotizable(p)
             ? { '@type': 'Service', name: p.nombre, provider: { '@id': `${SITIO}#organizacion` }, areaServed: 'CO', image: p.imagen }
-            : { '@type': 'Product', name: p.nombre, image: p.imagen, brand: { '@type': 'Brand', name: p.marca || 'DC Technology' }, category: CATEGORIAS[p.tipo]?.texto };
+            : { '@type': 'Product', name: p.nombre, image: p.imagen, url: `${SITIO}p/${p.id}.html`, brand: { '@type': 'Brand', name: p.marca || 'DC Technology' }, category: CATEGORIAS[p.tipo]?.texto };
         if (precios.length) {
             item.offers = precios.length === 1
-                ? { '@type': 'Offer', price: precios[0], priceCurrency: 'COP', availability: 'https://schema.org/InStock', url: `${SITIO}?producto=${encodeURIComponent(p.id)}` }
+                ? { '@type': 'Offer', price: precios[0], priceCurrency: 'COP', availability: 'https://schema.org/InStock', url: `${SITIO}p/${p.id}.html` }
                 : { '@type': 'AggregateOffer', lowPrice: Math.min(...precios), highPrice: Math.max(...precios), offerCount: precios.length, priceCurrency: 'COP', availability: 'https://schema.org/InStock' };
         }
         return { '@type': 'ListItem', position: i + 1, item };
@@ -981,7 +1025,29 @@ async function cerrarModal(modal) {
     if (!document.querySelector('[role="dialog"]:not([hidden])')) bloquearScroll(false);
     if (modal.id === 'product-modal') {
         try { history.replaceState(null, '', location.pathname); } catch { /* sin historial */ }
+        metaProducto(null);
     }
+}
+
+// SEO: con un producto abierto, título, descripción y canonical son los de su página indexable (p/<id>.html)
+const META_INICIAL = {
+    titulo: document.title,
+    descripcion: document.querySelector('meta[name="description"]')?.getAttribute('content') ?? '',
+    canonical: document.querySelector('link[rel="canonical"]')?.getAttribute('href') ?? SITIO,
+};
+function metaProducto(prod) {
+    const descripcion = document.querySelector('meta[name="description"]');
+    const canonical = document.querySelector('link[rel="canonical"]');
+    if (!prod) {
+        document.title = META_INICIAL.titulo;
+        descripcion?.setAttribute('content', META_INICIAL.descripcion);
+        canonical?.setAttribute('href', META_INICIAL.canonical);
+        return;
+    }
+    const precios = (prod.variantes ?? []).map((v) => Number(v.precio)).filter((n) => n > 0);
+    document.title = `${prod.nombre}${precios.length ? ` desde ${formatearPrecio(Math.min(...precios))}` : ''} | DC Technology`;
+    descripcion?.setAttribute('content', `${prod.nombre} en DC Technology Colombia. Paga con Nequi o Daviplata y recibe soporte por WhatsApp.`);
+    canonical?.setAttribute('href', `${SITIO}p/${prod.id}.html`);
 }
 
 /* ==================== ARRANQUE ==================== */
@@ -1012,6 +1078,17 @@ document.addEventListener('DOMContentLoaded', () => {
     $('btn-continuar').addEventListener('click', continuarCompra);
     $('form-terminos').addEventListener('submit', enviarPedido);
 
+    // Acceso discreto al panel: 6 clics seguidos al logo (el panel igual exige iniciar sesión)
+    let clicsLogo = 0;
+    let temporizadorLogo = null;
+    $('secret-admin-logo')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        clicsLogo += 1;
+        clearTimeout(temporizadorLogo);
+        if (clicsLogo >= 6) window.location.href = 'admin.html';
+        temporizadorLogo = setTimeout(() => { clicsLogo = 0; }, 2000);
+    });
+
     cargarCatalogo();
     pintarBannerPromo();
     pintarPruebaSocial();
@@ -1021,6 +1098,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // API mínima para copiloto.js
 window.DCTienda = {
     productos: () => estado.productos,
+    promociones: () => estado.promociones ?? [],
     abrirProducto,
     productoActual: () => estado.seleccion.producto,
     formatearPrecio,

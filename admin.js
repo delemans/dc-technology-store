@@ -229,6 +229,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     pintarNavegacion();
     document.getElementById('btn-recargar-metodos').addEventListener('click', cargarMetodosPago);
     document.getElementById('btn-recargar-notif').addEventListener('click', cargarNotificaciones);
+    document.getElementById('promo-buscar').addEventListener('input', pintarPromociones);
     document.getElementById('bot-buscar').addEventListener('input', pintarCatalogoBot);
     document.getElementById('form-pago').addEventListener('submit', protegido(guardarPago, 'modal-pago'));
     document.querySelectorAll('[data-abrir-ajustes]').forEach((btn) => {
@@ -1162,11 +1163,13 @@ const CLASES_NAV_ACTIVA = ['bg-dcRed/15', 'ring-dcRed/40', 'text-white', 'font-b
 const CLASES_NAV_INACTIVA = ['ring-transparent', 'text-neutral-400', 'hover:text-white', 'hover:bg-white/5', 'font-semibold'];
 
 function mostrarVista(vista) {
-    if (!['pedidos', 'pagos-bot'].includes(vista)) return;
+    if (!['pedidos', 'pagos-bot', 'productos'].includes(vista)) return;
     const cambio = ui.vista !== vista;
     ui.vista = vista;
     document.getElementById('vista-pedidos').hidden = vista !== 'pedidos';
     document.getElementById('vista-pagos-bot').hidden = vista !== 'pagos-bot';
+    document.getElementById('vista-productos').hidden = vista !== 'productos';
+    if (vista === 'productos') cargarPromociones();
     pintarNavegacion();
     window.scrollTo({ top: 0, behavior: 'smooth' });
     document.getElementById('zona-pedidos').scrollTo({ top: 0, behavior: 'smooth' });
@@ -1176,6 +1179,125 @@ function mostrarVista(vista) {
             { duration: 350, easing: 'cubic-bezier(.2,.8,.2,1)' }
         );
     }
+}
+
+/* ==================== PROMOCIONES DEL DÍA (public.promociones_dia · wo-025) ==================== */
+
+const MAX_PROMOS = 12;
+const TIPOS_PROMO = { streaming: 'Streaming', licencias: 'Licencias', pines: 'Pines', recargas: 'Recargas', tecnologia: 'Tecnología', servicios: 'Servicios', alquiler: 'Alquiler' };
+const promo = { catalogo: [], activas: new Map(), filtro: 'todas', cargando: false, error: null, enCurso: new Set() };
+
+async function cargarPromociones() {
+    if (promo.cargando) return;
+    promo.cargando = true;
+    try {
+        // El catálogo es el mismo archivo que publica la tienda
+        if (!promo.catalogo.length) {
+            const r = await fetch('productos.json', { cache: 'no-store' });
+            if (!r.ok) throw new Error(`productos.json: HTTP ${r.status}`);
+            promo.catalogo = await r.json();
+        }
+        const { data, error } = await supabaseClient.from('promociones_dia').select('producto_id, activa, vence_at');
+        if (error) {
+            promo.error = ['42P01', 'PGRST205'].includes(error.code)
+                ? 'Ejecuta supabase/wo-025-promociones.sql para activar las promociones del día.'
+                : `No se pudieron leer las promociones: ${error.message}`;
+        } else {
+            promo.error = null;
+            const ahora = Date.now();
+            promo.activas = new Map((data ?? [])
+                .filter((p) => p.activa && new Date(p.vence_at).getTime() > ahora)
+                .map((p) => [p.producto_id, p.vence_at]));
+        }
+    } catch (error) {
+        console.error('Promociones:', error);
+        promo.error = 'No se pudo cargar el catálogo (abre el panel desde el sitio o con Live Server).';
+    } finally {
+        promo.cargando = false;
+    }
+    pintarPromociones();
+}
+
+function pintarPromociones() {
+    const caja = document.getElementById('promo-lista');
+    if (!caja) return;
+    const activas = promo.activas.size;
+    document.getElementById('promo-resumen').innerHTML = `<i class="fa-solid fa-fire text-dcRed"></i> ${activas} de ${MAX_PROMOS} activas hoy`;
+    document.querySelectorAll('[data-contador-promos]').forEach((el) => { el.textContent = activas; el.hidden = activas === 0; });
+    document.getElementById('promo-aviso').innerHTML = promo.error ? filaVacia(promo.error, 'fa-triangle-exclamation') : '';
+
+    const filtros = [['todas', 'Todas'], ['activas', `En promoción (${activas})`], ...Object.entries(TIPOS_PROMO)];
+    document.getElementById('promo-filtros').replaceChildren(...filtros.map(([id, texto]) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = `shrink-0 min-h-[44px] px-3 rounded-xl ring-1 text-[11px] font-bold whitespace-nowrap ${promo.filtro === id ? 'bg-dcRed/15 ring-dcRed/50 text-white' : 'bg-white/[0.04] ring-white/10 text-neutral-400'}`;
+        b.textContent = texto;
+        b.addEventListener('click', () => { promo.filtro = id; pintarPromociones(); });
+        return b;
+    }));
+
+    const termino = document.getElementById('promo-buscar').value.trim().toLowerCase();
+    const lista = promo.catalogo.filter((p) => (promo.filtro === 'todas' || (promo.filtro === 'activas' ? promo.activas.has(p.id) : p.tipo === promo.filtro))
+        && (!termino || `${p.nombre} ${p.marca}`.toLowerCase().includes(termino)))
+        // Las activas primero
+        .sort((a, b) => Number(promo.activas.has(b.id)) - Number(promo.activas.has(a.id)));
+
+    if (!lista.length) {
+        caja.innerHTML = filaVacia(promo.filtro === 'activas' ? 'No hay promociones activas hoy.' : 'Ningún producto coincide.', 'fa-box-open');
+        return;
+    }
+    caja.replaceChildren(...lista.map(filaPromocion));
+}
+
+function filaPromocion(p) {
+    const activa = promo.activas.has(p.id);
+    const precios = (p.variantes ?? []).map((v) => Number(v.precio)).filter((n) => n > 0);
+    const desc = Math.max(0, ...(p.variantes ?? []).map((v) => (Number(v.precio_anterior) > Number(v.precio) ? Math.round((1 - v.precio / v.precio_anterior) * 100) : 0)));
+    const vence = activa ? new Date(promo.activas.get(p.id)).toLocaleTimeString('es-CO', { hour: 'numeric', minute: '2-digit', timeZone: 'America/Bogota' }) : '';
+    const fila = document.createElement('div');
+    fila.className = `flex items-center gap-3 rounded-2xl ring-1 px-3 py-2.5 transition-colors ${activa ? 'bg-dcRed/10 ring-dcRed/40' : 'bg-dcDarkBg/60 ring-white/5'}`;
+    fila.innerHTML = `
+        <img src="${escaparHTML(p.imagen)}" alt="" loading="lazy" class="w-12 h-12 shrink-0 rounded-xl object-contain bg-[#121826] p-1">
+        <div class="flex-1 min-w-0">
+            <p class="text-sm font-bold text-white truncate">${escaparHTML(p.nombre)}</p>
+            <p class="text-[11px] text-neutral-500 truncate">${escaparHTML(TIPOS_PROMO[p.tipo] ?? p.tipo)} · ${precios.length ? `desde ${escaparHTML(PlantillasWA.precioCOP(Math.min(...precios)))}` : 'a cotizar'}${desc ? ` · <b class="text-emerald-300">-${desc}%</b>` : ''}</p>
+            ${activa ? `<p class="text-[10px] font-bold text-dcRed">En portada hasta las ${escaparHTML(vence)}</p>` : ''}
+        </div>
+        <button type="button" role="switch" aria-checked="${activa}" aria-label="Promoción del día: ${escaparHTML(p.nombre)}"
+            class="relative shrink-0 w-14 h-8 rounded-full ring-1 transition-colors ${activa ? 'bg-dcRed ring-dcRed shadow-[0_0_14px_rgba(255,0,51,.5)]' : 'bg-white/10 ring-white/15'} disabled:opacity-50">
+            <span class="absolute top-1 ${activa ? 'left-7' : 'left-1'} w-6 h-6 rounded-full bg-white shadow transition-all"></span>
+        </button>`;
+    fila.querySelector('button').addEventListener('click', (e) => alternarPromocion(p, !activa, e.currentTarget));
+    return fila;
+}
+
+async function alternarPromocion(p, activar, boton) {
+    if (promo.enCurso.has(p.id) || promo.error) return;
+    if (activar && promo.activas.size >= MAX_PROMOS) {
+        mostrarToast(`Máximo ${MAX_PROMOS} promociones a la vez: desactiva alguna primero.`, 'error', 5000);
+        return;
+    }
+    promo.enCurso.add(p.id);
+    boton.disabled = true;
+    // Cambio optimista: se ve al instante y se revierte si la base lo rechaza
+    const antes = promo.activas.get(p.id);
+    if (activar) promo.activas.set(p.id, new Date(Date.now() + 3600e3).toISOString());
+    else promo.activas.delete(p.id);
+    pintarPromociones();
+
+    const { data, error } = await supabaseClient.rpc('alternar_promocion', { p_producto_id: p.id, p_activa: activar }).maybeSingle();
+    promo.enCurso.delete(p.id);
+    if (error || !data?.ok) {
+        console.error('alternar_promocion:', error ?? data);
+        if (antes) promo.activas.set(p.id, antes); else promo.activas.delete(p.id);
+        pintarPromociones();
+        mostrarToast(data?.mensaje ?? (error?.code === 'PGRST202' ? 'Falta ejecutar supabase/wo-025-promociones.sql.' : 'No se pudo cambiar la promoción.'), 'error', 5000);
+        Sonidos.error();
+        return;
+    }
+    if (activar) promo.activas.set(p.id, data.vence_at);
+    pintarPromociones();
+    mostrarToast(activar ? `${p.nombre} está en la portada hasta la medianoche.` : `${p.nombre} salió de la portada.`, 'ok', 3500);
 }
 
 function pintarNavegacion() {

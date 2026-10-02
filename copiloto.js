@@ -291,6 +291,15 @@
         if (/(como compr|pasos para compr|como hago (el|un) pedido)/.test(t)) return pasosCompra();
         if (/(recomiend|que me sirve|no se que|ayudame a elegir)/.test(t)) return preguntarQueBusca();
         if (/(asesor|humano|persona|hablar con|agente|reclamo|reembolso|estafa|no me (ha )?llegado|no me llego)/.test(t)) return escalar();
+        // Ofertas: las promociones del día que marcó el administrador (si hay); si no, el cupón y los mayores descuentos
+        if (/(oferta|promo|rebaja|descuento|barato|economico|en promocion)/.test(t) && !/dctech|cupon/.test(t)) {
+            const promos = window.DCTienda?.promociones() ?? [];
+            const lista = promos.length ? promos.slice(0, 4) : mejores(catalogo(), 3);
+            agregar(`<p>${promos.length ? '🔥 <b>Promociones del día</b> (solo hasta la medianoche):' : 'Estas son las opciones con mayor descuento hoy:'}</p>${tarjetasProductos(lista)}
+                ${promoMostrada ? '' : '<p class="text-[12px] text-neutral-400">Si es tu primera compra, suma <b>DCTECH2026</b> (10%).</p>'}`);
+            promoMostrada = true;
+            return;
+        }
         if (/(combo|complement|que mas|que otro|algo mas|acompan)/.test(t) && ultimoProducto) {
             if (!sugerir(ultimoProducto, { forzar: true })) escalar('Para armarte un combo a la medida, un asesor te ayuda:');
             return;
@@ -339,6 +348,7 @@
     }
 
     const ATAJOS = [
+        { texto: '🔥 Ofertas de hoy', accion: () => responderTexto('ofertas') },
         { texto: '¿Cómo comprar?', accion: pasosCompra },
         { texto: 'Métodos de pago', accion: () => responderFAQ('metodos_pago') },
         { texto: 'Tiempo de entrega', accion: () => responderFAQ('tiempo_entrega') },

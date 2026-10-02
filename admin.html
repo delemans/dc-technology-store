@@ -2,11 +2,15 @@
 <html lang="es" class="dark">
 <head>
     <meta charset="UTF-8">
+    <!-- Seguridad: solo se ejecuta JavaScript propio y de CDNs fijados con hash (ningún script en línea) -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.tailwindcss.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src 'self' data: https://cdnjs.cloudflare.com https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://vyqcizwfmjlflncdwzve.supabase.co wss://vyqcizwfmjlflncdwzve.supabase.co https://cdn.jsdelivr.net; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#0B0F19">
+    <!-- El panel nunca debe aparecer en buscadores -->
+    <meta name="robots" content="noindex, nofollow">
     <title>DC TECHNOLOGY | Panel Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" integrity="sha384-iw3OoTErCYJJB9mCa8LNS2hbsQ7M3C0EpIsO/H5+EGAkPGc6rk+V8i04oW/K5xq0" crossorigin="anonymous" referrerpolicy="no-referrer">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@700;800;900&display=swap" rel="stylesheet">
     <!-- Tema claro/oscuro + colores de Tailwind (antes de pintar, sin destello) -->
     <script src="tema.js"></script>
@@ -171,7 +175,11 @@
                         <i class="fa-solid fa-robot w-4"></i> Pagos &amp; Agente Bot
                         <span data-contador-verificar class="ml-auto px-1.5 py-0.5 rounded-md bg-sky-500/15 text-sky-300 text-[10px] font-bold" hidden>0</span>
                     </button>
-                    <a href="portal.html" target="_blank" class="flex items-center gap-3 px-4 min-h-[48px] rounded-xl text-neutral-400 hover:text-white hover:bg-white/5 font-semibold text-xs transition-colors">
+                    <button type="button" data-vista="productos" class="w-full flex items-center gap-3 px-4 min-h-[48px] rounded-xl ring-1 text-xs transition-colors">
+                        <i class="fa-solid fa-fire w-4"></i> Promociones del día
+                        <span data-contador-promos class="ml-auto px-1.5 py-0.5 rounded-md bg-dcRed/15 text-dcRed text-[10px] font-bold" hidden>0</span>
+                    </button>
+                    <a href="portal.html" target="_blank" rel="noopener" class="flex items-center gap-3 px-4 min-h-[48px] rounded-xl text-neutral-400 hover:text-white hover:bg-white/5 font-semibold text-xs transition-colors">
                         <i class="fa-solid fa-magnifying-glass-location w-4"></i> Portal de clientes
                         <i class="fa-solid fa-arrow-up-right-from-square ml-auto text-[10px] opacity-60"></i>
                     </a>
@@ -402,6 +410,31 @@
                     </section>
                 </div>
               </div>
+
+              <!-- ============ VISTA: PRODUCTOS / PROMOCIONES DEL DÍA ============ -->
+              <div id="vista-productos" hidden>
+                <div class="flex flex-wrap items-end justify-between gap-4 mb-6">
+                    <div>
+                        <p class="text-[10px] font-bold uppercase tracking-[0.3em] text-neutral-500 mb-2">Catálogo de la tienda</p>
+                        <h2 class="font-tech text-2xl sm:text-3xl font-black uppercase tracking-wider">
+                            Promociones <span class="text-dcRed dc-text-glow">del día</span>
+                        </h2>
+                    </div>
+                    <span id="promo-resumen" class="inline-flex items-center gap-2 h-12 px-4 rounded-2xl bg-white/[0.04] ring-1 ring-white/10 text-xs font-bold text-neutral-300"></span>
+                </div>
+                <p class="text-xs text-neutral-500 mb-4 max-w-2xl">Activa el interruptor y el producto aparece en la portada de la tienda, en la sección <b class="text-neutral-300">Promociones del día</b>, hasta la medianoche (hora Colombia). Máximo 12 a la vez. Los precios y descuentos son los del catálogo.</p>
+                <div id="promo-aviso" class="mb-4"></div>
+                <div class="flex flex-col sm:flex-row gap-3 mb-4">
+                    <label class="relative flex-1">
+                        <span class="sr-only">Buscar producto</span>
+                        <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500 text-sm"></i>
+                        <input type="search" id="promo-buscar" placeholder="Buscar producto…" autocomplete="off"
+                            class="w-full min-h-[52px] bg-dcDarkBg/70 ring-1 ring-white/10 rounded-2xl pl-11 pr-4 text-base sm:text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-dcRed/60">
+                    </label>
+                    <div id="promo-filtros" class="sin-scrollbar flex gap-2 overflow-x-auto"></div>
+                </div>
+                <div id="promo-lista" class="grid gap-2 sm:grid-cols-2 xl:grid-cols-3"></div>
+              </div>
             </main>
         </div>
 
@@ -421,8 +454,8 @@
                         <i class="fa-solid fa-plus"></i>
                     </button>
                 </div>
-                <button type="button" data-exportar class="flex flex-col items-center justify-center gap-1 min-h-[64px] text-neutral-400 active:text-white">
-                    <i class="fa-solid fa-file-csv text-lg"></i><span class="text-[9px] font-bold uppercase tracking-wider">CSV</span>
+                <button type="button" data-vista-dock="productos" class="flex flex-col items-center justify-center gap-1 min-h-[64px] text-neutral-400">
+                    <i class="fa-solid fa-fire text-lg"></i><span class="text-[9px] font-bold uppercase tracking-wider">Promos</span>
                 </button>
                 <button type="button" data-abrir-ajustes class="flex flex-col items-center justify-center gap-1 min-h-[64px] text-neutral-400 active:text-white">
                     <i class="fa-solid fa-gear text-lg"></i><span class="text-[9px] font-bold uppercase tracking-wider">Ajustes</span>
@@ -598,7 +631,7 @@
                     <i class="fa-solid fa-expand text-neutral-400"></i>
                 </button>
             </dl>
-            <a href="portal.html" target="_blank" class="mt-2 w-full flex items-center justify-between gap-3 rounded-2xl bg-dcDarkBg/60 ring-1 ring-white/5 px-4 min-h-[52px] text-xs">
+            <a href="portal.html" target="_blank" rel="noopener" class="mt-2 w-full flex items-center justify-between gap-3 rounded-2xl bg-dcDarkBg/60 ring-1 ring-white/5 px-4 min-h-[52px] text-xs">
                 <span class="text-neutral-400 font-semibold"><i class="fa-solid fa-magnifying-glass-location mr-2 text-dcRed"></i>Abrir portal de clientes</span>
                 <i class="fa-solid fa-arrow-up-right-from-square text-neutral-400"></i>
             </a>
@@ -611,8 +644,8 @@
     <!-- Toasts (encima del dock en móvil) -->
     <div id="toasts" class="fixed z-[60] right-4 left-4 sm:left-auto bottom-[calc(6.5rem+env(safe-area-inset-bottom))] md:bottom-6 flex flex-col items-end gap-2 pointer-events-none" aria-live="polite"></div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js" integrity="sha384-Rj26LVGvoeRVR6+mwQmFfcR3QOBEwT+ZmuCWpuiqeTzJpCs0ER4ITAWGb4Hiy3Ok" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" integrity="sha384-3zSEDfvllQohrq0PHL1fOXJuC/jSOO34H46t6UQfobFOmxE5BpjjaIJY5F2/bMnU" crossorigin="anonymous"></script>
     <script src="plantillas-whatsapp.js"></script>
     <script src="ui.js"></script>
     <script src="admin.js"></script>

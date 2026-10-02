@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /admin.html
+Disallow: /herramientas/
+Disallow: /supabase/
+Disallow: /n8n/
+Disallow: /*.sql$
+
+Sitemap: https://dctecnology.xyz/sitemap.xml

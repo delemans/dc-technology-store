@@ -2,6 +2,8 @@
 <html lang="es" class="dark scroll-smooth" data-sonido="off">
 <head>
     <meta charset="UTF-8">
+    <!-- Seguridad: solo se ejecuta JavaScript propio y de CDNs fijados con hash (ningún script en línea) -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.tailwindcss.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src 'self' data: https://cdnjs.cloudflare.com https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://vyqcizwfmjlflncdwzve.supabase.co wss://vyqcizwfmjlflncdwzve.supabase.co https://cdn.jsdelivr.net; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <!-- Necesario para que carguen las imágenes del catálogo alojadas en Tiendanube -->
     <meta name="referrer" content="no-referrer">
@@ -52,7 +54,7 @@
     </script>
 
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" integrity="sha384-iw3OoTErCYJJB9mCa8LNS2hbsQ7M3C0EpIsO/H5+EGAkPGc6rk+V8i04oW/K5xq0" crossorigin="anonymous" referrerpolicy="no-referrer">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;700;800;900&display=swap" rel="stylesheet">
     <!-- Tema claro/oscuro + colores de Tailwind (antes de pintar, sin destello) -->
     <script src="tema.js"></script>
@@ -161,6 +163,19 @@
         @keyframes barrido { to { transform: translateX(130%); } }
         .insignia { transition: box-shadow .3s ease, background-color .3s ease; }
         .tarjeta-3d:hover .insignia { box-shadow: 0 0 12px -2px currentColor; }
+
+        /* Promociones del día: banda con borde neón animado, carrusel en móvil y grilla en escritorio */
+        .promo-banda { position: relative; padding: 1.25rem; border-radius: 1.75rem; background: linear-gradient(160deg, rgb(255 42 95 / .10), rgb(var(--tarjeta) / .55) 45%); box-shadow: inset 0 0 0 1px rgb(255 42 95 / .35), 0 0 40px -12px rgb(255 42 95 / .45); overflow: hidden; }
+        .promo-banda::before { content: ''; position: absolute; inset: -40% -10% auto auto; width: 22rem; height: 22rem; border-radius: 999px; background: radial-gradient(closest-side, rgb(255 42 95 / .22), transparent); pointer-events: none; animation: mesh-a 14s ease-in-out infinite alternate; }
+        .promo-reloj { display: inline-flex; align-items: center; gap: .45rem; padding: .55rem .9rem; border-radius: 999px; font-size: 12px; font-weight: 700; color: rgb(var(--tinta) / .8); background: rgb(var(--tinta) / .05); box-shadow: inset 0 0 0 1px rgb(255 42 95 / .4); }
+        .promo-reloj b { font: 900 14px/1 Outfit, Inter, sans-serif; letter-spacing: .06em; color: #FF2A5F; font-variant-numeric: tabular-nums; }
+        .promo-carrusel { position: relative; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(16.5rem, 78%); gap: 1rem; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: .25rem; }
+        .promo-carrusel > * { scroll-snap-align: start; }
+        @media (min-width: 640px) { .promo-carrusel { grid-auto-columns: minmax(16.5rem, 44%); } }
+        @media (min-width: 1024px) { .promo-carrusel { grid-auto-flow: row; grid-template-columns: repeat(4, minmax(0, 1fr)); overflow: visible; } }
+        .cinta-promo { position: absolute; top: .75rem; right: .75rem; z-index: 10; display: inline-flex; align-items: center; gap: .35rem; padding: .3rem .65rem; border-radius: 999px; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: .08em; color: #fff; background: linear-gradient(135deg, #FF2A5F, #E50914); box-shadow: 0 0 16px rgb(255 42 95 / .6); }
+        .cinta-promo i { animation: latido 1.6s ease-in-out infinite; }
+        @keyframes latido { 50% { transform: scale(1.25); } }
 
         /* Botón COMPRAR neón */
         .btn-neon {
@@ -281,6 +296,20 @@
         </section>
 
         <!-- Catálogo tri-módulo -->
+        <!-- Promociones del día (wo-025): solo aparece si hay promociones vigentes -->
+        <section id="promociones-dia" hidden class="max-w-7xl mx-auto px-4 pb-8" aria-labelledby="promos-titulo">
+            <div class="promo-banda">
+                <div class="flex flex-wrap items-end justify-between gap-3 mb-4">
+                    <div>
+                        <p class="text-[10px] font-black uppercase tracking-[0.3em] text-dcNeon mb-1.5"><i class="fa-solid fa-fire mr-1"></i> Solo por hoy</p>
+                        <h2 id="promos-titulo" class="font-tech text-2xl sm:text-3xl font-black uppercase tracking-wider">Promociones <span class="text-dcRed dc-text-glow">del día</span></h2>
+                    </div>
+                    <p class="promo-reloj" aria-live="off"><i class="fa-regular fa-clock"></i> Terminan en <b id="promos-reloj">--:--:--</b></p>
+                </div>
+                <div id="promos-grid" class="promo-carrusel sin-scrollbar"></div>
+            </div>
+        </section>
+
         <section id="catalogo" class="max-w-7xl mx-auto px-4 pb-10" aria-labelledby="category-title">
             <div role="tablist" aria-label="Tipo de producto" id="modulos" class="grid grid-cols-2 sm:grid-cols-4 gap-2 p-1.5 rounded-3xl bg-white/[0.03] ring-1 ring-white/10 backdrop-blur-xl mb-4">
                 <button type="button" role="tab" data-modulo="todos" class="min-h-[52px] rounded-2xl text-xs font-black uppercase tracking-wider transition-all"><i class="fa-solid fa-border-all mr-1.5"></i>Todo</button>
@@ -381,6 +410,17 @@
                 <p class="mt-2">&copy; 2026 DC Technology. Todos los derechos reservados.</p>
             </div>
         </div>
+        <!-- SEO:DIRECTORIO (generado por herramientas/generar_seo.js, no editar a mano) -->
+        <nav aria-label="Todos los productos" class="max-w-7xl mx-auto px-4 mt-8 pt-6 border-t border-white/5 grid gap-6 sm:grid-cols-2 lg:grid-cols-4 text-xs text-neutral-500">
+            <div><p class="font-bold uppercase tracking-wider text-neutral-400 mb-2">Streaming</p><ul class="space-y-1"><li><a href="p/netflix.html" class="hover:text-white">Netflix Premium 4K</a></li><li><a href="p/prime-video.html" class="hover:text-white">Prime Video Ultra HD</a></li><li><a href="p/disney-plus.html" class="hover:text-white">Disney Plus Premium</a></li><li><a href="p/hbo-max.html" class="hover:text-white">Max (HBO)</a></li><li><a href="p/crunchyroll.html" class="hover:text-white">Crunchyroll Mega Fan</a></li><li><a href="p/vix-premium.html" class="hover:text-white">Vix Premium</a></li><li><a href="p/paramount-plus.html" class="hover:text-white">Paramount Plus</a></li><li><a href="p/universal-plus.html" class="hover:text-white">Universal Plus</a></li><li><a href="p/viki-rakuten.html" class="hover:text-white">Viki Rakuten Pass</a></li><li><a href="p/apple-tv.html" class="hover:text-white">Apple TV Plus</a></li><li><a href="p/mubi.html" class="hover:text-white">Mubi Cinema</a></li><li><a href="p/iptv-smarters.html" class="hover:text-white">IPTV Smarters / Plex HD</a></li></ul></div>
+            <div><p class="font-bold uppercase tracking-wider text-neutral-400 mb-2">Licencias de software</p><ul class="space-y-1"><li><a href="p/capcut-pro.html" class="hover:text-white">CapCut Pro Edición</a></li><li><a href="p/canva-pro.html" class="hover:text-white">Canva Pro</a></li><li><a href="p/duolingo-super.html" class="hover:text-white">Duolingo Super</a></li><li><a href="p/mcafee-antivirus.html" class="hover:text-white">McAfee Antivirus Total Protection</a></li><li><a href="p/office-365.html" class="hover:text-white">Office 365 Personal / Familiar</a></li><li><a href="p/office-2016-2019-2021-2024-pro-plus.html" class="hover:text-white">Office Pro Plus Vitalicio</a></li><li><a href="p/windows-10-y-11-pro-y-home.html" class="hover:text-white">Windows 10 y 11 Pro / Home</a></li><li><a href="p/gemini-ia-pro.html" class="hover:text-white">Gemini IA Pro</a></li></ul></div>
+            <div><p class="font-bold uppercase tracking-wider text-neutral-400 mb-2">Pines virtuales</p><ul class="space-y-1"><li><a href="p/pin-virtual-disney-plus-1tpu5.html" class="hover:text-white">PIN Virtual Disney Plus</a></li><li><a href="p/pin-virtual-netflix.html" class="hover:text-white">PIN Virtual Netflix Colombia</a></li><li><a href="p/pin-virtual-directv-go.html" class="hover:text-white">PIN Virtual Directv Go</a></li><li><a href="p/pin-virtual-win-play.html" class="hover:text-white">PIN Virtual Win Play</a></li><li><a href="p/pin-virtual-vix.html" class="hover:text-white">PIN Virtual Vix</a></li><li><a href="p/pin-virtual-deezer.html" class="hover:text-white">PIN Virtual Deezer</a></li><li><a href="p/pin-google-play.html" class="hover:text-white">PIN Virtual Google Play</a></li><li><a href="p/pin-virtual-roblox.html" class="hover:text-white">PIN Virtual Roblox</a></li><li><a href="p/pin-virtual-razer-gold.html" class="hover:text-white">PIN Virtual Razer Gold</a></li><li><a href="p/pin-virtual-imvu.html" class="hover:text-white">PIN Virtual IMVU</a></li><li><a href="p/pin-virtual-mcafee.html" class="hover:text-white">PIN Virtual McAfee</a></li><li><a href="p/pin-virtual-uber.html" class="hover:text-white">PIN Virtual Uber</a></li></ul></div>
+            <div><p class="font-bold uppercase tracking-wider text-neutral-400 mb-2">Recargas</p><ul class="space-y-1"><li><a href="p/directv-prepago-4s7gd.html" class="hover:text-white">DirecTV Prepago Recarga Directa</a></li><li><a href="p/free-fire-diamantes-vwx2s.html" class="hover:text-white">Free Fire Diamantes Directo</a></li><li><a href="p/recargas-claro.html" class="hover:text-white">Recargas Móvil Claro</a></li><li><a href="p/recargas-movistar.html" class="hover:text-white">Recargas Móvil Movistar</a></li><li><a href="p/recargas-tigo.html" class="hover:text-white">Recargas Móvil Tigo</a></li><li><a href="p/recargas-etb.html" class="hover:text-white">Recargas Móvil ETB</a></li><li><a href="p/recargas-movil-exito.html" class="hover:text-white">Recargas Móvil Éxito</a></li><li><a href="p/recargas-wom.html" class="hover:text-white">Recargas Móvil Wom</a></li><li><a href="p/recargas-virgin-mobile.html" class="hover:text-white">Recargas Virgin Mobile</a></li><li><a href="p/recarga-rushbet.html" class="hover:text-white">Recarga Rushbet Apuestas</a></li><li><a href="p/recarga-bwin-7t6cc.html" class="hover:text-white">Recarga Bwin Apuestas</a></li><li><a href="p/recarga-betsson.html" class="hover:text-white">Recarga Betsson Apuestas</a></li></ul></div>
+            <div><p class="font-bold uppercase tracking-wider text-neutral-400 mb-2">Tecnología</p><ul class="space-y-1"><li><a href="p/reloj-inteligente-smartwatch-d16-con-auriculares-inalambricos-incorporados.html" class="hover:text-white">Reloj Inteligente Smartwatch D16 con Auriculares Inalámbricos incorporados</a></li><li><a href="p/diademas-inalambricas-cr-8-con-luces-r9s7x.html" class="hover:text-white">Diademas Inalámbricas CR-8 con Luces LED</a></li><li><a href="p/diademas-gamer-a3s-alambrico.html" class="hover:text-white">Diademas Gamer A3S Alámbrico</a></li><li><a href="p/reloj-inteligente-smartwatch-gt5-pro-en-acero-inoxidable.html" class="hover:text-white">Reloj Inteligente Smartwatch GT5 Pro En Acero Inoxidable</a></li><li><a href="p/powerbank-portatil-recargable-20-000-mah.html" class="hover:text-white">Powerbank Portátil Recargable 20.000 mAh</a></li><li><a href="p/auriculares-inalambricos-de-gancho-sp16.html" class="hover:text-white">Auriculares Inalámbricos de Gancho SP16</a></li><li><a href="p/auriculares-inalambricos-m19-con-powerbank.html" class="hover:text-white">Auriculares Inalámbricos M19 (Con Powerbank)</a></li><li><a href="p/reloj-inteligente-smartwatch-h19.html" class="hover:text-white">Reloj Inteligente Smartwatch H19 en Acero Inoxidable</a></li><li><a href="p/auriculares-inalambricos-m25-con-powerbank.html" class="hover:text-white">Auriculares Inalámbricos M25 (Con Powerbank)</a></li><li><a href="p/reloj-inteligente-smartwatch-z90.html" class="hover:text-white">Reloj Inteligente Smartwatch Z90</a></li><li><a href="p/reloj-inteligente-smartwatch-p13-de-lujo-en-acero-inoxidable.html" class="hover:text-white">Reloj Inteligente Smartwatch P13 de Lujo en Acero Inoxidable</a></li><li><a href="p/reloj-inteligente-smartwatch-m9.html" class="hover:text-white">Reloj Inteligente Smartwatch M9</a></li></ul></div>
+            <div><p class="font-bold uppercase tracking-wider text-neutral-400 mb-2">Servicios técnicos</p><ul class="space-y-1"><li><a href="p/servicio-mantenimiento-computadores.html" class="hover:text-white">Mantenimiento Preventivo y Correctivo de Equipos</a></li><li><a href="p/servicio-instalacion-so-licenciamiento.html" class="hover:text-white">Instalación de Sistema Operativo y Licenciamiento</a></li><li><a href="p/servicio-asesorias-tutorias.html" class="hover:text-white">Asesoría Técnica y Tutoría Personalizada</a></li><li><a href="p/servicio-desarrollo-web-automatizaciones.html" class="hover:text-white">Desarrollo de Catálogos Web y Automatizaciones IA</a></li></ul></div>
+            <div><p class="font-bold uppercase tracking-wider text-neutral-400 mb-2">Alquiler de equipos</p><ul class="space-y-1"><li><a href="p/servicio-alquiler-equipos-computo.html" class="hover:text-white">Alquiler de Laptops y Equipos de Cómputo</a></li></ul></div>
+        </nav>
+        <!-- /SEO:DIRECTORIO -->
     </footer>
 
     <!-- ============ MODAL DE PRODUCTO / CHECKOUT ============ -->
@@ -513,26 +553,11 @@
     <!-- Toasts (abajo a la izquierda para no tapar el copiloto) -->
     <div id="toasts" class="fixed z-[60] left-4 right-24 sm:right-auto bottom-[max(1rem,env(safe-area-inset-bottom))] flex flex-col items-start gap-2 pointer-events-none" aria-live="polite"></div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js" integrity="sha384-Rj26LVGvoeRVR6+mwQmFfcR3QOBEwT+ZmuCWpuiqeTzJpCs0ER4ITAWGb4Hiy3Ok" crossorigin="anonymous"></script>
     <script src="plantillas-whatsapp.js"></script>
     <script src="ui.js"></script>
     <script src="app.js"></script>
     <script src="copiloto.js"></script>
 
-    <!-- Easter egg: 6 clics al logo abren el panel admin -->
-    <script>
-        let clickAdminCount = 0;
-        let clickAdminTimer;
-        const secretLogo = document.getElementById('secret-admin-logo');
-        if (secretLogo) {
-            secretLogo.addEventListener('click', (e) => {
-                e.preventDefault();
-                clickAdminCount++;
-                clearTimeout(clickAdminTimer);
-                if (clickAdminCount >= 6) window.location.href = 'admin.html';
-                clickAdminTimer = setTimeout(() => { clickAdminCount = 0; }, 2000);
-            });
-        }
-    </script>
 </body>
 </html>
