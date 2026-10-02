@@ -17,6 +17,7 @@ const crypto = require('crypto');
 const RAIZ = path.join(__dirname, '..');
 const SALIDA = path.join(__dirname, 'flujo_bot_dctechnology.json');
 const kb = JSON.parse(fs.readFileSync(path.join(RAIZ, 'bot-conocimiento.json'), 'utf8'));
+const WA = require(path.join(RAIZ, 'plantillas-whatsapp.js'));
 
 const MODELO = 'deepseek-ai/DeepSeek-V3';
 const SILICONFLOW_URL = 'https://api.siliconflow.cn/v1';
@@ -30,6 +31,7 @@ const kbEmbebida = {
     faq: kb.faq.filter((f) => !f.pendiente_configurar && f.respuesta),
     promociones: kb.promociones.filter((p) => p.activa && !p.pendiente_configurar),
     reglas_uso: kb.reglas_uso,
+    flujo_digital: kb.flujo_digital,
     escalamiento: kb.escalamiento,
     plantillas: kb.plantillas,
     notificaciones: { plantilla_por_tipo: kb.notificaciones.plantilla_por_tipo },
@@ -80,7 +82,9 @@ function normalizarMensaje() {
     if (!jid.endsWith('@s.whatsapp.net')) return []; // grupos, estados y canales: el bot no responde
     const numero = jid.split('@')[0];
     const m = d.message ?? {};
-    const texto = String(m.conversation ?? m.extendedTextMessage?.text ?? m.imageMessage?.caption ?? m.videoMessage?.caption ?? '').trim();
+    const texto = String(m.conversation ?? m.extendedTextMessage?.text ?? m.imageMessage?.caption ?? m.documentMessage?.caption ?? m.videoMessage?.caption ?? '').trim();
+    // Foto o PDF = comprobante de pago (Nequi / Daviplata envían captura o PDF)
+    const esComprobante = Boolean(m.imageMessage || (m.documentMessage && /pdf|image/i.test(String(m.documentMessage.mimetype ?? ''))));
 
     const memoria = $getWorkflowStaticData('global');
     memoria.pausados = memoria.pausados || {};
@@ -109,7 +113,8 @@ function normalizarMensaje() {
     const t = normalizar(texto);
     const palabras = (cfg.palabras_asesor || '').split(',').map((p) => normalizar(p).trim()).filter(Boolean);
     let ruta = 'ia';
-    if (!texto) ruta = 'sin_texto';
+    if (esComprobante) ruta = 'comprobante';
+    else if (!texto) ruta = 'sin_texto';
     // "NO" solo da de baja si le llegó una solicitud de reseña en los últimos 7 días
     else if (/^no[.!]?$/.test(t) && ahora - (memoria.resenas[numero] || 0) < 7 * 864e5) ruta = 'baja';
     else if (/^(asesor|soporte|accesos|humano)[.!]?$/.test(t) || palabras.some((p) => ` ${t} `.includes(` ${p} `))) ruta = 'asesor';
@@ -133,6 +138,29 @@ function respuestaFija() {
         sin_texto: 'Por ahora solo puedo leer mensajes de texto 🙏 Escríbeme tu consulta o "ASESOR" para hablar con una persona.',
     };
     return [{ json: { numero: msg.numero, texto: textos[msg.ruta] ?? textos.sin_texto } }];
+}
+
+// A3b · Comprobante recibido: confirma al cliente y avisa al administrador (el pago lo valida una persona)
+function comprobanteRecibido() {
+    const cfg = $('Config bot').first().json;
+    const msg = $input.first().json;
+    const salida = [{ json: { numero: msg.numero, texto: [
+        '🧾 *¡Recibimos tu comprobante!*',
+        '',
+        `Lo estamos validando. Apenas se confirme, tu pedido sale en máximo *${__ENTREGA_MIN__} minutos* (${__HORARIO__}) y te llega por este chat.`,
+        '',
+        'No necesitas enviarlo de nuevo 🙌',
+    ].join('\n') } }];
+    const aviso = String(cfg.numero_aviso_admin ?? '').replace(/\D/g, '');
+    if (aviso) {
+        salida.push({ json: { numero: aviso, texto: [
+            '🧾 *Comprobante recibido*',
+            `Cliente: +${msg.numero}${msg.nombre ? ` (${String(msg.nombre).slice(0, 40)})` : ''}`,
+            msg.texto ? `Nota del cliente: ${msg.texto.slice(0, 200)}` : null,
+            'Valídalo en el panel → Pagos & Bot.',
+        ].filter(Boolean).join('\n') } });
+    }
+    return salida;
 }
 
 // A4 · Contexto del agente: base de conocimiento en vivo (o la embebida) + cuentas activas de Supabase
@@ -167,7 +195,8 @@ function armarContexto() {
         ...(base.catalogo ?? []).map((p) => `- ${p.nombre} [${p.tipo}]: ${(p.variantes ?? []).map((v) => `${v.nombre} ${Number(v.precio) > 0 ? cop(v.precio) : 'a cotizar'}`).join('; ')}`),
         '',
         'FORMATO: español de Colombia, máximo 6 líneas, *negrita* de WhatsApp solo para datos clave, sin títulos ni tablas.',
-        'Para comprar: confirma producto y opción, comparte una cuenta activa y pide el comprobante con su número de referencia. Nunca confirmes un pago tú mismo: un asesor lo valida.',
+        'PRODUCTOS DIGITALES (venta y soporte completos, sin pasar a un asesor):',
+        ...(base.flujo_digital ?? []).map((x) => `- ${x}`),
         'ESCALAMIENTO: si aplica cualquier disparador de escalamiento, responde EXACTAMENTE "[ESCALAR] <motivo breve>" y nada más.',
     ].join('\n');
 
@@ -225,7 +254,9 @@ const cuerpo = (fn) => {
 const UTILIDADES = cuerpo(utilidades);
 const codigo = (fn, { conUtilidades = false } = {}) => ((conUtilidades ? `${UTILIDADES}\n` : '') + cuerpo(fn))
     .replace(/__KB__/g, `(${JSON.stringify(kbEmbebida)})`)
-    .replace(/__HORAS_PAUSA__/g, String(HORAS_PAUSA_ASESOR));
+    .replace(/__HORAS_PAUSA__/g, String(HORAS_PAUSA_ASESOR))
+    .replace(/__ENTREGA_MIN__/g, String(WA.ENTREGA_MAX_MIN))
+    .replace(/__HORARIO__/g, JSON.stringify(WA.HORARIO));
 
 const uuid = () => crypto.randomUUID();
 const nodos = [];
@@ -285,7 +316,7 @@ const regla = (valor, salida) => ({
     outputKey: salida,
 });
 nodo('Ruta', 'n8n-nodes-base.switch', 3.2, [660, 0], {
-    rules: { values: [regla('baja', 'Baja'), regla('asesor', 'Asesor'), regla('sin_texto', 'Sin texto')] },
+    rules: { values: [regla('baja', 'Baja'), regla('asesor', 'Asesor'), regla('sin_texto', 'Sin texto'), regla('comprobante', 'Comprobante')] },
     options: { fallbackOutput: 'extra', renameFallbackOutput: 'IA' },
 });
 nodo('Registrar baja', 'n8n-nodes-base.httpRequest', 4.2, [900, -300], supabaseRpc('registrar_baja_whatsapp', {
@@ -294,6 +325,7 @@ nodo('Registrar baja', 'n8n-nodes-base.httpRequest', 4.2, [900, -300], supabaseR
 }), { onError: 'continueRegularOutput' });
 nodoCodigo('Respuesta fija', [1120, -200], respuestaFija);
 nodoCodigo('Escalar a asesor', [900, -100], rutaAsesor, { conUtilidades: true });
+nodoCodigo('Comprobante recibido', [900, 0], comprobanteRecibido);
 nodo('Base de conocimiento', 'n8n-nodes-base.httpRequest', 4.2, [900, 140], {
     url: "={{ $('Config bot').first().json.url_conocimiento }}",
     options: { timeout: 8000, response: { response: { responseFormat: 'json' } } },
@@ -386,7 +418,9 @@ unir('Normalizar mensaje', 'Ruta');
 unir('Ruta', 'Registrar baja', 0);
 unir('Ruta', 'Escalar a asesor', 1);
 unir('Ruta', 'Respuesta fija', 2);
-unir('Ruta', 'Base de conocimiento', 3);
+unir('Ruta', 'Comprobante recibido', 3);
+unir('Ruta', 'Base de conocimiento', 4);              // salida extra (fallback) = IA
+unir('Comprobante recibido', 'Enviar respuesta');
 unir('Registrar baja', 'Respuesta fija');
 unir('Respuesta fija', 'Enviar respuesta');
 unir('Escalar a asesor', 'Enviar respuesta');
@@ -436,4 +470,4 @@ const flujo = {
 fs.writeFileSync(SALIDA, JSON.stringify(flujo, null, 2) + '\n', 'utf8');
 console.log(`Flujo generado: ${path.relative(RAIZ, SALIDA)} · ${nodos.length} nodos · modelo ${MODELO}`);
 
-module.exports = { normalizarMensaje, rutaAsesor, respuestaFija, armarContexto, revisarRespuesta, armarNotificacion, recordarResena, utilidades, kbEmbebida };
+module.exports = { comprobanteRecibido, normalizarMensaje, rutaAsesor, respuestaFija, armarContexto, revisarRespuesta, armarNotificacion, recordarResena, utilidades, kbEmbebida };

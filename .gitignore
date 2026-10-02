@@ -1,3 +1,7 @@
 
 # Respaldos de flujos de n8n (pueden contener IDs de credenciales)
 n8n/respaldos/
+
+# Secretos locales: nunca al repositorio
+.env
+herramientas/.n8n-credenciales.json

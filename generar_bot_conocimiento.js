@@ -88,7 +88,7 @@ const reglasNegocio = [
 const escalamiento = {
     disparadores: [
         'El cliente pide hablar con una persona (asesor, humano, persona, agente).',
-        'Reclamo de garantía, cuenta caída o credenciales que no funcionan.',
+        'Reclamo de garantía o cuenta que sigue sin funcionar DESPUÉS de dar los pasos de soporte de las FAQ.',
         'Problemas de pago: pago doble, monto distinto, comprobante rechazado o reembolso.',
         `Pedido pagado sin entregar después de ${WA.ENTREGA_MAX_MIN} minutos dentro del horario.`,
         'Cliente molesto, insultos o amenaza de reclamo.',
@@ -100,8 +100,17 @@ const escalamiento = {
         'Avisar al WhatsApp del negocio con: número del cliente, pedido (si lo hay), motivo y último mensaje.',
         'Responder al cliente con la plantilla "escalar_asesor".',
     ],
-    palabras_clave: ['asesor', 'humano', 'persona', 'agente', 'reclamo', 'reembolso', 'devolucion', 'estafa', 'no me llego', 'no funciona'],
+    // "no funciona" ya no escala de inmediato: primero la IA da los pasos de soporte (soporte automatizado)
+    palabras_clave: ['asesor', 'humano', 'persona', 'agente', 'reclamo', 'reembolso', 'devolucion', 'estafa', 'no me llego'],
 };
+
+// Venta y soporte de productos digitales (streaming, licencias, pines, recargas): la IA los atiende completos
+const flujoDigital = [
+    'VENTA DIGITAL (sin pasar a un asesor): 1) confirma producto, opción y total (aplica DCTECH2026 solo si es la primera compra); 2) comparte UNA cuenta de pago activa; 3) pide la foto del comprobante con su número de referencia.',
+    `Cuando el cliente envía el comprobante: confirma que lo recibiste y que, al validarlo, su pedido sale en máximo ${WA.ENTREGA_MAX_MIN} minutos dentro del horario. Nunca digas que el pago está aprobado: lo valida el equipo.`,
+    'Las cuentas, perfiles, seriales y códigos los envía el sistema por este chat al validar el pago. Tú nunca escribes credenciales ni inventas accesos.',
+    'SOPORTE DIGITAL: si algo no funciona, primero da los pasos de las FAQ de soporte (inicio de sesión, límite de pantallas, activación). Escala solo si después de esos pasos el problema sigue.',
+];
 
 // FAQ ligadas a reglas de negocio: se sobrescriben siempre con estos textos
 const faqObligatorias = (horario) => [
@@ -124,6 +133,20 @@ const faqObligatorias = (horario) => [
         pregunta: '¿Cómo funciona el cupón DCTECH2026?',
         palabras_clave: ['cupon', 'descuento', 'dctech2026', 'codigo promocional', 'promo', 'primera compra'],
         respuesta: 'DCTECH2026 te da 10% de descuento solo en tu primera compra (se verifica con tu número de WhatsApp al validar el pago). Es un cupón por compra y no se acumula con otros. No aplica a servicios cotizados.',
+        pendiente_configurar: false,
+    },
+    {
+        id: 'soporte_inicio_sesion',
+        pregunta: 'No puedo entrar a mi cuenta de streaming',
+        palabras_clave: ['no puedo entrar', 'contrasena incorrecta', 'no me deja entrar', 'no funciona', 'no abre', 'cerro sesion', 'error'],
+        respuesta: '1) Cierra la app por completo y vuelve a abrirla. 2) Escribe el correo y la clave exactamente como te llegaron (sin espacios al final). 3) Entra solo a tu perfil asignado. 4) Si sigue fallando, envíanos una captura del mensaje de error y lo revisamos de inmediato. Recuerda: nunca cambies la contraseña.',
+        pendiente_configurar: false,
+    },
+    {
+        id: 'soporte_pantallas',
+        pregunta: 'Me dice que hay demasiadas pantallas en uso',
+        palabras_clave: ['demasiadas pantallas', 'limite', 'otro dispositivo', 'muchas personas', 'en uso'],
+        respuesta: 'Tu plan permite los dispositivos que elegiste al comprar. Cierra la sesión en los dispositivos que no estés usando y vuelve a intentarlo en unos minutos. Si persiste, envíanos una captura y lo revisamos.',
         pendiente_configurar: false,
     },
     {
@@ -261,6 +284,7 @@ const promptSistema = [
     `Eres el asistente de WhatsApp de ${negocio.nombre} (${negocio.sitio}). Tono cercano, claro y profesional, en español de Colombia.`,
     '', 'INSTRUCCIONES:', ...instruccionesAgente.map((x) => `- ${x}`),
     '', 'REGLAS DE NEGOCIO (estrictas):', ...reglasNegocio.map((x) => `- ${x}`),
+    '', 'PRODUCTOS DIGITALES:', ...flujoDigital.map((x) => `- ${x}`),
     '', 'ESCALA A UN HUMANO CUANDO:', ...escalamiento.disparadores.map((x) => `- ${x}`),
     '', `Horario: ${horario.replace(/\.$/, '')}. Rastreo de pedidos: ${negocio.portal_rastreo}.`,
 ].join('\n');
@@ -269,6 +293,7 @@ const resultado = {
     version: new Date().toISOString(),
     instrucciones_agente: instruccionesAgente,
     reglas_negocio: reglasNegocio,
+    flujo_digital: flujoDigital,
     escalamiento,
     prompt_sistema: promptSistema,
     negocio,
