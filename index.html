@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <!-- Necesario para que carguen las imágenes del catálogo alojadas en Tiendanube -->
     <meta name="referrer" content="no-referrer">
-    <meta name="theme-color" content="#0F111A">
+    <meta name="theme-color" content="#0B0F19">
 
     <title>DC Technology | Streaming, Licencias, Pines, Tecnología y Servicios en Colombia</title>
     <meta name="description" content="Tienda oficial DC Technology: cuentas de streaming, licencias de software, pines y recargas con entrega inmediata (máx. 15 min), tecnología con garantía y servicios técnicos en Colombia. Pago por Nequi o Daviplata.">
@@ -54,28 +54,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;700;800;900&display=swap" rel="stylesheet">
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        dcRed: '#FF0033',
-                        dcRedDark: '#CC0029',
-                        dcNeon: '#FF2A5F',
-                        dcNeonDark: '#E50914',
-                        dcDarkBg: '#0B0F19',
-                        dcDarkCard: '#121826',
-                        dcBorder: '#272C3D'
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'system-ui', 'sans-serif'],
-                        tech: ['Outfit', 'Inter', 'sans-serif']
-                    }
-                }
-            }
-        }
-    </script>
+    <!-- Tema claro/oscuro + colores de Tailwind (antes de pintar, sin destello) -->
+    <script src="tema.js"></script>
+    <link rel="stylesheet" href="tema.css">
     <style>
         html { -webkit-tap-highlight-color: transparent; }
         [hidden] { display: none !important; }
@@ -91,8 +72,8 @@
         @keyframes mesh-c { to { transform: translate(-20vw, 12vh) scale(.85); } }
         .bg-grid {
             background-image:
-                linear-gradient(rgba(255, 255, 255, .03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255, 255, 255, .03) 1px, transparent 1px);
+                linear-gradient(rgb(var(--rejilla) / .035) 1px, transparent 1px),
+                linear-gradient(90deg, rgb(var(--rejilla) / .035) 1px, transparent 1px);
             background-size: 40px 40px;
             -webkit-mask-image: radial-gradient(ellipse at 50% 20%, black 20%, transparent 70%);
                     mask-image: radial-gradient(ellipse at 50% 20%, black 20%, transparent 70%);
@@ -204,16 +185,16 @@
         @keyframes fade-slide-in { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
         .entrada { animation: fade-slide-in .5s cubic-bezier(.2, .8, .2, 1) both; }
         @keyframes toast-progress { from { transform: scaleX(1); } to { transform: scaleX(0); } }
-        .skeleton { position: relative; overflow: hidden; background: rgba(255, 255, 255, .045); }
+        .skeleton { position: relative; overflow: hidden; background: rgb(var(--tinta) / .05); }
         .skeleton::after { content: ''; position: absolute; inset: 0; transform: translateX(-100%); background: linear-gradient(90deg, transparent, rgba(255, 0, 51, .14), transparent); animation: shimmer 1.4s infinite; }
         @keyframes shimmer { to { transform: translateX(100%); } }
 
         .sin-scrollbar { scrollbar-width: none; }
         .sin-scrollbar::-webkit-scrollbar { display: none; }
         ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-thumb { background: #272C3D; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: var(--scroll); border-radius: 10px; }
         input[type=search]::-webkit-search-cancel-button { display: none; }
-        .descripcion-producto strong { color: #fff; }
+        .descripcion-producto strong { color: rgb(var(--tinta)); }
 
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after { animation: none !important; transition: none !important; }
@@ -249,6 +230,7 @@
             </label>
 
             <div class="flex items-center gap-2">
+                <button type="button" data-alternar-tema class="btn-cyber w-12 h-12 shrink-0 grid place-items-center rounded-2xl bg-white/[0.04] ring-1 ring-white/10" aria-label="Cambiar tema"><i class="fa-solid fa-sun"></i></button>
                 <a href="portal.html" class="btn-cyber inline-flex items-center justify-center gap-2 min-h-[48px] min-w-[48px] px-3 sm:px-4 rounded-2xl bg-white/[0.04] ring-1 ring-white/10 text-xs font-bold uppercase tracking-wider" aria-label="Portal de clientes">
                     <i class="fa-solid fa-magnifying-glass-location"></i><span class="hidden sm:inline">Mi pedido</span>
                 </a>

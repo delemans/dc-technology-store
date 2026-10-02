@@ -3,32 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="theme-color" content="#0F111A">
+    <meta name="theme-color" content="#0B0F19">
     <title>DC TECHNOLOGY | Panel Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@700;800;900&display=swap" rel="stylesheet">
-    <script>
-        // Paleta Neón Dark Obsidian (misma que la tienda y el portal)
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        dcRed: '#FF0033',
-                        dcRedDark: '#CC0029',
-                        dcDarkBg: '#0F111A',
-                        dcDarkCard: '#181B26',
-                        dcBorder: '#272C3D'
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'system-ui', 'sans-serif'],
-                        tech: ['Outfit', 'Inter', 'sans-serif']
-                    }
-                }
-            }
-        }
-    </script>
+    <!-- Tema claro/oscuro + colores de Tailwind (antes de pintar, sin destello) -->
+    <script src="tema.js"></script>
+    <link rel="stylesheet" href="tema.css">
     <style>
         html { -webkit-tap-highlight-color: transparent; }
         [hidden] { display: none !important; } /* que 'hidden' gane a clases como flex/grid */
@@ -44,8 +26,8 @@
         @keyframes mesh-c { to { transform: translate(-20vw, 12vh) scale(.85); } }
         .bg-grid {
             background-image:
-                linear-gradient(rgba(255, 255, 255, .03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255, 255, 255, .03) 1px, transparent 1px);
+                linear-gradient(rgb(var(--rejilla) / .035) 1px, transparent 1px),
+                linear-gradient(90deg, rgb(var(--rejilla) / .035) 1px, transparent 1px);
             background-size: 40px 40px;
             -webkit-mask-image: radial-gradient(ellipse at 50% 30%, black 20%, transparent 70%);
                     mask-image: radial-gradient(ellipse at 50% 30%, black 20%, transparent 70%);
@@ -84,7 +66,7 @@
         .vista-entrada { animation: fade-slide-in .45s cubic-bezier(.2, .8, .2, 1) both; }
 
         /* Skeleton neón */
-        .skeleton { position: relative; overflow: hidden; background: rgba(255, 255, 255, .045); }
+        .skeleton { position: relative; overflow: hidden; background: rgb(var(--tinta) / .05); }
         .skeleton::after {
             content: ''; position: absolute; inset: 0; transform: translateX(-100%);
             background: linear-gradient(90deg, transparent, rgba(255, 0, 51, .14), transparent);
@@ -100,7 +82,7 @@
         .sin-scrollbar { scrollbar-width: none; }
         .sin-scrollbar::-webkit-scrollbar { display: none; }
         ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-thumb { background: #272C3D; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: var(--scroll); border-radius: 10px; }
         input[type=search]::-webkit-search-cancel-button { display: none; }
 
         @media (prefers-reduced-motion: reduce) {
@@ -210,7 +192,7 @@
 
         <div class="flex-1 min-w-0 flex flex-col">
             <!-- Barra superior (móvil) -->
-            <header class="md:hidden sticky top-0 z-20 flex items-center justify-between gap-3 px-4 pt-[max(.75rem,env(safe-area-inset-top))] pb-3 bg-black/50 backdrop-blur-xl border-b border-white/10">
+            <header class="md:hidden sticky top-0 z-20 flex items-center justify-between gap-3 px-4 pt-[max(.75rem,env(safe-area-inset-top))] pb-3 bg-dcDarkBg/75 backdrop-blur-xl border-b border-white/10">
                 <div class="flex items-center gap-2.5">
                     <svg class="dc-logo w-9 h-9" role="img" aria-label="DC Technology"><use href="#dc-isotipo"/></svg>
                     <span class="font-tech font-black text-xs tracking-[0.16em] uppercase">DC <span class="text-dcRed dc-text-glow">Technology</span></span>
@@ -233,6 +215,7 @@
                         <button type="button" data-generar-prueba title="Generar pedido de prueba" class="btn-cyber hidden md:inline-flex items-center gap-2 h-12 px-4 rounded-2xl bg-dcRed/10 ring-1 ring-dcRed/40 text-dcRed text-[11px] font-black uppercase tracking-wider">
                             <i class="fa-solid fa-plus"></i> Pedido de prueba
                         </button>
+                        <button type="button" data-alternar-tema class="btn-cyber w-12 h-12 text-neutral-300 grid place-items-center rounded-2xl bg-white/[0.04] ring-1 ring-white/10" aria-label="Cambiar tema"><i class="fa-solid fa-sun"></i></button>
                         <button type="button" id="btn-exportar" title="Exportar a CSV" aria-label="Exportar a CSV"
                             class="btn-cyber w-12 h-12 grid place-items-center rounded-2xl bg-white/[0.04] ring-1 ring-white/10 text-neutral-300 hover:text-white">
                             <i class="fa-solid fa-file-csv"></i>

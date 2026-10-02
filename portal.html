@@ -3,32 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="theme-color" content="#0F111A">
+    <meta name="theme-color" content="#0B0F19">
     <title>DC TECHNOLOGY | Estado de Pedido</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@700;800;900&display=swap" rel="stylesheet">
-    <script>
-        // Paleta Neón Dark Obsidian (misma que la tienda y el panel admin)
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        dcRed: '#FF0033',
-                        dcRedDark: '#CC0029',
-                        dcDarkBg: '#0F111A',
-                        dcDarkCard: '#181B26',
-                        dcBorder: '#272C3D'
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'system-ui', 'sans-serif'],
-                        tech: ['Outfit', 'Inter', 'sans-serif']
-                    }
-                }
-            }
-        }
-    </script>
+    <!-- Tema claro/oscuro + colores de Tailwind (antes de pintar, sin destello) -->
+    <script src="tema.js"></script>
+    <link rel="stylesheet" href="tema.css">
     <style>
         html { -webkit-tap-highlight-color: transparent; }
         [hidden] { display: none !important; } /* que 'hidden' gane a clases como flex/grid */
@@ -55,8 +37,8 @@
         .btn-cyber:active { transform: scale(.96); }
         .bg-grid {
             background-image:
-                linear-gradient(rgba(255, 255, 255, .035) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255, 255, 255, .035) 1px, transparent 1px);
+                linear-gradient(rgb(var(--rejilla) / .035) 1px, transparent 1px),
+                linear-gradient(90deg, rgb(var(--rejilla) / .035) 1px, transparent 1px);
             background-size: 40px 40px;
             -webkit-mask-image: radial-gradient(ellipse at 50% 35%, black 20%, transparent 70%);
                     mask-image: radial-gradient(ellipse at 50% 35%, black 20%, transparent 70%);
@@ -110,9 +92,12 @@
                     <span class="block mt-1 text-[9px] font-bold uppercase tracking-[0.3em] text-neutral-500">Rastreo de pedidos</span>
                 </span>
             </a>
+            <div class="flex items-center gap-2">
+            <button type="button" data-alternar-tema class="btn-cyber w-12 h-12 shrink-0 grid place-items-center rounded-2xl bg-white/[0.04] ring-1 ring-white/10" aria-label="Cambiar tema"><i class="fa-solid fa-sun"></i></button>
             <a href="index.html" aria-label="Volver al catálogo" class="btn-cyber inline-flex items-center justify-center gap-2 min-h-[48px] min-w-[48px] px-3 sm:px-4 text-xs font-bold rounded-2xl bg-white/[0.04] ring-1 ring-white/10 hover:bg-dcRed/10">
                 <i class="fa-solid fa-store"></i> <span class="hidden sm:inline">Catálogo</span>
             </a>
+            </div>
         </div>
     </header>
 
