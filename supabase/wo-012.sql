@@ -173,7 +173,8 @@ security definer
 set search_path = ''
 as $$
 declare
-    v_compra public.compras_proveedor%rowtype;
+    v_compra   public.compras_proveedor%rowtype;
+    v_producto text;
 begin
     if p_calificacion is null or p_calificacion not between 1 and 5 then
         return query select false, 'La calificación debe ser de 1 a 5 estrellas.';
@@ -199,9 +200,24 @@ begin
         return;
     end if;
 
-    -- producto_id se deja vacío: el producto se lee de la compra (ver resenas_publicas)
-    insert into public.resenas (calificacion, comentario, cliente_nombre, verificado, compra_id)
+    -- producto_id (NOT NULL) sale de la compra: primero el producto real de la variante
+    -- (si existe public.variantes.producto_id); si no, la referencia o la variante de la compra.
+    if v_compra.variante_id is not null and exists (
+        select 1 from information_schema.columns
+        where table_schema = 'public' and table_name = 'variantes' and column_name = 'producto_id'
+    ) then
+        execute 'select producto_id::text from public.variantes where id::text = $1 limit 1'
+           into v_producto using v_compra.variante_id::text;
+    end if;
+    v_producto := coalesce(nullif(v_producto, ''), nullif(v_compra.referencia_externa::text, ''), v_compra.variante_id::text);
+    if v_producto is null then
+        return query select false, 'No pudimos identificar el producto de esta compra. Escríbenos por WhatsApp.';
+        return;
+    end if;
+
+    insert into public.resenas (producto_id, calificacion, comentario, cliente_nombre, verificado, compra_id)
     values (
+        v_producto,
         p_calificacion,
         nullif(btrim(p_comentario), ''),
         coalesce(nullif(btrim(p_nombre), ''), 'Cliente verificado'),

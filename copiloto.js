@@ -19,7 +19,7 @@
     // Respaldo mínimo si bot-conocimiento.json no carga (p. ej. abriendo el archivo sin servidor)
     const FAQ_RESPALDO = [
         { id: 'como_comprar', pregunta: '¿Cómo compro?', respuesta: 'Elige tu producto, toca "Comprar", acepta los términos y te abrimos WhatsApp con el pedido listo. Te enviamos los datos de pago y, al validar tu comprobante, procesamos tu pedido.' },
-        { id: 'metodos_pago', pregunta: '¿Qué métodos de pago aceptan?', respuesta: 'Nequi, Daviplata, Bancolombia, Binance (USDT) y Transfiya.' },
+        { id: 'metodos_pago', pregunta: '¿Qué métodos de pago aceptan?', respuesta: 'Por ahora recibimos Nequi y Daviplata.' },
         { id: 'garantia', pregunta: '¿Tienen garantía?', respuesta: 'Sí: 30 días desde la entrega en cuentas, licencias y tecnología, si se respetan las reglas de uso.' },
         { id: 'horario_atencion', pregunta: '¿Horario?', respuesta: 'Lunes a sábado, 8:00 a.m. – 8:00 p.m.' },
     ];

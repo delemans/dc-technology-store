@@ -53,7 +53,7 @@ const negocioPorDefecto = {
     sitio: 'https://dctecnology.xyz',
     portal_rastreo: WA.URL_PORTAL,
     whatsapp: WA.NUMERO_TIENDA,
-    metodos_pago: ['Nequi', 'Daviplata', 'Bancolombia', 'Binance (USDT)', 'Transfiya'],
+    metodos_pago: ['Nequi', 'Daviplata'], // valores del enum public.metodo_pago
     nota_metodos_pago: 'Los números de cuenta salen de la tabla public.metodos_pago (solo los activos). No se escriben aquí.',
     nota_horario_y_entrega: 'El horario y el tiempo de entrega se configuran en las FAQ "horario_atencion" y "tiempo_entrega".',
     garantia_dias_por_defecto: 30,
@@ -79,7 +79,7 @@ const faqPorDefecto = [
         id: 'metodos_pago',
         pregunta: '¿Qué métodos de pago aceptan?',
         palabras_clave: ['pago', 'nequi', 'daviplata', 'bancolombia', 'binance', 'usdt', 'transfiya', 'transferencia'],
-        respuesta: 'Recibimos Nequi, Daviplata, Bancolombia, Binance (USDT) y Transfiya. Te compartimos los datos de la cuenta al confirmar tu pedido. Envíanos el comprobante con su número de referencia.',
+        respuesta: 'Por ahora recibimos Nequi y Daviplata. Te compartimos los datos de la cuenta al confirmar tu pedido. Envíanos el comprobante con su número de referencia.',
         pendiente_configurar: false,
     },
     {

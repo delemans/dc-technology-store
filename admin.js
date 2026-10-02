@@ -34,8 +34,12 @@ const ESTADOS_POR_ENTREGAR = ['PEDIDO_REALIZADO', 'RECIBIDA'];
 // Entregados al cliente: cuentan como venta completada, garantía y posventa
 const ESTADOS_ENTREGADOS = ['ENTREGADO', 'ENTREGADO_INMEDIATO'];
 
-// Métodos de pago que se pueden registrar (además de los que existan en public.metodos_pago)
-const METODOS_PAGO_BASE = ['Nequi', 'Daviplata', 'Bancolombia', 'Binance (USDT)', 'Transfiya'];
+// Métodos de pago que acepta el enum public.metodo_pago (por ahora solo estos dos)
+const METODOS_PAGO_BASE = [
+    { valor: 'NEQUI', texto: 'Nequi' },
+    { valor: 'DAVIPLATA', texto: 'Daviplata' },
+];
+const METODO_TEXTO = Object.fromEntries(METODOS_PAGO_BASE.map(({ valor, texto }) => [valor, texto]));
 // Ventanas del seguimiento posventa
 const HORAS_SATISFACCION = 24;
 const DIAS_MAX_SATISFACCION = 7;   // pasado este plazo ya no tiene sentido preguntar
@@ -86,6 +90,8 @@ let canalPedidos = null;            // suscripción Realtime activa
 let pedidoEditando = null;          // id del pedido abierto en el modal de edición
 let pedidoPagando = null;           // id del pedido abierto en el modal de pago
 let metodosPago = [];               // filas de public.metodos_pago
+let pagosPendientes = [];           // comprobantes PENDIENTE de public.pagos (RPC pagos_pendientes)
+let errorPagos = null;              // mensaje si no se pudieron leer
 let baseConocimiento = null;        // bot-conocimiento.json
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -112,6 +118,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         cargarPedidos();
         iniciarRealtime();
         cargarMetodosPago();
+        cargarPagosPendientes();
         cargarBaseConocimiento();
     }
 
@@ -502,6 +509,14 @@ function iniciarRealtime() {
     canalPedidos = supabaseClient
         .channel('admin-compras-proveedor')
         .on('postgres_changes', { event: '*', schema: 'public', table: 'compras_proveedor' }, manejarCambio)
+        // Comprobantes nuevos o revisados en 'pagos' (n8n / WhatsApp)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'pagos' }, ({ eventType, new: pago }) => {
+            if (eventType === 'INSERT' && pago?.estado === 'PENDIENTE') {
+                mostrarToast(`Nuevo comprobante ${METODO_TEXTO[pago.metodo] ?? pago.metodo ?? ''} por verificar.`, 'nuevo', 6000);
+                Sonidos.nuevo();
+            }
+            cargarPagosPendientes();
+        })
         .subscribe((estado, err) => {
             const enVivo = estado === 'SUBSCRIBED';
             indicadorEnVivo(enVivo);
@@ -1107,11 +1122,15 @@ function pintarPagosBot() {
     if (!document.getElementById('vista-pagos-bot')) return;
     const filas = [...pedidos.values()];
     const porVerificar = filas.filter((fila) => fila.estado === ESTADO_PENDIENTE_PAGO);
+    // Pendientes = comprobantes recibidos + compras esperando pago sin comprobante
+    const conComprobante = new Set(pagosPendientes.map((pago) => String(pago.pedido_id)));
+    const totalPorVerificar = pagosPendientes.length
+        + porVerificar.filter((fila) => !conComprobante.has(String(fila.pedido_id))).length;
 
-    document.getElementById('kpi-por-verificar').textContent = porVerificar.length;
+    document.getElementById('kpi-por-verificar').textContent = totalPorVerificar;
     document.querySelectorAll('[data-contador-verificar]').forEach((el) => {
-        el.textContent = porVerificar.length;
-        el.hidden = porVerificar.length === 0;
+        el.textContent = totalPorVerificar;
+        el.hidden = totalPorVerificar === 0;
     });
 
     pintarPorVerificar(porVerificar);
@@ -1207,60 +1226,139 @@ async function alternarMetodo(fila, columna, valor) {
     mostrarToast(`Método ${valor ? 'activado' : 'desactivado'}.`, 'ok');
 }
 
-/* ==================== REGISTRO Y VALIDACIÓN DE PAGOS ==================== */
+/* ==================== REGISTRO Y VALIDACIÓN DE PAGOS (tabla public.pagos) ==================== */
+
+// Comprobantes PENDIENTE que dejó n8n (o el cliente) en public.pagos
+async function cargarPagosPendientes() {
+    const { data, error } = await supabaseClient.rpc('pagos_pendientes');
+    if (error) {
+        console.error('pagos_pendientes:', error);
+        pagosPendientes = [];
+        errorPagos = error.code === 'PGRST202'
+            ? 'Falta ejecutar supabase/wo-014-pagos.sql.'
+            : `No se pudieron leer los pagos: ${error.message}`;
+    } else {
+        pagosPendientes = data ?? [];
+        errorPagos = null;
+    }
+    pintarPagosBot();
+}
 
 function pintarPorVerificar(porVerificar) {
     const caja = document.getElementById('lista-por-verificar');
-    if (porVerificar.length === 0) {
+    const items = [];
+
+    if (errorPagos) items.push(htmlANodo(filaVacia(errorPagos, 'fa-database')));
+
+    // a) Comprobantes recibidos (pagos PENDIENTE): aprobar o rechazar
+    pagosPendientes.forEach((pago) => {
+        const item = document.createElement('div');
+        item.className = 'rounded-2xl bg-dcDarkBg/60 ring-1 ring-sky-500/30 px-4 py-3 space-y-3';
+        const alertas = pago.alertas && !['null', '[]', '{}', ''].includes(pago.alertas) ? pago.alertas : null;
+        item.innerHTML = `
+            <div class="flex items-start gap-3">
+                <div class="flex-1 min-w-0">
+                    <p class="text-[10px] font-black uppercase tracking-widest text-sky-300">Comprobante · ${escaparHTML(METODO_TEXTO[pago.metodo] ?? pago.metodo)} · ${escaparHTML(pago.origen)}</p>
+                    <p class="text-sm font-bold text-white truncate">${escaparHTML(pago.producto ?? 'Sin compra en PENDIENTE_PAGO')}</p>
+                    <p class="text-[11px] text-neutral-400">
+                        Declarado: <b class="text-neutral-200">${escaparHTML(PlantillasWA.precioCOP(pago.monto_declarado_cop))}</b>
+                        ${pago.referencia ? ` · Ref. <span class="font-mono">${escaparHTML(pago.referencia)}</span>` : ''}
+                    </p>
+                    ${alertas ? `<p class="mt-1 text-[11px] text-amber-300"><i class="fa-solid fa-triangle-exclamation mr-1"></i>${escaparHTML(alertas)}</p>` : ''}
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+                <button type="button" data-aprobar ${pago.compra_id ? '' : 'disabled'} class="btn-cyber min-h-[44px] rounded-xl bg-sky-600 hover:bg-sky-500 text-[11px] font-black uppercase tracking-wider text-white disabled:opacity-40 disabled:cursor-not-allowed">
+                    <i class="fa-solid fa-check mr-1"></i> Revisar y aprobar
+                </button>
+                <button type="button" data-rechazar class="btn-cyber min-h-[44px] rounded-xl bg-white/[0.04] ring-1 ring-red-500/40 text-[11px] font-black uppercase tracking-wider text-red-300">
+                    <i class="fa-solid fa-xmark mr-1"></i> Rechazar
+                </button>
+            </div>
+            <form data-form-rechazo class="flex gap-2" hidden>
+                <input type="text" required maxlength="300" placeholder="Motivo del rechazo (lo verá el equipo)" class="min-w-0 flex-1 min-h-[44px] rounded-xl bg-dcDarkCard ring-1 ring-white/10 px-3 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-red-500/60">
+                <button type="submit" class="shrink-0 min-h-[44px] px-3 rounded-xl bg-red-600 hover:bg-red-500 text-[11px] font-black uppercase text-white">Confirmar</button>
+            </form>`;
+        item.querySelector('[data-aprobar]').addEventListener('click', () => abrirPago(pago.compra_id, pago));
+        const formRechazo = item.querySelector('[data-form-rechazo]');
+        item.querySelector('[data-rechazar]').addEventListener('click', () => {
+            formRechazo.hidden = !formRechazo.hidden;
+            if (!formRechazo.hidden) formRechazo.querySelector('input').focus();
+        });
+        formRechazo.addEventListener('submit', (e) => {
+            e.preventDefault();
+            rechazarPago(pago, formRechazo.querySelector('input').value);
+        });
+        items.push(item);
+    });
+
+    // b) Compras en PENDIENTE_PAGO sin comprobante recibido: registro manual
+    const pedidosConComprobante = new Set(pagosPendientes.map((pago) => String(pago.pedido_id)));
+    porVerificar
+        .filter((fila) => !pedidosConComprobante.has(String(fila.pedido_id)))
+        .forEach((fila) => {
+            const p = normalizarPedido(fila);
+            const item = document.createElement('div');
+            item.className = 'flex items-center gap-3 rounded-2xl bg-dcDarkBg/60 ring-1 ring-white/10 px-4 py-3';
+            item.innerHTML = `
+                <div class="flex-1 min-w-0">
+                    <p class="text-[10px] font-black uppercase tracking-widest text-neutral-400">Sin comprobante · Pedido #${escaparHTML(p.ref)}${p.prueba ? ' · prueba' : ''}</p>
+                    <p class="text-sm font-bold text-white truncate">${escaparHTML(p.producto)}</p>
+                    <p class="text-[11px] text-neutral-500">${escaparHTML(p.fecha)}</p>
+                </div>
+                <button type="button" class="btn-cyber shrink-0 min-h-[44px] px-4 rounded-xl bg-white/[0.04] ring-1 ring-sky-500/40 text-[11px] font-black uppercase tracking-wider text-sky-300">
+                    <i class="fa-solid fa-pen mr-1"></i> Registrar manual
+                </button>`;
+            item.querySelector('button').addEventListener('click', () => abrirPago(String(p.id)));
+            items.push(item);
+        });
+
+    if (items.length === 0) {
         caja.innerHTML = filaVacia('No hay pagos por verificar.');
         return;
     }
-    caja.replaceChildren(...porVerificar.map((fila) => {
-        const p = normalizarPedido(fila);
-        const item = document.createElement('div');
-        item.className = 'flex items-center gap-3 rounded-2xl bg-dcDarkBg/60 ring-1 ring-sky-500/20 px-4 py-3';
-        item.innerHTML = `
-            <div class="flex-1 min-w-0">
-                <p class="text-[10px] font-black uppercase tracking-widest text-sky-300">Pedido #${escaparHTML(p.ref)}${p.prueba ? ' · prueba' : ''}</p>
-                <p class="text-sm font-bold text-white truncate">${escaparHTML(p.producto)}</p>
-                <p class="text-[11px] text-neutral-500">${escaparHTML(p.fecha)}</p>
-            </div>
-            <button type="button" class="btn-cyber shrink-0 min-h-[44px] px-4 rounded-xl bg-sky-600 hover:bg-sky-500 text-[11px] font-black uppercase tracking-wider text-white">
-                <i class="fa-solid fa-receipt mr-1"></i> Registrar
-            </button>`;
-        item.querySelector('button').addEventListener('click', () => abrirPago(String(p.id)));
-        return item;
-    }));
+    caja.replaceChildren(...items);
 }
 
-function abrirPago(id) {
-    const fila = pedidos.get(id);
-    if (!fila) return;
-    if (!fila._prueba && !('referencia_pago' in fila)) {
-        mostrarToast('Falta preparar la base: ejecuta supabase/wo-011.sql en Supabase.', 'error', 6000);
+function htmlANodo(html) {
+    const plantilla = document.createElement('template');
+    plantilla.innerHTML = html.trim();
+    return plantilla.content.firstElementChild;
+}
+
+// pago = comprobante PENDIENTE de public.pagos (si se abre desde "Revisar y aprobar"); null = registro manual
+function abrirPago(id, pago = null) {
+    const fila = pedidos.get(String(id));
+    if (!fila) {
+        mostrarToast('La compra de este pedido no está cargada en el panel. Actualiza la lista.', 'error', 5000);
         return;
     }
-    pedidoPagando = id;
+    if (!fila._prueba && !fila.pedido_id) {
+        mostrarToast('Esta compra no tiene pedido_id: no se puede asociar el pago.', 'error', 6000);
+        return;
+    }
+    pedidoPagando = String(id);
     const p = normalizarPedido(fila);
-    document.getElementById('modal-pago-ref').textContent = `Pedido #${p.ref} · ${p.producto}`;
+    document.getElementById('modal-pago-ref').textContent = pago
+        ? `Comprobante ${pago.origen} · Pedido #${p.ref} · ${p.producto}`
+        : `Registro manual · Pedido #${p.ref} · ${p.producto}`;
 
-    // Métodos: los activos de metodos_pago + los básicos, sin repetir
-    const nombres = [...new Set([
-        ...metodosPago.filter(metodoActivo).map((m) => campoMetodo(m, 'nombre').valor).filter(Boolean),
-        ...METODOS_PAGO_BASE,
-    ].map(String))];
-    document.getElementById('pago-metodos').innerHTML = nombres.map((nombre, i) => `
+    // Solo los valores del enum public.metodo_pago
+    document.getElementById('pago-metodos').innerHTML = METODOS_PAGO_BASE.map(({ valor, texto }, i) => `
         <label class="cursor-pointer">
-            <input type="radio" name="pago-metodo" value="${escaparHTML(nombre)}" class="peer sr-only" ${i === 0 ? 'required' : ''}>
+            <input type="radio" name="pago-metodo" value="${valor}" class="peer sr-only" ${i === 0 ? 'required' : ''} ${pago?.metodo === valor ? 'checked' : ''}>
             <span class="flex items-center justify-center text-center min-h-[48px] px-2 rounded-2xl bg-dcDarkBg/70 ring-1 ring-white/10 text-[11px] font-bold text-neutral-300 peer-checked:bg-dcRed/15 peer-checked:ring-dcRed/60 peer-checked:text-white peer-focus-visible:ring-2 transition-all">
-                ${escaparHTML(nombre)}
+                ${texto}
             </span>
         </label>`).join('');
 
     document.getElementById('pago-cupon').value = fila.cupon_aplicado ?? '';
     document.getElementById('pago-cupon').disabled = Boolean(fila.cupon_aplicado);
-    document.getElementById('pago-referencia').value = fila.referencia_pago ?? '';
-    document.getElementById('pago-monto').value = fila.monto_pago ?? '';
+    document.getElementById('pago-referencia').value = pago?.referencia ?? '';
+    // El monto se escribe tras verificarlo en la app del banco (no se copia el declarado)
+    document.getElementById('pago-monto').value = '';
+    document.getElementById('pago-monto').placeholder = pago?.monto_declarado_cop
+        ? `Declarado: ${pago.monto_declarado_cop} — escribe el verificado` : 'Ej: 15000';
     document.getElementById('pago-confirmo').checked = false;
     // "Entregar ya" solo si ya hay cuenta/serial asignado: el admin decide (modo sombra)
     document.getElementById('btn-pago-entregar').hidden = !fila.clave_serial;
@@ -1279,18 +1377,13 @@ async function guardarPago(e) {
     const referencia = document.getElementById('pago-referencia').value.trim();
     const monto = Number(document.getElementById('pago-monto').value);
     if (!metodo || !referencia || !(monto > 0)) {
-        mostrarToast('Completa método, referencia y monto.', 'error');
+        mostrarToast('Completa método, referencia y monto verificado.', 'error');
         return;
     }
-
-    const ahora = new Date().toISOString();
-    const cambios = { metodo_pago: metodo, referencia_pago: referencia, monto_pago: monto, pago_validado_at: ahora, estado: destino };
-    if (destino === 'ENTREGADO_INMEDIATO') cambios.entregado_at = ahora;
 
     const botones = document.querySelectorAll('#form-pago button[type="submit"]');
     botones.forEach((b) => { b.disabled = true; });
     e.submitter?.insertAdjacentHTML('afterbegin', '<i class="fa-solid fa-spinner fa-spin mr-2" data-cargando></i>');
-
     const restaurarBotones = () => {
         botones.forEach((b) => { b.disabled = false; });
         document.querySelector('#form-pago [data-cargando]')?.remove();
@@ -1299,7 +1392,7 @@ async function guardarPago(e) {
     // Cupón: se verifica y consume en la base ANTES de validar el pago (si no es válido, no se valida)
     const cupon = document.getElementById('pago-cupon').value.trim().toUpperCase();
     if (cupon && !filaActual.cupon_aplicado && !filaActual._prueba) {
-        const { data: canje, error: errorCanje } = await supabaseClient.rpc('canjear_cupon', { p_codigo: cupon, p_compra_id: String(id) }).maybeSingle();
+        const { data: canje, error: errorCanje } = await supabaseClient.rpc('canjear_cupon', { p_codigo: cupon, p_compra_id: id }).maybeSingle();
         if (errorCanje || !canje?.ok) {
             restaurarBotones();
             console.error('canjear_cupon:', errorCanje ?? canje);
@@ -1310,49 +1403,68 @@ async function guardarPago(e) {
         mostrarToast(`${canje.mensaje} (-${canje.porcentaje}%)`, 'ok', 4000);
     }
 
-    let filaNueva;
+    let filasActualizadas;
     if (filaActual._prueba) {
         await new Promise((r) => setTimeout(r, 400));
-        filaNueva = { ...filaActual, ...cambios, ...(cupon ? { cupon_aplicado: cupon } : {}) };
+        const ahora = new Date().toISOString();
+        filasActualizadas = [{
+            ...filaActual,
+            estado: destino,
+            pago_validado_at: ahora,
+            ...(destino === 'ENTREGADO_INMEDIATO' ? { entregado_at: ahora } : {}),
+            ...(cupon ? { cupon_aplicado: cupon } : {}),
+        }];
     } else {
-        const { data, error } = await supabaseClient
-            .from('compras_proveedor')
-            .update(cambios)
-            .eq('id', id)
-            .eq('estado', ESTADO_PENDIENTE_PAGO) // solo si sigue esperando pago
-            .select('*');
+        // Aprueba el comprobante en 'pagos' y avanza las compras del pedido en una sola transacción
+        const { data: r, error } = await supabaseClient.rpc('validar_pago', {
+            p_compra_id: id,
+            p_metodo: metodo,
+            p_referencia: referencia,
+            p_monto: monto,
+            p_destino: destino,
+        }).maybeSingle();
 
-        if (error || !data?.length) {
-            botones.forEach((b) => { b.disabled = false; });
-            document.querySelector('#form-pago [data-cargando]')?.remove();
-            console.error(`Error al validar el pago del pedido ${id}:`, error ?? 'No se actualizó ninguna fila (¿ya no está en PENDIENTE_PAGO o RLS?).');
-            const mensaje = error?.code === '23505'
-                ? 'Esa referencia ya se usó para validar otro pago.'
-                : error?.code === '22P02' || error?.code === '23514'
-                    ? `La base no acepta el estado ${destino}. Revisa la restricción de 'estado' (supabase/wo-011.sql, paso 4).`
-                    : 'No se pudo validar el pago. Revisa la consola.';
+        if (error || !r?.ok) {
+            restaurarBotones();
+            console.error(`validar_pago (compra ${id}):`, error ?? r);
+            const mensaje = error?.code === 'PGRST202' ? 'Falta ejecutar supabase/wo-014-pagos.sql.'
+                : error?.code === '23505' ? 'Esa referencia ya fue aprobada en otro pago.'
+                : r?.mensaje ?? 'No se pudo validar el pago. Revisa la consola.';
             mostrarToast(mensaje, 'error', 6000);
             Sonidos.error();
             return;
         }
-        filaNueva = data[0];
+
+        // Releer todas las compras del pedido (pudieron avanzar varias)
+        const { data: filas, error: errorFilas } = await supabaseClient
+            .from('compras_proveedor').select('*').eq('pedido_id', filaActual.pedido_id);
+        if (errorFilas) console.error('Releer compras del pedido:', errorFilas);
+        filasActualizadas = filas?.length ? filas : [];
     }
 
-    botones.forEach((b) => { b.disabled = false; });
-    document.querySelector('#form-pago [data-cargando]')?.remove();
-    pedidos.set(id, filaNueva);
-    pintarTabs();
-
-    const tarjeta = buscarTarjeta(id);
-    if (tarjeta && coincideFiltro(filaNueva)) tarjeta.replaceWith(crearTarjeta(filaNueva));
-    else if (tarjeta) retirarTarjeta(tarjeta);
+    restaurarBotones();
+    filasActualizadas.forEach((fila) => pedidos.set(String(fila.id), fila));
+    renderLista();
+    cargarPagosPendientes();
 
     cerrarModal(document.getElementById('modal-pago'));
-    const p = normalizarPedido(filaNueva);
+    const p = normalizarPedido(filaActual);
     mostrarToast(destino === 'ENTREGADO_INMEDIATO'
-        ? `Pago validado y pedido #${p.ref} entregado.`
-        : `Pago validado: pedido #${p.ref} pasa a esperar proveedor.`, 'ok', 4500);
+        ? `Pago aprobado y pedido #${p.ref} entregado.`
+        : `Pago aprobado: pedido #${p.ref} pasa a esperar proveedor.`, 'ok', 4500);
     Sonidos.completar();
+}
+
+async function rechazarPago(pago, motivo) {
+    const { data: r, error } = await supabaseClient.rpc('rechazar_pago', { p_pago_id: pago.pago_id, p_motivo: motivo }).maybeSingle();
+    if (error || !r?.ok) {
+        console.error('rechazar_pago:', error ?? r);
+        mostrarToast(r?.mensaje ?? 'No se pudo rechazar el pago. Revisa la consola.', 'error', 5000);
+        Sonidos.error();
+        return;
+    }
+    mostrarToast('Comprobante rechazado. La compra sigue esperando un pago válido.', 'ok', 4500);
+    cargarPagosPendientes();
 }
 
 /* ==================== FIDELIZACIÓN (posventa) ==================== */

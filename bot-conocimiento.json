@@ -1,5 +1,5 @@
 {
-  "version": "2026-10-02T14:12:28.128Z",
+  "version": "2026-10-02T15:03:21.336Z",
   "instrucciones_agente": [
     "Responde solo con información de este archivo; si no sabes algo, ofrece hablar con un asesor.",
     "No envíes entradas con \"pendiente_configurar\": true.",
@@ -13,10 +13,7 @@
     "whatsapp": "573223284622",
     "metodos_pago": [
       "Nequi",
-      "Daviplata",
-      "Bancolombia",
-      "Binance (USDT)",
-      "Transfiya"
+      "Daviplata"
     ],
     "nota_metodos_pago": "Los números de cuenta salen de la tabla public.metodos_pago (solo los activos). No se escriben aquí.",
     "garantia_dias_por_defecto": 30,
@@ -50,7 +47,7 @@
         "transfiya",
         "transferencia"
       ],
-      "respuesta": "Recibimos Nequi, Daviplata, Bancolombia, Binance (USDT) y Transfiya. Te compartimos los datos de la cuenta al confirmar tu pedido. Envíanos el comprobante con su número de referencia.",
+      "respuesta": "Por ahora recibimos Nequi y Daviplata. Te compartimos los datos de la cuenta al confirmar tu pedido. Envíanos el comprobante con su número de referencia.",
       "pendiente_configurar": false
     },
     {
