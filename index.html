@@ -1,11 +1,59 @@
 <!DOCTYPE html>
-<html lang="es" class="dark scroll-smooth">
+<html lang="es" class="dark scroll-smooth" data-sonido="off">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DC TECHNOLOGY | Tienda Oficial</title>
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <!-- Necesario para que carguen las imágenes del catálogo alojadas en Tiendanube -->
+    <meta name="referrer" content="no-referrer">
+    <meta name="theme-color" content="#0F111A">
+
+    <title>DC Technology | Streaming, Licencias, Pines, Tecnología y Servicios en Colombia</title>
+    <meta name="description" content="Tienda oficial DC Technology: cuentas de streaming, licencias de software, pines y recargas con entrega inmediata (máx. 15 min), tecnología con garantía y servicios técnicos en Colombia. Pago por Nequi, Daviplata, Bancolombia, Binance y Transfiya.">
+    <link rel="canonical" href="https://dctecnology.xyz/">
+
+    <!-- Open Graph (vista previa en WhatsApp, Facebook, etc.) -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="DC Technology">
+    <meta property="og:locale" content="es_CO">
+    <meta property="og:url" content="https://dctecnology.xyz/">
+    <meta property="og:title" content="DC Technology | Streaming, licencias y tecnología con entrega inmediata">
+    <meta property="og:description" content="Cuentas de streaming, licencias, pines y recargas con entrega en máximo 15 minutos, tecnología con garantía y soporte directo por WhatsApp.">
+    <meta property="og:image" content="https://i.ibb.co/LDN4xyW0/Mesa-de-trabajo-1.png">
+    <meta property="og:image:alt" content="Logo de DC Technology">
+    <!-- Twitter / X -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="DC Technology | Streaming, licencias y tecnología">
+    <meta name="twitter:description" content="Entrega inmediata (máx. 15 min), garantía y soporte directo por WhatsApp.">
+    <meta name="twitter:image" content="https://i.ibb.co/LDN4xyW0/Mesa-de-trabajo-1.png">
+
+    <!-- Schema.org: organización (el catálogo de productos y servicios lo inyecta app.js con precios reales) -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "@id": "https://dctecnology.xyz/#organizacion",
+        "name": "DC Technology",
+        "url": "https://dctecnology.xyz/",
+        "logo": "https://i.ibb.co/LDN4xyW0/Mesa-de-trabajo-1.png",
+        "areaServed": { "@type": "Country", "name": "Colombia" },
+        "contactPoint": {
+            "@type": "ContactPoint",
+            "telephone": "+57-322-328-4622",
+            "contactType": "customer service",
+            "availableLanguage": "Spanish",
+            "hoursAvailable": {
+                "@type": "OpeningHoursSpecification",
+                "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+                "opens": "08:00",
+                "closes": "20:00"
+            }
+        }
+    }
+    </script>
+
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;700;800;900&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -16,242 +64,393 @@
                         dcRedDark: '#CC0029',
                         dcDarkBg: '#0F111A',
                         dcDarkCard: '#181B26',
-                        dcLightBg: '#F4F6F8',
-                        dcLightCard: '#FFFFFF'
+                        dcBorder: '#272C3D'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        tech: ['Outfit', 'Inter', 'sans-serif']
                     }
                 }
             }
         }
     </script>
-
-    <!-- Fuentes Premium (Inter y Outfit) -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;700;800;900&display=swap" rel="stylesheet">
-    
     <style>
-        body { 
-            font-family: 'Inter', sans-serif; 
-            transition: background-color 0.3s ease, color 0.3s ease; 
-        }
-        .font-tech { font-family: 'Outfit', sans-serif; letter-spacing: -0.02em; }
+        html { -webkit-tap-highlight-color: transparent; }
+        [hidden] { display: none !important; }
 
-        /* Scrollbar limpia */
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
-        .dark ::-webkit-scrollbar-thumb { background: #334155; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-        /* Tarjetas: 3D Suave y Elegante */
-        .card-3d { 
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-            perspective: 1000px;
-        }
-        .dark .card-3d { background: #181B26; border: 1px solid #272C3D; }
-        html:not(.dark) .card-3d { background: #FFFFFF; border: 1px solid #E2E8F0; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
-        .card-3d:hover {
-            transform: translateY(-6px);
-            border-color: #FF0033;
-            box-shadow: 0 12px 24px rgba(255, 0, 51, 0.12);
+        /* Fondo mesh neón animado (solo transform → 60 fps) */
+        .mesh { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
+        .mesh span { position: absolute; border-radius: 9999px; filter: blur(90px); will-change: transform; }
+        .mesh span:nth-child(1) { width: 42rem; height: 42rem; top: -16rem; left: -12rem; background: rgba(255, 0, 51, .15); animation: mesh-a 24s ease-in-out infinite alternate; }
+        .mesh span:nth-child(2) { width: 34rem; height: 34rem; bottom: -14rem; right: -10rem; background: rgba(255, 0, 51, .10); animation: mesh-b 28s ease-in-out infinite alternate; }
+        .mesh span:nth-child(3) { width: 26rem; height: 26rem; top: 40%; left: 45%; background: rgba(140, 0, 255, .07); animation: mesh-c 32s ease-in-out infinite alternate; }
+        @keyframes mesh-a { to { transform: translate(18vw, 22vh) scale(1.15); } }
+        @keyframes mesh-b { to { transform: translate(-16vw, -18vh) scale(1.2); } }
+        @keyframes mesh-c { to { transform: translate(-20vw, 12vh) scale(.85); } }
+        .bg-grid {
+            background-image:
+                linear-gradient(rgba(255, 255, 255, .03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, .03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            -webkit-mask-image: radial-gradient(ellipse at 50% 20%, black 20%, transparent 70%);
+                    mask-image: radial-gradient(ellipse at 50% 20%, black 20%, transparent 70%);
         }
 
-        /* Botón de pago más sólido */
-        .btn-glow {
-            background: #FF0033;
-            transition: all 0.3s ease;
-        }
-        .btn-glow:hover {
-            background: #CC0029;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(255, 0, 51, 0.3);
-        }
+        .dc-text-glow { text-shadow: 0 0 14px rgba(255, 0, 51, .55); }
+        @keyframes logo-neon { 0%, 100% { filter: drop-shadow(0 0 4px rgba(255, 0, 51, .45)); } 50% { filter: drop-shadow(0 0 12px rgba(255, 0, 51, .85)); } }
+        .logo-neon { animation: logo-neon 2.8s ease-in-out infinite; transition: transform .35s cubic-bezier(.34, 1.56, .64, 1); }
+        .logo-neon:hover { transform: scale(1.06) rotate(-3deg); }
+        .logo-neon:active { transform: scale(.94); }
 
-        /* Giro 360° mantenido y sombras de imagen */
-        .img-360 { 
-            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter 0.4s ease; 
-            transform-style: preserve-3d; 
-            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.1));
+        /* Botones Cyber-Glow */
+        .btn-cyber { transition: transform .2s ease, box-shadow .25s ease, background-color .2s ease, color .2s ease; }
+        .btn-cyber:hover, .btn-cyber:focus-visible {
+            transform: scale(1.04);
+            box-shadow: 0 0 0 1px rgba(255, 0, 51, .65), 0 0 18px rgba(255, 0, 51, .45), 0 0 42px rgba(255, 0, 51, .18);
         }
-        .card-3d:hover .img-360 { 
-            transform: rotateY(360deg) scale(1.15); 
-            filter: drop-shadow(0 15px 25px rgba(255,0,51,0.3)); 
-        }
+        .btn-cyber.ancho:hover, .btn-cyber.ancho:focus-visible { transform: scale(1.02); }
+        .btn-cyber.verde:hover, .btn-cyber.verde:focus-visible { box-shadow: 0 0 0 1px rgba(16, 185, 129, .7), 0 0 18px rgba(16, 185, 129, .45); }
+        .btn-cyber:active { transform: scale(.96); }
 
-        /* Neón Sutil (Legible y Premium) */
-        @keyframes neon-pulse-soft { 
-            0%, 100% { text-shadow: 0 0 2px rgba(255, 0, 51, 0.1); } 
-            50% { text-shadow: 0 0 8px rgba(255, 0, 51, 0.4); } 
-        }
-        .precio-magico { animation: neon-pulse-soft 2s infinite alternate; font-family: 'Outfit', sans-serif; font-variant-numeric: tabular-nums; }
+        /* Marquesina de promoción */
+        .marquesina { mask-image: linear-gradient(90deg, transparent, black 8%, black 92%, transparent); -webkit-mask-image: linear-gradient(90deg, transparent, black 8%, black 92%, transparent); }
+        .marquesina-pista { display: flex; width: max-content; animation: marquesina 26s linear infinite; }
+        .marquesina:hover .marquesina-pista { animation-play-state: paused; }
+        @keyframes marquesina { to { transform: translateX(-50%); } }
 
-        /* Acordeón de Categorías - Limpio y de alto contraste */
-        .acc-row {
-            display: flex; align-items: center; gap: 0.75rem; width: 100%; text-align: left; 
-            padding: 0.85rem 1rem; border-radius: 0.75rem; font-weight: 700; 
-            transition: all 0.2s ease; border: 1px solid transparent;
+        /* Tarjetas con inclinación 3D (las variables las mueve app.js con el puntero) */
+        .tarjeta-3d { transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateY(var(--ty, 0)); transition: transform .25s ease, box-shadow .3s ease, border-color .3s ease; will-change: transform; }
+        .tarjeta-3d:hover { --ty: -4px; box-shadow: 0 0 0 1px rgba(255, 0, 51, .45), 0 18px 50px -12px rgba(255, 0, 51, .35); }
+        .tarjeta-3d .brillo { background: radial-gradient(400px circle at var(--mx, 50%) var(--my, 50%), rgba(255, 255, 255, .08), transparent 40%); }
+
+        /* Zoom de galería */
+        .zoom-caja { cursor: zoom-in; touch-action: pan-y; }
+        .zoom-caja.activo { cursor: zoom-out; }
+        .zoom-caja img { transition: transform .25s ease; transform-origin: var(--zx, 50%) var(--zy, 50%); }
+        .zoom-caja.activo img { transform: scale(2.2); }
+
+        @keyframes fade-slide-in { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+        .entrada { animation: fade-slide-in .5s cubic-bezier(.2, .8, .2, 1) both; }
+        @keyframes toast-progress { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+        .skeleton { position: relative; overflow: hidden; background: rgba(255, 255, 255, .045); }
+        .skeleton::after { content: ''; position: absolute; inset: 0; transform: translateX(-100%); background: linear-gradient(90deg, transparent, rgba(255, 0, 51, .14), transparent); animation: shimmer 1.4s infinite; }
+        @keyframes shimmer { to { transform: translateX(100%); } }
+
+        .sin-scrollbar { scrollbar-width: none; }
+        .sin-scrollbar::-webkit-scrollbar { display: none; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-thumb { background: #272C3D; border-radius: 10px; }
+        input[type=search]::-webkit-search-cancel-button { display: none; }
+        .descripcion-producto strong { color: #fff; }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation: none !important; transition: none !important; }
+            .tarjeta-3d { transform: none !important; }
         }
-        .dark .acc-row:hover { background: #232838; }
-        html:not(.dark) .acc-row:hover { background: #F1F5F9; }
-        .acc-row[data-parent="true"] { color: #FF0033; }
-        .acc-row[data-active="true"] { background: #FF0033; color: #fff; }
-        
-        .acc-count { margin-left: auto; font-size: 10px; font-weight: 800; padding: 0.15rem 0.5rem; border-radius: 999px; background: rgba(148,163,184,0.2); }
-        .acc-row[data-active="true"] .acc-count { background: rgba(255,255,255,0.25); color: #fff; }
-        
-        .acc-chev { width: 1rem; height: 1rem; flex: none; transition: transform 0.3s ease; }
-        .acc-row[aria-expanded="true"] .acc-chev { transform: rotate(180deg); }
-        
-        .acc-panel { display: grid; grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows 0.3s ease, opacity 0.2s ease; }
-        .acc-panel.open { grid-template-rows: 1fr; opacity: 1; }
-        .acc-panel > div { overflow: hidden; min-height: 0; }
-        
-        /* Chips limpios */
-        .acc-chip { 
-            font-size: 11px; font-weight: 700; padding: 0.4rem 0.75rem; border-radius: 999px; 
-            border: 1px solid; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 0.4rem;
-        }
-        .dark .acc-chip { color: #CBD5E1; border-color: #272C3D; background: #181B26; }
-        html:not(.dark) .acc-chip { color: #475569; border-color: #E2E8F0; background: #FFFFFF; }
-        .acc-chip:hover { border-color: #FF0033; color: #FF0033; }
-        .acc-chip[data-active="true"] { background: #FF0033 !important; border-color: #FF0033 !important; color: #fff !important; }
-        .acc-chip span { opacity: 0.7; font-size: 10px; background: rgba(0,0,0,0.1); padding: 0.1rem 0.4rem; border-radius: 999px; }
     </style>
 </head>
-<body class="bg-dcLightBg dark:bg-dcDarkBg text-gray-900 dark:text-white min-h-screen flex flex-col">
+<body class="bg-dcDarkBg text-white min-h-screen flex flex-col font-sans antialiased selection:bg-dcRed/40">
+    <div class="mesh" aria-hidden="true"><span></span><span></span><span></span></div>
+    <div class="bg-grid fixed inset-0 pointer-events-none" aria-hidden="true"></div>
 
-    <!-- Top Notice Bar -->
-    <div class="bg-dcRed text-white text-[11px] font-black uppercase tracking-widest text-center py-2.5 px-4">
-        ⚡ ENTREGA AUTOMÁTICA EN MINUTOS • SOPORTE DIRECTO DC TECHNOLOGY ⚡
+    <!-- Marquesina de promoción: solo aparece si el cupón está vigente en la base de datos -->
+    <div id="banner-promo" class="relative z-30 bg-gradient-to-r from-dcRed/90 via-dcRedDark to-dcRed/90 text-white text-[11px] sm:text-xs font-black uppercase tracking-widest" hidden>
+        <div class="marquesina overflow-hidden py-2.5">
+            <div class="marquesina-pista" id="banner-promo-pista"></div>
+        </div>
     </div>
 
-    <!-- Header Sólido y Claro -->
-    <header class="sticky top-0 z-40 bg-white dark:bg-[#0F111A] border-b border-gray-200 dark:border-gray-800 shadow-sm">
-        <div class="container mx-auto px-4 py-3.5 flex flex-wrap justify-between items-center gap-4">
-            
-            <!-- Logo Oficial -->
-            <div class="flex items-center gap-3">
-                <a href="#" class="flex items-center gap-3 group">
-                    <img src="https://i.ibb.co/LDN4xyW0/Mesa-de-trabajo-1.png" alt="DC Technology Logo" class="h-10 md:h-12 object-contain group-hover:scale-105 transition-transform duration-300">
-                    <span class="text-xl md:text-2xl font-black tracking-tighter uppercase font-tech text-gray-900 dark:text-white flex flex-col leading-none hidden sm:flex">
-                        DC <span class="text-dcRed">TECHNOLOGY</span>
-                    </span>
-                </a>
-            </div>
+    <!-- Encabezado -->
+    <header class="sticky top-0 z-40 bg-dcDarkBg/75 backdrop-blur-xl border-b border-white/10 pt-[env(safe-area-inset-top)]">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+            <!-- Logo (6 clics abren el panel admin) -->
+            <a href="#" id="secret-admin-logo" class="flex items-center gap-3 min-h-[48px]" aria-label="DC Technology, inicio">
+                <img src="https://i.ibb.co/LDN4xyW0/Mesa-de-trabajo-1.png" alt="DC Technology" class="logo-neon h-10 md:h-12 w-auto object-contain" width="48" height="48">
+                <span class="hidden sm:flex flex-col leading-none font-tech font-black text-xl uppercase tracking-tight">DC <span class="text-dcRed dc-text-glow">Technology</span></span>
+            </a>
 
-            <!-- Buscador Mejorado -->
-            <div class="w-full md:w-1/3 relative group">
-                <input type="search" id="searchInput" placeholder="Buscar producto, recarga, juego..." class="w-full rounded-xl pl-10 pr-5 py-2.5 bg-gray-100 dark:bg-[#181B26] text-gray-900 dark:text-white text-sm border border-gray-200 dark:border-gray-700 focus:outline-none focus:border-dcRed focus:bg-white dark:focus:bg-[#181B26] transition-all">
-                <span class="absolute left-3 top-2.5 text-gray-400">🔍</span>
-            </div>
+            <label class="order-3 md:order-none w-full md:w-auto md:flex-1 md:max-w-md relative">
+                <span class="sr-only">Buscar productos</span>
+                <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500 text-sm"></i>
+                <input type="search" id="searchInput" placeholder="Buscar Netflix, Windows, recargas, audífonos…" autocomplete="off" enterkeyhint="search"
+                    class="w-full min-h-[48px] rounded-2xl pl-11 pr-4 bg-white/[0.04] ring-1 ring-white/10 text-base sm:text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-dcRed/60 transition-all">
+            </label>
 
-            <!-- Controles y Accesos -->
-            <div class="flex items-center space-x-3">
-                <button id="themeToggle" class="p-2.5 rounded-xl bg-gray-100 dark:bg-[#181B26] hover:bg-gray-200 dark:hover:bg-gray-800 border border-transparent hover:border-dcRed text-sm transition-all" aria-label="Cambiar Tema">
-                    <span id="themeIcon">🌙</span>
-                </button>
-                <a href="portal.html" class="hidden md:flex bg-gray-900 dark:bg-[#181B26] hover:bg-dcRed dark:hover:bg-dcRed text-white px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all border border-gray-800 dark:border-gray-700 items-center gap-2">
-                    🔑 Portal Clientes
+            <div class="flex items-center gap-2">
+                <a href="portal.html" class="btn-cyber inline-flex items-center justify-center gap-2 min-h-[48px] min-w-[48px] px-3 sm:px-4 rounded-2xl bg-white/[0.04] ring-1 ring-white/10 text-xs font-bold uppercase tracking-wider" aria-label="Portal de clientes">
+                    <i class="fa-solid fa-magnifying-glass-location"></i><span class="hidden sm:inline">Mi pedido</span>
                 </a>
             </div>
         </div>
     </header>
 
-    <!-- Main Container -->
-    <main class="container mx-auto px-4 py-8 flex flex-col lg:flex-row gap-8 flex-grow">
-        
-        <!-- Sidebar de Filtros -->
-        <aside class="w-full lg:w-1/4 h-fit lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto no-scrollbar z-10">
-            <div class="bg-white dark:bg-[#181B26] p-6 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
-                <h2 class="text-sm font-black mb-5 uppercase text-gray-900 dark:text-white font-tech tracking-wider flex items-center gap-2">
-                    <span class="w-2.5 h-5 bg-dcRed rounded-full"></span> Categorías
-                </h2>
-                <nav id="category-accordion" class="space-y-1.5 text-xs" aria-label="Categorías"></nav>
-            </div>
-        </aside>
-
-        <!-- Product Grid Section -->
-        <section class="w-full lg:w-3/4">
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 border-b border-gray-200 dark:border-gray-800 pb-4 gap-3">
-                <h1 class="text-2xl font-black uppercase font-tech tracking-wide text-gray-900 dark:text-white" id="category-title">Catálogo Completo</h1>
-                <span class="text-xs font-black text-dcRed bg-red-500/10 px-3.5 py-1.5 rounded-full border border-red-500/20" id="product-count">
-                    Cargando...
-                </span>
-            </div>
-
-            <!-- Grilla Dinámica -->
-            <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6 md:gap-8">
-                <!-- Inyección JS -->
+    <main class="relative z-10 flex-grow">
+        <!-- Héroe -->
+        <section class="max-w-7xl mx-auto px-4 pt-8 sm:pt-12 pb-6 entrada">
+            <p class="text-[10px] sm:text-xs font-black uppercase tracking-[0.3em] text-dcRed mb-3">Tienda oficial · Colombia</p>
+            <h1 class="font-tech font-black text-3xl sm:text-5xl lg:text-6xl uppercase leading-[0.95] tracking-tight max-w-3xl">
+                Streaming, licencias y tecnología <span class="text-dcRed dc-text-glow">sin esperas</span>
+            </h1>
+            <p class="mt-4 text-sm sm:text-base text-neutral-400 max-w-2xl">Entrega inmediata (máximo 15 minutos tras validar tu pago), garantía en cuentas y licencias, y soporte directo por WhatsApp de lunes a sábado, 8 a.m. – 8 p.m.</p>
+            <!-- Prueba social: se llena con datos reales de Supabase (o un texto neutro) -->
+            <div id="prueba-social" class="mt-5 inline-flex flex-wrap items-center gap-3 rounded-2xl bg-white/[0.03] ring-1 ring-white/10 backdrop-blur-xl px-4 py-3 text-xs sm:text-sm font-semibold text-neutral-300">
+                <i class="fa-solid fa-heart text-dcRed"></i> Únete a nuestros clientes satisfechos
             </div>
         </section>
 
-    </main>
+        <!-- Catálogo tri-módulo -->
+        <section id="catalogo" class="max-w-7xl mx-auto px-4 pb-10" aria-labelledby="category-title">
+            <div role="tablist" aria-label="Tipo de producto" id="modulos" class="grid grid-cols-2 sm:grid-cols-4 gap-2 p-1.5 rounded-3xl bg-white/[0.03] ring-1 ring-white/10 backdrop-blur-xl mb-4">
+                <button type="button" role="tab" data-modulo="todos" class="min-h-[52px] rounded-2xl text-xs font-black uppercase tracking-wider transition-all"><i class="fa-solid fa-border-all mr-1.5"></i>Todo</button>
+                <button type="button" role="tab" data-modulo="digitales" class="min-h-[52px] rounded-2xl text-xs font-black uppercase tracking-wider transition-all"><i class="fa-solid fa-bolt mr-1.5"></i>Digitales</button>
+                <button type="button" role="tab" data-modulo="fisicos" class="min-h-[52px] rounded-2xl text-xs font-black uppercase tracking-wider transition-all"><i class="fa-solid fa-headphones mr-1.5"></i>Físicos</button>
+                <button type="button" role="tab" data-modulo="servicios" class="min-h-[52px] rounded-2xl text-xs font-black uppercase tracking-wider transition-all"><i class="fa-solid fa-screwdriver-wrench mr-1.5"></i>Servicios</button>
+            </div>
+            <div id="chips" class="sin-scrollbar flex gap-2 overflow-x-auto pb-2 mb-5 -mx-4 px-4" aria-label="Categorías"></div>
 
-    <!-- MODAL DETALLADO DE VARIANTES -->
-    <div id="product-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 opacity-0 transition-opacity duration-300">
-        <div class="bg-white dark:bg-[#181B26] rounded-3xl border border-gray-200 dark:border-gray-800 w-full max-w-4xl max-h-[92vh] overflow-y-auto no-scrollbar relative shadow-2xl flex flex-col md:flex-row transform scale-95 transition-transform duration-300" id="modal-content-box">
-            
-            <button id="close-modal" class="absolute top-4 right-5 text-gray-400 hover:text-dcRed bg-gray-100 dark:bg-[#0F111A] rounded-full p-2 transition-colors z-20">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-            </button>
-            
-            <!-- Imagen Modal -->
-            <div class="w-full md:w-5/12 bg-gray-50 dark:bg-[#0F111A] flex flex-col items-center justify-center p-8 rounded-t-3xl md:rounded-l-3xl md:rounded-tr-none relative border-b md:border-b-0 md:border-r border-gray-200 dark:border-gray-800">
-                <div class="absolute top-4 left-4 bg-dcRed text-white text-[10px] font-black px-3 py-1 rounded-full z-10 hidden" id="modal-discount-badge"></div>
-                
-                <img id="modal-img" src="" alt="Producto" class="w-full h-48 md:h-64 object-contain img-360">
-                
-                <div class="mt-6 w-full text-center bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-200 dark:border-yellow-700/30 text-yellow-700 dark:text-yellow-500 text-xs font-bold py-2 px-3 rounded-xl">
-                    ⭐ Garantía Oficial DC Technology
+            <div class="flex items-end justify-between gap-3 mb-5">
+                <h2 class="font-tech text-xl sm:text-2xl font-black uppercase tracking-wider" id="category-title">Catálogo completo</h2>
+                <span id="product-count" class="shrink-0 text-[11px] font-black text-dcRed bg-dcRed/10 ring-1 ring-dcRed/30 px-3 py-1.5 rounded-full">Cargando…</span>
+            </div>
+            <div id="product-grid" class="grid grid-cols-1 min-[420px]:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-6"></div>
+        </section>
+
+        <!-- Servicios técnicos -->
+        <section id="servicios" class="max-w-7xl mx-auto px-4 pb-12" aria-labelledby="titulo-servicios">
+            <div class="rounded-3xl bg-white/[0.03] ring-1 ring-white/10 backdrop-blur-xl p-5 sm:p-8">
+                <p class="text-[10px] font-black uppercase tracking-[0.3em] text-dcRed mb-2">Servicios técnicos</p>
+                <h2 id="titulo-servicios" class="font-tech text-2xl sm:text-3xl font-black uppercase tracking-wider">Mantenimiento, automatización <span class="text-dcRed dc-text-glow">y más</span></h2>
+                <div class="mt-6 grid gap-6 lg:grid-cols-2">
+                    <!-- Fases -->
+                    <ol id="servicio-fases" class="space-y-3" aria-label="Cómo trabajamos"></ol>
+                    <!-- Cotizador express -->
+                    <form id="cotizador" class="rounded-3xl bg-dcDarkBg/70 ring-1 ring-white/10 p-5 space-y-4">
+                        <h3 class="font-tech text-lg font-black uppercase tracking-wider"><i class="fa-solid fa-calculator text-dcRed mr-2"></i>Cotizador express</h3>
+                        <label class="block">
+                            <span class="block text-[10px] font-bold uppercase tracking-wider text-neutral-400 mb-2">Servicio</span>
+                            <select id="cot-servicio" class="w-full min-h-[52px] rounded-2xl bg-dcDarkCard ring-1 ring-white/10 px-4 text-base sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-dcRed/60"></select>
+                        </label>
+                        <label class="block">
+                            <span class="block text-[10px] font-bold uppercase tracking-wider text-neutral-400 mb-2">Opción</span>
+                            <select id="cot-opcion" class="w-full min-h-[52px] rounded-2xl bg-dcDarkCard ring-1 ring-white/10 px-4 text-base sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-dcRed/60"></select>
+                        </label>
+                        <div class="grid grid-cols-2 gap-3">
+                            <label class="block">
+                                <span class="block text-[10px] font-bold uppercase tracking-wider text-neutral-400 mb-2">Equipos / unidades</span>
+                                <input id="cot-cantidad" type="number" min="1" max="50" value="1" inputmode="numeric" class="w-full min-h-[52px] rounded-2xl bg-dcDarkCard ring-1 ring-white/10 px-4 text-base sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-dcRed/60">
+                            </label>
+                            <label class="block">
+                                <span class="block text-[10px] font-bold uppercase tracking-wider text-neutral-400 mb-2">Fecha preferida</span>
+                                <input id="cot-fecha" type="date" class="w-full min-h-[52px] rounded-2xl bg-dcDarkCard ring-1 ring-white/10 px-4 text-base sm:text-sm text-white [color-scheme:dark] focus:outline-none focus:ring-2 focus:ring-dcRed/60">
+                            </label>
+                        </div>
+                        <label class="block">
+                            <span class="block text-[10px] font-bold uppercase tracking-wider text-neutral-400 mb-2">Franja</span>
+                            <select id="cot-franja" class="w-full min-h-[52px] rounded-2xl bg-dcDarkCard ring-1 ring-white/10 px-4 text-base sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-dcRed/60">
+                                <option>Mañana (8 a.m. – 12 m.)</option>
+                                <option>Tarde (12 m. – 5 p.m.)</option>
+                                <option>Noche (5 p.m. – 8 p.m.)</option>
+                            </select>
+                        </label>
+                        <label class="block">
+                            <span class="block text-[10px] font-bold uppercase tracking-wider text-neutral-400 mb-2">Cuéntanos qué necesitas (opcional)</span>
+                            <textarea id="cot-detalle" rows="2" maxlength="300" class="w-full rounded-2xl bg-dcDarkCard ring-1 ring-white/10 px-4 py-3 text-base sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-dcRed/60"></textarea>
+                        </label>
+                        <div class="flex items-end justify-between gap-3 rounded-2xl bg-white/[0.03] ring-1 ring-white/10 px-4 py-3">
+                            <span class="text-xs text-neutral-400">Valor estimado<br><span class="text-[10px] text-neutral-500">Se confirma tras el diagnóstico</span></span>
+                            <span id="cot-total" class="font-tech text-2xl font-black text-dcRed">—</span>
+                        </div>
+                        <button type="submit" class="btn-cyber ancho verde w-full min-h-[56px] rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-xs font-black uppercase tracking-wider text-white flex items-center justify-center gap-2">
+                            <i class="fa-brands fa-whatsapp text-lg"></i> Agendar por WhatsApp
+                        </button>
+                    </form>
                 </div>
             </div>
-            
-            <!-- Detalles y Selección Modal -->
-            <div class="w-full md:w-7/12 p-6 md:p-8 flex flex-col justify-between">
-                <div>
-                    <span id="modal-brand" class="text-[10px] uppercase text-gray-500 dark:text-gray-400 font-black tracking-widest block mb-1">DC Technology</span>
-                    <h2 id="modal-title" class="text-xl md:text-2xl font-black text-gray-900 dark:text-white font-tech mb-3 leading-snug"></h2>
-                    
-                    <!-- Precios -->
-                    <div class="flex items-end gap-3 mb-2">
-                        <span id="modal-price" class="text-3xl font-black text-dcRed precio-magico"></span>
-                        <span id="modal-old-price" class="text-sm line-through text-gray-400 font-semibold"></span>
-                    </div>
-                    <div class="text-xs text-green-600 dark:text-green-400 font-bold mb-5 hidden" id="modal-savings"></div>
+        </section>
 
-                    <!-- Variantes Dinámicas -->
-                    <div class="mb-6">
-                        <h3 class="text-xs font-black uppercase text-gray-700 dark:text-gray-300 mb-3">Selecciona tu Opción:</h3>
-                        <div id="modal-variants" class="grid grid-cols-1 gap-2 max-h-40 overflow-y-auto no-scrollbar pr-1">
-                            <!-- JS inserta las opciones -->
+        <!-- Reseñas reales -->
+        <section id="opiniones" class="max-w-7xl mx-auto px-4 pb-16" aria-labelledby="titulo-opiniones">
+            <div class="flex flex-wrap items-end justify-between gap-3 mb-5">
+                <div>
+                    <p class="text-[10px] font-black uppercase tracking-[0.3em] text-dcRed mb-2">Opiniones</p>
+                    <h2 id="titulo-opiniones" class="font-tech text-2xl sm:text-3xl font-black uppercase tracking-wider">Compras verificadas</h2>
+                </div>
+                <a href="portal.html" class="btn-cyber inline-flex items-center gap-2 min-h-[48px] px-4 rounded-2xl bg-white/[0.04] ring-1 ring-white/10 text-xs font-bold uppercase tracking-wider">
+                    <i class="fa-solid fa-star text-amber-400"></i> Califica tu compra
+                </a>
+            </div>
+            <div id="lista-resenas" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"></div>
+        </section>
+    </main>
+
+    <footer class="relative z-10 border-t border-white/10 bg-dcDarkBg/80 backdrop-blur-xl pt-8 pb-[max(2rem,env(safe-area-inset-bottom))]">
+        <div class="max-w-7xl mx-auto px-4 grid gap-6 sm:grid-cols-3 text-sm text-neutral-400">
+            <div>
+                <p class="font-tech font-black text-lg text-white uppercase">DC <span class="text-dcRed">Technology</span></p>
+                <p class="mt-2 text-xs">Lunes a sábado · 8:00 a.m. – 8:00 p.m.</p>
+            </div>
+            <nav class="flex flex-col gap-1 text-xs" aria-label="Enlaces">
+                <a href="portal.html" class="min-h-[36px] inline-flex items-center hover:text-white">Rastrear mi pedido</a>
+                <a href="#servicios" class="min-h-[36px] inline-flex items-center hover:text-white">Servicios técnicos</a>
+                <a href="#opiniones" class="min-h-[36px] inline-flex items-center hover:text-white">Opiniones</a>
+            </nav>
+            <div class="text-xs">
+                <a href="https://wa.me/573223284622" target="_blank" rel="noopener" class="inline-flex items-center gap-2 min-h-[44px] text-emerald-400 font-bold hover:text-emerald-300"><i class="fa-brands fa-whatsapp text-lg"></i> +57 322 328 4622</a>
+                <p class="mt-2">&copy; 2026 DC Technology. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ============ MODAL DE PRODUCTO / CHECKOUT ============ -->
+    <div id="product-modal" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center" hidden role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <div data-cerrar class="modal-fondo absolute inset-0 bg-black/75 backdrop-blur-sm"></div>
+        <div class="modal-panel relative w-full sm:max-w-5xl max-h-[94vh] overflow-y-auto sin-scrollbar rounded-t-3xl sm:rounded-3xl bg-dcDarkCard/95 backdrop-blur-xl ring-1 ring-white/10 shadow-2xl shadow-black/70 md:grid md:grid-cols-[5fr_7fr]">
+            <button type="button" data-cerrar aria-label="Cerrar" class="absolute top-3 right-3 z-20 w-11 h-11 grid place-items-center rounded-xl bg-black/50 backdrop-blur text-neutral-300 hover:text-white">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <!-- Galería -->
+            <div class="relative bg-dcDarkBg/80 md:rounded-l-3xl p-5 sm:p-8 flex flex-col gap-3">
+                <span id="modal-discount-badge" class="absolute top-4 left-4 z-10 px-2.5 py-1 rounded-full bg-dcRed text-[10px] font-black" hidden></span>
+                <div id="galeria" class="sin-scrollbar flex snap-x snap-mandatory overflow-x-auto rounded-2xl" aria-label="Imágenes del producto"></div>
+                <div id="galeria-miniaturas" class="flex justify-center gap-2"></div>
+                <p class="text-center text-[10px] text-neutral-500"><i class="fa-solid fa-magnifying-glass-plus mr-1"></i>Toca o pasa el cursor para hacer zoom</p>
+            </div>
+
+            <!-- Información y compra -->
+            <div class="p-5 sm:p-8 flex flex-col gap-5">
+                <div>
+                    <p id="modal-brand" class="text-[10px] font-black uppercase tracking-[0.25em] text-dcRed"></p>
+                    <h2 id="modal-title" class="mt-1 font-tech text-2xl sm:text-3xl font-black leading-tight"></h2>
+                    <div id="modal-badges" class="mt-3 flex flex-wrap gap-2"></div>
+                </div>
+
+                <div id="modal-ficha"></div>
+
+                <fieldset>
+                    <legend class="text-[10px] font-black uppercase tracking-widest text-neutral-400 mb-2">Elige tu opción</legend>
+                    <div id="modal-variants" class="grid gap-2"></div>
+                </fieldset>
+
+                <div class="grid grid-cols-[auto_1fr] gap-3 items-end">
+                    <div>
+                        <span class="block text-[10px] font-black uppercase tracking-widest text-neutral-400 mb-2">Cantidad</span>
+                        <div class="flex items-center rounded-2xl bg-dcDarkBg/70 ring-1 ring-white/10">
+                            <button type="button" id="cantidad-menos" aria-label="Menos" class="w-12 h-12 grid place-items-center text-neutral-300 hover:text-white"><i class="fa-solid fa-minus"></i></button>
+                            <output id="cantidad" class="w-8 text-center font-black">1</output>
+                            <button type="button" id="cantidad-mas" aria-label="Más" class="w-12 h-12 grid place-items-center text-neutral-300 hover:text-white"><i class="fa-solid fa-plus"></i></button>
                         </div>
                     </div>
+                    <form id="form-cupon" class="min-w-0">
+                        <label for="cupon" class="block text-[10px] font-black uppercase tracking-widest text-neutral-400 mb-2">Cupón</label>
+                        <div class="flex rounded-2xl bg-dcDarkBg/70 ring-1 ring-white/10 focus-within:ring-2 focus-within:ring-dcRed/60">
+                            <input id="cupon" type="text" autocomplete="off" autocapitalize="characters" placeholder="DCTECH2026" class="min-w-0 flex-1 bg-transparent px-4 min-h-[48px] text-base sm:text-sm font-bold uppercase tracking-wider text-white placeholder:text-neutral-600 focus:outline-none">
+                            <button type="submit" id="btn-cupon" class="shrink-0 px-4 text-[11px] font-black uppercase tracking-wider text-dcRed hover:text-white">Aplicar</button>
+                        </div>
+                    </form>
+                </div>
+                <p id="cupon-estado" class="-mt-3 text-xs" hidden></p>
+
+                <div class="rounded-2xl bg-dcDarkBg/70 ring-1 ring-white/10 px-4 py-3 flex items-end justify-between gap-3">
+                    <div>
+                        <p class="text-[10px] font-black uppercase tracking-widest text-neutral-400">Total</p>
+                        <p id="modal-savings" class="text-[11px] text-emerald-400 font-bold" hidden></p>
+                    </div>
+                    <div class="text-right">
+                        <p id="modal-old-price" class="text-xs text-neutral-500 line-through" hidden></p>
+                        <p id="modal-price" class="font-tech text-3xl font-black text-dcRed dc-text-glow"></p>
+                    </div>
                 </div>
 
-                <!-- Acciones de compra -->
-                <div class="flex flex-col gap-2.5 mt-4">
-                    <button id="btn-pagar" class="btn-glow w-full text-white font-black uppercase tracking-wider py-3.5 rounded-xl text-xs flex items-center justify-center gap-2">
-                        PAGAR EN LÍNEA (NEQUI/PSE) 🔒
-                    </button>
-                    <button id="btn-whatsapp" class="w-full font-bold uppercase tracking-wider py-3 rounded-xl text-xs border-2 border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:border-dcRed hover:text-dcRed transition-colors flex items-center justify-center gap-2">
-                        O SOLICITAR POR WHATSAPP 📲
-                    </button>
-                </div>
+                <button type="button" id="btn-continuar" class="btn-cyber ancho w-full min-h-[56px] rounded-2xl bg-dcRed hover:bg-dcRedDark text-xs font-black uppercase tracking-[0.15em] text-white shadow-lg shadow-red-600/30 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-cart-shopping"></i> Continuar con la compra
+                </button>
+
+                <div id="modal-extra-info" class="descripcion-producto text-xs leading-relaxed text-neutral-400"></div>
+                <div id="modal-resenas"></div>
             </div>
         </div>
     </div>
 
-    <!-- Footer -->
-    <footer class="bg-white dark:bg-[#0F111A] border-t border-gray-200 dark:border-gray-800 text-gray-500 dark:text-gray-400 py-6 mt-auto">
-        <div class="container mx-auto text-center px-4">
-            <a href="#" class="inline-flex items-center gap-2 mb-2">
-                <img src="https://i.ibb.co/LDN4xyW0/Mesa-de-trabajo-1.png" alt="Logo" class="h-6 object-contain grayscale opacity-60">
-                <p class="font-tech font-black text-sm text-gray-900 dark:text-white">DC <span class="text-dcRed">TECHNOLOGY</span></p>
-            </a>
-            <p class="text-[11px] font-medium">&copy; 2026 DC Technology. Todos los derechos reservados.</p>
-        </div>
-    </footer>
+    <!-- ============ MODAL DE ADVERTENCIA PRE-COMPRA ============ -->
+    <div id="modal-terminos" class="fixed inset-0 z-[55] flex items-end sm:items-center justify-center" hidden role="dialog" aria-modal="true" aria-labelledby="terminos-titulo">
+        <div data-cerrar class="modal-fondo absolute inset-0 bg-black/80 backdrop-blur-sm"></div>
+        <form id="form-terminos" class="modal-panel relative w-full sm:max-w-lg max-h-[92vh] overflow-y-auto rounded-t-3xl sm:rounded-3xl bg-dcDarkCard/95 backdrop-blur-xl ring-1 ring-amber-500/30 shadow-2xl shadow-black/70 p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+            <div class="flex items-center gap-3 mb-4">
+                <span class="grid place-items-center w-12 h-12 rounded-2xl bg-amber-500/10 ring-1 ring-amber-500/40 text-amber-300 text-xl"><i class="fa-solid fa-triangle-exclamation"></i></span>
+                <div>
+                    <p class="text-[10px] font-black uppercase tracking-widest text-amber-300">Antes de comprar</p>
+                    <h3 id="terminos-titulo" class="font-tech text-xl font-black uppercase tracking-wider">Términos de uso</h3>
+                </div>
+            </div>
+            <ul id="terminos-lista" class="space-y-2.5 text-sm text-neutral-300"></ul>
+            <label class="mt-5 flex items-start gap-3 rounded-2xl bg-dcDarkBg/70 ring-1 ring-white/10 p-4 cursor-pointer">
+                <input type="checkbox" id="terminos-acepto" required class="mt-0.5 w-5 h-5 accent-[#FF0033] shrink-0">
+                <span class="text-xs text-neutral-300">Leí y acepto estas condiciones. Entiendo que incumplirlas anula la garantía sin reembolso.</span>
+            </label>
+            <div class="grid gap-3 mt-6">
+                <button type="submit" class="btn-cyber ancho verde min-h-[56px] rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-xs font-black uppercase tracking-wider text-white flex items-center justify-center gap-2">
+                    <i class="fa-brands fa-whatsapp text-lg"></i> Aceptar y pedir por WhatsApp
+                </button>
+                <button type="button" data-cerrar class="min-h-[48px] rounded-2xl bg-white/5 ring-1 ring-white/10 text-xs font-bold uppercase tracking-wider text-neutral-300">Volver</button>
+            </div>
+        </form>
+    </div>
 
-    <script src="checkout.js"></script>
+    <!-- ============ COPILOTO DE VENTAS ============ -->
+    <div id="copiloto" class="fixed z-[45] right-4 bottom-[max(1rem,env(safe-area-inset-bottom))] flex flex-col items-end gap-3">
+        <section id="copiloto-panel" hidden aria-label="Copiloto de compras"
+            class="w-[min(24rem,calc(100vw-2rem))] h-[min(34rem,calc(100dvh-7rem))] flex flex-col rounded-3xl bg-dcDarkCard/95 backdrop-blur-xl ring-1 ring-dcRed/30 shadow-2xl shadow-black/70 overflow-hidden">
+            <header class="flex items-center gap-3 px-4 py-3 border-b border-white/10 bg-dcRed/10">
+                <span class="relative grid place-items-center w-10 h-10 rounded-2xl bg-dcRed text-white"><i class="fa-solid fa-robot"></i>
+                    <span class="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-400 ring-2 ring-dcDarkCard"></span>
+                </span>
+                <div class="flex-1 min-w-0">
+                    <p class="font-tech font-black uppercase tracking-wider text-sm">Copiloto DC</p>
+                    <p class="text-[10px] text-neutral-400">Asistente automático · te paso con un asesor cuando quieras</p>
+                </div>
+                <button type="button" id="copiloto-cerrar" aria-label="Cerrar copiloto" class="w-10 h-10 grid place-items-center rounded-xl text-neutral-400 hover:text-white hover:bg-white/5"><i class="fa-solid fa-xmark"></i></button>
+            </header>
+            <div id="copiloto-mensajes" class="flex-1 overflow-y-auto px-4 py-4 space-y-3" aria-live="polite"></div>
+            <div id="copiloto-atajos" class="sin-scrollbar flex gap-2 overflow-x-auto px-4 pb-2"></div>
+            <form id="copiloto-form" class="flex items-center gap-2 p-3 border-t border-white/10">
+                <label for="copiloto-input" class="sr-only">Escribe tu pregunta</label>
+                <input id="copiloto-input" type="text" autocomplete="off" maxlength="160" placeholder="Pregúntame: Netflix, garantía, pagos…" class="min-w-0 flex-1 min-h-[48px] rounded-2xl bg-dcDarkBg/70 ring-1 ring-white/10 px-4 text-base sm:text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-dcRed/60">
+                <button type="submit" aria-label="Enviar" class="btn-cyber shrink-0 w-12 h-12 grid place-items-center rounded-2xl bg-dcRed text-white"><i class="fa-solid fa-paper-plane"></i></button>
+            </form>
+        </section>
+        <div class="flex items-center gap-2">
+            <p id="copiloto-burbuja" hidden class="max-w-[14rem] rounded-2xl rounded-br-md bg-dcDarkCard/95 ring-1 ring-white/10 px-4 py-2.5 text-xs font-semibold text-neutral-200 shadow-xl">¿Te ayudo a elegir? 👋</p>
+            <button type="button" id="copiloto-abrir" aria-label="Abrir copiloto de compras" aria-expanded="false" aria-controls="copiloto-panel"
+                class="btn-cyber w-16 h-16 grid place-items-center rounded-3xl bg-dcRed text-white text-2xl shadow-[0_0_30px_rgba(255,0,51,.55)]">
+                <i class="fa-solid fa-robot"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Toasts (abajo a la izquierda para no tapar el copiloto) -->
+    <div id="toasts" class="fixed z-[60] left-4 right-24 sm:right-auto bottom-[max(1rem,env(safe-area-inset-bottom))] flex flex-col items-start gap-2 pointer-events-none" aria-live="polite"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="plantillas-whatsapp.js"></script>
+    <script src="ui.js"></script>
     <script src="app.js"></script>
+    <script src="copiloto.js"></script>
+
+    <!-- Easter egg: 6 clics al logo abren el panel admin -->
+    <script>
+        let clickAdminCount = 0;
+        let clickAdminTimer;
+        const secretLogo = document.getElementById('secret-admin-logo');
+        if (secretLogo) {
+            secretLogo.addEventListener('click', (e) => {
+                e.preventDefault();
+                clickAdminCount++;
+                clearTimeout(clickAdminTimer);
+                if (clickAdminCount >= 6) window.location.href = 'admin.html';
+                clickAdminTimer = setTimeout(() => { clickAdminCount = 0; }, 2000);
+            });
+        }
+    </script>
 </body>
 </html>

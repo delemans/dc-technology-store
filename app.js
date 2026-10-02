@@ -1,495 +1,769 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const productGrid = document.getElementById('product-grid');
-    const productCount = document.getElementById('product-count');
-    const categoryTitle = document.getElementById('category-title');
-    const searchInput = document.getElementById('searchInput');
-    const themeToggle = document.getElementById('themeToggle');
-    const themeIcon = document.getElementById('themeIcon');
-    
-    // Modal Elements
-    const modal = document.getElementById('product-modal');
-    const modalBox = document.getElementById('modal-content-box');
-    const closeModal = document.getElementById('close-modal');
+// app.js — Tienda DC Technology (index.html)
+// Catálogo tri-módulo, checkout por WhatsApp con cupones validados en Supabase,
+// prueba social con datos reales, reseñas verificadas y datos estructurados para Google.
 
-    const numeroWhatsApp = "573223284622";
-    let todosLosProductos = [];
-    let productoSeleccionado = null;
-    let varianteSeleccionada = null;
+const SUPABASE_URL = 'https://vyqcizwfmjlflncdwzve.supabase.co';
+const SUPABASE_CLAVE_PUBLICA = 'sb_publishable_GvQiv6M7iSrlwsA90lXsOQ_5OfSYBwy';
+// La tienda funciona aunque Supabase no responda: solo se pierden cupones, reseñas y contadores
+const supabaseTienda = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_CLAVE_PUBLICA) : null;
+const WA = window.PlantillasWA;
 
-    // Formateador Seguro de Moneda
-    const formatearPrecio = (valor) => {
-        let num = parseFloat(valor);
-        if (isNaN(num) || num === null || num === undefined) num = 0;
-        if (num === 0) return "A Cotizar";
-        
-        return new Intl.NumberFormat('es-CO', {
-            style: 'currency',
-            currency: 'COP',
-            minimumFractionDigits: 0
-        }).format(num);
-    };
+const SITIO = 'https://dctecnology.xyz/';
+const CUPON_PROMO = 'DCTECH2026';
+const UMBRAL_PRUEBA_SOCIAL = 10;  // ventas completadas necesarias para mostrar cifras
+const GARANTIA_DIAS = 30;
+const CANTIDAD_MAXIMA = 10;
 
-    // Auto-categorizador robusto
-    const clasificarCategoria = (prod) => {
-        if (prod.tipo && prod.tipo !== "digital") return prod.tipo;
+// Tri-módulo: qué tipos de productos.json van en cada pestaña
+const MODULOS = {
+    todos:     { titulo: 'Catálogo completo', tipos: null },
+    digitales: { titulo: 'Productos digitales', tipos: ['streaming', 'licencias', 'pines', 'recargas'] },
+    fisicos:   { titulo: 'Tecnología física', tipos: ['tecnologia'] },
+    servicios: { titulo: 'Servicios técnicos', tipos: ['servicios', 'alquiler'] },
+};
+const CATEGORIAS = {
+    streaming:  { icono: 'fa-tv',                texto: 'Streaming' },
+    licencias:  { icono: 'fa-key',               texto: 'Licencias' },
+    pines:      { icono: 'fa-gamepad',           texto: 'Pines virtuales' },
+    recargas:   { icono: 'fa-mobile-screen',     texto: 'Recargas' },
+    tecnologia: { icono: 'fa-headphones',        texto: 'Tecnología' },
+    servicios:  { icono: 'fa-screwdriver-wrench', texto: 'Servicios' },
+    alquiler:   { icono: 'fa-laptop',            texto: 'Alquiler de equipos' },
+};
 
-        const id = (prod.id || '').toLowerCase();
-        if (id.includes('reloj') || id.includes('smartwatch') || id.includes('diadema') || id.includes('auricular') || id.includes('powerbank')) return 'tecnologia';
-        if (id.includes('pin-') || id.startsWith('pin')) return 'pines';
-        if (id.includes('recarga') || id.includes('free-fire') || id.includes('directv-prepago')) return 'recargas';
-        if (id.includes('office') || id.includes('windows') || id.includes('canva') || id.includes('capcut') || id.includes('duolingo') || id.includes('mcafee') || id.includes('gemini')) return 'licencias';
-        return 'streaming';
-    };
+// Condiciones que el cliente acepta antes de comprar (mismas reglas que la garantía)
+const TERMINOS = {
+    cuentas: [
+        'Esta cuenta es de <b>uso personal</b>: prohibido cambiar la contraseña, el correo o la facturación.',
+        'Prohibido usar en más dispositivos de los permitidos por tu plan.',
+        'Prohibido compartir, revender o transferir el acceso.',
+        'Usa solo el perfil asignado, sin excepciones.',
+        `Garantía de ${GARANTIA_DIAS} días desde la entrega, solo si se cumplen estas reglas.`,
+    ],
+    pines: [
+        'El código o saldo se envía al número / cuenta que nos indiques: <b>verifica bien tus datos</b>.',
+        'Las recargas y pines entregados <b>no son reversibles</b> ni tienen devolución.',
+    ],
+    tecnologia: [
+        '<b>Revisa la compatibilidad</b> de voltaje, puerto y sistema con tu equipo antes de comprar.',
+        'No uses cargadores rápidos de más de 5V/1A (5W): el exceso de voltaje daña la batería y anula la garantía.',
+        `Garantía de ${GARANTIA_DIAS} días por defectos de fábrica; no cubre golpes, humedad ni mal uso.`,
+    ],
+    servicios: [
+        'El valor mostrado es <b>estimado</b>: el precio final se confirma tras el diagnóstico.',
+        'Agenda sujeta a disponibilidad; te confirmamos por WhatsApp.',
+    ],
+};
 
-    // MOTOR INTELIGENTE DE INSTRUCCIONES DIGITALES (DISEÑO PREMIUM)
-    const generarInstruccionesDigitales = (producto) => {
-        if (producto.tipo === 'tecnologia' || producto.tipo === 'servicios' || producto.tipo === 'alquiler') return '';
+// Cómo trabajamos en servicios técnicos
+const FASES_SERVICIO = [
+    { icono: 'fa-comments',      titulo: 'Diagnóstico', texto: 'Nos cuentas qué necesitas por WhatsApp y revisamos el equipo o el proyecto.' },
+    { icono: 'fa-file-invoice',  titulo: 'Cotización',  texto: 'Te enviamos el valor final y el tiempo estimado antes de empezar.' },
+    { icono: 'fa-gears',         titulo: 'Ejecución',   texto: 'Mantenimiento, instalación o desarrollo, con avances por WhatsApp.' },
+    { icono: 'fa-circle-check',  titulo: 'Entrega y soporte', texto: 'Pruebas contigo y soporte posterior para cualquier ajuste.' },
+];
 
-        // Soporte para descripciones personalizadas futuras vía n8n
-        if (producto.descripcion && producto.descripcion.trim().length > 20) {
-            return `<div class="mt-4 border-t border-gray-100 dark:border-white/10 pt-4 text-xs font-medium leading-relaxed dark:text-gray-300">${producto.descripcion}</div>`;
-        }
+const estado = {
+    productos: [],
+    filtro: { modulo: 'todos', categoria: null, busqueda: '' },
+    seleccion: { producto: null, variante: null, cantidad: 1, cupon: null },
+    resenas: [],
+};
 
-        let reglasHTML = '';
-        if (producto.tipo === 'streaming' || producto.tipo === 'licencias') {
-            reglasHTML = `
-                <li class="flex items-start gap-2.5"><svg class="w-4 h-4 text-dcRed mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg> <span><strong>Prohibido</strong> usar en más dispositivos de los permitidos.</span></li>
-                <li class="flex items-start gap-2.5"><svg class="w-4 h-4 text-dcRed mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg> <span><strong>Prohibido</strong> modificar correo, contraseña o facturación.</span></li>
-                <li class="flex items-start gap-2.5"><svg class="w-4 h-4 text-dcRed mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg> <span><strong>Prohibido</strong> compartir, revender o transferir el acceso.</span></li>
-                <li class="flex items-start gap-2.5"><svg class="w-4 h-4 text-dcRed mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg> <span>Uso exclusivo del perfil asignado, sin excepciones.</span></li>
-            `;
-        } else {
-            reglasHTML = `
-                <li class="flex items-start gap-2.5"><svg class="w-4 h-4 text-dcRed mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg> <span>El código/saldo se enviará al número que nos indiques.</span></li>
-                <li class="flex items-start gap-2.5"><svg class="w-4 h-4 text-dcRed mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg> <span>Verifica bien tus datos; las recargas no son reversibles.</span></li>
-                <li class="flex items-start gap-2.5"><svg class="w-4 h-4 text-dcRed mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg> <span>Una vez entregado el PIN virtual, no hay devoluciones.</span></li>
-            `;
-        }
+/* ==================== UTILIDADES ==================== */
 
-        return `
-            <div class="space-y-4 mt-5 pt-5 border-t border-gray-100 dark:border-white/5">
-                <!-- Advertencia de Garantía Premium -->
-                <div class="relative overflow-hidden rounded-2xl border border-dcRed/30 bg-gradient-to-b from-dcRed/10 to-transparent p-5 shadow-sm">
-                    <div class="flex items-center gap-3 mb-4">
-                        <div class="flex-shrink-0 w-8 h-8 rounded-full bg-dcRed/20 flex items-center justify-center text-dcRed shadow-inner">
-                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                        </div>
-                        <h4 class="text-[13px] font-black text-dcRed uppercase tracking-wider">Condiciones y Garantía</h4>
-                    </div>
-                    <p class="text-[11.5px] text-gray-500 dark:text-gray-400 mb-3.5 font-medium">La garantía aplica únicamente si se respetan estas reglas:</p>
-                    <ul class="text-[12px] text-gray-800 dark:text-gray-300 space-y-2.5 mb-5 font-medium">
-                        ${reglasHTML}
-                    </ul>
-                    <div class="bg-gradient-to-r from-dcRed to-dcRedDark text-white text-[10px] font-black uppercase tracking-[0.15em] py-3 px-4 rounded-xl text-center shadow-[0_4px_15px_rgba(255,0,51,0.3)]">
-                        ⚠️ Incumplir anula la garantía sin reembolso
-                    </div>
-                </div>
+const $ = (id) => document.getElementById(id);
 
-                <!-- Proceso de Entrega Premium -->
-                <div class="relative overflow-hidden rounded-2xl border border-green-500/30 bg-gradient-to-b from-green-500/10 to-transparent p-5 shadow-sm">
-                    <div class="flex items-center gap-3 mb-5">
-                        <div class="flex-shrink-0 w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center text-green-500 shadow-inner">
-                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-                        </div>
-                        <h4 class="text-[13px] font-black text-green-600 dark:text-green-500 uppercase tracking-wider">Proceso de Entrega (1 a 10 min)</h4>
-                    </div>
-                    <div class="space-y-4">
-                        <div class="flex gap-3 items-start">
-                            <span class="w-6 h-6 rounded-full bg-green-500 text-white flex items-center justify-center text-[11px] font-black shrink-0 shadow-md">1</span>
-                            <div><strong class="text-gray-900 dark:text-white block text-[12px] mb-0.5">Pagas tu plan</strong><span class="text-[11px] text-gray-500 dark:text-gray-400 font-medium">Eliges tu opción y completas el pago en línea.</span></div>
-                        </div>
-                        <div class="flex gap-3 items-start">
-                            <span class="w-6 h-6 rounded-full bg-green-500 text-white flex items-center justify-center text-[11px] font-black shrink-0 shadow-md">2</span>
-                            <div><strong class="text-gray-900 dark:text-white block text-[12px] mb-0.5">Confirmas tu pago</strong><span class="text-[11px] text-gray-500 dark:text-gray-400 font-medium">Nos envías el soporte a nuestro WhatsApp.</span></div>
-                        </div>
-                        <div class="flex gap-3 items-start">
-                            <span class="w-6 h-6 rounded-full bg-green-500 text-white flex items-center justify-center text-[11px] font-black shrink-0 shadow-md">3</span>
-                            <div><strong class="text-gray-900 dark:text-white block text-[12px] mb-0.5">Recibes y disfrutas</strong><span class="text-[11px] text-gray-500 dark:text-gray-400 font-medium">Te enviamos el producto al instante.</span></div>
-                        </div>
-                    </div>
-                </div>
+const formatearPrecio = (valor) => {
+    const num = Number.parseFloat(valor);
+    if (!Number.isFinite(num) || num === 0) return 'A cotizar';
+    return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(num);
+};
 
-                <!-- Soporte -->
-                <div class="text-center bg-gray-100 dark:bg-white/5 py-3 rounded-xl border border-gray-200 dark:border-white/10 shadow-inner">
-                    <p class="text-[10px] text-gray-500 dark:text-gray-400 font-black uppercase tracking-[0.15em] flex items-center justify-center gap-2">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                        Soporte: Lunes a Domingo 10:00 AM - 11:30 PM
-                    </p>
-                </div>
-            </div>
-        `;
-    };
+const imagenRespaldo = (nombre) =>
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(String(nombre).slice(0, 2))}&background=181B26&color=FF0033&font-size=0.4&bold=true`;
 
-    // Renderizado en Grilla
-    const renderizarProductos = (productos) => {
-        productCount.textContent = `${productos.length} productos`;
-        productGrid.innerHTML = ''; 
+// Auto-categorizador robusto (para productos sin 'tipo' o con tipo 'digital')
+function clasificarCategoria(prod) {
+    if (prod.tipo && prod.tipo !== 'digital') return prod.tipo;
+    const id = (prod.id || '').toLowerCase();
+    if (['reloj', 'smartwatch', 'diadema', 'auricular', 'powerbank'].some((k) => id.includes(k))) return 'tecnologia';
+    if (id.includes('pin-') || id.startsWith('pin')) return 'pines';
+    if (['recarga', 'free-fire', 'directv-prepago'].some((k) => id.includes(k))) return 'recargas';
+    if (['office', 'windows', 'canva', 'capcut', 'duolingo', 'mcafee', 'gemini'].some((k) => id.includes(k))) return 'licencias';
+    return 'streaming';
+}
 
-        if (productos.length === 0) {
-            productGrid.innerHTML = `
-                <div class="col-span-full text-center py-16 text-gray-400">
-                    <span class="text-4xl block mb-2">🔎</span>
-                    <p class="font-bold">No hay productos en esta categoría.</p>
-                </div>`;
-            return;
-        }
+function moduloDe(tipo) {
+    return Object.keys(MODULOS).find((m) => MODULOS[m].tipos?.includes(tipo)) ?? 'digitales';
+}
 
-        productos.forEach(prod => {
-            const varBase = (prod.variantes && prod.variantes.length > 0) 
-                ? prod.variantes[0] 
-                : { precio: 0, precio_anterior: null };
+function grupoTerminos(tipo) {
+    if (tipo === 'streaming' || tipo === 'licencias') return 'cuentas';
+    if (tipo === 'pines' || tipo === 'recargas') return 'pines';
+    if (tipo === 'tecnologia') return 'tecnologia';
+    return 'servicios';
+}
 
-            const precioNum = parseFloat(varBase.precio) || 0;
-            const precioAntNum = parseFloat(varBase.precio_anterior) || 0;
-            const tieneDescuento = precioAntNum > precioNum;
-            const esCotizacion = precioNum === 0;
+const esCotizable = (prod) => prod.tipo === 'servicios' || prod.tipo === 'alquiler';
 
-            let descCorta = "Garantía oficial DC Technology";
-            if (prod.tipo === 'streaming') descCorta = "Activación inmediata • Resolución UHD/4K";
-            else if (prod.tipo === 'tecnologia') descCorta = "Envíos a todo el país • Calidad Premium";
-            else if (prod.tipo === 'pines' || prod.tipo === 'recargas') descCorta = "Recarga automática 24/7 segura";
-            else if (prod.tipo === 'licencias') descCorta = "Software 100% original • Soporte vitalicio";
-            else if (prod.tipo === 'servicios' || prod.tipo === 'alquiler') descCorta = "Ejecución profesional • Asesoría personalizada";
+// Insignias según el tipo: solo afirmaciones respaldadas por la operación real
+function insignias(prod) {
+    const lista = [];
+    const variantes = (prod.variantes || []).map((v) => (v.nombre || '').toLowerCase()).join(' ');
+    if (moduloDe(prod.tipo) === 'digitales') lista.push({ icono: 'fa-bolt', texto: 'Entrega ≤ 15 min', clase: 'text-amber-300 ring-amber-500/30 bg-amber-500/10' });
+    if (prod.tipo === 'streaming') {
+        if (/pantalla|perfil/.test(variantes)) lista.push({ icono: 'fa-user', texto: 'Perfil / pantalla', clase: 'text-sky-300 ring-sky-500/30 bg-sky-500/10' });
+        if (/cuenta completa/.test(variantes)) lista.push({ icono: 'fa-users', texto: 'Cuenta completa', clase: 'text-sky-300 ring-sky-500/30 bg-sky-500/10' });
+        lista.push({ icono: 'fa-display', texto: 'TV · Celular · PC', clase: 'text-neutral-300 ring-white/10 bg-white/[0.04]' });
+    }
+    if (prod.tipo === 'streaming' || prod.tipo === 'licencias' || prod.tipo === 'tecnologia') {
+        lista.push({ icono: 'fa-shield-halved', texto: `Garantía ${GARANTIA_DIAS} días`, clase: 'text-emerald-300 ring-emerald-500/30 bg-emerald-500/10' });
+    }
+    if (prod.tipo === 'tecnologia') lista.push({ icono: 'fa-truck-fast', texto: 'Envíos a todo el país', clase: 'text-neutral-300 ring-white/10 bg-white/[0.04]' });
+    if (esCotizable(prod)) lista.push({ icono: 'fa-calendar-check', texto: 'Agenda por WhatsApp', clase: 'text-neutral-300 ring-white/10 bg-white/[0.04]' });
+    return lista;
+}
 
-            let badgeDescuento = '';
-            if (tieneDescuento && !esCotizacion) {
-                const pct = Math.round(((precioAntNum - precioNum) / precioAntNum) * 100);
-                badgeDescuento = `<div class="absolute top-3 left-3 bg-dcRed text-white text-[10px] font-black px-2.5 py-1 rounded-md z-10 tracking-wider shadow-sm">-${pct}% OFF</div>`;
-            }
+const htmlInsignia = ({ icono, texto, clase }) =>
+    `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full ring-1 text-[10px] font-bold ${clase}"><i class="fa-solid ${icono}"></i>${escaparHTML(texto)}</span>`;
 
-            const card = document.createElement('div');
-            card.className = 'card-3d rounded-3xl p-5 flex flex-col justify-between cursor-pointer relative group';
-            
-            card.onclick = () => {
-                if (esCotizacion) {
-                    const mensaje = `Hola DC Technology! 👋🏼 Quiero solicitar una cotización para el servicio de:\n\n📌 *${prod.nombre}*`;
-                    window.open(`https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(mensaje)}`, '_blank');
-                } else {
-                    abrirModal(prod);
-                }
-            };
+/* ==================== CATÁLOGO ==================== */
 
-            const textoPrecio = esCotizacion 
-                ? 'A Cotizar' 
-                : `${prod.variantes && prod.variantes.length > 1 ? '<span class="text-xs text-gray-500 font-semibold tracking-normal">Desde </span>' : ''}${formatearPrecio(precioNum)}`;
-            
-            const textoBoton = esCotizacion 
-                ? 'Recibir cotización 📲' 
-                : 'Ver Opciones / Comprar';
-                
-            const clasesBoton = esCotizacion
-                ? 'bg-green-600 hover:bg-green-500' 
-                : 'bg-gray-900 dark:bg-[#232838] hover:bg-dcRed dark:hover:bg-dcRed border border-transparent dark:border-gray-700'; 
+async function cargarCatalogo() {
+    const grid = $('product-grid');
+    grid.innerHTML = Array.from({ length: 8 }, () => `
+        <div class="rounded-3xl bg-white/[0.03] ring-1 ring-white/10 p-4 space-y-3" aria-hidden="true">
+            <div class="skeleton h-40 rounded-2xl"></div><div class="skeleton h-3 w-20 rounded"></div>
+            <div class="skeleton h-5 w-3/4 rounded"></div><div class="skeleton h-12 rounded-2xl"></div>
+        </div>`).join('');
 
-            card.innerHTML = `
-                ${badgeDescuento}
-                <div class="relative overflow-hidden mb-5 h-44 flex items-center justify-center p-3 bg-transparent">
-                    <img src="${prod.imagen || 'https://via.placeholder.com/300'}" alt="${prod.nombre}" class="img-360 max-h-full object-contain drop-shadow-[0_0_15px_rgba(255,255,255,0.05)] ${prod.tipo === 'tecnologia' ? 'rounded-2xl shadow-lg dark:shadow-white/5' : ''}">
-                </div>
-                <div class="flex-grow flex flex-col text-left">
-                    <span class="text-[10px] uppercase text-dcRed font-black tracking-[0.15em] mb-1.5">${prod.marca || "DC Technology"}</span>
-                    <h3 class="text-sm font-bold text-gray-900 dark:text-white mb-1.5 line-clamp-2 leading-snug font-tech">${prod.nombre}</h3>
-                    <p class="text-[11px] text-gray-500 dark:text-gray-400 mb-3">${descCorta}</p>
-                    <div class="mt-auto mb-4">
-                        ${tieneDescuento && !esCotizacion ? `<span class="text-gray-400 line-through text-xs mr-2 font-medium">${formatearPrecio(precioAntNum)}</span>` : ''}
-                        <strong class="precio-magico text-xl font-black text-dcRed block leading-none tracking-tight">${textoPrecio}</strong>
-                    </div>
-                </div>
-                <button class="w-full ${clasesBoton} text-white font-bold py-3.5 rounded-xl text-xs transition-all shadow-sm group-hover:shadow-md">
-                    ${textoBoton}
-                </button>
-            `;
-            productGrid.appendChild(card);
-        });
-    };
-
-    // Abrir Modal
-    const abrirModal = (prod) => {
-        productoSeleccionado = prod;
-        varianteSeleccionada = prod.variantes[0];
-
-        const imgEl = document.getElementById('modal-img');
-        imgEl.src = prod.imagen;
-        imgEl.className = "w-full h-56 md:h-72 object-contain drop-shadow-2xl transition-transform duration-700 hover:[transform:rotateY(360deg)_scale(1.1)] cursor-pointer";
-
-        document.getElementById('modal-brand').textContent = prod.marca || "DC Technology";
-        document.getElementById('modal-title').textContent = prod.nombre;
-
-        renderizarVariantesModal();
-        actualizarPreciosModal();
-
-        let extraInfo = document.getElementById('modal-extra-info');
-        if (!extraInfo) {
-            extraInfo = document.createElement('div');
-            extraInfo.id = 'modal-extra-info';
-            const btnPagarContainer = document.getElementById('btn-pagar').parentNode;
-            btnPagarContainer.parentNode.insertBefore(extraInfo, btnPagarContainer);
-        }
-        
-        const htmlInstrucciones = generarInstruccionesDigitales(productoSeleccionado);
-        extraInfo.innerHTML = htmlInstrucciones;
-        if (htmlInstrucciones === '') {
-            extraInfo.classList.add('hidden');
-        } else {
-            extraInfo.classList.remove('hidden');
-        }
-
-        modal.classList.remove('hidden');
-        setTimeout(() => {
-            modal.classList.remove('opacity-0');
-            modalBox.classList.remove('scale-95');
-            modalBox.classList.add('scale-100');
-        }, 10);
-    };
-
-    const cerrarModal = () => {
-        modal.classList.add('opacity-0');
-        modalBox.classList.remove('scale-100');
-        modalBox.classList.add('scale-95');
-        setTimeout(() => modal.classList.add('hidden'), 300);
-    };
-
-    closeModal.onclick = cerrarModal;
-    modal.onclick = (e) => { if (e.target === modal) cerrarModal(); };
-
-    const obtenerNombreVarianteLimpio = (v, index, total) => {
-        let nombre = v.nombre;
-        if (!nombre || nombre === "Única") {
-            const cat = clasificarCategoria(productoSeleccionado);
-            if (cat === "recargas" || cat === "pines") {
-                return `Opción / Monto (${formatearPrecio(v.precio)})`;
-            }
-            if (total > 1) {
-                return `Opción ${index + 1} (${formatearPrecio(v.precio)})`;
-            }
-            return "Opción Estándar";
-        }
-        return nombre;
-    };
-
-    const renderizarVariantesModal = () => {
-        const modalVariants = document.getElementById('modal-variants');
-        modalVariants.innerHTML = '';
-
-        const totalVars = productoSeleccionado.variantes.length;
-
-        productoSeleccionado.variantes.forEach((v, idx) => {
-            const labelNombre = obtenerNombreVarianteLimpio(v, idx, totalVars);
-            const isActive = v === varianteSeleccionada;
-
-            const btn = document.createElement('button');
-            btn.className = `w-full text-left p-3 rounded-xl border-2 flex justify-between items-center transition-all ${isActive ? 'border-dcRed bg-red-500/10 text-dcRed font-black' : 'border-gray-200 dark:border-gray-800 text-gray-600 dark:text-gray-400'}`;
-
-            btn.innerHTML = `
-                <div class="flex items-center gap-2.5">
-                    <div class="w-4 h-4 rounded-full border-2 flex items-center justify-center ${isActive ? 'border-dcRed bg-dcRed' : 'border-gray-400'}">
-                        ${isActive ? '<div class="w-1.5 h-1.5 bg-white rounded-full"></div>' : ''}
-                    </div>
-                    <span class="text-xs font-bold">${labelNombre}</span>
-                </div>
-                <span class="text-xs font-black">${formatearPrecio(v.precio)}</span>
-            `;
-
-            btn.onclick = () => {
-                varianteSeleccionada = v;
-                renderizarVariantesModal();
-                actualizarPreciosModal();
-            };
-            modalVariants.appendChild(btn);
-        });
-    };
-
-    const actualizarPreciosModal = () => {
-        const pNum = parseFloat(varianteSeleccionada.precio) || 0;
-        const pAntNum = parseFloat(varianteSeleccionada.precio_anterior) || 0;
-
-        const mostrarDesde = (productoSeleccionado.tipo === 'alquiler' || productoSeleccionado.tipo === 'servicios') && pNum > 0;
-        const htmlPrecio = mostrarDesde 
-            ? `<span class="text-xl md:text-2xl text-gray-400 font-semibold mr-1 tracking-normal">Desde</span> ${formatearPrecio(pNum)}` 
-            : formatearPrecio(pNum);
-
-        document.getElementById('modal-price').innerHTML = htmlPrecio;
-
-        const oldPriceEl = document.getElementById('modal-old-price');
-        const savingsEl = document.getElementById('modal-savings');
-        const badgeEl = document.getElementById('modal-discount-badge');
-        const btnPagar = document.getElementById('btn-pagar');
-
-        if (pNum === 0) {
-            btnPagar.classList.add('hidden');
-        } else {
-            btnPagar.classList.remove('hidden');
-        }
-
-        if (pAntNum > pNum && pNum > 0) {
-            const ahorro = pAntNum - pNum;
-            const pct = Math.round((ahorro / pAntNum) * 100);
-
-            oldPriceEl.textContent = formatearPrecio(pAntNum);
-            savingsEl.textContent = `¡Ahorras ${formatearPrecio(ahorro)}!`;
-            badgeEl.textContent = `-${pct}% OFF`;
-
-            oldPriceEl.classList.remove('hidden');
-            savingsEl.classList.remove('hidden');
-            badgeEl.classList.remove('hidden');
-        } else {
-            oldPriceEl.classList.add('hidden');
-            savingsEl.classList.add('hidden');
-            badgeEl.classList.add('hidden');
-        }
-    };
-
-    document.getElementById('btn-whatsapp').onclick = () => {
-        const totalVars = productoSeleccionado.variantes.length;
-        const idx = productoSeleccionado.variantes.indexOf(varianteSeleccionada);
-        const varianteNombre = obtenerNombreVarianteLimpio(varianteSeleccionada, idx, totalVars);
-
-        let mensaje = '';
-        if (varianteSeleccionada.precio === 0) {
-            mensaje = `Hola DC Technology! 👋🏼 Quiero solicitar una cotización para el servicio de:\n\n📌 *${productoSeleccionado.nombre}*\n⚙️ *Opción:* ${varianteNombre}`;
-        } else {
-            mensaje = `Hola DC Technology! 👋🏼 Quiero realizar la compra de:\n\n📌 *Producto:* ${productoSeleccionado.nombre}\n⚙️ *Opción/Plan:* ${varianteNombre}\n💰 *Valor:* ${formatearPrecio(varianteSeleccionada.precio)}\n\n¿Me indican los datos para pagar por Nequi / Daviplata / Bancolombia?`;
-        }
-        
-        window.open(`https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(mensaje)}`, '_blank');
-    };
-
-    if (document.getElementById('btn-pagar')) {
-        document.getElementById('btn-pagar').onclick = () => {
-            if (typeof iniciarCheckout === 'function') {
-                iniciarCheckout(productoSeleccionado, varianteSeleccionada);
-            } else {
-                alert("Módulo de pago Nequi/Wompi en configuración.");
-            }
-        };
+    try {
+        const respuesta = await fetch('productos.json');
+        if (!respuesta.ok) throw new Error(`HTTP ${respuesta.status}`);
+        const datos = await respuesta.json();
+        estado.productos = datos.map((p) => ({ ...p, tipo: clasificarCategoria(p) }));
+    } catch (error) {
+        console.error('Error al cargar productos.json', error);
+        grid.innerHTML = `<p class="col-span-full rounded-3xl bg-red-500/10 ring-1 ring-red-500/30 p-6 text-center text-sm text-red-200">No pudimos cargar el catálogo. Recarga la página o escríbenos por WhatsApp.</p>`;
+        return;
     }
 
-    fetch('productos.json')
-        .then(res => res.json())
-        .then(data => {
-            todosLosProductos = data.map(p => {
-                const prod = { ...p, tipo: clasificarCategoria(p) };
-                prod.subcat = obtenerSubcategoria(prod);
-                return prod;
-            });
-            renderizarProductos(todosLosProductos);
-            construirAcordeon();
-        })
-        .catch(err => console.error("Error al cargar productos.json", err));
+    pintarModulos();
+    renderizar();
+    pintarCotizador();
+    inyectarSEO();
+    abrirDesdeEnlace();
+}
 
-    const CATEGORIAS = [
-        { id: 'tecnologia', icon: '💻', label: 'Tecnología Física' },
-        { id: 'streaming',  icon: '🎬', label: 'Cuentas Streaming' },
-        { id: 'licencias',  icon: '🔑', label: 'Licencias Software' },
-        { id: 'pines',      icon: '🎮', label: 'Pines Virtuales' },
-        { id: 'recargas',   icon: '💸', label: 'Recargas & Apuestas' },
-        { id: 'servicios',  icon: '🛠', label: 'Servicios & Soporte' },
-        { id: 'alquiler',   icon: '💻', label: 'Alquiler de Equipos' }
-    ];
-    const acordeon = document.getElementById('category-accordion');
-    let filtroActual = { cat: 'todos', sub: null };
-
-    const obtenerSubcategoria = (p) => {
-        const id = (p.id || '').toLowerCase();
-        if (p.tipo === 'tecnologia') {
-            if (id.includes('reloj')) return 'Smartwatches';
-            if (id.includes('diadema')) return 'Diademas';
-            if (id.startsWith('powerbank')) return 'Powerbanks';
-            return 'Auriculares';
+function productosFiltrados() {
+    const { modulo, categoria, busqueda } = estado.filtro;
+    return estado.productos.filter((p) => {
+        if (busqueda) {
+            return `${p.nombre} ${p.marca ?? ''} ${p.tipo}`.toLowerCase().includes(busqueda);
         }
-        if (p.tipo === 'recargas') {
-            if (['rushbet', 'bwin', 'betsson', 'luckia', 'sportium', 'ya-juego'].some(k => id.includes(k))) return 'Apuestas';
-            if (id.startsWith('recargas-')) return 'Recargas móviles';
-            return 'TV & Juegos';
-        }
-        return p.marca || 'Otros';
-    };
+        if (MODULOS[modulo].tipos && !MODULOS[modulo].tipos.includes(p.tipo)) return false;
+        if (categoria && p.tipo !== categoria) return false;
+        return true;
+    });
+}
 
-    const chevron = '<svg class="acc-chev" viewBox="0 0 20 20" fill="currentColor"><path d="M5.3 7.3a1 1 0 0 1 1.4 0L10 10.6l3.3-3.3a1 1 0 1 1 1.4 1.4l-4 4a1 1 0 0 1-1.4 0l-4-4a1 1 0 0 1 0-1.4z"/></svg>';
+function pintarModulos() {
+    document.querySelectorAll('[data-modulo]').forEach((btn) => {
+        const activo = !estado.filtro.busqueda && btn.dataset.modulo === estado.filtro.modulo;
+        btn.setAttribute('aria-selected', String(activo));
+        btn.className = `min-h-[52px] rounded-2xl text-xs font-black uppercase tracking-wider transition-all ${
+            activo ? 'bg-dcRed text-white shadow-[0_0_24px_rgba(255,0,51,.45)]' : 'text-neutral-400 hover:text-white hover:bg-white/5'}`;
+    });
 
-    const construirAcordeon = () => {
-        let html = `<button class="acc-row" data-cat="todos">🚀 <span>Todos los Productos</span><span class="acc-count">${todosLosProductos.length}</span></button>`;
-        CATEGORIAS.forEach(c => {
-            const prods = todosLosProductos.filter(p => p.tipo === c.id);
-            if (!prods.length) return;
-            const conteo = {};
-            prods.forEach(p => { conteo[p.subcat] = (conteo[p.subcat] || 0) + 1; });
-            const subs = Object.keys(conteo).sort((x, y) => x.localeCompare(y, 'es'));
-            const expandible = subs.length > 1;
+    // Chips de categoría del módulo activo
+    const tipos = MODULOS[estado.filtro.modulo].tipos ?? Object.keys(CATEGORIAS);
+    const presentes = tipos.filter((t) => estado.productos.some((p) => p.tipo === t));
+    $('chips').replaceChildren(...[null, ...presentes].map((tipo) => {
+        const activo = estado.filtro.categoria === tipo && !estado.filtro.busqueda;
+        const total = tipo ? estado.productos.filter((p) => p.tipo === tipo).length
+            : estado.productos.filter((p) => !MODULOS[estado.filtro.modulo].tipos || MODULOS[estado.filtro.modulo].tipos.includes(p.tipo)).length;
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = `btn-cyber shrink-0 inline-flex items-center gap-2 min-h-[44px] px-4 rounded-2xl ring-1 text-[11px] font-bold uppercase tracking-wider ${
+            activo ? 'bg-dcRed/15 ring-dcRed/50 text-white' : 'bg-white/[0.03] ring-white/10 text-neutral-400 hover:text-white'}`;
+        const info = tipo ? CATEGORIAS[tipo] : { icono: 'fa-layer-group', texto: 'Todas' };
+        chip.innerHTML = `<i class="fa-solid ${info.icono} ${activo ? 'text-dcRed' : ''}"></i>${info.texto}<span class="px-1.5 py-0.5 rounded-md bg-white/10 text-[10px]">${total}</span>`;
+        chip.addEventListener('click', () => {
+            estado.filtro.categoria = tipo;
+            renderizar();
+        });
+        return chip;
+    }));
+}
 
-            html += `<div>
-                <button class="acc-row" data-cat="${c.id}" ${expandible ? 'data-expandable="1" aria-expanded="false" aria-controls="panel-' + c.id + '"' : ''}>
-                    ${c.icon} <span>${c.label}</span><span class="acc-count">${prods.length}</span>${expandible ? chevron : ''}
-                </button>
-                ${expandible ? `<div class="acc-panel" id="panel-${c.id}" inert><div>
-                    <div class="flex flex-wrap gap-1.5 px-2 pt-2 pb-3">
-                        ${subs.map(s => `<button class="acc-chip" data-cat="${c.id}" data-sub="${s}">${s}<span>${conteo[s]}</span></button>`).join('')}
-                    </div></div></div>` : ''}
+function renderizar() {
+    const lista = productosFiltrados();
+    const { modulo, categoria, busqueda } = estado.filtro;
+    $('category-title').textContent = busqueda ? `Resultados para “${busqueda}”`
+        : categoria ? CATEGORIAS[categoria].texto : MODULOS[modulo].titulo;
+    $('product-count').textContent = `${lista.length} producto${lista.length === 1 ? '' : 's'}`;
+    pintarModulos();
+
+    const grid = $('product-grid');
+    if (lista.length === 0) {
+        grid.innerHTML = `
+            <div class="col-span-full rounded-3xl bg-white/[0.02] border border-dashed border-white/10 p-10 text-center">
+                <i class="fa-solid fa-magnifying-glass text-3xl text-neutral-600 mb-3"></i>
+                <p class="font-bold">No encontramos productos.</p>
+                <p class="text-xs text-neutral-500 mt-1">Prueba con otra búsqueda o pregúntale al Copiloto.</p>
             </div>`;
-        });
-        acordeon.innerHTML = html;
-        pintarActivos();
-    };
+        return;
+    }
+    grid.replaceChildren(...lista.map(crearTarjeta));
+    grid.querySelectorAll('article').forEach((t, i) => {
+        t.animate([{ opacity: 0, transform: 'translateY(14px)' }, { opacity: 1, transform: 'none' }],
+            { duration: 380, delay: Math.min(i, 10) * 40, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'backwards' });
+    });
+}
 
-    const pintarActivos = () => {
-        acordeon.querySelectorAll('.acc-row').forEach(r => {
-            const esCat = r.dataset.cat === filtroActual.cat;
-            r.dataset.active = String(esCat && !filtroActual.sub);
-            r.dataset.parent = String(esCat && !!filtroActual.sub);
-        });
-        acordeon.querySelectorAll('.acc-chip').forEach(c => {
-            c.dataset.active = String(c.dataset.cat === filtroActual.cat && c.dataset.sub === filtroActual.sub);
-        });
-    };
+function crearTarjeta(prod) {
+    const base = prod.variantes?.[0] ?? { precio: 0 };
+    const precios = (prod.variantes ?? []).map((v) => Number(v.precio)).filter((n) => n > 0);
+    const desde = precios.length ? Math.min(...precios) : 0;
+    const anterior = Number(base.precio_anterior) || 0;
+    const descuento = anterior > Number(base.precio) && Number(base.precio) > 0
+        ? Math.round(((anterior - base.precio) / anterior) * 100) : 0;
+    const cotizacion = desde === 0;
 
-    const alternarPanel = (cat, abrir) => {
-        acordeon.querySelectorAll('.acc-row[data-expandable]').forEach(row => {
-            const panel = document.getElementById('panel-' + row.dataset.cat);
-            const open = row.dataset.cat === cat ? abrir : false;
-            row.setAttribute('aria-expanded', String(open));
-            panel.classList.toggle('open', open);
-            panel.inert = !open;
+    const tarjeta = document.createElement('article');
+    tarjeta.className = 'tarjeta-3d group relative overflow-hidden rounded-3xl bg-white/[0.03] backdrop-blur-xl ring-1 ring-white/10 p-4 flex flex-col cursor-pointer';
+    tarjeta.tabIndex = 0;
+    tarjeta.setAttribute('aria-label', `${prod.nombre}, ${cotizacion ? 'a cotizar' : `desde ${formatearPrecio(desde)}`}`);
+    tarjeta.innerHTML = `
+        <div class="brillo pointer-events-none absolute inset-0"></div>
+        ${descuento ? `<span class="absolute top-3 left-3 z-10 px-2.5 py-1 rounded-full bg-dcRed text-[10px] font-black shadow-[0_0_14px_rgba(255,0,51,.6)]">-${descuento}%</span>` : ''}
+        <div class="relative h-40 sm:h-44 mb-4 grid place-items-center rounded-2xl bg-gradient-to-b from-white/[0.04] to-transparent overflow-hidden">
+            <img src="${escaparHTML(prod.imagen || imagenRespaldo(prod.nombre))}" alt="${escaparHTML(prod.nombre)}" loading="lazy" decoding="async"
+                class="w-full h-full object-contain p-1 transition-transform duration-500 group-hover:scale-110 ${prod.tipo === 'tecnologia' || esCotizable(prod) ? 'rounded-xl' : ''}">
+        </div>
+        <p class="text-[10px] font-black uppercase tracking-[0.2em] text-dcRed">${escaparHTML(prod.marca || 'DC Technology')}</p>
+        <h3 class="mt-1 font-tech font-bold text-base leading-snug line-clamp-2">${escaparHTML(prod.nombre)}</h3>
+        <div class="mt-2 flex flex-wrap gap-1.5">${insignias(prod).slice(0, 2).map(htmlInsignia).join('')}</div>
+        <div class="mt-auto pt-4 flex items-end justify-between gap-2">
+            <div>
+                ${descuento ? `<p class="text-[11px] text-neutral-500 line-through">${formatearPrecio(anterior)}</p>` : ''}
+                <p class="font-tech text-xl font-black text-dcRed leading-none">${cotizacion ? 'A cotizar'
+                    : `${precios.length > 1 ? '<span class="text-[10px] text-neutral-400 font-semibold mr-1">Desde</span>' : ''}${formatearPrecio(desde)}`}</p>
+            </div>
+            <span class="btn-cyber shrink-0 inline-flex items-center gap-1.5 min-h-[44px] px-3.5 rounded-2xl bg-white/[0.06] ring-1 ring-white/10 text-[11px] font-black uppercase tracking-wider group-hover:bg-dcRed group-hover:ring-dcRed">
+                ${esCotizable(prod) ? 'Cotizar' : 'Comprar'} <i class="fa-solid fa-arrow-right"></i>
+            </span>
+        </div>`;
+    const img = tarjeta.querySelector('img');
+    img.addEventListener('error', () => { img.src = imagenRespaldo(prod.nombre); }, { once: true });
+
+    tarjeta.addEventListener('click', () => abrirProducto(prod.id));
+    tarjeta.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); abrirProducto(prod.id); } });
+    activarInclinacion(tarjeta);
+    return tarjeta;
+}
+
+// Inclinación 3D siguiendo el puntero (solo con ratón; en táctil no se activa)
+function activarInclinacion(tarjeta) {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    let marco = null;
+    tarjeta.addEventListener('pointermove', (e) => {
+        if (e.pointerType !== 'mouse') return;
+        cancelAnimationFrame(marco);
+        marco = requestAnimationFrame(() => {
+            const r = tarjeta.getBoundingClientRect();
+            const x = (e.clientX - r.left) / r.width;
+            const y = (e.clientY - r.top) / r.height;
+            tarjeta.style.setProperty('--ry', `${(x - 0.5) * 10}deg`);
+            tarjeta.style.setProperty('--rx', `${(0.5 - y) * 10}deg`);
+            tarjeta.style.setProperty('--mx', `${x * 100}%`);
+            tarjeta.style.setProperty('--my', `${y * 100}%`);
         });
-    };
+    });
+    tarjeta.addEventListener('pointerleave', () => {
+        cancelAnimationFrame(marco);
+        tarjeta.style.setProperty('--rx', '0deg');
+        tarjeta.style.setProperty('--ry', '0deg');
+    });
+}
 
-    const aplicarFiltro = (cat, sub = null) => {
-        filtroActual = { cat, sub };
-        let lista = todosLosProductos;
-        if (cat !== 'todos') lista = lista.filter(p => p.tipo === cat);
-        if (sub) lista = lista.filter(p => p.subcat === sub);
-        categoryTitle.textContent = sub || (cat === 'todos' ? 'Catálogo Completo' : CATEGORIAS.find(c => c.id === cat).label);
-        searchInput.value = '';
-        renderizarProductos(lista);
-        pintarActivos();
-    };
+/* ==================== MODAL DE PRODUCTO ==================== */
 
-    acordeon.addEventListener('click', (e) => {
-        const chip = e.target.closest('.acc-chip');
-        if (chip) return aplicarFiltro(chip.dataset.cat, chip.dataset.sub);
-        const row = e.target.closest('.acc-row');
-        if (!row) return;
-        const cat = row.dataset.cat;
-        if (row.dataset.expandable) {
-            const abrir = row.getAttribute('aria-expanded') !== 'true';
-            alternarPanel(cat, abrir);
-            if (!abrir) return;
-        } else {
-            alternarPanel(null, false);
+function abrirProducto(id) {
+    const prod = estado.productos.find((p) => p.id === id);
+    if (!prod) return;
+    const precioValido = (prod.variantes ?? []).find((v) => Number(v.precio) > 0) ?? prod.variantes?.[0];
+    estado.seleccion = { producto: prod, variante: precioValido, cantidad: 1, cupon: estado.seleccion.cupon };
+
+    $('modal-brand').textContent = prod.marca || 'DC Technology';
+    $('modal-title').textContent = prod.nombre;
+    $('modal-badges').innerHTML = insignias(prod).map(htmlInsignia).join('');
+    pintarGaleria(prod);
+    pintarFicha(prod);
+    pintarVariantes();
+    pintarCupon();
+    actualizarTotal();
+
+    // Descripción propia del catálogo (contenido de productos.json, controlado por la tienda)
+    $('modal-extra-info').innerHTML = prod.descripcion && prod.descripcion.trim().length > 20
+        ? `<div class="rounded-2xl bg-dcDarkBg/60 ring-1 ring-white/5 p-4">${prod.descripcion}</div>` : '';
+    pintarResenasProducto(prod);
+
+    // Servicios: la cantidad y el cupón no aplican (se cotiza)
+    const cotizable = esCotizable(prod);
+    $('form-cupon').parentElement.hidden = cotizable;
+    if (cotizable) $('cupon-estado').hidden = true;
+    $('btn-continuar').innerHTML = cotizable
+        ? '<i class="fa-solid fa-calendar-check"></i> Cotizar y agendar'
+        : '<i class="fa-solid fa-cart-shopping"></i> Continuar con la compra';
+
+    try { history.replaceState(null, '', `?producto=${encodeURIComponent(prod.id)}`); } catch { /* sin historial */ }
+    document.dispatchEvent(new CustomEvent('dc:producto-visto', { detail: prod }));
+    abrirModal($('product-modal'));
+}
+
+function pintarGaleria(prod) {
+    const imagenes = (Array.isArray(prod.imagenes) && prod.imagenes.length ? prod.imagenes : [prod.imagen]).filter(Boolean);
+    if (!imagenes.length) imagenes.push(imagenRespaldo(prod.nombre));
+    const galeria = $('galeria');
+
+    galeria.replaceChildren(...imagenes.map((src, i) => {
+        const caja = document.createElement('div');
+        caja.className = 'zoom-caja snap-center shrink-0 w-full h-64 sm:h-80 grid place-items-center overflow-hidden rounded-2xl bg-gradient-to-b from-white/[0.04] to-transparent';
+        caja.innerHTML = `<img src="${escaparHTML(src)}" alt="${escaparHTML(prod.nombre)} — imagen ${i + 1}" class="w-full h-full object-contain select-none" draggable="false">`;
+        const img = caja.querySelector('img');
+        img.addEventListener('error', () => { img.src = imagenRespaldo(prod.nombre); }, { once: true });
+        // Zoom: sigue el cursor en escritorio; toque para activar/desactivar en móvil
+        caja.addEventListener('pointermove', (e) => {
+            const r = caja.getBoundingClientRect();
+            caja.style.setProperty('--zx', `${((e.clientX - r.left) / r.width) * 100}%`);
+            caja.style.setProperty('--zy', `${((e.clientY - r.top) / r.height) * 100}%`);
+            if (e.pointerType === 'mouse') caja.classList.add('activo');
+        });
+        caja.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse') caja.classList.remove('activo'); });
+        caja.addEventListener('click', () => caja.classList.toggle('activo'));
+        return caja;
+    }));
+
+    // Miniaturas solo si hay varias imágenes (deslizar también funciona en móvil)
+    const miniaturas = $('galeria-miniaturas');
+    miniaturas.replaceChildren(...(imagenes.length > 1 ? imagenes.map((src, i) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'w-12 h-12 rounded-xl overflow-hidden ring-1 ring-white/10 hover:ring-dcRed';
+        btn.setAttribute('aria-label', `Ver imagen ${i + 1}`);
+        btn.innerHTML = `<img src="${escaparHTML(src)}" alt="" class="w-full h-full object-cover">`;
+        btn.addEventListener('click', () => galeria.children[i].scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' }));
+        return btn;
+    }) : []));
+    galeria.scrollLeft = 0;
+}
+
+// Ficha técnica para productos físicos (datos del propio catálogo, sin inventar stock)
+function pintarFicha(prod) {
+    const caja = $('modal-ficha');
+    if (prod.tipo !== 'tecnologia') {
+        caja.innerHTML = '';
+        return;
+    }
+    const texto = String(prod.descripcion ?? '').replace(/<[^>]+>/g, ' ');
+    // Busca "Garantía: 30 días…" (con número), no el título "…USO Y GARANTÍA:"
+    const garantia = /Garant[ií]a:?\s*(\d[^.•]*)/i.exec(texto)?.[1]?.trim() || `${GARANTIA_DIAS} días por defectos de fábrica`;
+    const filas = [
+        ['Marca', prod.marca || 'DC Technology'],
+        ['Modelo', prod.nombre],
+        ['Garantía', garantia],
+        ['Disponibilidad', 'Confirmada por WhatsApp al pedir'],
+    ];
+    caja.innerHTML = `
+        <dl class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 rounded-2xl bg-dcDarkBg/60 ring-1 ring-white/5 p-4 text-xs">
+            ${filas.map(([k, v]) => `<dt class="text-neutral-500 font-bold uppercase tracking-wider text-[10px] pt-0.5">${k}</dt><dd class="text-neutral-200">${escaparHTML(v)}</dd>`).join('')}
+        </dl>
+        <p class="mt-2 flex items-start gap-2 rounded-2xl bg-amber-500/10 ring-1 ring-amber-500/30 px-4 py-3 text-xs text-amber-200">
+            <i class="fa-solid fa-plug-circle-exclamation mt-0.5"></i> Revisa la compatibilidad de voltaje y puerto con tu equipo antes de comprar.
+        </p>`;
+}
+
+function pintarVariantes() {
+    const { producto, variante } = estado.seleccion;
+    const variantes = producto.variantes ?? [];
+    $('modal-variants').replaceChildren(...variantes.map((v, i) => {
+        const activa = v === variante;
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.setAttribute('aria-pressed', String(activa));
+        btn.className = `w-full min-h-[52px] text-left px-4 rounded-2xl ring-1 flex items-center justify-between gap-3 transition-all ${
+            activa ? 'bg-dcRed/15 ring-dcRed/60 text-white' : 'bg-dcDarkBg/60 ring-white/10 text-neutral-300 hover:ring-white/30'}`;
+        btn.innerHTML = `
+            <span class="flex items-center gap-3 min-w-0">
+                <span class="shrink-0 w-4 h-4 rounded-full ring-2 ${activa ? 'ring-dcRed bg-dcRed' : 'ring-neutral-500'}"></span>
+                <span class="text-sm font-bold truncate">${escaparHTML(v.nombre || `Opción ${i + 1}`)}</span>
+            </span>
+            <span class="shrink-0 text-sm font-black ${activa ? 'text-dcRed' : ''}">${formatearPrecio(v.precio)}</span>`;
+        btn.addEventListener('click', () => {
+            estado.seleccion.variante = v;
+            pintarVariantes();
+            actualizarTotal();
+        });
+        return btn;
+    }));
+}
+
+function totales() {
+    const { variante, cantidad, cupon } = estado.seleccion;
+    const unitario = Number(variante?.precio) || 0;
+    const anterior = Number(variante?.precio_anterior) || 0;
+    const bruto = unitario * cantidad;
+    const descuentoCupon = cupon ? Math.round((bruto * cupon.porcentaje) / 100) : 0;
+    return { unitario, anterior, bruto, descuentoCupon, total: bruto - descuentoCupon };
+}
+
+function actualizarTotal() {
+    const { producto, cantidad } = estado.seleccion;
+    const t = totales();
+    $('cantidad').textContent = cantidad;
+    $('cantidad-menos').disabled = cantidad <= 1;
+    $('cantidad-mas').disabled = cantidad >= CANTIDAD_MAXIMA || esCotizable(producto);
+
+    const cotizable = esCotizable(producto);
+    $('modal-price').innerHTML = t.unitario === 0 ? 'A cotizar'
+        : `${cotizable ? '<span class="text-sm text-neutral-400 font-semibold mr-1">Desde</span>' : ''}${formatearPrecio(t.total)}`;
+
+    const ahorroLista = t.anterior > t.unitario && t.unitario > 0 ? (t.anterior - t.unitario) * cantidad : 0;
+    $('modal-old-price').hidden = !(ahorroLista || t.descuentoCupon);
+    $('modal-old-price').textContent = formatearPrecio(ahorroLista ? t.anterior * cantidad : t.bruto);
+    const ahorro = ahorroLista + t.descuentoCupon;
+    $('modal-savings').hidden = !ahorro;
+    $('modal-savings').textContent = ahorro ? `¡Ahorras ${formatearPrecio(ahorro)}!` : '';
+
+    const badge = $('modal-discount-badge');
+    badge.hidden = !(t.anterior > t.unitario && t.unitario > 0);
+    if (!badge.hidden) badge.textContent = `-${Math.round(((t.anterior - t.unitario) / t.anterior) * 100)}%`;
+}
+
+function cambiarCantidad(delta) {
+    const s = estado.seleccion;
+    s.cantidad = Math.min(CANTIDAD_MAXIMA, Math.max(1, s.cantidad + delta));
+    actualizarTotal();
+}
+
+/* ==================== CUPONES (validados en Supabase) ==================== */
+
+function pintarCupon() {
+    const { cupon } = estado.seleccion;
+    const estadoCupon = $('cupon-estado');
+    $('cupon').value = cupon?.codigo ?? '';
+    estadoCupon.hidden = !cupon;
+    if (cupon) {
+        estadoCupon.className = '-mt-3 text-xs text-emerald-400 font-semibold';
+        estadoCupon.innerHTML = `<i class="fa-solid fa-ticket mr-1"></i>${escaparHTML(cupon.codigo)}: -${cupon.porcentaje}% · ${escaparHTML(cupon.mensaje)}
+            <button type="button" id="quitar-cupon" class="ml-2 underline text-neutral-400 hover:text-white">Quitar</button>`;
+        $('quitar-cupon').addEventListener('click', () => {
+            estado.seleccion.cupon = null;
+            pintarCupon();
+            actualizarTotal();
+        });
+    }
+}
+
+async function consultarCupon(codigo) {
+    if (!supabaseTienda) return { valido: false, mensaje: 'No pudimos conectar para validar el cupón.' };
+    const { data, error } = await supabaseTienda.rpc('validar_cupon', { p_codigo: codigo }).maybeSingle();
+    if (error) {
+        console.error('validar_cupon:', error);
+        return { valido: false, mensaje: 'No pudimos validar el cupón en este momento.' };
+    }
+    return data ?? { valido: false, mensaje: 'Cupón no válido.' };
+}
+
+async function aplicarCupon(e) {
+    e.preventDefault();
+    const codigo = $('cupon').value.trim().toUpperCase();
+    const estadoCupon = $('cupon-estado');
+    if (!codigo) return;
+
+    const btn = $('btn-cupon');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+    const r = await consultarCupon(codigo);
+    btn.disabled = false;
+    btn.textContent = 'Aplicar';
+
+    if (r.valido) {
+        estado.seleccion.cupon = { codigo, porcentaje: r.porcentaje, tipo: r.tipo, mensaje: r.mensaje };
+        pintarCupon();
+        actualizarTotal();
+        mostrarToast(`Cupón ${codigo} aplicado: -${r.porcentaje}%`, 'ok');
+    } else {
+        estado.seleccion.cupon = null;
+        actualizarTotal();
+        estadoCupon.hidden = false;
+        estadoCupon.className = '-mt-3 text-xs text-red-400 font-semibold';
+        estadoCupon.textContent = r.mensaje || 'Cupón no válido.';
+    }
+}
+
+// Marquesina: solo se anuncia el cupón si está vigente en la base de datos
+async function pintarBannerPromo() {
+    const r = await consultarCupon(CUPON_PROMO);
+    if (!r.valido) return;
+    const texto = `🔥 ${r.porcentaje}% OFF en tu primera compra con el código: ${CUPON_PROMO}`;
+    const item = `<span class="px-8">${escaparHTML(texto)}</span><span class="px-8">⚡ Entrega inmediata · máximo 15 minutos</span>`;
+    $('banner-promo-pista').innerHTML = item.repeat(4);
+    $('banner-promo').hidden = false;
+}
+
+/* ==================== TÉRMINOS Y ENVÍO DEL PEDIDO ==================== */
+
+function continuarCompra() {
+    const { producto } = estado.seleccion;
+    if (!producto) return;
+    $('terminos-lista').innerHTML = TERMINOS[grupoTerminos(producto.tipo)]
+        .map((t) => `<li class="flex items-start gap-3"><i class="fa-solid fa-circle-exclamation text-amber-400 mt-1"></i><span>${t}</span></li>`).join('');
+    $('terminos-acepto').checked = false;
+    abrirModal($('modal-terminos'));
+}
+
+function enviarPedido(e) {
+    e.preventDefault();
+    if (!$('terminos-acepto').checked) return;
+    const { producto, variante, cantidad, cupon } = estado.seleccion;
+    const t = totales();
+
+    let texto;
+    if (esCotizable(producto)) {
+        texto = WA.agendarServicio({ servicio: producto.nombre, opcion: variante?.nombre, estimado: t.unitario || undefined });
+    } else {
+        texto = WA.pedidoTienda({
+            producto: producto.nombre,
+            variante: variante?.nombre,
+            cantidad,
+            precioUnitario: t.unitario,
+            cupon: cupon?.codigo,
+            porcentaje: cupon?.porcentaje,
+            total: t.total,
+        });
+    }
+    window.open(WA.enlace(WA.NUMERO_TIENDA, texto), '_blank', 'noopener');
+    cerrarModal($('modal-terminos'));
+    mostrarToast('Abrimos WhatsApp con tu pedido listo. ¡Te atendemos enseguida!', 'ok', 5000);
+}
+
+/* ==================== SERVICIOS: FASES + COTIZADOR ==================== */
+
+function pintarCotizador() {
+    $('servicio-fases').innerHTML = FASES_SERVICIO.map((f, i) => `
+        <li class="flex gap-4 rounded-2xl bg-dcDarkBg/60 ring-1 ring-white/5 p-4">
+            <span class="shrink-0 grid place-items-center w-12 h-12 rounded-2xl bg-dcRed/10 ring-1 ring-dcRed/30 text-dcRed"><i class="fa-solid ${f.icono}"></i></span>
+            <span><span class="block text-[10px] font-black uppercase tracking-widest text-neutral-500">Fase ${i + 1}</span>
+            <span class="block font-tech font-bold text-base">${f.titulo}</span>
+            <span class="block text-xs text-neutral-400 mt-0.5">${f.texto}</span></span>
+        </li>`).join('');
+
+    const servicios = estado.productos.filter(esCotizable);
+    const selServicio = $('cot-servicio');
+    selServicio.innerHTML = servicios.map((s) => `<option value="${escaparHTML(s.id)}">${escaparHTML(s.nombre)}</option>`).join('');
+    const hoy = new Date();
+    $('cot-fecha').min = new Date(hoy.getTime() - hoy.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+
+    const pintarOpciones = () => {
+        const s = servicios.find((x) => x.id === selServicio.value);
+        $('cot-opcion').innerHTML = (s?.variantes ?? []).map((v, i) => `<option value="${i}">${escaparHTML(v.nombre)} — ${formatearPrecio(v.precio)}</option>`).join('');
+        recalcular();
+    };
+    const recalcular = () => {
+        const s = servicios.find((x) => x.id === selServicio.value);
+        const v = s?.variantes?.[Number($('cot-opcion').value)];
+        const cantidad = Math.max(1, Math.min(50, Number.parseInt($('cot-cantidad').value, 10) || 1));
+        $('cot-total').textContent = v && Number(v.precio) > 0 ? formatearPrecio(Number(v.precio) * cantidad) : 'A cotizar';
+    };
+    selServicio.addEventListener('change', pintarOpciones);
+    $('cot-opcion').addEventListener('change', recalcular);
+    $('cot-cantidad').addEventListener('input', recalcular);
+    pintarOpciones();
+
+    $('cotizador').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const s = servicios.find((x) => x.id === selServicio.value);
+        const v = s?.variantes?.[Number($('cot-opcion').value)];
+        const cantidad = Math.max(1, Math.min(50, Number.parseInt($('cot-cantidad').value, 10) || 1));
+        const fecha = $('cot-fecha').value
+            ? new Date(`${$('cot-fecha').value}T12:00:00`).toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'long' })
+            : '';
+        const texto = WA.agendarServicio({
+            servicio: s?.nombre,
+            opcion: v ? `${v.nombre}${cantidad > 1 ? ` × ${cantidad}` : ''}` : undefined,
+            fecha,
+            franja: $('cot-franja').value,
+            detalle: $('cot-detalle').value.trim(),
+            estimado: v && Number(v.precio) > 0 ? Number(v.precio) * cantidad : undefined,
+        });
+        window.open(WA.enlace(WA.NUMERO_TIENDA, texto), '_blank', 'noopener');
+    });
+}
+
+/* ==================== PRUEBA SOCIAL Y RESEÑAS (datos reales) ==================== */
+
+async function pintarPruebaSocial() {
+    const caja = $('prueba-social');
+    if (!supabaseTienda) return;
+    const { data, error } = await supabaseTienda.rpc('estadisticas_publicas').maybeSingle();
+    if (error || !data) {
+        if (error) console.error('estadisticas_publicas:', error);
+        return; // se queda el texto neutro
+    }
+    const ventas = Number(data.ventas_completadas) || 0;
+    const resenas = Number(data.resenas) || 0;
+    if (ventas < UMBRAL_PRUEBA_SOCIAL) return; // por debajo del umbral: texto neutro
+
+    const partes = [`<span><i class="fa-solid fa-circle-check text-emerald-400 mr-1.5"></i><b class="text-white">${ventas.toLocaleString('es-CO')}</b> ventas completadas</span>`];
+    if (resenas > 0 && data.promedio) {
+        partes.push(`<span><i class="fa-solid fa-star text-amber-400 mr-1.5"></i><b class="text-white">${Number(data.promedio).toLocaleString('es-CO')}</b>/5 en ${resenas} reseña${resenas === 1 ? '' : 's'} verificada${resenas === 1 ? '' : 's'}</span>`);
+    }
+    caja.innerHTML = partes.join('<span class="text-neutral-600">·</span>');
+}
+
+const estrellas = (n) => Array.from({ length: 5 }, (_, i) =>
+    `<i class="fa-${i < n ? 'solid' : 'regular'} fa-star ${i < n ? 'text-amber-400' : 'text-neutral-600'}"></i>`).join('');
+
+function tarjetaResena(r) {
+    const fecha = new Date(r.created_at).toLocaleDateString('es-CO', { month: 'short', year: 'numeric' });
+    return `
+        <article class="rounded-3xl bg-white/[0.03] backdrop-blur-xl ring-1 ring-white/10 p-5 flex flex-col gap-3">
+            <div class="flex items-center justify-between gap-2 text-sm">${estrellas(r.calificacion)}<span class="text-[10px] text-neutral-500">${escaparHTML(fecha)}</span></div>
+            ${r.comentario ? `<p class="text-sm text-neutral-300 leading-relaxed">“${escaparHTML(r.comentario)}”</p>` : ''}
+            <div class="mt-auto flex flex-wrap items-center justify-between gap-2">
+                <span class="text-xs font-bold">${escaparHTML(r.nombre_publico)}${r.producto ? ` <span class="text-neutral-500 font-medium">· ${escaparHTML(r.producto)}</span>` : ''}</span>
+                <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-emerald-500/10 ring-1 ring-emerald-500/30 text-emerald-300 text-[9px] font-black uppercase tracking-wider">
+                    <i class="fa-solid fa-circle-check"></i> Compra verificada por DC Technology
+                </span>
+            </div>
+        </article>`;
+}
+
+async function cargarResenas() {
+    const caja = $('lista-resenas');
+    const vacio = `
+        <div class="sm:col-span-2 lg:col-span-3 rounded-3xl bg-white/[0.02] border border-dashed border-white/10 p-8 text-center">
+            <i class="fa-regular fa-star text-3xl text-amber-400 mb-3"></i>
+            <p class="font-bold">Aún no hay reseñas publicadas.</p>
+            <p class="text-xs text-neutral-500 mt-1">Solo publicamos opiniones de compras verificadas. ¿Ya compraste? Califícala desde “Mi pedido”.</p>
+        </div>`;
+    if (!supabaseTienda) { caja.innerHTML = vacio; return; }
+
+    const { data, error } = await supabaseTienda.rpc('resenas_publicas', { p_limite: 30 });
+    if (error) console.error('resenas_publicas:', error);
+    estado.resenas = data ?? [];
+    caja.innerHTML = estado.resenas.length ? estado.resenas.slice(0, 9).map(tarjetaResena).join('') : vacio;
+}
+
+// En el modal: reseñas cuyo producto coincide con la marca o el nombre
+function pintarResenasProducto(prod) {
+    const claves = [prod.marca, prod.nombre.split(' ')[0]].filter(Boolean).map((s) => s.toLowerCase());
+    const propias = estado.resenas.filter((r) => claves.some((k) => String(r.producto ?? '').toLowerCase().includes(k)));
+    $('modal-resenas').innerHTML = propias.length ? `
+        <h3 class="text-[10px] font-black uppercase tracking-widest text-neutral-400 mb-2">Opiniones de clientes (${propias.length})</h3>
+        <div class="grid gap-3">${propias.slice(0, 3).map(tarjetaResena).join('')}</div>` : '';
+}
+
+/* ==================== SEO: DATOS ESTRUCTURADOS ==================== */
+
+// Inyecta el catálogo real como ItemList de Product/Service con sus ofertas en COP
+function inyectarSEO() {
+    const elementos = estado.productos.map((p, i) => {
+        const precios = (p.variantes ?? []).map((v) => Number(v.precio)).filter((n) => n > 0);
+        const item = esCotizable(p)
+            ? { '@type': 'Service', name: p.nombre, provider: { '@id': `${SITIO}#organizacion` }, areaServed: 'CO', image: p.imagen }
+            : { '@type': 'Product', name: p.nombre, image: p.imagen, brand: { '@type': 'Brand', name: p.marca || 'DC Technology' }, category: CATEGORIAS[p.tipo]?.texto };
+        if (precios.length) {
+            item.offers = precios.length === 1
+                ? { '@type': 'Offer', price: precios[0], priceCurrency: 'COP', availability: 'https://schema.org/InStock', url: `${SITIO}?producto=${encodeURIComponent(p.id)}` }
+                : { '@type': 'AggregateOffer', lowPrice: Math.min(...precios), highPrice: Math.max(...precios), offerCount: precios.length, priceCurrency: 'COP', availability: 'https://schema.org/InStock' };
         }
-        aplicarFiltro(cat);
+        return { '@type': 'ListItem', position: i + 1, item };
     });
 
-    searchInput.addEventListener('keyup', (e) => {
-        const query = e.target.value.toLowerCase();
-        const filtrados = todosLosProductos.filter(p => p.nombre.toLowerCase().includes(query) || (p.marca && p.marca.toLowerCase().includes(query)));
-        categoryTitle.textContent = "Resultados de búsqueda";
-        filtroActual = { cat: null, sub: null };
-        pintarActivos();
-        renderizarProductos(filtrados);
+    const script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.textContent = JSON.stringify({ '@context': 'https://schema.org', '@type': 'ItemList', name: 'Catálogo DC Technology', itemListElement: elementos });
+    document.head.appendChild(script);
+}
+
+// Enlace directo: ?producto=netflix abre el producto (lo usan el Copiloto y los mensajes)
+function abrirDesdeEnlace() {
+    const id = new URLSearchParams(location.search).get('producto');
+    if (id && estado.productos.some((p) => p.id === id)) abrirProducto(id);
+}
+
+/* ==================== MODALES ==================== */
+
+function abrirModal(modal) {
+    if (!modal.hidden) return;
+    modal.hidden = false;
+    document.body.style.overflow = 'hidden';
+    modal.querySelector('.modal-fondo').animate([{ opacity: 0 }, { opacity: 1 }], { duration: 250 });
+    modal.querySelector('.modal-panel').animate(
+        [{ opacity: 0, transform: 'translateY(40px) scale(.98)' }, { opacity: 1, transform: 'none' }],
+        { duration: 360, easing: 'cubic-bezier(.2,.8,.2,1)' });
+}
+
+async function cerrarModal(modal) {
+    if (!modal || modal.hidden || modal.dataset.cerrando) return;
+    modal.dataset.cerrando = '1';
+    await Promise.all([
+        modal.querySelector('.modal-fondo').animate([{ opacity: 1 }, { opacity: 0 }], { duration: 200, fill: 'forwards' }).finished,
+        modal.querySelector('.modal-panel').animate([{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'translateY(40px) scale(.98)' }],
+            { duration: 220, easing: 'ease-in', fill: 'forwards' }).finished,
+    ]);
+    modal.hidden = true;
+    delete modal.dataset.cerrando;
+    modal.getAnimations({ subtree: true }).forEach((a) => a.cancel());
+    if (!document.querySelector('[role="dialog"]:not([hidden])')) document.body.style.overflow = '';
+    if (modal.id === 'product-modal') {
+        try { history.replaceState(null, '', location.pathname); } catch { /* sin historial */ }
+    }
+}
+
+/* ==================== ARRANQUE ==================== */
+
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('[data-modulo]').forEach((btn) => btn.addEventListener('click', () => {
+        estado.filtro = { modulo: btn.dataset.modulo, categoria: null, busqueda: '' };
+        $('searchInput').value = '';
+        renderizar();
+    }));
+
+    let espera;
+    $('searchInput').addEventListener('input', (e) => {
+        clearTimeout(espera);
+        espera = setTimeout(() => {
+            estado.filtro.busqueda = e.target.value.trim().toLowerCase();
+            renderizar();
+        }, 150);
     });
 
-    themeToggle.onclick = () => {
-        const isDark = document.documentElement.classList.toggle('dark');
-        themeIcon.textContent = isDark ? '🌙' : '☀️';
-    };
+    document.querySelectorAll('[data-cerrar]').forEach((el) => el.addEventListener('click', () => cerrarModal(el.closest('[role="dialog"]'))));
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') [...document.querySelectorAll('[role="dialog"]:not([hidden])')].reverse().slice(0, 1).forEach(cerrarModal);
+    });
+    $('cantidad-menos').addEventListener('click', () => cambiarCantidad(-1));
+    $('cantidad-mas').addEventListener('click', () => cambiarCantidad(1));
+    $('form-cupon').addEventListener('submit', aplicarCupon);
+    $('btn-continuar').addEventListener('click', continuarCompra);
+    $('form-terminos').addEventListener('submit', enviarPedido);
+
+    cargarCatalogo();
+    pintarBannerPromo();
+    pintarPruebaSocial();
+    cargarResenas();
 });
+
+// API mínima para copiloto.js
+window.DCTienda = {
+    productos: () => estado.productos,
+    abrirProducto,
+    productoActual: () => estado.seleccion.producto,
+    formatearPrecio,
+    moduloDe,
+};

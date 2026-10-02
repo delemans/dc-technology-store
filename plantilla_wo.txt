@@ -1,0 +1,7 @@
+WO-[NUMERO] | [TITULO_DE_LA_TAREA]
+OBJETIVO: [Qué vamos a lograr]
+LEER: [Archivos que Gemini debe analizar]
+EDITAR: [Archivo exacto a modificar]
+CAMBIOS: 
+[Pega aquí el código o la lógica que Claude te generó en la web]
+NO HACER: No tocar otras funciones.

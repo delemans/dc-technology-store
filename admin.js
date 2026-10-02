@@ -1,0 +1,1613 @@
+// Configuración de Supabase
+const supabaseUrl = 'https://vyqcizwfmjlflncdwzve.supabase.co';
+const supabaseKey = 'sb_publishable_GvQiv6M7iSrlwsA90lXsOQ_5OfSYBwy';
+const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+// Número de ALL NECESSARY COLOMBIA (proveedor)
+const WHATSAPP_PROVEEDOR = '573223284622';
+// Cuántos pedidos recientes se cargan para pestañas, KPIs y exportación
+const LIMITE_PEDIDOS = 300;
+// Días de soporte que se muestran en la tarjeta (política comercial, solo visual)
+const GARANTIA_DIAS = 30;
+
+// Apariencia de cada estado: badge con LED pulsante
+const ESTADOS = {
+    PENDIENTE_PAGO:      { texto: 'Pendiente de pago',   clases: 'bg-sky-500/10 text-sky-300 ring-sky-500/30', punto: 'bg-sky-400', pulso: true },
+    ESPERANDO_PROVEEDOR: { texto: 'Esperando proveedor', clases: 'bg-amber-500/10 text-amber-300 ring-amber-500/30', punto: 'bg-amber-400', pulso: true },
+    PEDIDO_REALIZADO:    { texto: 'Pedido realizado',    clases: 'bg-emerald-500/10 text-emerald-300 ring-emerald-500/30', punto: 'bg-emerald-400', pulso: true },
+    ENTREGADO:           { texto: 'Entregado',           clases: 'bg-emerald-500/10 text-emerald-300 ring-emerald-500/30', punto: 'bg-emerald-400', pulso: false },
+    ENTREGADO_INMEDIATO: { texto: 'Entregado inmediato', clases: 'bg-emerald-500/10 text-emerald-300 ring-emerald-500/30', punto: 'bg-emerald-400', pulso: false },
+};
+const ESTADO_PENDIENTE = 'ESPERANDO_PROVEEDOR';
+const ESTADO_PENDIENTE_PAGO = 'PENDIENTE_PAGO';
+// La pestaña "Pendientes" agrupa lo que aún requiere acción: pago por validar o compra al proveedor
+const ESTADOS_ACTIVOS = [ESTADO_PENDIENTE_PAGO, ESTADO_PENDIENTE];
+
+// Métodos de pago que se pueden registrar (además de los que existan en public.metodos_pago)
+const METODOS_PAGO_BASE = ['Nequi', 'Daviplata', 'Bancolombia', 'Binance (USDT)', 'Transfiya'];
+// Ventanas del seguimiento posventa
+const HORAS_SATISFACCION = 24;
+const DIAS_MAX_SATISFACCION = 7;   // pasado este plazo ya no tiene sentido preguntar
+const DIAS_AVISO_RENOVACION = 3;
+
+// Mapeo de columnas de 'compras_proveedor' (id, pedido_id, variante_id, estado, clave_serial,
+// referencia_externa, costo_real_cop, fecha y opcionalmente entregado_at). Se usa el primer nombre con valor.
+const COLUMNAS = {
+    pedido:    ['pedido_id'],
+    producto:  ['referencia_externa', 'variante_id'],
+    variante:  ['variante_id'],
+    costo:     ['costo_real_cop'],
+    cantidad:  ['cantidad'],
+    fecha:     ['created_at', 'creado_at'],
+    entregado: ['entregado_at'],
+    // Columnas de WO-011 (supabase/wo-011.sql)
+    whatsapp:     ['cliente_whatsapp'],
+    vencimiento:  ['fecha_vencimiento'],
+    garantiaDias: ['garantia_dias'],
+};
+// Nombres posibles de la columna de fecha para ordenar; se recuerda el que funcione
+const COLUMNAS_FECHA = ['created_at', 'creado_at'];
+let columnaFecha = null;
+
+// Categorías por palabras clave en el nombre del producto (combos se evalúan primero)
+const CATEGORIAS = [
+    { id: 'combos',    texto: 'Combos',    icono: 'fa-layer-group', palabras: ['combo', 'pack', 'kit', ' + '] },
+    { id: 'streaming', texto: 'Streaming', icono: 'fa-tv',          palabras: ['netflix', 'disney', 'hbo', 'max', 'prime', 'amazon', 'spotify', 'youtube', 'crunchyroll', 'paramount', 'star+', 'vix', 'apple tv', 'deezer', 'plex', 'iptv', 'pantalla'] },
+    { id: 'licencias', texto: 'Licencias', icono: 'fa-key',         palabras: ['licencia', 'windows', 'office', '365', 'serial', 'key', 'antivirus', 'kaspersky', 'eset', 'norton', 'adobe', 'autocad', 'game pass', 'xbox', 'playstation', 'psn', 'steam', 'canva'] },
+];
+const CATEGORIA_OTROS = { id: 'otros', texto: 'Otros', icono: 'fa-box' };
+
+// Simulador de stock de prueba (solo en este navegador; nunca se escribe en la BD)
+const PRODUCTOS_PRUEBA = [
+    { referencia: 'Licencia Windows 11 Pro', costo: 18000 },
+    { referencia: 'Netflix 1 Pantalla',      costo: 9000 },
+    { referencia: 'Game Pass Ultimate 1 Mes', costo: 22000 },
+    { referencia: 'Office 365 Personal',     costo: 25000 },
+    { referencia: 'Disney+ Premium Pantalla', costo: 7000 },
+    { referencia: 'Spotify Premium 1 Mes',   costo: 6000 },
+    { referencia: 'Combo Netflix + Spotify', costo: 15000 },
+];
+
+// Estado de la interfaz
+const pedidos = new Map();          // id → fila de la BD (o de prueba)
+const ui = { filtro: 'pendientes', categoria: 'todas', busqueda: '', vista: 'pedidos' };
+let canalPedidos = null;            // suscripción Realtime activa
+let pedidoEditando = null;          // id del pedido abierto en el modal de edición
+let pedidoPagando = null;           // id del pedido abierto en el modal de pago
+let metodosPago = [];               // filas de public.metodos_pago
+let baseConocimiento = null;        // bot-conocimiento.json
+
+document.addEventListener('DOMContentLoaded', async () => {
+    const formLogin = document.getElementById('form-login');
+    const inputEmail = document.getElementById('login-email');
+    const inputPassword = document.getElementById('login-password');
+    const btnLogin = document.getElementById('btn-login');
+    const loginError = document.getElementById('login-error');
+    const vistaLogin = document.getElementById('vista-login');
+    const vistaDashboard = document.getElementById('vista-dashboard');
+
+    // Limpieza del sistema anterior (clave maestra + sessionStorage)
+    sessionStorage.removeItem('dc_admin_auth');
+
+    async function mostrarDashboard() {
+        vistaLogin.classList.add('hidden');
+        vistaDashboard.classList.remove('hidden');
+        vistaDashboard.animate(
+            [{ opacity: 0, transform: 'translateY(14px)' }, { opacity: 1, transform: 'none' }],
+            { duration: 450, easing: 'cubic-bezier(.2,.8,.2,1)' }
+        );
+        const { data: { user } } = await supabaseClient.auth.getUser();
+        document.getElementById('ajustes-email').textContent = user?.email ?? '—';
+        cargarPedidos();
+        iniciarRealtime();
+        cargarMetodosPago();
+        cargarBaseConocimiento();
+    }
+
+    function mostrarLogin() {
+        detenerRealtime();
+        document.querySelectorAll('[role="dialog"]').forEach(cerrarModal);
+        vistaDashboard.classList.add('hidden');
+        vistaLogin.classList.remove('hidden');
+        vistaLogin.animate(
+            [{ opacity: 0, transform: 'translateY(14px)' }, { opacity: 1, transform: 'none' }],
+            { duration: 450, easing: 'cubic-bezier(.2,.8,.2,1)' }
+        );
+        inputPassword.value = '';
+    }
+
+    // 1. Sesión existente de Supabase Auth (persiste entre recargas)
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (session) mostrarDashboard();
+
+    // Si la sesión expira o se cierra en otra pestaña, volver al login
+    supabaseClient.auth.onAuthStateChange((evento) => {
+        if (evento === 'SIGNED_OUT') mostrarLogin();
+    });
+
+    // 2. Inicio de sesión con Supabase Auth
+    formLogin.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        loginError.classList.add('hidden');
+        btnLogin.disabled = true;
+        btnLogin.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Verificando...';
+
+        const { error } = await supabaseClient.auth.signInWithPassword({
+            email: inputEmail.value.trim(),
+            password: inputPassword.value,
+        });
+
+        btnLogin.disabled = false;
+        btnLogin.textContent = 'Desbloquear Panel';
+
+        if (error) {
+            console.error('Error de inicio de sesión:', error.message);
+            // Sin respuesta del servidor (DNS/firewall/sin internet) ≠ credenciales incorrectas
+            const sinConexion = error.status === 0 || error.name === 'AuthRetryableFetchError' || /fetch/i.test(error.message);
+            document.getElementById('login-error-texto').textContent = sinConexion
+                ? 'Sin conexión con el servidor. Revisa tu conexión a internet.'
+                : 'Correo o contraseña incorrectos. Acceso denegado.';
+            loginError.classList.remove('hidden');
+            loginError.animate(
+                [{ transform: 'translateX(0)' }, { transform: 'translateX(-6px)' }, { transform: 'translateX(6px)' }, { transform: 'translateX(0)' }],
+                { duration: 300 }
+            );
+            Sonidos.error();
+            inputPassword.value = '';
+            return;
+        }
+
+        inputPassword.value = '';
+        mostrarDashboard();
+    });
+
+    // 3. Cerrar sesión (barra lateral y ajustes)
+    document.querySelectorAll('[data-logout]').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+            const { error } = await supabaseClient.auth.signOut();
+            if (error) console.error('Error al cerrar sesión:', error.message);
+            mostrarLogin();
+        });
+    });
+
+    // 4. Acciones de la cabecera y el dock
+    document.getElementById('btn-recargar').addEventListener('click', cargarPedidos);
+    document.querySelectorAll('[data-generar-prueba]').forEach((btn) => btn.addEventListener('click', generarPedidoPrueba));
+    document.querySelectorAll('#btn-exportar, [data-exportar]').forEach((btn) => btn.addEventListener('click', exportarCSV));
+    document.querySelectorAll('#btn-pantalla-completa, #ajuste-pantalla-completa').forEach((btn) => btn.addEventListener('click', alternarPantallaCompleta));
+    document.addEventListener('fullscreenchange', pintarBotonPantallaCompleta);
+    if (!document.fullscreenEnabled) {
+        // iPhone/iPad no permiten pantalla completa en páginas web
+        document.querySelectorAll('#btn-pantalla-completa, #ajuste-pantalla-completa').forEach((btn) => { btn.hidden = true; });
+    }
+
+    // 5. Filtros por estado, categoría y buscador
+    document.querySelectorAll('[data-filtro]').forEach((tab) => {
+        tab.addEventListener('click', () => cambiarFiltro(tab.dataset.filtro));
+    });
+
+    const buscador = document.getElementById('buscador');
+    const btnLimpiar = document.getElementById('btn-limpiar-busqueda');
+    buscador.addEventListener('input', () => {
+        ui.busqueda = buscador.value.trim().toLowerCase();
+        btnLimpiar.hidden = !buscador.value;
+        renderLista();
+    });
+    btnLimpiar.addEventListener('click', () => {
+        buscador.value = '';
+        buscador.dispatchEvent(new Event('input'));
+        buscador.focus();
+    });
+
+    // 6. Navegación: Pedidos / Pagos & Bot / Ajustes
+    document.querySelectorAll('[data-vista], [data-vista-dock]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+            cerrarModal(document.getElementById('modal-ajustes'));
+            mostrarVista(btn.dataset.vista ?? btn.dataset.vistaDock);
+        });
+    });
+    pintarNavegacion();
+    document.getElementById('btn-recargar-metodos').addEventListener('click', cargarMetodosPago);
+    document.getElementById('bot-buscar').addEventListener('input', pintarCatalogoBot);
+    document.getElementById('form-pago').addEventListener('submit', guardarPago);
+    document.querySelectorAll('[data-abrir-ajustes]').forEach((btn) => {
+        btn.addEventListener('click', () => abrirModal(document.getElementById('modal-ajustes')));
+    });
+
+    // 7. Modales: cerrar con fondo, botón o tecla Esc
+    document.querySelectorAll('[data-cerrar-modal]').forEach((el) => {
+        el.addEventListener('click', () => cerrarModal(el.closest('[role="dialog"]')));
+    });
+    document.addEventListener('keydown', (e) => {
+        if (e.key !== 'Escape') return;
+        document.querySelectorAll('[role="dialog"]:not([hidden])').forEach(cerrarModal);
+    });
+    document.getElementById('form-editar').addEventListener('submit', guardarEdicion);
+
+    // 8. Ojo de visibilidad para campos de contraseña / clave
+    document.querySelectorAll('[data-ojo]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+            const input = document.getElementById(btn.dataset.ojo);
+            const mostrar = input.type === 'password';
+            input.type = mostrar ? 'text' : 'password';
+            btn.innerHTML = `<i class="fa-solid ${mostrar ? 'fa-eye-slash' : 'fa-eye'}"></i>`;
+            btn.setAttribute('aria-label', mostrar ? 'Ocultar' : 'Mostrar');
+        });
+    });
+
+    // 9. Sonido On/Off (preferencia compartida con ui.js)
+    const ajusteSonido = document.getElementById('ajuste-sonido');
+    ajusteSonido.checked = Sonidos.activo();
+    ajusteSonido.addEventListener('change', () => {
+        Sonidos.activar(ajusteSonido.checked);
+        if (ajusteSonido.checked) Sonidos.completar();
+    });
+
+    pintarTabs();
+    indicadorEnVivo(false);
+});
+
+/* ==================== CARGA DE DATOS ==================== */
+
+async function cargarPedidos() {
+    const contenedor = document.getElementById('lista-pedidos');
+    const iconoRecargar = document.querySelector('#btn-recargar i');
+
+    iconoRecargar?.classList.add('fa-spin');
+    contenedor.innerHTML = Array.from({ length: 4 }, skeletonTarjeta).join('');
+
+    const { data, error } = await consultarPedidos();
+    iconoRecargar?.classList.remove('fa-spin');
+
+    if (error) {
+        console.error('Error al cargar pedidos:', error);
+        contenedor.innerHTML = `
+            <div class="col-span-full rounded-3xl bg-red-500/[0.06] ring-1 ring-red-500/30 p-8 text-center">
+                <i class="fa-solid fa-triangle-exclamation text-red-400 text-3xl mb-3"></i>
+                <p class="text-sm font-bold text-red-200">No se pudieron cargar los pedidos.</p>
+                <p class="text-xs text-red-300/70 mt-1 break-words">${escaparHTML(error.message)}</p>
+            </div>`;
+        return;
+    }
+
+    // Los pedidos de prueba viven solo en memoria: se conservan al recargar
+    const pruebas = [...pedidos.values()].filter((fila) => fila._prueba);
+    pedidos.clear();
+    data.forEach((fila) => pedidos.set(String(fila.id), fila));
+    pruebas.forEach((fila) => pedidos.set(String(fila.id), fila));
+    renderLista({ animar: true });
+}
+
+// Ordena por la columna de fecha que exista (created_at o creado_at); si ninguna existe, por id
+async function consultarPedidos() {
+    const candidatas = columnaFecha ? [columnaFecha] : [...COLUMNAS_FECHA, null];
+    let ultimoError = null;
+
+    for (const columna of candidatas) {
+        let consulta = supabaseClient.from('compras_proveedor').select('*');
+        if (columna) consulta = consulta.order(columna, { ascending: false });
+        const { data, error } = await consulta.order('id', { ascending: false }).limit(LIMITE_PEDIDOS);
+
+        if (!error) {
+            columnaFecha = columna;
+            return { data, error: null };
+        }
+        ultimoError = error;
+        // 42703 = la columna no existe → probar la siguiente; cualquier otro error se reporta
+        if (error.code !== '42703') break;
+    }
+    return { data: null, error: ultimoError };
+}
+
+/* ==================== FILTROS, BÚSQUEDA Y RENDER ==================== */
+
+function esPendiente(fila) {
+    return ESTADOS_ACTIVOS.includes(fila?.estado);
+}
+
+function categoriaDe(fila) {
+    const nombre = ` ${String(leerCampo(fila, 'producto', '')).toLowerCase()} `;
+    return CATEGORIAS.find((c) => c.palabras.some((p) => nombre.includes(p))) ?? CATEGORIA_OTROS;
+}
+
+function coincideFiltro(fila) {
+    if (ui.filtro === 'pendientes' && !esPendiente(fila)) return false;
+    if (ui.filtro === 'entregados' && esPendiente(fila)) return false;
+    if (ui.categoria !== 'todas' && categoriaDe(fila).id !== ui.categoria) return false;
+    if (!ui.busqueda) return true;
+    const p = normalizarPedido(fila);
+    return [p.id, p.pedidoId, p.producto, p.variante, fila.estado]
+        .some((valor) => String(valor).toLowerCase().includes(ui.busqueda));
+}
+
+function filasOrdenadas() {
+    const fecha = (fila) => new Date(leerCampo(fila, 'fecha', 0)).getTime() || 0;
+    return [...pedidos.values()].sort((a, b) => fecha(b) - fecha(a) || (Number(b.id) || 0) - (Number(a.id) || 0));
+}
+
+function filasVisibles() {
+    return filasOrdenadas().filter(coincideFiltro);
+}
+
+function renderLista({ animar = false } = {}) {
+    const contenedor = document.getElementById('lista-pedidos');
+    const visibles = filasVisibles();
+    pintarTabs();
+
+    if (visibles.length === 0) {
+        mostrarVacio();
+        return;
+    }
+
+    contenedor.replaceChildren(...visibles.map(crearTarjeta));
+    if (!animar) return;
+    contenedor.querySelectorAll('article').forEach((tarjeta, i) => {
+        tarjeta.animate(
+            [{ opacity: 0, transform: 'translateY(14px) scale(.98)' }, { opacity: 1, transform: 'none' }],
+            { duration: 420, delay: Math.min(i, 8) * 60, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'backwards' }
+        );
+    });
+}
+
+function mostrarVacio() {
+    const mensajes = {
+        pendientes: ['fa-circle-check', 'No hay pedidos pendientes', 'Todo al día. Usa “+” para generar un pedido de prueba.'],
+        entregados: ['fa-box-open', 'Aún no hay entregas', 'Los pedidos marcados como realizados aparecerán aquí.'],
+        todos:      ['fa-inbox', 'Sin pedidos registrados', 'Cuando entre el primer pago lo verás aquí en tiempo real.'],
+    };
+    let [icono, titulo, detalle] = mensajes[ui.filtro];
+    if (ui.categoria !== 'todas') {
+        [icono, titulo, detalle] = ['fa-filter', 'Nada en esta categoría', 'Prueba con otra categoría o con “Todas”.'];
+    }
+    if (ui.busqueda) {
+        [icono, titulo, detalle] = ['fa-magnifying-glass', 'Sin resultados', `Ningún pedido coincide con “${ui.busqueda}”.`];
+    }
+
+    document.getElementById('lista-pedidos').innerHTML = `
+        <div class="col-span-full rounded-3xl bg-white/[0.02] border border-dashed border-white/10 p-10 sm:p-14 text-center">
+            <div class="mx-auto mb-5 grid place-items-center w-16 h-16 rounded-2xl bg-emerald-500/10 ring-1 ring-emerald-500/30 shadow-lg shadow-emerald-500/10">
+                <i class="fa-solid ${icono} text-emerald-400 text-2xl"></i>
+            </div>
+            <h3 class="font-tech text-lg font-black uppercase tracking-wider">${escaparHTML(titulo)}</h3>
+            <p class="text-xs text-neutral-500 mt-2">${escaparHTML(detalle)}</p>
+        </div>`;
+}
+
+function cambiarFiltro(filtro) {
+    if (ui.filtro === filtro) return;
+    ui.filtro = filtro;
+    renderLista({ animar: true });
+}
+
+function cambiarCategoria(categoria) {
+    if (ui.categoria === categoria) return;
+    ui.categoria = categoria;
+    renderLista({ animar: true });
+}
+
+// Pestañas de estado y categoría con contadores dinámicos + KPIs
+function pintarTabs() {
+    const filas = [...pedidos.values()];
+    const pendientes = filas.filter(esPendiente).length;
+    const totales = { pendientes, entregados: filas.length - pendientes, todos: filas.length };
+
+    document.querySelectorAll('[data-contador]').forEach((el) => {
+        el.textContent = totales[el.dataset.contador];
+    });
+
+    const orden = ['pendientes', 'entregados', 'todos'];
+    document.querySelectorAll('[data-filtro]').forEach((tab) => {
+        const activa = tab.dataset.filtro === ui.filtro;
+        tab.setAttribute('aria-selected', String(activa));
+        tab.classList.toggle('text-white', activa);
+        tab.classList.toggle('text-neutral-400', !activa);
+    });
+    const indicador = document.getElementById('tab-indicador');
+    if (indicador) indicador.style.transform = `translateX(calc(${orden.indexOf(ui.filtro)} * (100% + 0.25rem)))`;
+
+    pintarCategorias(filas);
+    pintarKPIs(filas);
+    pintarPagosBot();
+}
+
+function pintarCategorias(filas) {
+    const caja = document.getElementById('filtro-categorias');
+    if (!caja) return;
+    const conteo = { todas: filas.length };
+    filas.forEach((fila) => {
+        const id = categoriaDe(fila).id;
+        conteo[id] = (conteo[id] ?? 0) + 1;
+    });
+
+    const opciones = [{ id: 'todas', texto: 'Todas', icono: 'fa-border-all' }, ...CATEGORIAS.slice().reverse(), CATEGORIA_OTROS];
+    caja.replaceChildren(...opciones.map(({ id, texto, icono }) => {
+        const activa = ui.categoria === id;
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = `btn-cyber shrink-0 inline-flex items-center gap-2 min-h-[44px] px-4 rounded-2xl text-[11px] font-bold uppercase tracking-wider ring-1 ${
+            activa ? 'bg-dcRed/15 ring-dcRed/50 text-white' : 'bg-white/[0.03] ring-white/10 text-neutral-400 hover:text-white'}`;
+        btn.innerHTML = `<i class="fa-solid ${icono} ${activa ? 'text-dcRed' : ''}"></i> ${texto}
+            <span class="px-1.5 py-0.5 rounded-md bg-white/10 text-[10px] text-neutral-300">${conteo[id] ?? 0}</span>`;
+        btn.addEventListener('click', () => cambiarCategoria(id));
+        return btn;
+    }));
+}
+
+/* ==================== MICRO-DASHBOARD KPI ==================== */
+
+function pintarKPIs(filas) {
+    const hoy = new Date().toDateString();
+    const pedidosHoy = filas.filter((fila) => {
+        const f = leerCampo(fila, 'fecha', null);
+        return f && new Date(f).toDateString() === hoy;
+    }).length;
+
+    document.getElementById('kpi-hoy').textContent = pedidosHoy;
+    document.getElementById('kpi-procesando').textContent = filas.filter((fila) => fila.estado === ESTADO_PENDIENTE).length;
+
+    // Tiempo promedio = entregado_at − fecha de creación (requiere la columna entregado_at)
+    const tiempos = filas
+        .map((fila) => {
+            const inicio = new Date(leerCampo(fila, 'fecha', null)).getTime();
+            const fin = new Date(leerCampo(fila, 'entregado', null)).getTime();
+            return fin - inicio;
+        })
+        .filter((ms) => Number.isFinite(ms) && ms >= 0);
+
+    const kpiTiempo = document.getElementById('kpi-tiempo');
+    const nota = document.getElementById('kpi-tiempo-nota');
+    if (tiempos.length) {
+        kpiTiempo.textContent = formatearDuracion(tiempos.reduce((a, b) => a + b, 0) / tiempos.length);
+        nota.textContent = `${tiempos.length} entrega${tiempos.length === 1 ? '' : 's'}`;
+    } else {
+        kpiTiempo.textContent = '—';
+        nota.textContent = tieneColumnaEntregado() ? 'Sin entregas aún' : 'Falta columna entregado_at';
+    }
+}
+
+function tieneColumnaEntregado() {
+    return [...pedidos.values()].some((fila) => !fila._prueba && 'entregado_at' in fila);
+}
+
+function formatearDuracion(ms) {
+    const minutos = Math.round(ms / 60000);
+    if (minutos < 1) return '<1 min';
+    if (minutos < 60) return `${minutos} min`;
+    const horas = Math.floor(minutos / 60);
+    if (horas < 24) return `${horas} h ${minutos % 60} min`;
+    return `${Math.floor(horas / 24)} d ${horas % 24} h`;
+}
+
+/* ==================== TIEMPO REAL (Supabase Realtime) ==================== */
+
+function iniciarRealtime() {
+    if (canalPedidos) return;
+    let yaConectado = false;
+
+    canalPedidos = supabaseClient
+        .channel('admin-compras-proveedor')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'compras_proveedor' }, manejarCambio)
+        .subscribe((estado, err) => {
+            const enVivo = estado === 'SUBSCRIBED';
+            indicadorEnVivo(enVivo);
+            if (err) console.error('Realtime:', estado, err);
+            // Tras una reconexión se pudieron perder eventos: resincronizar
+            if (enVivo && yaConectado) cargarPedidos();
+            if (enVivo) yaConectado = true;
+        });
+}
+
+async function detenerRealtime() {
+    if (!canalPedidos) return;
+    await supabaseClient.removeChannel(canalPedidos);
+    canalPedidos = null;
+    indicadorEnVivo(false);
+}
+
+// Aplica un INSERT / UPDATE / DELETE sin recargar la lista (también lo usa el simulador)
+function manejarCambio({ eventType, new: nuevo, old: viejo }) {
+    const id = String(nuevo?.id ?? viejo?.id ?? '');
+    if (!id) return;
+
+    const tarjeta = buscarTarjeta(id);
+    // Una tarjeta que este panel está procesando o retirando ya se gestiona sola
+    if (tarjeta?.dataset.procesando || tarjeta?.dataset.saliendo) return;
+
+    if (eventType === 'DELETE') {
+        pedidos.delete(id);
+        if (tarjeta) retirarTarjeta(tarjeta);
+        pintarTabs();
+        return;
+    }
+
+    const esNuevo = eventType === 'INSERT' && !pedidos.has(id);
+    pedidos.set(id, nuevo);
+    pintarTabs();
+
+    if (coincideFiltro(nuevo)) {
+        if (tarjeta) tarjeta.replaceWith(crearTarjeta(nuevo));
+        else agregarTarjeta(nuevo);
+    } else if (tarjeta) {
+        retirarTarjeta(tarjeta);
+    }
+
+    if (esNuevo) {
+        const p = normalizarPedido(nuevo);
+        const etiqueta = nuevo._prueba ? 'Pedido de prueba' : 'Nuevo pedido';
+        mostrarToast(`${etiqueta} #${p.ref}: ${p.producto} x${p.cantidad}`, 'nuevo', 6000);
+        Sonidos.nuevo();
+    }
+}
+
+// El indicador "En vivo" aparece en la barra móvil, la cabecera y los ajustes
+function indicadorEnVivo(activo) {
+    document.querySelectorAll('[data-indicador-vivo]').forEach((indicador) => {
+        const visibleEnEscritorio = indicador.classList.contains('md:inline-flex');
+        indicador.className = `${visibleEnEscritorio ? 'hidden md:inline-flex' : 'inline-flex'} items-center gap-2 px-3 py-2 rounded-xl ring-1 text-[10px] font-black uppercase tracking-widest ${
+            activo ? 'bg-emerald-500/10 text-emerald-300 ring-emerald-500/30' : 'bg-white/[0.04] text-neutral-500 ring-white/10'}`;
+        indicador.title = activo ? 'Los cambios llegan automáticamente' : 'Sin conexión en tiempo real: usa el botón de actualizar';
+        indicador.innerHTML = `
+            <span class="relative flex h-2 w-2">
+                ${activo ? '<span class="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 animate-ping"></span>' : ''}
+                <span class="relative inline-flex h-2 w-2 rounded-full ${activo ? 'bg-emerald-400' : 'bg-neutral-500'}"></span>
+            </span>
+            ${activo ? 'En vivo' : 'Sin conexión'}`;
+    });
+}
+
+/* ==================== SIMULADOR DE PEDIDOS ==================== */
+
+// Crea un pedido ficticio en memoria y lo pasa por el mismo flujo que un INSERT real
+function generarPedidoPrueba() {
+    const azar = (n) => Math.floor(Math.random() * n);
+    const base = PRODUCTOS_PRUEBA[azar(PRODUCTOS_PRUEBA.length)];
+    const bloque = () => Math.random().toString(36).slice(2, 7).toUpperCase().padEnd(5, 'X');
+
+    const fila = {
+        id: `prueba-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`, // único aunque se generen varios en el mismo ms
+        pedido_id: `TEST-${1000 + azar(9000)}`,
+        variante_id: `VAR-${100 + azar(900)}`,
+        estado: Math.random() < 0.35 ? ESTADO_PENDIENTE_PAGO : ESTADO_PENDIENTE,
+        garantia_dias: GARANTIA_DIAS,
+        clave_serial: Math.random() < 0.5 ? `${bloque()}-${bloque()}-${bloque()}-${bloque()}` : null,
+        referencia_externa: base.referencia,
+        costo_real_cop: base.costo,
+        created_at: new Date().toISOString(),
+        _prueba: true,
+    };
+
+    // Si el filtro actual ocultaría el pedido, volver a "Pendientes / Todas" para verlo entrar
+    if (!coincideFiltro(fila)) {
+        ui.filtro = 'pendientes';
+        ui.categoria = 'todas';
+        renderLista();
+    }
+    manejarCambio({ eventType: 'INSERT', new: fila });
+}
+
+/* ==================== TARJETAS ==================== */
+
+function buscarTarjeta(id) {
+    return document.querySelector(`#lista-pedidos article[data-id="${CSS.escape(String(id))}"]`);
+}
+
+// Primer valor no vacío entre los nombres de columna conocidos
+function leerCampo(pedido, campo, porDefecto) {
+    for (const columna of COLUMNAS[campo]) {
+        const valor = pedido?.[columna];
+        if (valor !== null && valor !== undefined && String(valor).trim() !== '') return valor;
+    }
+    return porDefecto;
+}
+
+// Convierte una fila de la BD en datos seguros para pintar (nunca null/undefined)
+function normalizarPedido(pedido) {
+    const cantidad = Number.parseInt(leerCampo(pedido, 'cantidad', 1), 10);
+    const costo = Number(leerCampo(pedido, 'costo', NaN));
+    const fechaBruta = leerCampo(pedido, 'fecha', null);
+    const fecha = fechaBruta ? new Date(fechaBruta) : null;
+    const id = pedido?.id ?? '—';
+    const pedidoId = leerCampo(pedido, 'pedido', null);
+
+    return {
+        id,
+        pedidoId: pedidoId === null ? '—' : String(pedidoId),
+        ref: String(pedidoId ?? id), // número que se muestra y se envía por WhatsApp
+        producto: String(leerCampo(pedido, 'producto', 'Producto sin referencia')),
+        variante: String(leerCampo(pedido, 'variante', '—')),
+        costoNumero: Number.isFinite(costo) ? costo : null,
+        costo: Number.isFinite(costo)
+            ? costo.toLocaleString('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 })
+            : '—',
+        cantidad: Number.isFinite(cantidad) && cantidad > 0 ? cantidad : 1,
+        fechaISO: fecha && !Number.isNaN(fecha.getTime()) ? fecha.toISOString() : '',
+        fecha: fecha && !Number.isNaN(fecha.getTime())
+            ? fecha.toLocaleString('es-CO', { dateStyle: 'medium', timeStyle: 'short' })
+            : '—',
+        estadoTexto: ESTADOS[pedido?.estado]?.texto ?? pedido?.estado ?? 'Sin estado',
+        tieneClave: Boolean(pedido?.clave_serial),
+        prueba: Boolean(pedido?._prueba),
+    };
+}
+
+function mensajeProveedor(p) {
+    return PlantillasWA.pedidoProveedor({ pedido: p.ref, producto: p.producto, cantidad: p.cantidad });
+}
+
+function enlaceProveedor(p) {
+    return `https://wa.me/${WHATSAPP_PROVEEDOR}?text=${encodeURIComponent(mensajeProveedor(p))}`;
+}
+
+// Formato limpio para pegar en un chat
+function resumenChat(p) {
+    return `📦 PEDIDO #${p.ref} | 🔑 PRODUCTO: ${p.producto} | STATUS: ${p.estadoTexto}`;
+}
+
+// Días que faltan para que venza la garantía (null si no hay fecha de vencimiento)
+function diasParaVencer(fila) {
+    const vence = new Date(leerCampo(fila, 'vencimiento', null)).getTime();
+    return Number.isFinite(vence) ? Math.ceil((vence - Date.now()) / 86400000) : null;
+}
+
+// Garantía: usa fecha_vencimiento (la calcula la BD al asignar la clave); si no existe, cuenta desde la entrega
+function garantia(fila) {
+    const dias = Number(leerCampo(fila, 'garantiaDias', GARANTIA_DIAS)) || GARANTIA_DIAS;
+    if (esPendiente(fila) && !leerCampo(fila, 'vencimiento', null)) {
+        return { texto: `Garantía ${dias} días · se activa al asignar la cuenta`, clases: 'text-neutral-400 ring-white/10 bg-white/[0.03]', icono: 'fa-shield' };
+    }
+    let restantes = diasParaVencer(fila);
+    if (restantes === null) {
+        const inicio = new Date(leerCampo(fila, 'entregado', null) ?? leerCampo(fila, 'fecha', null)).getTime();
+        if (!Number.isFinite(inicio)) {
+            return { texto: `Garantía ${dias} días activada`, clases: 'text-emerald-300 ring-emerald-500/30 bg-emerald-500/10', icono: 'fa-shield-halved' };
+        }
+        restantes = dias - Math.floor((Date.now() - inicio) / 86400000);
+    }
+    if (restantes <= 0) {
+        return { texto: 'Garantía vencida', clases: 'text-neutral-500 ring-white/10 bg-white/[0.03]', icono: 'fa-shield' };
+    }
+    return {
+        texto: `Garantía ${dias} días activada · quedan ${restantes}`,
+        clases: restantes <= 5 ? 'text-amber-300 ring-amber-500/30 bg-amber-500/10' : 'text-emerald-300 ring-emerald-500/30 bg-emerald-500/10',
+        icono: 'fa-shield-halved',
+    };
+}
+
+// Crea el <article> de un pedido con sus botones conectados
+function crearTarjeta(fila) {
+    const plantilla = document.createElement('template');
+    plantilla.innerHTML = tarjetaPedido(fila).trim();
+    const tarjeta = plantilla.content.firstElementChild;
+    const p = normalizarPedido(fila);
+
+    tarjeta.querySelector('[data-accion="marcar"]')?.addEventListener('click', (e) => marcarComoPedido(String(p.id), e.currentTarget, p.ref));
+    tarjeta.querySelector('[data-accion="pago"]')?.addEventListener('click', () => abrirPago(String(p.id)));
+    tarjeta.querySelector('[data-accion="copiar"]').addEventListener('click', () => copiarTexto(mensajeProveedor(p), 'Pedido copiado para el proveedor'));
+    tarjeta.querySelector('[data-accion="resumen"]').addEventListener('click', () => copiarTexto(resumenChat(p), 'Resumen copiado para chat'));
+    tarjeta.querySelector('[data-accion="qr"]').addEventListener('click', () => abrirQR(p));
+    tarjeta.querySelector('[data-accion="editar"]').addEventListener('click', () => abrirEdicion(String(p.id)));
+    return tarjeta;
+}
+
+// Inserta una tarjeta nueva con entrada neón instantánea
+function agregarTarjeta(fila) {
+    const contenedor = document.getElementById('lista-pedidos');
+    if (!contenedor.querySelector('article')) contenedor.innerHTML = ''; // quita el estado vacío
+    const tarjeta = crearTarjeta(fila);
+    contenedor.prepend(tarjeta); // la lista va de más reciente a más antiguo
+
+    tarjeta.animate(
+        [{ opacity: 0, transform: 'translateY(16px) scale(.94)' }, { opacity: 1, transform: 'none' }],
+        { duration: 450, easing: 'cubic-bezier(.2,.8,.2,1)' }
+    );
+    tarjeta.animate(
+        [{ boxShadow: '0 0 0 2px rgba(255,0,51,.9), 0 0 60px rgba(255,0,51,.55)' }, { boxShadow: '0 0 0 0 rgba(255,0,51,0)' }],
+        { duration: 2000, easing: 'ease-out' }
+    );
+}
+
+// Salida fluida: contracción + desvanecido, luego eliminar
+async function retirarTarjeta(tarjeta) {
+    tarjeta.dataset.saliendo = '1';
+    await tarjeta.animate(
+        [{ opacity: 1, transform: 'scale(1)' }, { opacity: 0, transform: 'scale(.88) translateY(-8px)' }],
+        { duration: 380, easing: 'cubic-bezier(.4,0,.2,1)', fill: 'forwards' }
+    ).finished;
+    tarjeta.remove();
+    if (!document.querySelector('#lista-pedidos article')) mostrarVacio();
+}
+
+function skeletonTarjeta() {
+    return `
+        <div class="rounded-3xl bg-white/[0.03] ring-1 ring-dcRed/10 p-5 space-y-4" aria-hidden="true">
+            <div class="flex justify-between"><div class="skeleton h-6 w-36 rounded-full"></div><div class="skeleton h-4 w-16 rounded-md"></div></div>
+            <div class="space-y-2"><div class="skeleton h-3 w-24 rounded"></div><div class="skeleton h-6 w-3/4 rounded-lg"></div></div>
+            <div class="grid grid-cols-2 gap-2">${'<div class="skeleton h-14 rounded-2xl"></div>'.repeat(4)}</div>
+            <div class="grid grid-cols-5 gap-2">${'<div class="skeleton h-12 rounded-2xl"></div>'.repeat(5)}</div>
+            <div class="skeleton h-12 rounded-2xl"></div>
+        </div>`;
+}
+
+// Plantilla de una tarjeta de pedido (cristal + hover elevado + glow si está pendiente)
+function tarjetaPedido(fila) {
+    const p = normalizarPedido(fila);
+    const pendiente = esPendiente(fila);
+    const categoria = categoriaDe(fila);
+    const g = garantia(fila);
+    const boton = 'btn-cyber grid place-items-center min-h-[48px] rounded-2xl bg-white/[0.04] ring-1 ring-white/10 text-neutral-300 hover:text-white';
+
+    return `
+        <article data-id="${escaparHTML(p.id)}"
+            class="group relative overflow-hidden rounded-3xl bg-white/[0.03] backdrop-blur-xl ring-1 ${p.prueba ? 'ring-sky-400/30' : 'ring-white/10'} ${pendiente ? 'glow-activo' : ''} shadow-2xl shadow-black/40 p-5 flex flex-col gap-4 transform-gpu transition-all duration-300 hover:-translate-y-1 hover:ring-dcRed/40 hover:shadow-red-500/10">
+            <div class="pointer-events-none absolute -top-20 -right-20 w-48 h-48 rounded-full bg-dcRed/20 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+
+            <div class="relative flex flex-wrap items-center justify-between gap-2">
+                <span class="badge-estado">${badgeEstado(fila.estado)}</span>
+                <span class="flex items-center gap-1.5">
+                    ${p.prueba ? '<span class="px-2 py-1 rounded-full bg-sky-500/15 ring-1 ring-sky-400/40 text-sky-300 text-[9px] font-black uppercase tracking-widest">Prueba</span>' : ''}
+                    ${p.tieneClave ? '<span class="badge-vip px-2 py-1 rounded-full text-[9px] font-black uppercase tracking-widest"><i class="fa-solid fa-bolt mr-1"></i>VIP · Entrega inmediata</span>' : ''}
+                </span>
+            </div>
+
+            <div class="relative min-w-0">
+                <p class="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.25em] text-dcRed truncate">
+                    Pedido #${escaparHTML(p.ref)}
+                    <span class="text-neutral-500 tracking-wider"><i class="fa-solid ${categoria.icono} mr-1"></i>${escaparHTML(categoria.texto)}</span>
+                </p>
+                <h3 class="mt-1 font-tech text-xl font-black leading-tight text-white break-words">${escaparHTML(p.producto)}</h3>
+            </div>
+
+            <dl class="relative grid grid-cols-2 gap-2 text-xs">
+                ${celda('fa-receipt', 'Pedido', p.pedidoId)}
+                ${celda('fa-layer-group', 'Variante', p.variante)}
+                ${celda('fa-coins', 'Costo', p.costo, 'text-emerald-300')}
+                ${celda('fa-key', 'Clave', p.tieneClave ? 'Asignada' : 'Sin asignar', p.tieneClave ? 'text-emerald-300' : 'text-amber-300')}
+            </dl>
+
+            <div class="relative flex flex-wrap items-center justify-between gap-2 -mt-1">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full ring-1 text-[10px] font-bold ${g.clases}">
+                    <i class="fa-solid ${g.icono}"></i> ${escaparHTML(g.texto)}
+                </span>
+                <span class="text-[11px] text-neutral-500"><i class="fa-regular fa-clock mr-1"></i>${escaparHTML(p.fecha)}</span>
+            </div>
+
+            <div class="relative mt-auto grid grid-cols-5 gap-2">
+                <a href="${enlaceProveedor(p)}" target="_blank" rel="noopener" title="Enviar al proveedor por WhatsApp" aria-label="Enviar al proveedor por WhatsApp"
+                    class="${boton} hover:text-emerald-300"><i class="fa-brands fa-whatsapp text-lg"></i></a>
+                <button type="button" data-accion="copiar" title="Copiar pedido para el proveedor" aria-label="Copiar pedido para el proveedor" class="${boton}">
+                    <i class="fa-regular fa-copy"></i>
+                </button>
+                <button type="button" data-accion="resumen" title="Copiar resumen para chat" aria-label="Copiar resumen para chat" class="${boton}">
+                    <i class="fa-regular fa-comment-dots"></i>
+                </button>
+                <button type="button" data-accion="qr" title="QR para enviar desde el celular" aria-label="QR para enviar desde el celular" class="${boton}">
+                    <i class="fa-solid fa-qrcode"></i>
+                </button>
+                <button type="button" data-accion="editar" title="Edición rápida" aria-label="Edición rápida" class="${boton}">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                </button>
+            </div>
+            ${fila.estado === ESTADO_PENDIENTE_PAGO ? `
+            <button type="button" data-accion="pago"
+                class="btn-cyber ancho relative flex items-center justify-center gap-2 min-h-[52px] rounded-2xl bg-sky-600 hover:bg-sky-500 text-xs font-black uppercase tracking-wider text-white shadow-lg shadow-sky-600/25">
+                <i class="fa-solid fa-receipt text-sm"></i> Registrar pago
+            </button>` : ''}
+            ${fila.estado === ESTADO_PENDIENTE ? `
+            <button type="button" data-accion="marcar"
+                class="btn-cyber ancho relative flex items-center justify-center gap-2 min-h-[52px] rounded-2xl bg-dcRed hover:bg-dcRedDark text-xs font-black uppercase tracking-wider text-white shadow-lg shadow-red-600/25 disabled:opacity-70 disabled:cursor-wait">
+                <i class="fa-solid fa-truck-fast text-sm"></i> Marcar como Pedido
+            </button>` : ''}
+        </article>`;
+}
+
+function celda(icono, etiqueta, valor, colorValor = 'text-white') {
+    return `
+        <div class="rounded-2xl bg-dcDarkBg/60 ring-1 ring-white/5 p-3 min-w-0">
+            <dt class="text-[10px] uppercase font-bold tracking-wider text-neutral-500"><i class="fa-solid ${icono} mr-1"></i> ${etiqueta}</dt>
+            <dd class="mt-1 font-bold truncate ${colorValor}" title="${escaparHTML(valor)}">${escaparHTML(valor)}</dd>
+        </div>`;
+}
+
+// Badge con LED pulsante
+function badgeEstado(estado) {
+    const e = ESTADOS[estado] ?? { texto: estado ?? 'Sin estado', clases: 'bg-white/5 text-neutral-300 ring-white/10', punto: 'bg-neutral-400', pulso: false };
+    return `
+        <span class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full ring-1 text-[10px] font-black uppercase tracking-widest ${e.clases}">
+            <span class="relative flex h-2 w-2">
+                ${e.pulso ? `<span class="absolute inline-flex h-full w-full rounded-full ${e.punto} opacity-75 animate-ping"></span>` : ''}
+                <span class="relative inline-flex h-2 w-2 rounded-full ${e.punto}"></span>
+            </span>
+            ${escaparHTML(e.texto)}
+        </span>`;
+}
+
+/* ==================== ACCIONES ==================== */
+
+// id = clave de compras_proveedor (para el UPDATE); ref = pedido_id visible en los avisos
+async function marcarComoPedido(id, btn, ref = id) {
+    const tarjeta = btn.closest('article');
+    const contenidoOriginal = btn.innerHTML;
+    const filaActual = pedidos.get(String(id));
+
+    // Spinner y bloqueo; Realtime ignora esta tarjeta mientras se procesa
+    tarjeta.dataset.procesando = '1';
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-sm"></i> Procesando...';
+
+    const cambios = { estado: 'PEDIDO_REALIZADO' };
+    // Registrar la hora de entrega si la tabla tiene la columna (alimenta el KPI de tiempo promedio)
+    if (filaActual?._prueba || tieneColumnaEntregado()) cambios.entregado_at = new Date().toISOString();
+
+    let filaNueva;
+    if (filaActual?._prueba) {
+        await new Promise((r) => setTimeout(r, 500)); // simula la latencia de red
+        filaNueva = { ...filaActual, ...cambios };
+    } else {
+        const { data, error } = await supabaseClient
+            .from('compras_proveedor')
+            .update(cambios)
+            .eq('id', id)
+            .eq('estado', ESTADO_PENDIENTE) // solo si sigue pendiente
+            .select('*');
+
+        // Supabase no da error si RLS bloquea el update: devuelve 0 filas. Por eso se revisa data.length.
+        if (error || !data || data.length === 0) {
+            console.error(
+                `Error al marcar el pedido #${ref} como PEDIDO_REALIZADO:`,
+                error ?? 'No se actualizó ninguna fila (el id no existe, ya no está pendiente, o RLS bloqueó el UPDATE).'
+            );
+            mostrarToast(`No se pudo actualizar el pedido #${ref}. Revisa la consola.`, 'error', 5000);
+            Sonidos.error();
+            delete tarjeta.dataset.procesando;
+            btn.disabled = false;
+            btn.innerHTML = contenidoOriginal;
+            return;
+        }
+        filaNueva = data[0];
+    }
+
+    pedidos.set(String(id), filaNueva);
+    pintarTabs();
+
+    // Confirmación: badge verde, botón "Listo"
+    tarjeta.querySelector('.badge-estado').innerHTML = badgeEstado('PEDIDO_REALIZADO');
+    tarjeta.classList.remove('glow-activo');
+    tarjeta.classList.replace('ring-white/10', 'ring-emerald-500/50');
+    btn.innerHTML = '<i class="fa-solid fa-check text-sm"></i> Listo';
+    btn.classList.replace('bg-dcRed', 'bg-emerald-600');
+    mostrarToast(`Pedido #${ref} marcado como realizado.`, 'ok');
+    Sonidos.completar();
+    navigator.vibrate?.(20);
+
+    await new Promise((r) => setTimeout(r, 650));
+    if (coincideFiltro(filaNueva)) {
+        // Sigue visible (pestaña "Todos"): reemplazar por la versión actualizada
+        tarjeta.replaceWith(crearTarjeta(filaNueva));
+    } else {
+        retirarTarjeta(tarjeta);
+    }
+}
+
+/* ==================== MODAL: QR DE WHATSAPP ==================== */
+
+function abrirQR(p) {
+    const lienzo = document.getElementById('qr-lienzo');
+    const enlace = enlaceProveedor(p);
+    document.getElementById('modal-qr-ref').textContent = `Pedido #${p.ref} · ${p.producto}`;
+    document.getElementById('qr-abrir').href = enlace;
+
+    lienzo.replaceChildren();
+    if (typeof QRCode === 'function') {
+        new QRCode(lienzo, { text: enlace, width: 220, height: 220, colorDark: '#0F111A', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M });
+    } else {
+        lienzo.textContent = 'No se pudo cargar el generador de QR. Usa el botón de abajo.';
+    }
+    abrirModal(document.getElementById('modal-qr'));
+}
+
+/* ==================== MODAL DE EDICIÓN RÁPIDA ==================== */
+
+function abrirEdicion(id) {
+    const fila = pedidos.get(id);
+    if (!fila) return;
+    pedidoEditando = id;
+    const p = normalizarPedido(fila);
+
+    document.getElementById('modal-editar-ref').textContent = `Pedido #${p.ref} · compra ${p.id}${p.prueba ? ' · prueba' : ''}`;
+    const inputClave = document.getElementById('editar-clave');
+    inputClave.value = fila.clave_serial ?? '';
+    inputClave.type = 'password';
+    document.querySelector('[data-ojo="editar-clave"]').innerHTML = '<i class="fa-solid fa-eye"></i>';
+    document.getElementById('editar-referencia').value = fila.referencia_externa ?? '';
+    document.getElementById('editar-costo').value = fila.costo_real_cop ?? '';
+
+    // Campos de WO-011: solo si la fila ya trae esas columnas (tras ejecutar supabase/wo-011.sql)
+    const conWO011 = filaTieneWO011(fila);
+    document.getElementById('campos-wo011').hidden = !conWO011;
+    if (conWO011) {
+        document.getElementById('editar-whatsapp').value = fila.cliente_whatsapp ?? '';
+        document.getElementById('editar-garantia').value = fila.garantia_dias ?? GARANTIA_DIAS;
+        const vence = leerCampo(fila, 'vencimiento', null);
+        document.getElementById('editar-vencimiento').textContent = vence
+            ? `Garantía vigente hasta ${formatearFecha(vence)}. Cambiar la clave o los días la recalcula.`
+            : 'La fecha de vencimiento se calcula sola al asignar la clave / serial.';
+    }
+
+    abrirModal(document.getElementById('modal-editar'));
+}
+
+function filaTieneWO011(fila) {
+    return Boolean(fila?._prueba) || (fila && 'cliente_whatsapp' in fila && 'garantia_dias' in fila);
+}
+
+function formatearFecha(valor) {
+    const fecha = new Date(valor);
+    return Number.isNaN(fecha.getTime()) ? '—' : fecha.toLocaleDateString('es-CO', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+async function guardarEdicion(e) {
+    e.preventDefault();
+    const id = pedidoEditando;
+    if (!id) return;
+    const btn = document.getElementById('btn-guardar-edicion');
+    const costoTexto = document.getElementById('editar-costo').value.trim();
+    const filaActual = pedidos.get(id);
+
+    const cambios = {
+        clave_serial: document.getElementById('editar-clave').value.trim() || null,
+        referencia_externa: document.getElementById('editar-referencia').value.trim() || null,
+        costo_real_cop: costoTexto === '' ? null : Number(costoTexto),
+    };
+
+    if (filaTieneWO011(filaActual)) {
+        const whatsappTexto = document.getElementById('editar-whatsapp').value.trim();
+        const whatsapp = whatsappTexto ? PlantillasWA.normalizarNumero(whatsappTexto) : null;
+        if (whatsappTexto && !whatsapp) {
+            mostrarToast('El WhatsApp no parece válido. Usa 10 dígitos (300…) o el número con indicativo.', 'error', 5000);
+            document.getElementById('editar-whatsapp').focus();
+            return;
+        }
+        cambios.cliente_whatsapp = whatsapp;
+        const dias = Number.parseInt(document.getElementById('editar-garantia').value, 10);
+        cambios.garantia_dias = Number.isFinite(dias) && dias >= 0 ? dias : GARANTIA_DIAS;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Guardando';
+
+    let filaNueva;
+    if (filaActual?._prueba) {
+        filaNueva = { ...filaActual, ...cambios };
+        // Imita el trigger de la BD: al asignar/cambiar clave o días se recalcula el vencimiento
+        if (cambios.clave_serial && (cambios.clave_serial !== filaActual.clave_serial || cambios.garantia_dias !== filaActual.garantia_dias)) {
+            filaNueva.fecha_vencimiento = new Date(Date.now() + (cambios.garantia_dias ?? GARANTIA_DIAS) * 86400000).toISOString();
+        }
+    } else {
+        const { data, error } = await supabaseClient
+            .from('compras_proveedor')
+            .update(cambios)
+            .eq('id', id)
+            .select('*');
+
+        if (error || !data || data.length === 0) {
+            btn.disabled = false;
+            btn.textContent = 'Guardar';
+            console.error(`Error al editar la compra ${id}:`, error ?? 'No se actualizó ninguna fila (¿RLS?).');
+            mostrarToast('No se pudieron guardar los cambios. Revisa la consola.', 'error', 5000);
+            Sonidos.error();
+            return;
+        }
+        filaNueva = data[0];
+    }
+
+    btn.disabled = false;
+    btn.textContent = 'Guardar';
+    pedidos.set(id, filaNueva);
+    pintarTabs();
+
+    const tarjeta = buscarTarjeta(id);
+    if (tarjeta && coincideFiltro(filaNueva)) {
+        const nueva = crearTarjeta(filaNueva);
+        tarjeta.replaceWith(nueva);
+        nueva.animate(
+            [{ boxShadow: '0 0 0 2px rgba(16,185,129,.7), 0 0 40px rgba(16,185,129,.3)' }, { boxShadow: '0 0 0 0 rgba(16,185,129,0)' }],
+            { duration: 1500, easing: 'ease-out' }
+        );
+    } else if (tarjeta) {
+        retirarTarjeta(tarjeta); // p. ej. cambió de categoría y ya no coincide con el filtro
+    }
+    cerrarModal(document.getElementById('modal-editar'));
+    mostrarToast('Cambios guardados.', 'ok');
+    Sonidos.completar();
+}
+
+/* ==================== VISTAS: PEDIDOS / PAGOS & BOT ==================== */
+
+const CLASES_NAV_ACTIVA = ['bg-dcRed/15', 'ring-dcRed/40', 'text-white', 'font-bold', 'shadow-lg', 'shadow-red-600/10'];
+const CLASES_NAV_INACTIVA = ['ring-transparent', 'text-neutral-400', 'hover:text-white', 'hover:bg-white/5', 'font-semibold'];
+
+function mostrarVista(vista) {
+    if (!['pedidos', 'pagos-bot'].includes(vista)) return;
+    const cambio = ui.vista !== vista;
+    ui.vista = vista;
+    document.getElementById('vista-pedidos').hidden = vista !== 'pedidos';
+    document.getElementById('vista-pagos-bot').hidden = vista !== 'pagos-bot';
+    pintarNavegacion();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    document.getElementById('zona-pedidos').scrollTo({ top: 0, behavior: 'smooth' });
+    if (cambio) {
+        document.getElementById(`vista-${vista}`).animate(
+            [{ opacity: 0, transform: 'translateY(12px)' }, { opacity: 1, transform: 'none' }],
+            { duration: 350, easing: 'cubic-bezier(.2,.8,.2,1)' }
+        );
+    }
+}
+
+function pintarNavegacion() {
+    document.querySelectorAll('[data-vista]').forEach((btn) => {
+        const activa = btn.dataset.vista === ui.vista;
+        btn.classList.remove(...CLASES_NAV_ACTIVA, ...CLASES_NAV_INACTIVA);
+        btn.classList.add(...(activa ? CLASES_NAV_ACTIVA : CLASES_NAV_INACTIVA));
+        btn.querySelector('i').classList.toggle('text-dcRed', activa);
+        btn.setAttribute('aria-current', activa ? 'page' : 'false');
+    });
+    document.querySelectorAll('[data-vista-dock]').forEach((btn) => {
+        const activa = btn.dataset.vistaDock === ui.vista;
+        btn.classList.toggle('text-dcRed', activa);
+        btn.classList.toggle('text-neutral-400', !activa);
+    });
+}
+
+// Pinta todo lo que depende de los pedidos en la vista Pagos & Bot
+function pintarPagosBot() {
+    if (!document.getElementById('vista-pagos-bot')) return;
+    const filas = [...pedidos.values()];
+    const porVerificar = filas.filter((fila) => fila.estado === ESTADO_PENDIENTE_PAGO);
+
+    document.getElementById('kpi-por-verificar').textContent = porVerificar.length;
+    document.querySelectorAll('[data-contador-verificar]').forEach((el) => {
+        el.textContent = porVerificar.length;
+        el.hidden = porVerificar.length === 0;
+    });
+
+    pintarPorVerificar(porVerificar);
+    pintarFidelizacion(filas);
+}
+
+function filaVacia(texto, icono = 'fa-circle-check') {
+    return `<p class="flex items-center gap-2 rounded-2xl bg-dcDarkBg/40 ring-1 ring-white/5 px-4 py-3 text-xs text-neutral-500"><i class="fa-solid ${icono}"></i> ${escaparHTML(texto)}</p>`;
+}
+
+/* ==================== MÉTODOS DE PAGO (public.metodos_pago) ==================== */
+
+// La tabla ya existe con columnas propias: se leen con nombres candidatos
+const CAMPOS_METODO = {
+    nombre:     ['nombre', 'metodo', 'tipo', 'banco', 'entidad', 'plataforma'],
+    numero:     ['numero', 'numero_cuenta', 'cuenta', 'telefono', 'celular', 'llave', 'wallet', 'direccion', 'billetera'],
+    titular:    ['titular', 'nombre_titular', 'beneficiario', 'a_nombre_de'],
+    tipoCuenta: ['tipo_cuenta', 'red', 'network'],
+    activo:     ['activo', 'activa', 'habilitado', 'enabled'],
+};
+
+function campoMetodo(fila, campo) {
+    const columnas = CAMPOS_METODO[campo].filter((c) => c in fila);
+    const conValor = columnas.find((c) => fila[c] !== null && fila[c] !== '');
+    return { columna: conValor ?? columnas[0] ?? null, valor: conValor ? fila[conValor] : null };
+}
+
+function metodoActivo(fila) {
+    const { columna, valor } = campoMetodo(fila, 'activo');
+    return columna ? valor !== false : true; // sin columna 'activo' se asume activo
+}
+
+async function cargarMetodosPago() {
+    const caja = document.getElementById('lista-metodos-pago');
+    caja.innerHTML = '<div class="skeleton h-16 rounded-2xl"></div><div class="skeleton h-16 rounded-2xl"></div>';
+
+    const { data, error } = await supabaseClient.from('metodos_pago').select('*');
+    if (error) {
+        console.error('Error al cargar metodos_pago:', error);
+        metodosPago = [];
+        caja.innerHTML = filaVacia(`No se pudo leer metodos_pago: ${error.message}`, 'fa-triangle-exclamation');
+        return;
+    }
+    metodosPago = data ?? [];
+    pintarMetodosPago();
+}
+
+function pintarMetodosPago() {
+    const caja = document.getElementById('lista-metodos-pago');
+    if (metodosPago.length === 0) {
+        caja.innerHTML = filaVacia('No hay cuentas en metodos_pago. Agrégalas en Supabase → Table Editor → metodos_pago.', 'fa-circle-info');
+        return;
+    }
+
+    caja.replaceChildren(...metodosPago.map((fila) => {
+        const nombre = campoMetodo(fila, 'nombre').valor ?? 'Método sin nombre';
+        const numero = campoMetodo(fila, 'numero').valor;
+        const titular = campoMetodo(fila, 'titular').valor;
+        const tipoCuenta = campoMetodo(fila, 'tipoCuenta').valor;
+        const { columna: colActivo } = campoMetodo(fila, 'activo');
+        const activo = metodoActivo(fila);
+
+        const item = document.createElement('div');
+        item.className = `flex items-center gap-3 rounded-2xl bg-dcDarkBg/60 ring-1 ${activo ? 'ring-emerald-500/30' : 'ring-white/5 opacity-60'} px-4 py-3`;
+        item.innerHTML = `
+            <div class="flex-1 min-w-0">
+                <p class="text-sm font-bold text-white truncate">${escaparHTML(nombre)}${tipoCuenta ? ` <span class="text-[10px] text-neutral-500 font-semibold">· ${escaparHTML(tipoCuenta)}</span>` : ''}</p>
+                <p class="text-xs font-mono text-neutral-300 truncate">${escaparHTML(numero ?? 'Sin número')}</p>
+                ${titular ? `<p class="text-[11px] text-neutral-500 truncate">${escaparHTML(titular)}</p>` : ''}
+            </div>
+            ${numero ? `<button type="button" data-copiar aria-label="Copiar número" class="btn-cyber shrink-0 w-11 h-11 grid place-items-center rounded-xl bg-white/[0.04] ring-1 ring-white/10 text-neutral-300"><i class="fa-regular fa-copy"></i></button>` : ''}
+            ${colActivo && 'id' in fila ? `
+            <button type="button" data-alternar role="switch" aria-checked="${activo}" aria-label="${activo ? 'Desactivar' : 'Activar'} ${escaparHTML(nombre)}"
+                class="shrink-0 min-h-[44px] px-3 rounded-xl text-[10px] font-black uppercase tracking-wider ring-1 ${activo ? 'bg-emerald-500/10 text-emerald-300 ring-emerald-500/30' : 'bg-white/[0.04] text-neutral-400 ring-white/10'}">
+                ${activo ? 'Activo' : 'Inactivo'}
+            </button>` : `<span class="shrink-0 text-[10px] font-bold uppercase ${activo ? 'text-emerald-300' : 'text-neutral-500'}">${activo ? 'Activo' : 'Inactivo'}</span>`}`;
+
+        item.querySelector('[data-copiar]')?.addEventListener('click', () => copiarTexto(String(numero), `${nombre}: número copiado`));
+        item.querySelector('[data-alternar]')?.addEventListener('click', () => alternarMetodo(fila, colActivo, !activo));
+        return item;
+    }));
+}
+
+async function alternarMetodo(fila, columna, valor) {
+    const { data, error } = await supabaseClient.from('metodos_pago').update({ [columna]: valor }).eq('id', fila.id).select('*');
+    if (error || !data?.length) {
+        console.error('No se pudo cambiar el método de pago:', error ?? 'RLS no permite el UPDATE');
+        mostrarToast('No se pudo cambiar el método (¿permisos de la tabla?).', 'error', 5000);
+        return;
+    }
+    metodosPago = metodosPago.map((m) => (m.id === fila.id ? data[0] : m));
+    pintarMetodosPago();
+    mostrarToast(`Método ${valor ? 'activado' : 'desactivado'}.`, 'ok');
+}
+
+/* ==================== REGISTRO Y VALIDACIÓN DE PAGOS ==================== */
+
+function pintarPorVerificar(porVerificar) {
+    const caja = document.getElementById('lista-por-verificar');
+    if (porVerificar.length === 0) {
+        caja.innerHTML = filaVacia('No hay pagos por verificar.');
+        return;
+    }
+    caja.replaceChildren(...porVerificar.map((fila) => {
+        const p = normalizarPedido(fila);
+        const item = document.createElement('div');
+        item.className = 'flex items-center gap-3 rounded-2xl bg-dcDarkBg/60 ring-1 ring-sky-500/20 px-4 py-3';
+        item.innerHTML = `
+            <div class="flex-1 min-w-0">
+                <p class="text-[10px] font-black uppercase tracking-widest text-sky-300">Pedido #${escaparHTML(p.ref)}${p.prueba ? ' · prueba' : ''}</p>
+                <p class="text-sm font-bold text-white truncate">${escaparHTML(p.producto)}</p>
+                <p class="text-[11px] text-neutral-500">${escaparHTML(p.fecha)}</p>
+            </div>
+            <button type="button" class="btn-cyber shrink-0 min-h-[44px] px-4 rounded-xl bg-sky-600 hover:bg-sky-500 text-[11px] font-black uppercase tracking-wider text-white">
+                <i class="fa-solid fa-receipt mr-1"></i> Registrar
+            </button>`;
+        item.querySelector('button').addEventListener('click', () => abrirPago(String(p.id)));
+        return item;
+    }));
+}
+
+function abrirPago(id) {
+    const fila = pedidos.get(id);
+    if (!fila) return;
+    if (!fila._prueba && !('referencia_pago' in fila)) {
+        mostrarToast('Falta preparar la base: ejecuta supabase/wo-011.sql en Supabase.', 'error', 6000);
+        return;
+    }
+    pedidoPagando = id;
+    const p = normalizarPedido(fila);
+    document.getElementById('modal-pago-ref').textContent = `Pedido #${p.ref} · ${p.producto}`;
+
+    // Métodos: los activos de metodos_pago + los básicos, sin repetir
+    const nombres = [...new Set([
+        ...metodosPago.filter(metodoActivo).map((m) => campoMetodo(m, 'nombre').valor).filter(Boolean),
+        ...METODOS_PAGO_BASE,
+    ].map(String))];
+    document.getElementById('pago-metodos').innerHTML = nombres.map((nombre, i) => `
+        <label class="cursor-pointer">
+            <input type="radio" name="pago-metodo" value="${escaparHTML(nombre)}" class="peer sr-only" ${i === 0 ? 'required' : ''}>
+            <span class="flex items-center justify-center text-center min-h-[48px] px-2 rounded-2xl bg-dcDarkBg/70 ring-1 ring-white/10 text-[11px] font-bold text-neutral-300 peer-checked:bg-dcRed/15 peer-checked:ring-dcRed/60 peer-checked:text-white peer-focus-visible:ring-2 transition-all">
+                ${escaparHTML(nombre)}
+            </span>
+        </label>`).join('');
+
+    document.getElementById('pago-cupon').value = fila.cupon_aplicado ?? '';
+    document.getElementById('pago-cupon').disabled = Boolean(fila.cupon_aplicado);
+    document.getElementById('pago-referencia').value = fila.referencia_pago ?? '';
+    document.getElementById('pago-monto').value = fila.monto_pago ?? '';
+    document.getElementById('pago-confirmo').checked = false;
+    // "Entregar ya" solo si ya hay cuenta/serial asignado: el admin decide (modo sombra)
+    document.getElementById('btn-pago-entregar').hidden = !fila.clave_serial;
+
+    abrirModal(document.getElementById('modal-pago'));
+}
+
+async function guardarPago(e) {
+    e.preventDefault();
+    const id = pedidoPagando;
+    const filaActual = pedidos.get(id);
+    if (!filaActual) return;
+
+    const destino = e.submitter?.dataset.destino ?? ESTADO_PENDIENTE;
+    const metodo = document.querySelector('input[name="pago-metodo"]:checked')?.value;
+    const referencia = document.getElementById('pago-referencia').value.trim();
+    const monto = Number(document.getElementById('pago-monto').value);
+    if (!metodo || !referencia || !(monto > 0)) {
+        mostrarToast('Completa método, referencia y monto.', 'error');
+        return;
+    }
+
+    const ahora = new Date().toISOString();
+    const cambios = { metodo_pago: metodo, referencia_pago: referencia, monto_pago: monto, pago_validado_at: ahora, estado: destino };
+    if (destino === 'ENTREGADO_INMEDIATO') cambios.entregado_at = ahora;
+
+    const botones = document.querySelectorAll('#form-pago button[type="submit"]');
+    botones.forEach((b) => { b.disabled = true; });
+    e.submitter?.insertAdjacentHTML('afterbegin', '<i class="fa-solid fa-spinner fa-spin mr-2" data-cargando></i>');
+
+    const restaurarBotones = () => {
+        botones.forEach((b) => { b.disabled = false; });
+        document.querySelector('#form-pago [data-cargando]')?.remove();
+    };
+
+    // Cupón: se verifica y consume en la base ANTES de validar el pago (si no es válido, no se valida)
+    const cupon = document.getElementById('pago-cupon').value.trim().toUpperCase();
+    if (cupon && !filaActual.cupon_aplicado && !filaActual._prueba) {
+        const { data: canje, error: errorCanje } = await supabaseClient.rpc('canjear_cupon', { p_codigo: cupon, p_compra_id: String(id) }).maybeSingle();
+        if (errorCanje || !canje?.ok) {
+            restaurarBotones();
+            console.error('canjear_cupon:', errorCanje ?? canje);
+            mostrarToast(canje?.mensaje ?? 'No se pudo verificar el cupón (¿ejecutaste supabase/wo-012.sql?).', 'error', 6000);
+            Sonidos.error();
+            return;
+        }
+        mostrarToast(`${canje.mensaje} (-${canje.porcentaje}%)`, 'ok', 4000);
+    }
+
+    let filaNueva;
+    if (filaActual._prueba) {
+        await new Promise((r) => setTimeout(r, 400));
+        filaNueva = { ...filaActual, ...cambios, ...(cupon ? { cupon_aplicado: cupon } : {}) };
+    } else {
+        const { data, error } = await supabaseClient
+            .from('compras_proveedor')
+            .update(cambios)
+            .eq('id', id)
+            .eq('estado', ESTADO_PENDIENTE_PAGO) // solo si sigue esperando pago
+            .select('*');
+
+        if (error || !data?.length) {
+            botones.forEach((b) => { b.disabled = false; });
+            document.querySelector('#form-pago [data-cargando]')?.remove();
+            console.error(`Error al validar el pago del pedido ${id}:`, error ?? 'No se actualizó ninguna fila (¿ya no está en PENDIENTE_PAGO o RLS?).');
+            const mensaje = error?.code === '23505'
+                ? 'Esa referencia ya se usó para validar otro pago.'
+                : error?.code === '22P02' || error?.code === '23514'
+                    ? `La base no acepta el estado ${destino}. Revisa la restricción de 'estado' (supabase/wo-011.sql, paso 4).`
+                    : 'No se pudo validar el pago. Revisa la consola.';
+            mostrarToast(mensaje, 'error', 6000);
+            Sonidos.error();
+            return;
+        }
+        filaNueva = data[0];
+    }
+
+    botones.forEach((b) => { b.disabled = false; });
+    document.querySelector('#form-pago [data-cargando]')?.remove();
+    pedidos.set(id, filaNueva);
+    pintarTabs();
+
+    const tarjeta = buscarTarjeta(id);
+    if (tarjeta && coincideFiltro(filaNueva)) tarjeta.replaceWith(crearTarjeta(filaNueva));
+    else if (tarjeta) retirarTarjeta(tarjeta);
+
+    cerrarModal(document.getElementById('modal-pago'));
+    const p = normalizarPedido(filaNueva);
+    mostrarToast(destino === 'ENTREGADO_INMEDIATO'
+        ? `Pago validado y pedido #${p.ref} entregado.`
+        : `Pago validado: pedido #${p.ref} pasa a esperar proveedor.`, 'ok', 4500);
+    Sonidos.completar();
+}
+
+/* ==================== FIDELIZACIÓN (posventa) ==================== */
+
+const COLUMNA_ENVIO = { satisfaccion: 'satisfaccion_enviada_at', renovacion: 'renovacion_enviada_at', cupon: 'cupon_enviado_at' };
+
+// Momento desde el que se cuenta la posventa: entrega → validación del pago → creación
+function momentoEntrega(fila) {
+    return new Date(leerCampo(fila, 'entregado', null) ?? fila.pago_validado_at ?? leerCampo(fila, 'fecha', null)).getTime();
+}
+
+function colasFidelizacion(filas) {
+    const ahora = Date.now();
+    const candidatas = filas.filter((fila) => !fila._prueba && !esPendiente(fila) && PlantillasWA.normalizarNumero(fila.cliente_whatsapp));
+
+    return {
+        satisfaccion: candidatas.filter((fila) => {
+            const horas = (ahora - momentoEntrega(fila)) / 3600000;
+            return !fila.satisfaccion_enviada_at && horas >= HORAS_SATISFACCION && horas <= DIAS_MAX_SATISFACCION * 24;
+        }),
+        renovacion: candidatas.filter((fila) => {
+            const dias = diasParaVencer(fila);
+            return !fila.renovacion_enviada_at && dias !== null && dias > 0 && dias <= DIAS_AVISO_RENOVACION;
+        }),
+        cupon: candidatas.filter((fila) => fila.satisfaccion_enviada_at && !fila.cupon_enviado_at),
+    };
+}
+
+function pintarFidelizacion(filas) {
+    const reales = filas.filter((fila) => !fila._prueba);
+    const conColumnas = reales.some((fila) => 'cliente_whatsapp' in fila);
+    const cajas = { satisfaccion: 'cola-satisfaccion', renovacion: 'cola-renovacion', cupon: 'cola-cupones' };
+
+    if (!conColumnas) {
+        Object.values(cajas).forEach((id) => {
+            document.getElementById(id).innerHTML = filaVacia('Ejecuta supabase/wo-011.sql para activar el seguimiento.', 'fa-database');
+        });
+        ['kpi-satisfaccion', 'kpi-renovacion', 'kpi-cupones'].forEach((id) => { document.getElementById(id).textContent = '—'; });
+        document.getElementById('kpi-con-whatsapp').textContent = '';
+        return;
+    }
+
+    const colas = colasFidelizacion(reales);
+    document.getElementById('kpi-satisfaccion').textContent = colas.satisfaccion.length;
+    document.getElementById('kpi-renovacion').textContent = colas.renovacion.length;
+    document.getElementById('kpi-cupones').textContent = reales.filter((fila) => fila.cupon_enviado_at).length;
+    const conWhatsapp = reales.filter((fila) => PlantillasWA.normalizarNumero(fila.cliente_whatsapp)).length;
+    document.getElementById('kpi-con-whatsapp').textContent = reales.length
+        ? `${Math.round((conWhatsapp / reales.length) * 100)}% de compras con WhatsApp`
+        : '';
+
+    const vacios = {
+        satisfaccion: 'Nadie cumple 24 h desde la entrega.',
+        renovacion: 'Ninguna garantía vence en los próximos 3 días.',
+        cupon: 'Los cupones se ofrecen después del mensaje de satisfacción.',
+    };
+    Object.entries(cajas).forEach(([tipo, idCaja]) => {
+        const caja = document.getElementById(idCaja);
+        if (colas[tipo].length === 0) {
+            caja.innerHTML = filaVacia(vacios[tipo]);
+            return;
+        }
+        caja.replaceChildren(...colas[tipo].map((fila) => {
+            const p = normalizarPedido(fila);
+            const detalle = tipo === 'renovacion' ? `Vence en ${diasParaVencer(fila)} día(s)` : `Entregado ${formatearFecha(momentoEntrega(fila))}`;
+            const item = document.createElement('div');
+            item.className = 'flex items-center gap-3 rounded-2xl bg-dcDarkBg/60 ring-1 ring-white/5 px-4 py-3';
+            item.innerHTML = `
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-bold text-white truncate">${escaparHTML(p.producto)}</p>
+                    <p class="text-[11px] text-neutral-500 truncate">#${escaparHTML(p.ref)} · ${escaparHTML(detalle)}</p>
+                </div>
+                <button type="button" aria-label="Enviar por WhatsApp" class="btn-cyber verde shrink-0 w-11 h-11 grid place-items-center rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white">
+                    <i class="fa-brands fa-whatsapp text-lg"></i>
+                </button>`;
+            item.querySelector('button').addEventListener('click', (e) => enviarSeguimiento(tipo, fila, e.currentTarget));
+            return item;
+        }));
+    });
+}
+
+// Código legible sin caracteres confusos (0/O, 1/I)
+function generarCupon() {
+    const alfabeto = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    const azar = crypto.getRandomValues(new Uint32Array(6));
+    return `DC-${Array.from(azar, (n) => alfabeto[n % alfabeto.length]).join('')}`;
+}
+
+async function enviarSeguimiento(tipo, fila, btn) {
+    const p = normalizarPedido(fila);
+    const cupon = tipo === 'satisfaccion' ? null : (fila.cupon_codigo || generarCupon());
+    const texto = {
+        satisfaccion: () => PlantillasWA.satisfaccion24h({ producto: p.producto }),
+        renovacion: () => PlantillasWA.renovacion3d({ producto: p.producto, cupon }),
+        cupon: () => PlantillasWA.cuponFidelidad({ producto: p.producto, cupon }),
+    }[tipo]();
+
+    // Abrir WhatsApp primero (dentro del clic, para que el navegador no lo bloquee)
+    window.open(PlantillasWA.enlace(fila.cliente_whatsapp, texto), '_blank', 'noopener');
+
+    btn.disabled = true;
+    const cambios = { [COLUMNA_ENVIO[tipo]]: new Date().toISOString() };
+    if (cupon && cupon !== fila.cupon_codigo) cambios.cupon_codigo = cupon;
+
+    const { data, error } = await supabaseClient.from('compras_proveedor').update(cambios).eq('id', fila.id).select('*');
+    if (error || !data?.length) {
+        btn.disabled = false;
+        console.error('No se pudo registrar el envío:', error ?? 'RLS no permite el UPDATE');
+        mostrarToast('Se abrió WhatsApp, pero no se registró el envío. Revisa la consola.', 'error', 6000);
+        return;
+    }
+    pedidos.set(String(fila.id), data[0]);
+    pintarPagosBot();
+    mostrarToast(cupon ? `Mensaje registrado · cupón ${cupon}` : 'Mensaje de satisfacción registrado.', 'ok', 4000);
+}
+
+/* ==================== AGENTE BOT · BASE DE CONOCIMIENTO ==================== */
+
+async function cargarBaseConocimiento() {
+    try {
+        const respuesta = await fetch('bot-conocimiento.json', { cache: 'no-store' });
+        if (!respuesta.ok) throw new Error(`HTTP ${respuesta.status}`);
+        baseConocimiento = await respuesta.json();
+    } catch (error) {
+        console.error('No se pudo leer bot-conocimiento.json:', error);
+        baseConocimiento = null;
+    }
+    pintarBot();
+}
+
+const NOMBRES_PLANTILLAS = {
+    comprar_ahora: 'Comprar ahora', consultar_estado: 'Consultar estado', solicitar_soporte: 'Solicitar soporte',
+    reclamar_garantia: 'Reclamar garantía', satisfaccion_24h: 'Satisfacción 24 h', renovacion_3d: 'Renovación 3 días',
+    cupon_fidelidad: 'Cupón de fidelidad', pedido_proveedor: 'Pedido al proveedor',
+};
+
+function bloqueCopiable(titulo, texto, { pendiente = false } = {}) {
+    const item = document.createElement('div');
+    item.className = `rounded-2xl bg-dcDarkBg/60 ring-1 ${pendiente ? 'ring-amber-500/30' : 'ring-white/5'} p-3`;
+    item.innerHTML = `
+        <div class="flex items-start justify-between gap-2">
+            <p class="text-xs font-bold text-white"></p>
+            ${pendiente ? '<span class="shrink-0 text-[9px] font-black uppercase tracking-widest text-amber-300">Pendiente</span>' : `
+            <button type="button" aria-label="Copiar" class="btn-cyber shrink-0 w-9 h-9 grid place-items-center rounded-lg bg-white/[0.04] ring-1 ring-white/10 text-neutral-300"><i class="fa-regular fa-copy"></i></button>`}
+        </div>
+        <p class="mt-1 text-[11px] leading-relaxed text-neutral-400 whitespace-pre-line"></p>`;
+    item.querySelector('p').textContent = titulo;
+    item.querySelectorAll('p')[1].textContent = pendiente ? 'Complétala en bot-conocimiento.json antes de que el bot la use.' : texto;
+    item.querySelector('button')?.addEventListener('click', () => copiarTexto(texto, `"${titulo}" copiado`));
+    return item;
+}
+
+function pintarBot() {
+    const avisos = document.getElementById('bot-avisos');
+    const faq = document.getElementById('bot-faq');
+    const plantillas = document.getElementById('bot-plantillas');
+
+    if (!baseConocimiento) {
+        avisos.innerHTML = filaVacia('No se pudo leer bot-conocimiento.json. Abre el panel con Live Server (no como archivo) y verifica que el archivo exista.', 'fa-triangle-exclamation');
+        faq.innerHTML = '';
+        plantillas.innerHTML = '';
+        document.getElementById('bot-catalogo').innerHTML = '';
+        return;
+    }
+
+    const bc = baseConocimiento;
+    document.getElementById('bot-version').textContent = `Generado ${formatearFecha(bc.version)} · ${bc.catalogo?.length ?? 0} productos`;
+
+    const pendientes = [...(bc.faq ?? []), ...(bc.promociones ?? [])].filter((x) => x.pendiente_configurar);
+    avisos.innerHTML = pendientes.length
+        ? `<div class="rounded-2xl bg-amber-500/10 ring-1 ring-amber-500/30 px-4 py-3 text-xs text-amber-200">
+               <i class="fa-solid fa-triangle-exclamation mr-1"></i> Por configurar en bot-conocimiento.json:
+               <b>${pendientes.map((x) => escaparHTML(x.id)).join(', ')}</b>
+           </div>`
+        : '';
+
+    faq.replaceChildren(...(bc.faq ?? []).map((f) => bloqueCopiable(f.pregunta, f.respuesta, { pendiente: f.pendiente_configurar || !f.respuesta })));
+    plantillas.replaceChildren(...Object.entries(bc.plantillas ?? {})
+        .filter(([clave]) => clave !== 'botones')
+        .map(([clave, texto]) => bloqueCopiable(NOMBRES_PLANTILLAS[clave] ?? clave, texto)));
+    pintarCatalogoBot();
+}
+
+function pintarCatalogoBot() {
+    const caja = document.getElementById('bot-catalogo');
+    if (!baseConocimiento) return;
+    const termino = document.getElementById('bot-buscar').value.trim().toLowerCase();
+    const resultados = (baseConocimiento.catalogo ?? [])
+        .filter((p) => !termino || `${p.nombre} ${p.marca} ${p.tipo}`.toLowerCase().includes(termino))
+        .slice(0, termino ? 12 : 6);
+
+    if (resultados.length === 0) {
+        caja.innerHTML = `<div class="sm:col-span-2">${filaVacia(`Ningún producto coincide con “${termino}”.`, 'fa-magnifying-glass')}</div>`;
+        return;
+    }
+
+    caja.replaceChildren(...resultados.map((producto) => {
+        const variantes = producto.variantes ?? [];
+        const precios = [`${producto.nombre}:`, ...variantes.map((v) => `• ${v.nombre}: ${PlantillasWA.precioCOP(v.precio)}`)].join('\n');
+        const masBarata = [...variantes].sort((a, b) => a.precio - b.precio)[0];
+        const comprar = PlantillasWA.comprarAhora({ producto: producto.nombre, variante: masBarata?.nombre, precio: masBarata?.precio });
+
+        const item = document.createElement('div');
+        item.className = 'rounded-2xl bg-dcDarkBg/60 ring-1 ring-white/5 p-3 flex flex-col gap-2';
+        item.innerHTML = `
+            <div class="min-w-0">
+                <p class="text-[10px] font-black uppercase tracking-widest text-dcRed">${escaparHTML(producto.tipo)}</p>
+                <p class="text-sm font-bold text-white truncate">${escaparHTML(producto.nombre)}</p>
+                <p class="text-[11px] text-neutral-400">Desde ${escaparHTML(PlantillasWA.precioCOP(producto.desde))} · ${variantes.length} opción(es)</p>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+                <button type="button" data-copiar="precios" class="btn-cyber min-h-[40px] rounded-xl bg-white/[0.04] ring-1 ring-white/10 text-[10px] font-bold uppercase tracking-wider text-neutral-300"><i class="fa-solid fa-tags mr-1"></i> Precios</button>
+                <button type="button" data-copiar="comprar" class="btn-cyber min-h-[40px] rounded-xl bg-white/[0.04] ring-1 ring-white/10 text-[10px] font-bold uppercase tracking-wider text-neutral-300"><i class="fa-solid fa-cart-shopping mr-1"></i> Comprar ahora</button>
+            </div>`;
+        item.querySelector('[data-copiar="precios"]').addEventListener('click', () => copiarTexto(precios, 'Precios copiados'));
+        item.querySelector('[data-copiar="comprar"]').addEventListener('click', () => copiarTexto(comprar, 'Plantilla "Comprar ahora" copiada'));
+        return item;
+    }));
+}
+
+/* ==================== EXPORTAR CSV ==================== */
+
+// Exporta lo que se ve (filtro + categoría + búsqueda). Excluye pedidos de prueba y NUNCA incluye clave_serial.
+function exportarCSV() {
+    const filas = filasVisibles().filter((fila) => !fila._prueba);
+    if (filas.length === 0) {
+        mostrarToast('No hay pedidos reales para exportar con este filtro.', 'info');
+        return;
+    }
+
+    // Prefijo ' en celdas que empiezan por = + - @ para evitar fórmulas maliciosas en Excel
+    const celdaCSV = (valor) => {
+        let texto = String(valor ?? '');
+        if (/^[=+\-@]/.test(texto)) texto = `'${texto}`;
+        return `"${texto.replace(/"/g, '""')}"`;
+    };
+    const encabezado = ['ID compra', 'Pedido', 'Producto', 'Variante', 'Categoría', 'Estado', 'Costo COP', 'Fecha'];
+    const lineas = filas.map((fila) => {
+        const p = normalizarPedido(fila);
+        return [p.id, p.pedidoId, p.producto, p.variante, categoriaDe(fila).texto, p.estadoTexto, p.costoNumero ?? '', p.fechaISO]
+            .map(celdaCSV).join(';');
+    });
+
+    // BOM + ';' para que Excel en español abra tildes y columnas correctamente
+    const contenido = '﻿' + [encabezado.map(celdaCSV).join(';'), ...lineas].join('\r\n');
+    const fecha = new Date().toISOString().slice(0, 10);
+    descargarArchivo(`dc-entregas-${ui.filtro}-${fecha}.csv`, contenido, 'text/csv;charset=utf-8');
+    mostrarToast(`${filas.length} pedido${filas.length === 1 ? '' : 's'} exportado${filas.length === 1 ? '' : 's'} a CSV.`, 'ok');
+}
+
+/* ==================== MODO KIOSCO ==================== */
+
+async function alternarPantallaCompleta() {
+    try {
+        if (document.fullscreenElement) await document.exitFullscreen();
+        else await document.documentElement.requestFullscreen();
+    } catch (error) {
+        console.error('Pantalla completa no disponible:', error);
+        mostrarToast('Este navegador no permite pantalla completa.', 'error');
+    }
+}
+
+function pintarBotonPantallaCompleta() {
+    const activa = Boolean(document.fullscreenElement);
+    document.querySelectorAll('#btn-pantalla-completa i, #ajuste-pantalla-completa i.fa-expand, #ajuste-pantalla-completa i.fa-compress').forEach((icono) => {
+        icono.classList.toggle('fa-expand', !activa);
+        icono.classList.toggle('fa-compress', activa);
+    });
+}
+
+/* ==================== MODALES (fade + slide) ==================== */
+
+function abrirModal(modal) {
+    if (!modal || !modal.hidden) return;
+    modal.hidden = false;
+    document.body.style.overflow = 'hidden';
+    modal.querySelector('.modal-fondo').animate([{ opacity: 0 }, { opacity: 1 }], { duration: 250, easing: 'ease-out' });
+    modal.querySelector('.modal-panel').animate(
+        [{ opacity: 0, transform: 'translateY(40px) scale(.98)' }, { opacity: 1, transform: 'none' }],
+        { duration: 340, easing: 'cubic-bezier(.2,.8,.2,1)' }
+    );
+    modal.querySelector('input, button:not([data-cerrar-modal])')?.focus({ preventScroll: true });
+}
+
+async function cerrarModal(modal) {
+    if (!modal || modal.hidden || modal.dataset.cerrando) return;
+    modal.dataset.cerrando = '1';
+    await Promise.all([
+        modal.querySelector('.modal-fondo').animate([{ opacity: 1 }, { opacity: 0 }], { duration: 200, fill: 'forwards' }).finished,
+        modal.querySelector('.modal-panel').animate(
+            [{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'translateY(40px) scale(.98)' }],
+            { duration: 220, easing: 'ease-in', fill: 'forwards' }
+        ).finished,
+    ]);
+    modal.hidden = true;
+    delete modal.dataset.cerrando;
+    modal.getAnimations({ subtree: true }).forEach((a) => a.cancel());
+    if (!document.querySelector('[role="dialog"]:not([hidden])')) document.body.style.overflow = '';
+    if (modal.id === 'modal-editar') pedidoEditando = null;
+    if (modal.id === 'modal-pago') pedidoPagando = null;
+}

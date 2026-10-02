@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#0F111A">
+    <title>DC TECHNOLOGY | Estado de Pedido</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@700;800;900&display=swap" rel="stylesheet">
+    <script>
+        // Paleta Neón Dark Obsidian (misma que la tienda y el panel admin)
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        dcRed: '#FF0033',
+                        dcRedDark: '#CC0029',
+                        dcDarkBg: '#0F111A',
+                        dcDarkCard: '#181B26',
+                        dcBorder: '#272C3D'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        tech: ['Outfit', 'Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        html { -webkit-tap-highlight-color: transparent; }
+        [hidden] { display: none !important; } /* que 'hidden' gane a clases como flex/grid */
+        /* Fondo mesh neón animado: solo transform sobre capas difuminadas (GPU, sin repintados) */
+        .mesh { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
+        .mesh span { position: absolute; border-radius: 9999px; filter: blur(90px); will-change: transform; }
+        .mesh span:nth-child(1) { width: 36rem; height: 36rem; top: -14rem; left: 50%; margin-left: -18rem; background: rgba(255, 0, 51, .18); animation: mesh-a 24s ease-in-out infinite alternate; }
+        .mesh span:nth-child(2) { width: 28rem; height: 28rem; bottom: -12rem; right: -10rem; background: rgba(255, 0, 51, .10); animation: mesh-b 28s ease-in-out infinite alternate; }
+        .mesh span:nth-child(3) { width: 22rem; height: 22rem; top: 45%; left: -8rem; background: rgba(140, 0, 255, .07); animation: mesh-c 32s ease-in-out infinite alternate; }
+        @keyframes mesh-a { to { transform: translate(12vw, 16vh) scale(1.15); } }
+        @keyframes mesh-b { to { transform: translate(-16vw, -18vh) scale(1.2); } }
+        @keyframes mesh-c { to { transform: translate(24vw, -10vh) scale(.85); } }
+
+        /* Botones Cyber-Glow */
+        .btn-cyber { transition: transform .2s ease, box-shadow .25s ease, background-color .2s ease, color .2s ease; }
+        .btn-cyber:hover, .btn-cyber:focus-visible {
+            transform: scale(1.05);
+            box-shadow: 0 0 0 1px rgba(255, 0, 51, .65), 0 0 18px rgba(255, 0, 51, .45), 0 0 42px rgba(255, 0, 51, .18);
+        }
+        .btn-cyber.ancho:hover, .btn-cyber.ancho:focus-visible { transform: scale(1.02); }
+        .btn-cyber.verde:hover, .btn-cyber.verde:focus-visible {
+            box-shadow: 0 0 0 1px rgba(16, 185, 129, .7), 0 0 18px rgba(16, 185, 129, .45), 0 0 42px rgba(16, 185, 129, .18);
+        }
+        .btn-cyber:active { transform: scale(.96); }
+        .bg-grid {
+            background-image:
+                linear-gradient(rgba(255, 255, 255, .035) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, .035) 1px, transparent 1px);
+            background-size: 40px 40px;
+            -webkit-mask-image: radial-gradient(ellipse at 50% 35%, black 20%, transparent 70%);
+                    mask-image: radial-gradient(ellipse at 50% 35%, black 20%, transparent 70%);
+        }
+
+        /* Logo con pulso neón + interacción hover/tap */
+        @keyframes dc-neon {
+            0%, 100% { filter: drop-shadow(0 0 4px rgba(255, 0, 51, .6)) drop-shadow(0 0 12px rgba(255, 0, 51, .25)); }
+            50%      { filter: drop-shadow(0 0 8px rgba(255, 0, 51, .95)) drop-shadow(0 0 26px rgba(255, 0, 51, .5)); }
+        }
+        .dc-logo { animation: dc-neon 2.8s ease-in-out infinite; transition: transform .35s cubic-bezier(.34, 1.56, .64, 1); }
+        .group:hover .dc-logo, .dc-logo:hover { transform: scale(1.08) rotate(-4deg); }
+        .group:active .dc-logo, .dc-logo:active { transform: scale(.92); }
+        .dc-text-glow { text-shadow: 0 0 12px rgba(255, 0, 51, .55); }
+
+        @keyframes fade-slide-in { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+        .vista-entrada { animation: fade-slide-in .5s cubic-bezier(.2, .8, .2, 1) both; }
+
+        @keyframes toast-progress { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+
+        /* Anillo del contador de sincronización */
+        #sync-anillo { transition: stroke-dashoffset 1s linear; }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation: none !important; transition: none !important; }
+        }
+    </style>
+</head>
+<body class="bg-dcDarkBg text-white min-h-screen flex flex-col font-sans antialiased selection:bg-dcRed/40">
+    <div class="mesh" aria-hidden="true"><span></span><span></span><span></span></div>
+    <div class="bg-grid fixed inset-0 pointer-events-none" aria-hidden="true"></div>
+
+    <!-- Banner de estado del sistema (lo actualiza portal.js con una comprobación real) -->
+    <div id="estado-sistema" class="relative z-30 flex items-center justify-center gap-2 px-4 pt-[max(.5rem,env(safe-area-inset-top))] pb-2 text-[10px] font-bold uppercase tracking-widest bg-white/[0.03] border-b border-white/5 text-neutral-500">
+        <span class="relative flex h-2 w-2"><span class="relative inline-flex h-2 w-2 rounded-full bg-neutral-500"></span></span>
+        Verificando servicios…
+    </div>
+
+    <!-- Encabezado -->
+    <header class="sticky top-0 z-20 bg-dcDarkBg/70 backdrop-blur-xl border-b border-white/10">
+        <div class="max-w-2xl mx-auto px-4 py-3 flex justify-between items-center gap-3">
+            <a href="index.html" class="group flex items-center gap-3 min-h-[48px]">
+                <svg viewBox="0 0 48 48" class="dc-logo w-10 h-10" role="img" aria-label="DC Technology">
+                    <path d="M24 3 42 13.5v21L24 45 6 34.5v-21Z" fill="#0F111A" stroke="#FF0033" stroke-width="2.5" stroke-linejoin="round"/>
+                    <path d="M24 9.5 36.5 16.75v14.5L24 38.5 11.5 31.25v-14.5Z" fill="#FF0033" opacity=".12"/>
+                    <circle cx="24" cy="3" r="1.6" fill="#FF0033"/><circle cx="24" cy="45" r="1.6" fill="#FF0033"/>
+                    <text x="24" y="29.5" text-anchor="middle" font-family="Outfit, Inter, sans-serif" font-weight="900" font-size="15" fill="#fff" letter-spacing="-.5">DC</text>
+                </svg>
+                <span class="leading-none">
+                    <span class="block font-tech font-black text-base tracking-[0.16em] uppercase">DC <span class="text-dcRed dc-text-glow">Technology</span></span>
+                    <span class="block mt-1 text-[9px] font-bold uppercase tracking-[0.3em] text-neutral-500">Rastreo de pedidos</span>
+                </span>
+            </a>
+            <a href="index.html" aria-label="Volver al catálogo" class="btn-cyber inline-flex items-center justify-center gap-2 min-h-[48px] min-w-[48px] px-3 sm:px-4 text-xs font-bold rounded-2xl bg-white/[0.04] ring-1 ring-white/10 hover:bg-dcRed/10">
+                <i class="fa-solid fa-store"></i> <span class="hidden sm:inline">Catálogo</span>
+            </a>
+        </div>
+    </header>
+
+    <main class="vista-entrada relative z-10 w-full max-w-md mx-auto px-4 py-8 sm:py-12 flex-grow space-y-5">
+        <!-- Consulta -->
+        <section class="rounded-3xl bg-white/[0.03] backdrop-blur-xl ring-1 ring-white/10 shadow-2xl shadow-black/60 p-6 sm:p-8 relative overflow-hidden">
+            <div class="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 w-64 h-40 rounded-full bg-dcRed/20 blur-3xl" aria-hidden="true"></div>
+
+            <div class="relative text-center mb-6">
+                <div class="mx-auto mb-4 grid place-items-center w-14 h-14 rounded-2xl bg-dcRed/10 ring-1 ring-dcRed/40 shadow-lg shadow-red-600/20">
+                    <i class="fa-solid fa-box-open text-dcRed text-xl"></i>
+                </div>
+                <h1 class="font-tech text-2xl font-black uppercase tracking-wider">Rastrea tu <span class="text-dcRed dc-text-glow">Servicio</span></h1>
+                <p class="text-sm text-neutral-400 mt-2">Ingresa el código de pedido enviado a tu WhatsApp</p>
+            </div>
+
+            <form id="form-consulta" class="relative space-y-3">
+                <label class="relative block">
+                    <span class="sr-only">Código de pedido</span>
+                    <i class="fa-solid fa-hashtag absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500"></i>
+                    <input type="text" id="codigo-pedido" placeholder="Ej: DC-1045" required autocomplete="off" autocapitalize="characters" enterkeyhint="search"
+                        class="w-full min-h-[56px] bg-dcDarkBg/70 ring-1 ring-white/10 rounded-2xl pl-11 pr-4 text-base text-center font-black text-white uppercase tracking-[0.25em] placeholder:text-neutral-500 placeholder:tracking-widest focus:outline-none focus:ring-2 focus:ring-dcRed/70 transition-all">
+                </label>
+                <button type="submit"
+                    class="btn-cyber ancho w-full min-h-[56px] bg-dcRed hover:bg-dcRedDark text-white font-black rounded-2xl text-sm uppercase tracking-[0.2em] shadow-lg shadow-red-600/30 disabled:opacity-60 disabled:cursor-wait">
+                    Verificar Estado
+                </button>
+            </form>
+
+            <!-- Búsquedas recientes (localStorage) -->
+            <div id="recientes" class="relative mt-4" hidden>
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-[10px] font-bold uppercase tracking-widest text-neutral-500"><i class="fa-solid fa-clock-rotate-left mr-1"></i> Consultados recientemente</span>
+                    <button type="button" id="btn-borrar-recientes" class="min-h-[36px] px-2 text-[10px] font-bold uppercase tracking-wider text-neutral-500 hover:text-white">Borrar</button>
+                </div>
+                <div id="recientes-lista" class="flex flex-wrap gap-2"></div>
+            </div>
+        </section>
+
+        <!-- Resultado (lo pinta portal.js) -->
+        <section id="resultado-pedido" hidden aria-live="polite"
+            class="rounded-3xl bg-white/[0.03] backdrop-blur-xl ring-1 ring-white/10 shadow-2xl shadow-black/60 p-6 sm:p-7 text-center">
+            <div id="status-badge" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full ring-1 text-[10px] font-black uppercase tracking-widest mb-4"></div>
+
+            <div class="flex items-center justify-center gap-1 mb-1">
+                <p id="res-pedido" class="text-[11px] font-black uppercase tracking-[0.25em] text-dcRed"></p>
+                <button type="button" id="btn-copiar-pedido" aria-label="Copiar número de pedido"
+                    class="w-10 h-10 grid place-items-center rounded-xl text-neutral-400 hover:text-white hover:bg-white/5 active:scale-90 transition-all">
+                    <i class="fa-regular fa-copy"></i>
+                </button>
+            </div>
+            <h3 id="res-producto" class="font-tech font-black text-xl mb-2 text-white break-words"></h3>
+            <p id="res-detalle" class="text-sm leading-relaxed text-neutral-400"></p>
+
+            <!-- Garantía (solo si el pedido tiene fecha de vencimiento) -->
+            <div id="garantia" class="mt-5 rounded-2xl bg-dcDarkBg/70 ring-1 ring-white/10 p-4 text-left" hidden>
+                <div class="flex items-center justify-between gap-3">
+                    <span id="garantia-badge" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full ring-1 text-[10px] font-black uppercase tracking-widest"></span>
+                    <span id="garantia-vence" class="text-[11px] text-neutral-500"></span>
+                </div>
+                <a id="btn-reclamar-garantia" href="#" target="_blank" rel="noopener"
+                    class="btn-cyber ancho mt-3 w-full min-h-[52px] rounded-2xl bg-white/[0.04] ring-1 ring-dcRed/40 text-dcRed text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-shield-halved"></i> Reclamar garantía en 1-Click
+                </a>
+            </div>
+
+            <!-- Reseña verificada (solo pedidos entregados) -->
+            <form id="form-resena" class="mt-5 rounded-2xl bg-dcDarkBg/70 ring-1 ring-amber-500/20 p-4 text-left space-y-3" hidden>
+                <p class="text-[10px] font-black uppercase tracking-widest text-amber-300"><i class="fa-solid fa-star mr-1"></i> Califica tu compra</p>
+                <fieldset>
+                    <legend class="sr-only">Calificación</legend>
+                    <div id="resena-estrellas" class="flex gap-1"></div>
+                </fieldset>
+                <textarea id="resena-comentario" rows="2" maxlength="500" placeholder="Cuéntanos cómo te fue (opcional)"
+                    class="w-full rounded-2xl bg-dcDarkCard ring-1 ring-white/10 px-4 py-3 text-base sm:text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-dcRed/60"></textarea>
+                <div class="grid grid-cols-2 gap-2">
+                    <input id="resena-nombre" type="text" maxlength="40" autocomplete="given-name" placeholder="Tu nombre (opcional)"
+                        class="min-w-0 min-h-[48px] rounded-2xl bg-dcDarkCard ring-1 ring-white/10 px-4 text-base sm:text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-dcRed/60">
+                    <input id="resena-whatsapp" type="text" inputmode="numeric" maxlength="4" pattern="\d{4}" required placeholder="Últimos 4 de tu WhatsApp"
+                        class="min-w-0 min-h-[48px] rounded-2xl bg-dcDarkCard ring-1 ring-white/10 px-4 text-base sm:text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-dcRed/60">
+                </div>
+                <p class="text-[10px] text-neutral-500">Los 4 dígitos solo sirven para verificar que la compra es tuya; no se publican.</p>
+                <button type="submit" class="btn-cyber ancho w-full min-h-[52px] rounded-2xl bg-amber-500 hover:bg-amber-400 text-xs font-black uppercase tracking-wider text-black disabled:opacity-60">
+                    Publicar reseña verificada
+                </button>
+            </form>
+
+            <!-- Credenciales de la cuenta / licencia (solo si la consulta las entrega) -->
+            <div id="credenciales" class="mt-5 space-y-2 text-left" hidden></div>
+
+            <!-- Soporte VIP -->
+            <a id="btn-soporte-pedido" href="#" target="_blank" rel="noopener"
+                class="btn-cyber ancho verde mt-6 w-full min-h-[56px] bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black rounded-2xl uppercase tracking-wider flex justify-center items-center gap-2 shadow-lg shadow-emerald-600/20">
+                <i class="fa-brands fa-whatsapp text-lg"></i> Soporte VIP por WhatsApp
+            </a>
+
+            <!-- Contador de auto-refresh -->
+            <div id="sync" class="mt-5 inline-flex items-center gap-2.5 text-[11px] font-semibold text-neutral-500" hidden>
+                <svg viewBox="0 0 24 24" class="w-5 h-5 -rotate-90" aria-hidden="true">
+                    <circle cx="12" cy="12" r="10" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="2.5"/>
+                    <circle id="sync-anillo" cx="12" cy="12" r="10" fill="none" stroke="#FF0033" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="62.83" stroke-dashoffset="0"/>
+                </svg>
+                <span id="sync-texto">Sincronizando estado en 30s…</span>
+            </div>
+        </section>
+
+        <!-- Guía de uso (acordeón) -->
+        <section class="rounded-3xl bg-white/[0.03] backdrop-blur-xl ring-1 ring-white/10 p-2" aria-label="Guía de uso">
+            <h2 class="px-4 pt-4 pb-2 text-[10px] font-black uppercase tracking-[0.25em] text-neutral-500"><i class="fa-solid fa-book-open mr-1 text-dcRed"></i> Guía rápida de activación</h2>
+
+            <div class="acordeon">
+                <button type="button" aria-expanded="false" class="w-full flex items-center justify-between gap-3 px-4 min-h-[56px] rounded-2xl text-left text-sm font-bold hover:bg-white/[0.03] transition-colors">
+                    <span><i class="fa-solid fa-tv mr-2 text-dcRed w-4"></i> Cuentas de streaming</span>
+                    <i class="fa-solid fa-chevron-down text-xs text-neutral-500 transition-transform duration-300"></i>
+                </button>
+                <div class="grid grid-rows-[0fr] transition-[grid-template-rows] duration-300 ease-out">
+                    <ol class="overflow-hidden list-decimal pl-10 pr-4 text-sm text-neutral-400 space-y-1.5 [&>li:last-child]:pb-4">
+                        <li>Abre la app oficial del servicio (Netflix, Disney+, etc.).</li>
+                        <li>Inicia sesión con el <b class="text-neutral-200">correo y la clave</b> de tu pedido.</li>
+                        <li>Entra <b class="text-neutral-200">solo a tu perfil asignado</b> y no cambies la contraseña.</li>
+                        <li>Si te pide un PIN de perfil, úsalo tal como aparece en tu pedido.</li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="acordeon">
+                <button type="button" aria-expanded="false" class="w-full flex items-center justify-between gap-3 px-4 min-h-[56px] rounded-2xl text-left text-sm font-bold hover:bg-white/[0.03] transition-colors">
+                    <span><i class="fa-solid fa-key mr-2 text-dcRed w-4"></i> Licencias y seriales</span>
+                    <i class="fa-solid fa-chevron-down text-xs text-neutral-500 transition-transform duration-300"></i>
+                </button>
+                <div class="grid grid-rows-[0fr] transition-[grid-template-rows] duration-300 ease-out">
+                    <ol class="overflow-hidden list-decimal pl-10 pr-4 text-sm text-neutral-400 space-y-1.5 [&>li:last-child]:pb-4">
+                        <li>Copia el serial con el botón <i class="fa-regular fa-copy"></i> para evitar errores al escribirlo.</li>
+                        <li>Abre el programa o la tienda donde se activa el producto.</li>
+                        <li>Busca la opción <b class="text-neutral-200">“Canjear código” o “Activar licencia”</b> y pégalo.</li>
+                        <li>Guarda tu serial en un lugar seguro: no lo compartas con nadie.</li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="acordeon">
+                <button type="button" aria-expanded="false" class="w-full flex items-center justify-between gap-3 px-4 min-h-[56px] rounded-2xl text-left text-sm font-bold hover:bg-white/[0.03] transition-colors">
+                    <span><i class="fa-solid fa-life-ring mr-2 text-dcRed w-4"></i> Mi acceso no funciona</span>
+                    <i class="fa-solid fa-chevron-down text-xs text-neutral-500 transition-transform duration-300"></i>
+                </button>
+                <div class="grid grid-rows-[0fr] transition-[grid-template-rows] duration-300 ease-out">
+                    <ol class="overflow-hidden list-decimal pl-10 pr-4 text-sm text-neutral-400 space-y-1.5 [&>li:last-child]:pb-4">
+                        <li>Verifica que copiaste los datos sin espacios de más.</li>
+                        <li>Cierra sesión en la app y vuelve a intentarlo.</li>
+                        <li>Si sigue fallando, usa <b class="text-neutral-200">Soporte VIP</b>: el mensaje ya incluye tu pedido y la hora.</li>
+                    </ol>
+                </div>
+            </div>
+        </section>
+
+        <!-- Soporte general -->
+        <div class="text-center">
+            <a href="https://wa.me/573223284622" target="_blank" rel="noopener" class="inline-flex items-center justify-center gap-2 min-h-[48px] px-4 text-sm text-emerald-400 font-bold hover:text-emerald-300 transition-colors">
+                <i class="fa-brands fa-whatsapp text-lg"></i> ¿Dudas? Escríbenos por WhatsApp
+            </a>
+        </div>
+    </main>
+
+    <!-- Pie de página -->
+    <footer class="relative z-10 border-t border-white/10 text-center pt-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] text-xs text-neutral-500">
+        &copy; 2026 <span class="font-bold text-neutral-400">DC <span class="text-dcRed">Technology</span></span>. Todos los derechos reservados.
+    </footer>
+
+    <!-- Toasts -->
+    <div id="toasts" class="fixed z-[60] right-4 left-4 sm:left-auto bottom-[max(1rem,env(safe-area-inset-bottom))] flex flex-col items-end gap-2 pointer-events-none" aria-live="polite"></div>
+
+    <!-- Lógica de Consulta -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="plantillas-whatsapp.js"></script>
+    <script src="ui.js"></script>
+    <script src="portal.js"></script>
+</body>
+</html>
