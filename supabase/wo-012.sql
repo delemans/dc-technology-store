@@ -18,12 +18,35 @@ create table if not exists public.cupones (
     activo          boolean not null default true,
     created_at      timestamptz not null default now()
 );
+-- Si 'cupones' ya existía con otra estructura, se completan las columnas que usan estas funciones
+alter table public.cupones
+    add column if not exists descripcion         text,
+    add column if not exists porcentaje          integer,
+    add column if not exists solo_primera_compra boolean not null default false,
+    add column if not exists usos_maximos        integer,
+    add column if not exists usos                integer not null default 0,
+    add column if not exists vence_at            timestamptz,
+    add column if not exists activo              boolean not null default true,
+    add column if not exists created_at          timestamptz not null default now();
+
 alter table public.cupones enable row level security;
 revoke all on table public.cupones from anon;   -- el público solo valida vía RPC, nunca lista cupones
 
 insert into public.cupones (codigo, descripcion, porcentaje, solo_primera_compra)
-values ('DCTECH2026', '10% OFF en tu primera compra', 10, true)
-on conflict (codigo) do nothing;
+select 'DCTECH2026', '10% OFF en tu primera compra', 10, true
+where not exists (select 1 from public.cupones where codigo = 'DCTECH2026');
+-- Si DCTECH2026 ya existía (versión anterior), se asegura que sea solo para la primera compra
+update public.cupones
+   set porcentaje = coalesce(porcentaje, 10), solo_primera_compra = true
+ where codigo = 'DCTECH2026';
+
+-- Las funciones pueden existir con otras columnas de salida (versión anterior):
+-- Postgres no permite cambiarlas con "create or replace", así que se eliminan antes de recrearlas.
+drop function if exists public.validar_cupon(text);
+drop function if exists public.canjear_cupon(text, text);
+drop function if exists public.dejar_resena(text, text, integer, text, text);
+drop function if exists public.resenas_publicas(integer);
+drop function if exists public.estadisticas_publicas();
 
 -- Registro de canjes (un canje por compra validada)
 alter table public.compras_proveedor

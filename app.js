@@ -474,7 +474,9 @@ async function consultarCupon(codigo) {
         console.error('validar_cupon:', error);
         return { valido: false, mensaje: 'No pudimos validar el cupón en este momento.' };
     }
-    return data ?? { valido: false, mensaje: 'Cupón no válido.' };
+    if (!data) return { valido: false, mensaje: 'Cupón no válido.' };
+    // Tolerante a versiones de la función que no devuelven 'mensaje'
+    return { ...data, mensaje: data.mensaje ?? (data.valido ? 'Cupón aplicado.' : 'Este cupón no existe o ya fue usado.') };
 }
 
 async function aplicarCupon(e) {
