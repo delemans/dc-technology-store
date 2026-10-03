@@ -30,7 +30,7 @@
     // Respaldo mínimo si bot-conocimiento.json no carga (p. ej. abriendo el archivo sin servidor)
     const FAQ_RESPALDO = [
         { id: 'como_comprar', pregunta: '¿Cómo compro?', respuesta: 'Elige tu producto, toca "Comprar", acepta los términos y te abrimos WhatsApp con el pedido listo. Te enviamos los datos de pago y, al validar tu comprobante, procesamos tu pedido.' },
-        { id: 'metodos_pago', pregunta: '¿Qué métodos de pago aceptan?', palabras_clave: ['pago', 'pagar', 'nequi', 'daviplata', 'tarjeta', 'efectivo', 'pse', 'bancolombia'], respuesta: 'Solo recibimos Nequi y Daviplata. No aceptamos tarjetas, efectivo, PSE, Bancolombia ni criptomonedas.' },
+        { id: 'metodos_pago', pregunta: '¿Qué métodos de pago aceptan?', palabras_clave: ['pago', 'pagar', 'nequi', 'daviplata', 'tarjeta', 'efectivo', 'pse', 'bancolombia', 'cripto', 'usdt', 'binance'], respuesta: 'Al confirmar tu pedido te mostramos los métodos disponibles (locales y, si están habilitadas, criptomonedas) y te damos los datos del que elijas.' },
         { id: 'tiempo_entrega', pregunta: '¿Cuánto tarda la entrega?', palabras_clave: ['cuanto tarda', 'demora', 'entrega', 'cuando llega'], respuesta: `Entregamos en máximo ${WA.ENTREGA_MAX_MIN} minutos después de validar tu pago (${WA.HORARIO}).` },
         { id: 'cupon_primera_compra', pregunta: '¿Cómo funciona DCTECH2026?', palabras_clave: ['cupon', 'descuento', 'dctech2026', 'promo'], respuesta: 'DCTECH2026 te da 10% de descuento solo en tu primera compra (se verifica con tu WhatsApp al validar el pago). Un cupón por compra.' },
         { id: 'garantia', pregunta: '¿Tienen garantía?', palabras_clave: ['garantia', 'no funciona', 'reclamo'], respuesta: `Sí: ${GARANTIA_DIAS} días desde la entrega en cuentas, licencias y tecnología, si se respetan las reglas de uso.` },
@@ -244,9 +244,13 @@
 
     /* ---------- Intenciones ---------- */
 
+    // Métodos activos (tienda → metodos_pago_publicos): se muestran junto a las FAQ de pago
+    const extraPago = (id) => (['metodos_pago', 'pago_cripto'].includes(id) && (window.DCTienda?.metodosPago() ?? []).length
+        ? `<div class="space-y-3 pt-1">${htmlFormasDePago(window.DCTienda.metodosPago(), { compacto: true })}</div>` : '');
+
     function responderFAQ(id, extra = '') {
         const f = respuestaFAQ(id);
-        agregar(`${formatear(f?.respuesta ?? 'Te ayudo por WhatsApp.')}${extra}`);
+        agregar(`${formatear(f?.respuesta ?? 'Te ayudo por WhatsApp.')}${extraPago(id)}${extra}`);
     }
 
     function pasosCompra() {
@@ -256,7 +260,7 @@
                 <li>Toca el producto y elige tu opción.</li>
                 <li>Si es tu primera compra, aplica <b>DCTECH2026</b> (10% de descuento).</li>
                 <li>Acepta los términos de uso.</li>
-                <li>Te abrimos WhatsApp con el pedido listo y te enviamos los datos de pago (<b>Nequi</b> o <b>Daviplata</b>).</li>
+                <li>Te abrimos WhatsApp con el pedido listo y te enviamos los datos de pago (${escaparHTML(resumenFormasDePago(window.DCTienda?.metodosPago()))}).</li>
                 <li>Al validar tu comprobante entregamos en máximo ${WA.ENTREGA_MAX_MIN} minutos (${escaparHTML(WA.HORARIO)}).</li>
             </ol>`);
     }
@@ -333,14 +337,14 @@
         if (productos.length) {
             sinResolver = 0;
             agregar(`<p>Encontré esto en el catálogo:</p>${tarjetasProductos(productos)}`);
-            if (mejorFAQ) agregar(formatear(mejorFAQ.respuesta));
+            if (mejorFAQ) agregar(formatear(mejorFAQ.respuesta) + extraPago(mejorFAQ.id));
             // Una sola coincidencia: es lo que busca → venta sugerida
             if (productos.length === 1) sugerir(productos[0]);
             return;
         }
         if (mejorFAQ) {
             sinResolver = 0;
-            return agregar(formatear(mejorFAQ.respuesta));
+            return agregar(formatear(mejorFAQ.respuesta) + extraPago(mejorFAQ.id));
         }
         sinResolver += 1;
         if (sinResolver >= 2) return escalar('Prefiero que lo resuelva una persona del equipo, así no pierdes tiempo:');

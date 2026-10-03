@@ -55,6 +55,60 @@
             .trim();
     }
 
+    /* ---------- Métodos de pago (WO-027) ----------
+       Catálogo de TIPOS que el sistema sabe manejar. Lo que ve el cliente sale SOLO de lo que el
+       administrador activa en public.metodos_pago (supabase/wo-027-metodos-pago.sql).
+       'valor' = valor del enum public.metodo_pago (registro del pago). 'campo' = qué dato pide el panel. */
+    const TIPOS_PAGO = [
+        { tipo: 'NEQUI', nombre: 'Nequi', categoria: 'electronico', icono: 'fa-solid fa-mobile-screen-button', color: '#DA0081', campo: 'Número Nequi' },
+        { tipo: 'DAVIPLATA', nombre: 'Daviplata', categoria: 'electronico', icono: 'fa-solid fa-mobile-screen-button', color: '#E1251B', campo: 'Número Daviplata' },
+        { tipo: 'LLAVE_BREB', nombre: 'Llave Bre-B', categoria: 'electronico', icono: 'fa-solid fa-key', color: '#0EA5E9', campo: 'Llave (celular, correo, cédula o @alias)' },
+        { tipo: 'BANCOLOMBIA', nombre: 'Bancolombia', categoria: 'electronico', icono: 'fa-solid fa-building-columns', color: '#FDDA24', campo: 'Número de cuenta' },
+        { tipo: 'TRANSFERENCIA', nombre: 'Transferencia bancaria', categoria: 'electronico', icono: 'fa-solid fa-building-columns', color: '#64748B', campo: 'Banco y número de cuenta' },
+        { tipo: 'PSE', nombre: 'PSE', categoria: 'electronico', icono: 'fa-solid fa-globe', color: '#1D4ED8', campo: 'Enlace de pago PSE', requiereUrl: true },
+        { tipo: 'ENLACE', nombre: 'Tarjeta (enlace de pago)', categoria: 'electronico', icono: 'fa-solid fa-credit-card', color: '#7C3AED', campo: 'Enlace de pago', requiereUrl: true },
+        { tipo: 'PAYPAL', nombre: 'PayPal', categoria: 'electronico', icono: 'fa-brands fa-paypal', color: '#0070BA', campo: 'Correo o enlace PayPal.me' },
+        { tipo: 'BINANCE_PAY', nombre: 'Binance Pay', categoria: 'cripto', icono: 'fa-solid fa-coins', color: '#F0B90B', campo: 'Pay ID o correo de Binance', monedas: ['USDT', 'USDC', 'BTC', 'BNB'], redes: ['BINANCE_PAY'] },
+        { tipo: 'USDT', nombre: 'USDT (Tether)', categoria: 'cripto', icono: 'fa-solid fa-dollar-sign', color: '#26A17B', campo: 'Dirección de la billetera', monedas: ['USDT'], redes: ['TRC20', 'BEP20', 'ERC20', 'POLYGON', 'SOL', 'TON'] },
+        { tipo: 'USDC', nombre: 'USDC', categoria: 'cripto', icono: 'fa-solid fa-dollar-sign', color: '#2775CA', campo: 'Dirección de la billetera', monedas: ['USDC'], redes: ['ERC20', 'BEP20', 'POLYGON', 'SOL', 'BASE'] },
+        { tipo: 'BTC', nombre: 'Bitcoin', categoria: 'cripto', icono: 'fa-brands fa-bitcoin', color: '#F7931A', campo: 'Dirección de la billetera', monedas: ['BTC'], redes: ['BTC'] },
+        { tipo: 'ETH', nombre: 'Ethereum', categoria: 'cripto', icono: 'fa-brands fa-ethereum', color: '#627EEA', campo: 'Dirección de la billetera', monedas: ['ETH'], redes: ['ERC20', 'ARBITRUM', 'BASE'] },
+        { tipo: 'BNB', nombre: 'BNB', categoria: 'cripto', icono: 'fa-solid fa-coins', color: '#F0B90B', campo: 'Dirección de la billetera', monedas: ['BNB'], redes: ['BEP20'] },
+        { tipo: 'SOL', nombre: 'Solana', categoria: 'cripto', icono: 'fa-solid fa-sun', color: '#9945FF', campo: 'Dirección de la billetera', monedas: ['SOL'], redes: ['SOL'] },
+        { tipo: 'TRX', nombre: 'TRON (TRX)', categoria: 'cripto', icono: 'fa-solid fa-coins', color: '#EF0027', campo: 'Dirección de la billetera', monedas: ['TRX'], redes: ['TRC20'] },
+        { tipo: 'LTC', nombre: 'Litecoin', categoria: 'cripto', icono: 'fa-solid fa-coins', color: '#345D9D', campo: 'Dirección de la billetera', monedas: ['LTC'], redes: ['LTC'] },
+    ];
+    const CATEGORIAS_PAGO = { electronico: 'Pagos locales y electrónicos', cripto: 'Criptomonedas' };
+    const tipoPago = (tipo) => TIPOS_PAGO.find((t) => t.tipo === tipo) ?? null;
+
+    // Formato de dirección por red: un error de red o de dirección es pérdida total de fondos.
+    // Mismas reglas que public.direccion_cripto_valida() en la base de datos.
+    const FORMATO_RED = {
+        TRC20: /^T[1-9A-HJ-NP-Za-km-z]{33}$/,
+        BEP20: /^0x[0-9a-fA-F]{40}$/,
+        ERC20: /^0x[0-9a-fA-F]{40}$/,
+        POLYGON: /^0x[0-9a-fA-F]{40}$/,
+        ARBITRUM: /^0x[0-9a-fA-F]{40}$/,
+        BASE: /^0x[0-9a-fA-F]{40}$/,
+        SOL: /^[1-9A-HJ-NP-Za-km-z]{32,44}$/,
+        TON: /^(EQ|UQ)[A-Za-z0-9_-]{46}$/,
+        BTC: /^(bc1[02-9ac-hj-np-z]{25,62}|[13][1-9A-HJ-NP-Za-km-z]{25,34})$/,
+        LTC: /^(ltc1[02-9ac-hj-np-z]{25,62}|[LM3][1-9A-HJ-NP-Za-km-z]{26,33})$/,
+        BINANCE_PAY: /^(\d{6,12}|[^\s@]+@[^\s@]+\.[^\s@]+)$/,
+    };
+    const direccionValida = (red, valor) => Boolean(FORMATO_RED[red] && FORMATO_RED[red].test(String(valor ?? '').trim()));
+
+    // Monto a pagar en cripto con la tasa que fijó el administrador (COP por 1 unidad). null = no cotizar.
+    // Se redondea HACIA ARRIBA para no recibir de menos; la tasa vence a las 24 h.
+    function montoCripto(totalCop, metodo, ahora = Date.now()) {
+        const tasa = Number(metodo?.tasa_cop);
+        const fecha = new Date(metodo?.tasa_actualizada_at ?? 0).getTime();
+        if (!(tasa > 0) || !(ahora - fecha < 24 * 3600e3)) return null;
+        const decimales = ['BTC', 'ETH', 'LTC'].includes(metodo.moneda) ? 8 : ['BNB', 'SOL'].includes(metodo.moneda) ? 6 : 2;
+        const factor = 10 ** decimales;
+        return Math.ceil((Number(totalCop) / tasa) * factor) / factor;
+    }
+
     const precioCOP = (valor) => Number.isFinite(Number(valor))
         ? Number(valor).toLocaleString('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 })
         : String(valor ?? '');
@@ -66,6 +120,12 @@
         ENTREGA_MAX_MIN,
         HORARIO,
         normalizarNumero,
+        TIPOS_PAGO,
+        CATEGORIAS_PAGO,
+        tipoPago,
+        FORMATO_RED,
+        direccionValida,
+        montoCripto,
         limpiarVariable,
         rellenar,
         enlace,

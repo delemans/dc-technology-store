@@ -74,6 +74,7 @@ function utilidades() {
         return salida;
     };
     const soloDigitos = (v) => String(v ?? '').replace(/\D/g, '');
+    const montoCripto = __MONTO_CRIPTO__;
     const cop = (v) => `$${Number(v || 0).toLocaleString('es-CO')}`;
     // Triangulación: termina el pedido. El error va a la salida de error del nodo → "Cerrar triangulación"
     const terminar = (estado, avisoAdmin, avisoCliente) => {
@@ -103,7 +104,9 @@ function normalizarMensaje() {
     const m = d.message ?? {};
     const texto = String(m.conversation ?? m.extendedTextMessage?.text ?? m.imageMessage?.caption ?? m.documentMessage?.caption ?? m.videoMessage?.caption ?? '').trim();
     // Foto o PDF = comprobante de pago (Nequi / Daviplata envían captura o PDF)
-    const esComprobante = Boolean(m.imageMessage || (m.documentMessage && /pdf|image/i.test(String(m.documentMessage.mimetype ?? ''))));
+    // Hash de transacción cripto (TXID): 64 hex (BTC, ETH/BEP20/TRC20…) o firma de Solana (base58, ~88)
+    const txid = (/\b(?:0x)?[0-9a-fA-F]{64}\b/.exec(texto) || /\b[1-9A-HJ-NP-Za-km-z]{86,90}\b/.exec(texto) || [])[0] ?? null;
+    const esComprobante = Boolean(m.imageMessage || txid || (m.documentMessage && /pdf|image/i.test(String(m.documentMessage.mimetype ?? ''))));
 
     const memoria = $getWorkflowStaticData('global');
     memoria.pausados = memoria.pausados || {};
@@ -148,7 +151,7 @@ function normalizarMensaje() {
     else if (/^no[.!]?$/.test(t) && ahora - (memoria.resenas[numero] || 0) < 7 * 864e5) ruta = 'baja';
     else if (/^(asesor|soporte|accesos|humano)[.!]?$/.test(t) || palabras.some((p) => ` ${t} `.includes(` ${p} `))) ruta = 'asesor';
 
-    return [{ json: { ruta, numero, texto: texto.slice(0, 1000), nombre: d.pushName ?? '', wamid: key.id ?? null } }];
+    return [{ json: { ruta, numero, texto: texto.slice(0, 1000), nombre: d.pushName ?? '', wamid: key.id ?? null, txid } }];
 }
 
 // A2 · Ruta "asesor": pausa el bot y avisa
@@ -174,16 +177,16 @@ function comprobanteRecibido() {
     const cfg = $('Config bot').first().json;
     const msg = $input.first().json;
     const salida = [{ json: { numero: msg.numero, texto: [
-        '🧾 *¡Recibimos tu comprobante!*',
+        msg.txid ? '🔗 *¡Recibimos el hash de tu transacción!*' : '🧾 *¡Recibimos tu comprobante!*',
         '',
-        `Lo estamos validando. Apenas se confirme, tu pedido sale en máximo *${__ENTREGA_MIN__} minutos* (${__HORARIO__}) y te llega por este chat.`,
+        `${msg.txid ? 'La verificamos en la red.' : 'Lo estamos validando.'} Apenas se confirme, tu pedido sale en máximo *${__ENTREGA_MIN__} minutos* (${__HORARIO__}) y te llega por este chat.`,
         '',
         'No necesitas enviarlo de nuevo 🙌',
     ].join('\n') } }];
     const aviso = String(cfg.numero_aviso_admin ?? '').replace(/\D/g, '');
     if (aviso) {
         salida.push({ json: { numero: aviso, texto: [
-            '🧾 *Comprobante recibido*',
+            msg.txid ? `🔗 *Pago cripto · TXID*\n${msg.txid}` : '🧾 *Comprobante recibido*',
             `Cliente: +${msg.numero}${msg.nombre ? ` (${String(msg.nombre).slice(0, 40)})` : ''}`,
             msg.texto ? `Nota del cliente: ${msg.texto.slice(0, 200)}` : null,
             'Valídalo en el panel → Pagos & Bot.',
@@ -197,8 +200,18 @@ function armarContexto() {
     const msg = $('Normalizar mensaje').first().json;
     const enVivo = $('Base de conocimiento').first().json;
     const base = enVivo && enVivo.prompt_sistema && enVivo.plantillas ? enVivo : __KB__;
-    const cuentas = $('Metodos de pago').all().map((i) => i.json).filter((m) => m && m.numero_cuenta);
-    const cop = (v) => `$${Number(v).toLocaleString('es-CO')}`;
+    const cuentas = $('Metodos de pago').all().map((i) => i.json).filter((m) => m && (m.numero_cuenta || m.url_pago));
+    const linea = (c) => {
+        if (c.categoria !== 'cripto') {
+            return `- ${c.banco_alias ?? c.tipo}: ${c.numero_cuenta ?? ''}${c.url_pago ? ` · enlace: ${c.url_pago}` : ''}${c.titular ? ` (titular: ${c.titular})` : ''}${c.instrucciones ? ` · ${c.instrucciones}` : ''}`;
+        }
+        const tasaVigente = montoCripto(1, c) !== null;
+        return `- ${c.banco_alias ?? c.tipo}: ${c.moneda} SOLO por la red ${c.red} → ${c.red === 'BINANCE_PAY' ? 'Pay ID/correo' : 'dirección'}: ${c.numero_cuenta}${c.memo ? ` · MEMO OBLIGATORIO: ${c.memo}` : ''}${c.instrucciones ? ` · ${c.instrucciones}` : ''} · ${tasaVigente
+            ? `tasa vigente: 1 ${c.moneda} = ${cop(c.tasa_cop)}`
+            : 'SIN TASA VIGENTE: no cotices este método; ofrece un pago local o un asesor'}`;
+    };
+    const locales = cuentas.filter((c) => c.categoria !== 'cripto');
+    const criptos = cuentas.filter((c) => c.categoria === 'cripto');
     const ahora = new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota', dateStyle: 'full', timeStyle: 'short' });
 
     const sistema = [
@@ -206,10 +219,13 @@ function armarContexto() {
         '',
         `Fecha y hora en Colombia: ${ahora}.`,
         '',
-        'CUENTAS DE PAGO ACTIVAS (las únicas que puedes compartir, tal cual):',
-        cuentas.length
-            ? cuentas.map((c) => `- ${c.banco_alias ?? 'Cuenta'}: ${c.numero_cuenta}${c.titular ? ` (titular: ${c.titular})` : ''}`).join('\n')
-            : '- NO hay cuentas activas: no compartas datos de pago; escala a un asesor.',
+        'MÉTODOS DE PAGO ACTIVOS (los únicos que puedes ofrecer; datos EXACTOS):',
+        ...(cuentas.length ? [
+            'Pagos locales y electrónicos:',
+            ...(locales.length ? locales.map(linea) : ['- (ninguno activo)']),
+            'Criptomonedas:',
+            ...(criptos.length ? criptos.map(linea) : ['- (ninguna activa: no ofrezcas cripto)']),
+        ] : ['- NO hay métodos activos: no compartas datos de pago; escala a un asesor.']),
         '',
         'PROMOCIONES ACTIVAS:',
         ...(base.promociones ?? []).filter((p) => p.activa && !p.pendiente_configurar).map((p) => `- ${p.descripcion}`),
@@ -257,6 +273,12 @@ function revisarRespuesta() {
             if (prod && v) digital = { producto: prod.nombre, variante: v.nombre, precio: v.precio };
         } catch { /* JSON inválido: se ignora la marca */ }
     }
+    const metodos = $('Metodos de pago').all().map((i) => i.json).filter((m) => m && m.categoria === 'cripto');
+    r = r.replace(/\[MONTO_CRIPTO\s+cop=([\d.,]+)\s+moneda=([A-Z0-9]+)\s+red=([A-Z0-9_]+)\s*\]/gi, (_, cop, moneda, red) => {
+        const metodo = metodos.find((x) => String(x.moneda).toUpperCase() === moneda.toUpperCase() && String(x.red).toUpperCase() === red.toUpperCase());
+        const monto = metodo ? montoCripto(Number(String(cop).replace(/[.,]/g, '')), metodo) : null;
+        return monto !== null ? `*${monto} ${metodo.moneda}*` : '(el monto en cripto te lo confirma un asesor)';
+    });
     r = r
         .replace(/\*\*(.+?)\*\*/g, '*$1*')   // Markdown → negrita de WhatsApp
         .replace(/^#{1,6}\s*/gm, '')
@@ -528,7 +550,7 @@ const cuerpo = (fn) => {
     const s = fn.toString();
     return s.slice(s.indexOf('{') + 1, s.lastIndexOf('}')).replace(/^\n/, '').replace(/^ {4}/gm, '');
 };
-const UTILIDADES = cuerpo(utilidades);
+const UTILIDADES = cuerpo(utilidades).replace('__MONTO_CRIPTO__', WA.montoCripto.toString());
 const codigo = (fn, { conUtilidades = false } = {}) => ((conUtilidades ? `${UTILIDADES}\n` : '') + cuerpo(fn))
     .replace(/__KB__/g, `(${JSON.stringify(kbEmbebida)})`)
     .replace(/__HORAS_PAUSA__/g, String(HORAS_PAUSA_ASESOR))
@@ -612,12 +634,12 @@ nodo('Base de conocimiento', 'n8n-nodes-base.httpRequest', 4.2, [900, 140], {
     options: { timeout: 8000, response: { response: { responseFormat: 'json' } } },
 }, { onError: 'continueRegularOutput', alwaysOutputData: true });
 nodo('Metodos de pago', 'n8n-nodes-base.httpRequest', 4.2, [1120, 140], {
-    url: "={{ $('Config bot').first().json.supabase_url }}/rest/v1/metodos_pago?activo=eq.true&select=banco_alias,numero_cuenta,titular",
+    url: "={{ $('Config bot').first().json.supabase_url }}/rest/v1/metodos_pago?activo=eq.true&select=tipo,categoria,banco_alias,numero_cuenta,titular,moneda,red,memo,url_pago,instrucciones,tasa_cop,tasa_actualizada_at,orden&order=categoria,orden",
     authentication: 'predefinedCredentialType',
     nodeCredentialType: 'supabaseApi',
     options: { timeout: 8000 },
 }, { onError: 'continueRegularOutput', alwaysOutputData: true, executeOnce: true });
-nodoCodigo('Armar contexto', [1340, 140], armarContexto);
+nodoCodigo('Armar contexto', [1340, 140], armarContexto, { conUtilidades: true });
 nodo('Agente IA', '@n8n/n8n-nodes-langchain.agent', 1.7, [1560, 140], {
     promptType: 'define',
     text: '={{ $json.texto }}',

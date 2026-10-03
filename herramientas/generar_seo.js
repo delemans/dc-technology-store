@@ -17,6 +17,31 @@ const SITIO = 'https://dctecnology.xyz';
 const LOGO = 'https://i.ibb.co/LDN4xyW0/Mesa-de-trabajo-1.png';
 const GARANTIA_DIAS = 30;
 const productos = JSON.parse(fs.readFileSync(path.join(RAIZ, 'productos.json'), 'utf8'));
+const SUPABASE_URL = 'https://vyqcizwfmjlflncdwzve.supabase.co';
+const SUPABASE_PUBLICA = 'sb_publishable_GvQiv6M7iSrlwsA90lXsOQ_5OfSYBwy'; // la misma clave pública de la tienda
+
+// Formas de pago ACTIVAS al momento de generar (RPC pública: sin números ni direcciones).
+// Si cambias los métodos en el panel, vuelve a ejecutar este script para que las páginas lo reflejen.
+let PAGO = { texto: 'transferencia o billetera digital', chip: '💳 Pago local y digital' };
+async function cargarFormasDePago() {
+    try {
+        const r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/metodos_pago_publicos`, {
+            method: 'POST', headers: { apikey: SUPABASE_PUBLICA, 'Content-Type': 'application/json' }, body: '{}',
+        });
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        const metodos = await r.json();
+        if (!metodos.length) return;
+        const locales = [...new Set(metodos.filter((m) => m.categoria !== 'cripto').map((m) => m.nombre || m.tipo))];
+        const cripto = [...new Set(metodos.filter((m) => m.categoria === 'cripto').map((m) => (m.red && m.red !== 'BINANCE_PAY' ? `${m.moneda} ${m.red}` : m.nombre || m.tipo)))];
+        const partes = [...locales.slice(0, 3), ...(cripto.length ? [`cripto (${cripto.slice(0, 3).join(', ')})`] : [])];
+        PAGO = {
+            texto: partes.length > 1 ? `${partes.slice(0, -1).join(', ')} o ${partes.at(-1)}` : partes[0],
+            chip: `💳 ${[...locales.slice(0, 2), ...(cripto.length ? ['Cripto'] : [])].join(' · ')}`,
+        };
+    } catch (error) {
+        console.warn(`Formas de pago: se usa el texto genérico (${error.message}).`);
+    }
+}
 
 const CATEGORIAS = {
     streaming: 'Streaming', licencias: 'Licencias de software', pines: 'Pines virtuales', recargas: 'Recargas',
@@ -28,9 +53,9 @@ const COTIZABLES = ['servicios', 'alquiler'];
 
 // Mismos hechos que la tienda (app.js → COMO_FUNCIONA / TERMINOS) y el bot: nada inventado
 const PASOS = {
-    digital: ['Elige tu opción y confirma el pedido por WhatsApp.', 'Paga por Nequi o Daviplata y envía el comprobante.',
+    digital: ['Elige tu opción y confirma el pedido por WhatsApp.', 'Paga con el método que elijas y envía el comprobante.',
         `Recibe tu producto por WhatsApp en máximo ${WA.ENTREGA_MAX_MIN} minutos tras validar el pago (${WA.HORARIO}).`],
-    tecnologia: ['Elige el producto y confirmamos disponibilidad por WhatsApp.', 'Paga por Nequi o Daviplata.', 'Coordinamos el envío a tu ciudad.'],
+    tecnologia: ['Elige el producto y confirmamos disponibilidad por WhatsApp.', 'Paga con el método que elijas.', 'Coordinamos el envío a tu ciudad.'],
     servicio: ['Cuéntanos qué necesitas por WhatsApp.', 'Te enviamos la cotización final antes de empezar.', 'Ejecutamos el servicio con avances por WhatsApp.'],
 };
 const REGLAS = {
@@ -61,7 +86,8 @@ function descripcionMeta(p) {
         `${p.nombre}${desde ? ` desde ${cop(desde)}` : ''} en DC Technology Colombia.`,
         DIGITALES.includes(p.tipo) ? `Entrega en máximo ${WA.ENTREGA_MAX_MIN} min tras validar tu pago.` : cotizable ? 'Cotización sin compromiso.' : 'Envíos a todo el país.',
         CON_GARANTIA.includes(p.tipo) ? `Garantía de ${GARANTIA_DIAS} días.` : '',
-        'Paga con Nequi o Daviplata. Soporte por WhatsApp.',
+        `Paga con ${PAGO.texto}.`,
+        'Soporte por WhatsApp.',
     ];
     // Frases completas hasta 158 caracteres (Google corta más allá): nunca a mitad de palabra
     return partes.filter(Boolean).reduce((acc, frase) => ((`${acc} ${frase}`).trim().length <= 158 ? `${acc} ${frase}`.trim() : acc), '');
@@ -115,7 +141,8 @@ function pagina(p) {
     const { desde, desc, cotizable, categoria } = datosDe(p);
     const titulo = `${p.nombre}${desde ? ` desde ${cop(desde)}` : ''} | ${categoria} en Colombia | DC Technology`;
     const descripcion = descripcionMeta(p);
-    const pasos = cotizable ? PASOS.servicio : p.tipo === 'tecnologia' ? PASOS.tecnologia : PASOS.digital;
+    const pasos = (cotizable ? PASOS.servicio : p.tipo === 'tecnologia' ? PASOS.tecnologia : PASOS.digital)
+        .map((x) => x.replace('el método que elijas', PAGO.texto));
     const detalles = textoPlano(p.descripcion);
     const relacionados = productos.filter((x) => x.tipo === p.tipo && x.id !== p.id).slice(0, 6);
     const comprar = `${SITIO}/?producto=${encodeURIComponent(p.id)}`;
@@ -123,7 +150,7 @@ function pagina(p) {
     const chips = [
         DIGITALES.includes(p.tipo) ? `⚡ Entrega ≤ ${WA.ENTREGA_MAX_MIN} min` : null,
         CON_GARANTIA.includes(p.tipo) ? `🛡️ Garantía ${GARANTIA_DIAS} días` : null,
-        '💳 Nequi · Daviplata',
+        PAGO.chip,
         desc ? `🔥 Hasta -${desc}%` : null,
     ].filter(Boolean);
 
@@ -178,6 +205,8 @@ ${relacionados.length ? `<section><h2 style="font-size:18px">También en ${esc(c
 `;
 }
 
+async function generar() {
+await cargarFormasDePago();
 // 1) Páginas de producto (se borran las de productos que ya no existen)
 const carpeta = path.join(RAIZ, 'p');
 fs.mkdirSync(carpeta, { recursive: true });
@@ -222,4 +251,10 @@ const marca = /<!-- SEO:DIRECTORIO[\s\S]*?<!-- \/SEO:DIRECTORIO -->/;
 if (!marca.test(index)) throw new Error('Falta el marcador <!-- SEO:DIRECTORIO --><!-- /SEO:DIRECTORIO --> en index.html');
 fs.writeFileSync(indexRuta, index.replace(marca, directorio), 'utf8');
 
-console.log(`SEO: ${productos.length} páginas en p/, sitemap.xml (${urls.length} URLs), robots.txt y directorio del pie actualizados.`);
+console.log(`SEO: ${productos.length} páginas en p/, sitemap.xml (${urls.length} URLs), robots.txt y directorio del pie actualizados. Pagos: ${PAGO.texto}.`);
+}
+
+generar().catch((error) => {
+    console.error(error);
+    process.exitCode = 1;
+});

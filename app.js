@@ -277,6 +277,27 @@ async function cargarCatalogo() {
     inyectarSEO();
     abrirDesdeEnlace();
     cargarPromocionesDia();
+    cargarFormasDePago();
+}
+
+/* ==================== FORMAS DE PAGO (supabase/wo-027-metodos-pago.sql) ==================== */
+
+// Solo tipo, nombre, moneda y red de los métodos ACTIVOS: los datos de cuenta los da el bot al pagar
+async function cargarFormasDePago() {
+    if (!supabaseTienda) return;
+    const { data, error } = await supabaseTienda.rpc('metodos_pago_publicos');
+    if (error) {
+        if (error.code !== 'PGRST202') console.warn('metodos_pago_publicos:', error.message);
+        return;
+    }
+    estado.metodosPago = data ?? [];
+    const seccion = $('formas-pago');
+    if (seccion && estado.metodosPago.length) {
+        $('formas-pago-lista').innerHTML = htmlFormasDePago(estado.metodosPago);
+        seccion.hidden = false;
+    }
+    // Si un producto ya estaba abierto (enlace directo ?producto=), se completa su bloque de pagos
+    if (!$('product-modal').hidden && estado.seleccion.producto) pintarDescripcion(estado.seleccion.producto);
 }
 
 /* ==================== PROMOCIONES DEL DÍA (supabase/wo-025-promociones.sql) ==================== */
@@ -550,24 +571,24 @@ function pintarGaleria(prod) {
 const COMO_FUNCIONA = {
     streaming: [
         { icono: 'fa-cart-shopping', titulo: 'Pides', texto: 'Elige tu opción y confirmamos el pedido por WhatsApp.' },
-        { icono: 'fa-mobile-screen-button', titulo: 'Pagas', texto: 'Por Nequi o Daviplata y nos envías el comprobante.' },
+        { icono: 'fa-mobile-screen-button', titulo: 'Pagas', texto: 'Con {pago} y nos envías el comprobante.' },
         { icono: 'fa-bolt', titulo: 'Recibes', texto: 'Tus accesos llegan por WhatsApp en máximo 15 minutos tras validar el pago.' },
         { icono: 'fa-tv', titulo: 'Disfrutas', texto: 'Inicia sesión en la app oficial y entra solo a tu perfil asignado.' },
     ],
     licencias: [
         { icono: 'fa-cart-shopping', titulo: 'Pides', texto: 'Elige la versión y confirmamos el pedido por WhatsApp.' },
-        { icono: 'fa-mobile-screen-button', titulo: 'Pagas', texto: 'Por Nequi o Daviplata y nos envías el comprobante.' },
+        { icono: 'fa-mobile-screen-button', titulo: 'Pagas', texto: 'Con {pago} y nos envías el comprobante.' },
         { icono: 'fa-bolt', titulo: 'Recibes', texto: 'Tu licencia o acceso llega por WhatsApp en máximo 15 minutos tras validar el pago.' },
         { icono: 'fa-key', titulo: 'Activas', texto: 'Copia el serial sin espacios y pégalo en "Activar licencia" o "Canjear código".' },
     ],
     pines: [
         { icono: 'fa-cart-shopping', titulo: 'Pides', texto: 'Elige el valor y, si es una recarga, envíanos el número o ID exacto.' },
-        { icono: 'fa-mobile-screen-button', titulo: 'Pagas', texto: 'Por Nequi o Daviplata y nos envías el comprobante.' },
+        { icono: 'fa-mobile-screen-button', titulo: 'Pagas', texto: 'Con {pago} y nos envías el comprobante.' },
         { icono: 'fa-bolt', titulo: 'Recibes', texto: 'El código o la recarga llegan en máximo 15 minutos tras validar el pago.' },
     ],
     tecnologia: [
         { icono: 'fa-cart-shopping', titulo: 'Pides', texto: 'Elige el producto y confirmamos disponibilidad por WhatsApp.' },
-        { icono: 'fa-mobile-screen-button', titulo: 'Pagas', texto: 'Por Nequi o Daviplata y nos envías el comprobante.' },
+        { icono: 'fa-mobile-screen-button', titulo: 'Pagas', texto: 'Con {pago} y nos envías el comprobante.' },
         { icono: 'fa-truck-fast', titulo: 'Recibes', texto: 'Coordinamos el envío a tu ciudad por WhatsApp.' },
     ],
 };
@@ -613,7 +634,7 @@ function pintarDescripcion(prod) {
         <ol class="desc-pasos">${pasos.map((p, i) => `
             <li style="--i:${i}">
                 <span class="desc-paso-icono"><i class="fa-solid ${p.icono}"></i></span>
-                <span><b>${escaparHTML(p.titulo)}</b><span class="block">${escaparHTML(p.texto)}</span></span>
+                <span><b>${escaparHTML(p.titulo)}</b><span class="block">${escaparHTML(p.texto.replace('{pago}', resumenFormasDePago(estado.metodosPago)))}</span></span>
             </li>`).join('')}
         </ol>`));
 
@@ -633,6 +654,11 @@ function pintarDescripcion(prod) {
                 return `<li><i class="fa-solid ${icono}"></i><span>${p.titulo ? `<b>${escaparHTML(p.titulo)}</b>` : ''}${escaparHTML(p.texto)}</span></li>`;
             }).join('')}
             </ul>`));
+    }
+
+    // Formas de pago activas (las configura el administrador; sin números ni direcciones)
+    if (!esCotizable(prod) && estado.metodosPago?.length) {
+        bloques.push(seccion('fa-wallet', 'Formas de pago', `<div class="space-y-3">${htmlFormasDePago(estado.metodosPago, { compacto: true })}</div>`));
     }
 
     if (reglas.length) {
@@ -1046,7 +1072,7 @@ function metaProducto(prod) {
     }
     const precios = (prod.variantes ?? []).map((v) => Number(v.precio)).filter((n) => n > 0);
     document.title = `${prod.nombre}${precios.length ? ` desde ${formatearPrecio(Math.min(...precios))}` : ''} | DC Technology`;
-    descripcion?.setAttribute('content', `${prod.nombre} en DC Technology Colombia. Paga con Nequi o Daviplata y recibe soporte por WhatsApp.`);
+    descripcion?.setAttribute('content', `${prod.nombre} en DC Technology Colombia. Paga con ${resumenFormasDePago(estado.metodosPago)} y recibe soporte por WhatsApp.`);
     canonical?.setAttribute('href', `${SITIO}p/${prod.id}.html`);
 }
 
@@ -1099,6 +1125,7 @@ document.addEventListener('DOMContentLoaded', () => {
 window.DCTienda = {
     productos: () => estado.productos,
     promociones: () => estado.promociones ?? [],
+    metodosPago: () => estado.metodosPago ?? [],
     abrirProducto,
     productoActual: () => estado.seleccion.producto,
     formatearPrecio,

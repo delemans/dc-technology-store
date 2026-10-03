@@ -35,11 +35,7 @@ const ESTADOS_POR_ENTREGAR = ['PEDIDO_REALIZADO', 'RECIBIDA'];
 const ESTADOS_ENTREGADOS = ['ENTREGADO', 'ENTREGADO_INMEDIATO'];
 
 // Métodos de pago que acepta el enum public.metodo_pago (por ahora solo estos dos)
-const METODOS_PAGO_BASE = [
-    { valor: 'NEQUI', texto: 'Nequi' },
-    { valor: 'DAVIPLATA', texto: 'Daviplata' },
-];
-const METODO_TEXTO = Object.fromEntries(METODOS_PAGO_BASE.map(({ valor, texto }) => [valor, texto]));
+// Métodos posibles al registrar un pago: los del catálogo (plantillas-whatsapp.js · wo-027)
 // Ventanas del seguimiento posventa
 const HORAS_SATISFACCION = 24;
 const DIAS_MAX_SATISFACCION = 7;   // pasado este plazo ya no tiene sentido preguntar
@@ -228,6 +224,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
     pintarNavegacion();
     document.getElementById('btn-recargar-metodos').addEventListener('click', cargarMetodosPago);
+    document.getElementById('btn-nuevo-metodo').addEventListener('click', () => abrirMetodo());
+    document.getElementById('form-metodo').addEventListener('submit', protegido(guardarMetodo, 'modal-metodo'));
     document.getElementById('btn-recargar-notif').addEventListener('click', cargarNotificaciones);
     document.getElementById('promo-buscar').addEventListener('input', pintarPromociones);
     document.getElementById('bot-buscar').addEventListener('input', pintarCatalogoBot);
@@ -515,7 +513,7 @@ function iniciarRealtime() {
         // Comprobantes nuevos o revisados en 'pagos' (n8n / WhatsApp)
         .on('postgres_changes', { event: '*', schema: 'public', table: 'pagos' }, ({ eventType, new: pago }) => {
             if (eventType === 'INSERT' && pago?.estado === 'PENDIENTE') {
-                mostrarToast(`Nuevo comprobante ${METODO_TEXTO[pago.metodo] ?? pago.metodo ?? ''} por verificar.`, 'nuevo', 6000);
+                mostrarToast(`Nuevo comprobante ${textoMetodo(pago.metodo)} por verificar.`, 'nuevo', 6000);
                 Sonidos.nuevo();
             }
             cargarPagosPendientes();
@@ -1339,32 +1337,17 @@ function filaVacia(texto, icono = 'fa-circle-check') {
     return `<p class="flex items-center gap-2 rounded-2xl bg-dcDarkBg/40 ring-1 ring-white/5 px-4 py-3 text-xs text-neutral-500"><i class="fa-solid ${icono}"></i> ${escaparHTML(texto)}</p>`;
 }
 
-/* ==================== MÉTODOS DE PAGO (public.metodos_pago) ==================== */
+/* ==================== MÉTODOS DE PAGO (public.metodos_pago · supabase/wo-027-metodos-pago.sql) ==================== */
 
-// La tabla ya existe con columnas propias: se leen con nombres candidatos
-const CAMPOS_METODO = {
-    nombre:     ['banco_alias', 'nombre', 'metodo', 'tipo', 'banco', 'entidad', 'plataforma'],
-    numero:     ['numero', 'numero_cuenta', 'cuenta', 'telefono', 'celular', 'llave', 'wallet', 'direccion', 'billetera'],
-    titular:    ['titular', 'nombre_titular', 'beneficiario', 'a_nombre_de'],
-    tipoCuenta: ['tipo_cuenta', 'red', 'network'],
-    activo:     ['activo', 'activa', 'habilitado', 'enabled'],
-};
-
-function campoMetodo(fila, campo) {
-    const columnas = CAMPOS_METODO[campo].filter((c) => c in fila);
-    const conValor = columnas.find((c) => fila[c] !== null && fila[c] !== '');
-    return { columna: conValor ?? columnas[0] ?? null, valor: conValor ? fila[conValor] : null };
-}
-
-function metodoActivo(fila) {
-    const { columna, valor } = campoMetodo(fila, 'activo');
-    return columna ? valor !== false : true; // sin columna 'activo' se asume activo
-}
+// El catálogo de tipos (íconos, campos, redes) vive en plantillas-whatsapp.js: el mismo para tienda, bot y panel
+const WA_PAGO = PlantillasWA;
+const nombreMetodo = (fila) => fila.banco_alias || WA_PAGO.tipoPago(fila.tipo)?.nombre || 'Método sin nombre';
+const textoMetodo = (valor) => WA_PAGO.tipoPago(valor)?.nombre ?? valor ?? '';
+let metodoEditando = null; // id del método abierto en el modal (null = nuevo)
 
 async function cargarMetodosPago() {
     const caja = document.getElementById('lista-metodos-pago');
     caja.innerHTML = '<div class="skeleton h-16 rounded-2xl"></div><div class="skeleton h-16 rounded-2xl"></div>';
-
     const { data, error } = await supabaseClient.from('metodos_pago').select('*');
     if (error) {
         console.error('Error al cargar metodos_pago:', error);
@@ -1372,56 +1355,196 @@ async function cargarMetodosPago() {
         caja.innerHTML = filaVacia(`No se pudo leer metodos_pago: ${error.message}`, 'fa-triangle-exclamation');
         return;
     }
-    metodosPago = data ?? [];
+    metodosPago = (data ?? []).sort((a, b) => String(a.categoria).localeCompare(String(b.categoria)) || (a.orden ?? 0) - (b.orden ?? 0));
     pintarMetodosPago();
+}
+
+// Estado de la tasa de un método cripto (el bot no cotiza con tasas de más de 24 h)
+function estadoTasa(fila) {
+    if (fila.categoria !== 'cripto') return null;
+    if (!(Number(fila.tasa_cop) > 0)) return { texto: 'Sin tasa: el bot no cotiza en cripto', clase: 'text-amber-300' };
+    const horas = (Date.now() - new Date(fila.tasa_actualizada_at).getTime()) / 3600e3;
+    const tasa = `1 ${fila.moneda} = ${WA_PAGO.precioCOP(fila.tasa_cop)}`;
+    return horas < 24
+        ? { texto: `${tasa} · hace ${Math.max(0, Math.floor(horas))} h`, clase: 'text-emerald-300' }
+        : { texto: `${tasa} · vencida (actualízala)`, clase: 'text-red-300' };
 }
 
 function pintarMetodosPago() {
     const caja = document.getElementById('lista-metodos-pago');
     if (metodosPago.length === 0) {
-        caja.innerHTML = filaVacia('No hay cuentas en metodos_pago. Agrégalas en Supabase → Table Editor → metodos_pago.', 'fa-circle-info');
+        caja.innerHTML = filaVacia('Aún no hay métodos de pago. Toca "Agregar" para crear el primero.', 'fa-circle-info');
         return;
     }
-
-    caja.replaceChildren(...metodosPago.map((fila) => {
-        const nombre = campoMetodo(fila, 'nombre').valor ?? 'Método sin nombre';
-        const numero = campoMetodo(fila, 'numero').valor;
-        const titular = campoMetodo(fila, 'titular').valor;
-        const tipoCuenta = campoMetodo(fila, 'tipoCuenta').valor;
-        const { columna: colActivo } = campoMetodo(fila, 'activo');
-        const activo = metodoActivo(fila);
-
-        const item = document.createElement('div');
-        item.className = `flex items-center gap-3 rounded-2xl bg-dcDarkBg/60 ring-1 ${activo ? 'ring-emerald-500/30' : 'ring-white/5 opacity-60'} px-4 py-3`;
-        item.innerHTML = `
-            <div class="flex-1 min-w-0">
-                <p class="text-sm font-bold text-white truncate">${escaparHTML(nombre)}${tipoCuenta ? ` <span class="text-[10px] text-neutral-500 font-semibold">· ${escaparHTML(tipoCuenta)}</span>` : ''}</p>
-                <p class="text-xs font-mono text-neutral-300 truncate">${escaparHTML(numero ?? 'Sin número')}</p>
-                ${titular ? `<p class="text-[11px] text-neutral-500 truncate">${escaparHTML(titular)}</p>` : ''}
-            </div>
-            ${numero ? `<button type="button" data-copiar aria-label="Copiar número" class="btn-cyber shrink-0 w-11 h-11 grid place-items-center rounded-xl bg-white/[0.04] ring-1 ring-white/10 text-neutral-300"><i class="fa-regular fa-copy"></i></button>` : ''}
-            ${colActivo && 'id' in fila ? `
-            <button type="button" data-alternar role="switch" aria-checked="${activo}" aria-label="${activo ? 'Desactivar' : 'Activar'} ${escaparHTML(nombre)}"
-                class="shrink-0 min-h-[44px] px-3 rounded-xl text-[10px] font-black uppercase tracking-wider ring-1 ${activo ? 'bg-emerald-500/10 text-emerald-300 ring-emerald-500/30' : 'bg-white/[0.04] text-neutral-400 ring-white/10'}">
-                ${activo ? 'Activo' : 'Inactivo'}
-            </button>` : `<span class="shrink-0 text-[10px] font-bold uppercase ${activo ? 'text-emerald-300' : 'text-neutral-500'}">${activo ? 'Activo' : 'Inactivo'}</span>`}`;
-
-        item.querySelector('[data-copiar]')?.addEventListener('click', () => copiarTexto(String(numero), `${nombre}: número copiado`));
-        item.querySelector('[data-alternar]')?.addEventListener('click', () => alternarMetodo(fila, colActivo, !activo));
-        return item;
+    const grupos = Object.entries(WA_PAGO.CATEGORIAS_PAGO).map(([cat, titulo]) => [titulo, metodosPago.filter((m) => (m.categoria ?? 'electronico') === cat)]).filter(([, l]) => l.length);
+    caja.replaceChildren(...grupos.flatMap(([titulo, lista]) => {
+        const encabezado = document.createElement('p');
+        encabezado.className = 'pt-2 text-[10px] font-black uppercase tracking-widest text-neutral-500';
+        encabezado.textContent = titulo;
+        return [encabezado, ...lista.map(itemMetodo)];
     }));
 }
 
-async function alternarMetodo(fila, columna, valor) {
-    const { data, error } = await supabaseClient.from('metodos_pago').update({ [columna]: valor }).eq('id', fila.id).select('*');
-    if (error || !data?.length) {
-        console.error('No se pudo cambiar el método de pago:', error ?? 'RLS no permite el UPDATE');
-        mostrarToast('No se pudo cambiar el método (¿permisos de la tabla?).', 'error', 5000);
+function itemMetodo(fila) {
+    const tipo = WA_PAGO.tipoPago(fila.tipo);
+    const activo = fila.activo !== false;
+    const tasa = estadoTasa(fila);
+    const dato = fila.numero_cuenta || fila.url_pago || '';
+    const item = document.createElement('div');
+    item.className = `flex items-center gap-3 rounded-2xl bg-dcDarkBg/60 ring-1 ${activo ? 'ring-emerald-500/30' : 'ring-white/5 opacity-70'} px-3 py-3`;
+    item.innerHTML = `
+        <span class="shrink-0 w-10 h-10 grid place-items-center rounded-xl text-white" style="background:${escaparHTML(tipo?.color ?? '#475569')}"><i class="${escaparHTML(tipo?.icono ?? 'fa-solid fa-wallet')}"></i></span>
+        <div class="flex-1 min-w-0">
+            <p class="text-sm font-bold text-white truncate">${escaparHTML(nombreMetodo(fila))}
+                ${fila.categoria === 'cripto' ? `<span class="ml-1 px-1.5 py-0.5 rounded-md bg-amber-500/15 text-amber-300 text-[9px] font-black">${escaparHTML(fila.moneda ?? '')} · ${escaparHTML(fila.red ?? '')}</span>` : ''}</p>
+            <p class="text-xs font-mono text-neutral-300 truncate" title="${escaparHTML(dato)}">${escaparHTML(dato || 'Sin datos')}</p>
+            ${tasa ? `<p class="text-[10px] font-bold ${tasa.clase}">${escaparHTML(tasa.texto)}</p>` : ''}
+        </div>
+        ${dato ? '<button type="button" data-copiar aria-label="Copiar" class="btn-cyber shrink-0 w-10 h-10 grid place-items-center rounded-xl bg-white/[0.04] ring-1 ring-white/10 text-neutral-300"><i class="fa-regular fa-copy"></i></button>' : ''}
+        <button type="button" data-editar aria-label="Editar ${escaparHTML(nombreMetodo(fila))}" class="btn-cyber shrink-0 w-10 h-10 grid place-items-center rounded-xl bg-white/[0.04] ring-1 ring-white/10 text-neutral-300"><i class="fa-solid fa-pen"></i></button>
+        <button type="button" data-alternar role="switch" aria-checked="${activo}" aria-label="${activo ? 'Desactivar' : 'Activar'} ${escaparHTML(nombreMetodo(fila))}"
+            class="shrink-0 min-h-[40px] px-3 rounded-xl text-[10px] font-black uppercase tracking-wider ring-1 ${activo ? 'bg-emerald-500/10 text-emerald-300 ring-emerald-500/30' : 'bg-white/[0.04] text-neutral-400 ring-white/10'}">${activo ? 'Activo' : 'Inactivo'}</button>`;
+    item.querySelector('[data-copiar]')?.addEventListener('click', () => copiarTexto(String(dato), `${nombreMetodo(fila)}: copiado`));
+    item.querySelector('[data-editar]').addEventListener('click', () => abrirMetodo(fila));
+    item.querySelector('[data-alternar]').addEventListener('click', (e) => alternarMetodo(fila, !activo, e.currentTarget));
+    return item;
+}
+
+async function alternarMetodo(fila, activar, boton) {
+    if (activar && fila.categoria === 'cripto' && !WA_PAGO.direccionValida(fila.red, fila.numero_cuenta)) {
+        mostrarToast('La dirección no coincide con su red: edítala antes de activarla.', 'error', 6000);
         return;
     }
-    metodosPago = metodosPago.map((m) => (m.id === fila.id ? data[0] : m));
-    pintarMetodosPago();
-    mostrarToast(`Método ${valor ? 'activado' : 'desactivado'}.`, 'ok');
+    boton.disabled = true;
+    const { data, error } = await supabaseClient.rpc('estado_metodo_pago', { p_id: fila.id, p_activo: activar }).maybeSingle();
+    boton.disabled = false;
+    if (error || !data?.ok) {
+        console.error('estado_metodo_pago:', error ?? data);
+        mostrarToast(error?.code === 'PGRST202' ? 'Ejecuta supabase/wo-027-metodos-pago.sql.' : data?.mensaje ?? 'No se pudo cambiar el método.', 'error', 5000);
+        return;
+    }
+    mostrarToast(`${nombreMetodo(fila)} ${activar ? 'activado: ya aparece en la tienda y el bot lo comparte' : 'desactivado'}.`, 'ok', 4500);
+    cargarMetodosPago();
+}
+
+/* ---------- Modal crear / editar ---------- */
+
+const $m = (id) => document.getElementById(id);
+
+function prepararSelectTipos() {
+    const select = $m('metodo-tipo');
+    if (select.options.length) return;
+    select.innerHTML = Object.entries(WA_PAGO.CATEGORIAS_PAGO).map(([cat, titulo]) => `<optgroup label="${escaparHTML(titulo)}">${
+        WA_PAGO.TIPOS_PAGO.filter((t) => t.categoria === cat).map((t) => `<option value="${t.tipo}">${escaparHTML(t.nombre)}</option>`).join('')}</optgroup>`).join('');
+    select.addEventListener('change', () => ajustarFormularioMetodo());
+    $m('metodo-red').addEventListener('change', () => ajustarFormularioMetodo({ conservarMoneda: true }));
+    $m('metodo-moneda').addEventListener('change', () => { $m('metodo-tasa-moneda').textContent = $m('metodo-moneda').value; });
+    $m('metodo-numero').addEventListener('input', validarDatoMetodo);
+}
+
+function ajustarFormularioMetodo({ conservarMoneda = false } = {}) {
+    const tipo = WA_PAGO.tipoPago($m('metodo-tipo').value);
+    const cripto = tipo.categoria === 'cripto';
+    $m('metodo-bloque-cripto').hidden = !cripto;
+    $m('metodo-bloque-memo').hidden = !cripto || tipo.tipo === 'BINANCE_PAY';
+    $m('metodo-bloque-tasa').hidden = !cripto;
+    if (cripto) {
+        const redActual = $m('metodo-red').value;
+        $m('metodo-red').innerHTML = tipo.redes.map((r) => `<option value="${r}">${r === 'BINANCE_PAY' ? 'Binance Pay (interna)' : r}</option>`).join('');
+        if (tipo.redes.includes(redActual)) $m('metodo-red').value = redActual;
+        if (!conservarMoneda) $m('metodo-moneda').innerHTML = tipo.monedas.map((mo) => `<option value="${mo}">${mo}</option>`).join('');
+        $m('metodo-tasa-moneda').textContent = $m('metodo-moneda').value;
+    }
+    $m('metodo-numero-etiqueta').textContent = tipo.campo;
+    $m('metodo-bloque-numero').hidden = Boolean(tipo.requiereUrl);
+    $m('metodo-url-etiqueta').textContent = tipo.requiereUrl ? 'Enlace de pago (obligatorio, https)' : 'Enlace de pago (opcional)';
+    const aviso = $m('metodo-aviso-red');
+    const red = $m('metodo-red').value;
+    aviso.classList.toggle('hidden', !cripto || red === 'BINANCE_PAY');
+    aviso.innerHTML = cripto ? `<i class="fa-solid fa-triangle-exclamation mr-1"></i> El bot exigirá al cliente enviar <b>solo ${escaparHTML($m('metodo-moneda').value)} por la red ${escaparHTML(red)}</b>. Un envío por otra red se pierde y no se puede recuperar.` : '';
+    validarDatoMetodo();
+}
+
+// Valida en vivo: formato de la dirección según la red (cripto) o celular colombiano (Nequi / Daviplata)
+function validarDatoMetodo() {
+    const tipo = WA_PAGO.tipoPago($m('metodo-tipo').value);
+    const valor = $m('metodo-numero').value.trim();
+    const estado = $m('metodo-numero-estado');
+    let ok = true;
+    let texto = '';
+    if (tipo.categoria === 'cripto' && valor) {
+        ok = WA_PAGO.direccionValida($m('metodo-red').value, valor);
+        texto = ok ? `✓ Formato válido para ${$m('metodo-red').value}` : `✗ No es una dirección de la red ${$m('metodo-red').value}`;
+    } else if (['NEQUI', 'DAVIPLATA'].includes(tipo.tipo) && valor) {
+        ok = /^3\d{9}$/.test(valor.replace(/\D/g, ''));
+        texto = ok ? '✓ Celular válido' : '✗ Debe ser un celular de 10 dígitos (3xx…)';
+    }
+    estado.textContent = texto;
+    estado.className = `mt-1.5 block text-[11px] font-bold ${ok ? 'text-emerald-300' : 'text-red-300'}`;
+    return ok;
+}
+
+function abrirMetodo(fila = null) {
+    prepararSelectTipos();
+    metodoEditando = fila?.id ?? null;
+    $m('modal-metodo-titulo').textContent = fila ? 'Editar método' : 'Nuevo método';
+    $m('metodo-tipo').value = fila?.tipo && WA_PAGO.tipoPago(fila.tipo) ? fila.tipo : 'NEQUI';
+    ajustarFormularioMetodo();
+    if (fila?.moneda) $m('metodo-moneda').value = fila.moneda;
+    if (fila?.red) $m('metodo-red').value = fila.red;
+    ajustarFormularioMetodo({ conservarMoneda: true });
+    $m('metodo-nombre').value = fila?.banco_alias ?? '';
+    $m('metodo-numero').value = fila?.numero_cuenta ?? '';
+    $m('metodo-titular').value = fila?.titular ?? '';
+    $m('metodo-memo').value = fila?.memo ?? '';
+    $m('metodo-url').value = fila?.url_pago ?? '';
+    $m('metodo-qr').value = fila?.qr_url ?? '';
+    $m('metodo-tasa').value = fila?.tasa_cop ?? '';
+    $m('metodo-instrucciones').value = fila?.instrucciones ?? '';
+    $m('metodo-activo').checked = fila ? fila.activo !== false : false;
+    validarDatoMetodo();
+    abrirModal($m('modal-metodo'));
+}
+
+async function guardarMetodo(e) {
+    e.preventDefault();
+    const tipo = WA_PAGO.tipoPago($m('metodo-tipo').value);
+    const datos = {
+        tipo: tipo.tipo,
+        banco_alias: $m('metodo-nombre').value.trim() || tipo.nombre,
+        numero_cuenta: tipo.requiereUrl ? null : $m('metodo-numero').value.trim(),
+        titular: $m('metodo-titular').value.trim(),
+        moneda: tipo.categoria === 'cripto' ? $m('metodo-moneda').value : null,
+        red: tipo.categoria === 'cripto' ? $m('metodo-red').value : null,
+        memo: $m('metodo-memo').value.trim(),
+        url_pago: $m('metodo-url').value.trim(),
+        qr_url: $m('metodo-qr').value.trim(),
+        tasa_cop: tipo.categoria === 'cripto' ? $m('metodo-tasa').value : '',
+        instrucciones: $m('metodo-instrucciones').value.trim(),
+        activo: $m('metodo-activo').checked,
+    };
+    // Mismas reglas que la base: primero en el navegador para dar el error al instante
+    const errores = [];
+    if (tipo.requiereUrl && !/^https:\/\//.test(datos.url_pago)) errores.push('El enlace de pago debe empezar por https://');
+    if (!tipo.requiereUrl && !datos.numero_cuenta) errores.push(`Falta: ${tipo.campo}`);
+    if (!validarDatoMetodo()) errores.push('El dato no tiene un formato válido.');
+    for (const url of [datos.url_pago, datos.qr_url]) if (url && !/^https:\/\//.test(url)) errores.push('Los enlaces deben empezar por https://');
+    if (errores.length) {
+        mostrarToast(errores[0], 'error', 6000);
+        return;
+    }
+    const boton = $m('btn-guardar-metodo');
+    boton.disabled = true;
+    const { data, error } = await supabaseClient.rpc('guardar_metodo_pago', { p_id: metodoEditando, p_datos: datos }).maybeSingle();
+    boton.disabled = false;
+    if (error || !data?.ok) {
+        console.error('guardar_metodo_pago:', error ?? data);
+        mostrarToast(error?.code === 'PGRST202' ? 'Ejecuta supabase/wo-027-metodos-pago.sql para gestionar métodos.' : data?.mensaje ?? `No se pudo guardar: ${error?.message ?? ''}`, 'error', 7000);
+        return;
+    }
+    cerrarModal($m('modal-metodo'), { forzar: true });
+    mostrarToast(data.mensaje, 'ok', 4000);
+    cargarMetodosPago();
 }
 
 /* ==================== REGISTRO Y VALIDACIÓN DE PAGOS (tabla public.pagos) ==================== */
@@ -1456,7 +1579,7 @@ function pintarPorVerificar(porVerificar) {
         item.innerHTML = `
             <div class="flex items-start gap-3">
                 <div class="flex-1 min-w-0">
-                    <p class="text-[10px] font-black uppercase tracking-widest text-sky-300">Comprobante · ${escaparHTML(METODO_TEXTO[pago.metodo] ?? pago.metodo)} · ${escaparHTML(pago.origen)}</p>
+                    <p class="text-[10px] font-black uppercase tracking-widest text-sky-300">Comprobante · ${escaparHTML(textoMetodo(pago.metodo))} · ${escaparHTML(pago.origen)}</p>
                     <p class="text-sm font-bold text-white truncate">${escaparHTML(pago.producto ?? 'Sin compra en PENDIENTE_PAGO')}</p>
                     <p class="text-[11px] text-neutral-400">
                         Declarado: <b class="text-neutral-200">${escaparHTML(PlantillasWA.precioCOP(pago.monto_declarado_cop))}</b>
@@ -1542,7 +1665,12 @@ function abrirPago(id, pago = null) {
         : `Registro manual · Pedido #${p.ref} · ${p.producto}`;
 
     // Solo los valores del enum public.metodo_pago
-    document.getElementById('pago-metodos').innerHTML = METODOS_PAGO_BASE.map(({ valor, texto }, i) => `
+    const activos = [...new Set(metodosPago.filter((m) => m.activo !== false && m.tipo).map((m) => m.tipo))];
+    const opciones = (activos.length ? activos : PlantillasWA.TIPOS_PAGO.map((t) => t.tipo))
+        .concat(pago?.metodo && !activos.includes(pago.metodo) ? [pago.metodo] : [])
+        .filter((v, i, a) => a.indexOf(v) === i)
+        .map((valor) => ({ valor, texto: textoMetodo(valor) }));
+    document.getElementById('pago-metodos').innerHTML = opciones.map(({ valor, texto }, i) => `
         <label class="cursor-pointer">
             <input type="radio" name="pago-metodo" value="${valor}" class="peer sr-only" ${i === 0 ? 'required' : ''} ${pago?.metodo === valor ? 'checked' : ''}>
             <span class="flex items-center justify-center text-center min-h-[48px] px-2 rounded-2xl bg-dcDarkBg/70 ring-1 ring-white/10 text-[11px] font-bold text-neutral-300 peer-checked:bg-dcRed/15 peer-checked:ring-dcRed/60 peer-checked:text-white peer-focus-visible:ring-2 transition-all">

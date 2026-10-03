@@ -186,7 +186,8 @@ begin
     end if;
 
     if v_estado = 'ESPERANDO_PROVEEDOR' then
-        select initcap(lower(p.metodo::text)) into v_metodo
+        select coalesce((select m.banco_alias from public.metodos_pago m where m.tipo = p.metodo::text and m.activo order by m.orden limit 1),
+                        initcap(replace(lower(p.metodo::text), '_', ' '))) into v_metodo
           from public.pagos p
          where p.pedido_id::text = v_pedido and p.estado::text = 'APROBADO'
          order by p.revisado_at desc nulls last
@@ -195,7 +196,7 @@ begin
         insert into public.notificaciones_whatsapp (clave, tipo, compra_id, pedido_id, destino, variables, prioridad)
         values ('PAGO:' || v_pedido, 'PAGO_RECIBIDO', v_compra, v_pedido, v_destino,
                 jsonb_build_object('pedido', v_pedido, 'producto', v_producto,
-                                   'metodo', coalesce(v_metodo, 'Nequi o Daviplata'), 'codigo', v_compra),
+                                   'metodo', coalesce(v_metodo, 'tu método de pago'), 'codigo', v_compra),
                 1)
         on conflict (clave) do nothing;
 

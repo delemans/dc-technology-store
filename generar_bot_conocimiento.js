@@ -77,8 +77,11 @@ const notificaciones = {
 
 // Reglas estrictas: se regeneran SIEMPRE desde aquí (no se conservan ediciones manuales en el JSON)
 const reglasNegocio = [
-    'Métodos de pago: SOLO Nequi y Daviplata. Cualquier otro medio (tarjeta, efectivo, PSE, Bancolombia, criptomonedas, PayPal) se rechaza con amabilidad.',
-    'Los números de cuenta se leen de public.metodos_pago (solo activos). Nunca los inventes ni los copies de mensajes anteriores.',
+    'Métodos de pago: SOLO los de la lista "MÉTODOS DE PAGO ACTIVOS" que te da el sistema (sale de public.metodos_pago). Si el cliente pide otro medio, dile con amabilidad cuáles están disponibles hoy.',
+    'Números, llaves, enlaces y direcciones: cópialos EXACTOS de esa lista. Nunca los inventes, abrevies ni copies de mensajes anteriores.',
+    'AL PAGAR: primero muestra las opciones agrupadas en "Pagos locales" y "Criptomonedas" (solo las activas) y deja que el cliente elija; luego da únicamente los datos del método elegido.',
+    'CRIPTO (estricto): antes de dar la dirección confirma moneda y red; escribe la red en mayúsculas ("SOLO por la red TRC20") y advierte que un envío por otra red se pierde y no se puede recuperar. Si el método tiene memo/tag, es obligatorio incluirlo.',
+    'MONTOS CRIPTO: nunca los calcules tú. Escribe [MONTO_CRIPTO cop=<total en pesos sin puntos> moneda=<MONEDA> red=<RED>] y el sistema lo reemplaza por el monto exacto con la tasa vigente. Pide como comprobante el hash (TXID) de la transacción y la captura.',
     `Entrega: máximo ${WA.ENTREGA_MAX_MIN} minutos después de VALIDAR el pago, en horario (${WA.HORARIO}). Fuera de horario, el pedido se procesa al abrir. Nunca prometas entrega antes de validar el pago.`,
     'Cupón DCTECH2026: 10% SOLO en la primera compra del número de WhatsApp. Un cupón por compra, no acumulable. Se confirma al validar el pago: si el número ya tiene compras, el descuento no aplica.',
     'Precios: solo los del catálogo de este archivo. No negocies descuentos fuera de las promociones activas.',
@@ -107,7 +110,7 @@ const escalamiento = {
 
 // Venta y soporte de productos digitales (streaming, licencias, pines, recargas): la IA los atiende completos
 const flujoDigital = [
-    'VENTA DIGITAL (sin pasar a un asesor): 1) confirma producto, opción y total (aplica DCTECH2026 solo si es la primera compra); 2) comparte UNA cuenta de pago activa; 3) pide la foto del comprobante con su número de referencia.',
+    'VENTA DIGITAL (sin pasar a un asesor): 1) confirma producto, opción y total (aplica DCTECH2026 solo si es la primera compra); 2) muestra los métodos activos (locales y cripto) y da los datos del que elija; 3) pide el comprobante: captura con número de referencia, o el hash (TXID) si pagó en cripto.',
     `Cuando el cliente envía el comprobante: confirma que lo recibiste y que, al validarlo, su pedido sale en máximo ${WA.ENTREGA_MAX_MIN} minutos dentro del horario. Nunca digas que el pago está aprobado: lo valida el equipo.`,
     'Las cuentas, perfiles, seriales y códigos los envía el sistema por este chat al validar el pago. Tú nunca escribes credenciales ni inventas accesos.',
     'SOPORTE DIGITAL: si algo no funciona, primero da los pasos de las FAQ de soporte (inicio de sesión, límite de pantallas, activación). Escala solo si después de esos pasos el problema sigue.',
@@ -118,8 +121,8 @@ const faqObligatorias = (horario) => [
     {
         id: 'metodos_pago',
         pregunta: '¿Qué métodos de pago aceptan?',
-        palabras_clave: ['pago', 'pagar', 'nequi', 'daviplata', 'bancolombia', 'binance', 'usdt', 'transfiya', 'transferencia', 'tarjeta', 'efectivo', 'pse', 'paypal', 'credito'],
-        respuesta: 'Solo recibimos Nequi y Daviplata. No aceptamos tarjetas, efectivo, PSE, Bancolombia ni criptomonedas. Te compartimos la cuenta al confirmar tu pedido; luego envíanos el comprobante con su número de referencia.',
+        palabras_clave: ['pago', 'pagar', 'nequi', 'daviplata', 'bancolombia', 'transferencia', 'tarjeta', 'efectivo', 'pse', 'paypal', 'credito', 'llave', 'bre-b', 'breb'],
+        respuesta: 'Al confirmar tu pedido te mostramos los métodos disponibles ese día: pagos locales (billeteras y transferencias en Colombia) y, cuando estén habilitadas, criptomonedas. Eliges uno, te damos sus datos y nos envías el comprobante.',
         pendiente_configurar: false,
     },
     {
@@ -134,6 +137,13 @@ const faqObligatorias = (horario) => [
         pregunta: '¿Cómo funciona el cupón DCTECH2026?',
         palabras_clave: ['cupon', 'descuento', 'dctech2026', 'codigo promocional', 'promo', 'primera compra'],
         respuesta: 'DCTECH2026 te da 10% de descuento solo en tu primera compra (se verifica con tu número de WhatsApp al validar el pago). Es un cupón por compra y no se acumula con otros. No aplica a servicios cotizados.',
+        pendiente_configurar: false,
+    },
+    {
+        id: 'pago_cripto',
+        pregunta: '¿Puedo pagar con criptomonedas?',
+        palabras_clave: ['cripto', 'usdt', 'binance', 'bitcoin', 'btc', 'tether', 'usdc', 'ethereum', 'trc20', 'bep20', 'wallet', 'billetera'],
+        respuesta: 'Sí, cuando el método está habilitado. Te damos la moneda, la RED exacta y la dirección: envía solo por esa red (otra red = pérdida total de los fondos) y mándanos el hash (TXID) de la transacción. El monto en cripto se calcula con la tasa del día.',
         pendiente_configurar: false,
     },
     {
@@ -164,8 +174,7 @@ const negocioPorDefecto = {
     sitio: 'https://dctecnology.xyz',
     portal_rastreo: WA.URL_PORTAL,
     whatsapp: WA.NUMERO_TIENDA,
-    metodos_pago: ['Nequi', 'Daviplata'], // valores del enum public.metodo_pago
-    nota_metodos_pago: 'Los números de cuenta salen de la tabla public.metodos_pago (solo los activos). No se escriben aquí.',
+    nota_metodos_pago: 'Los métodos (locales y cripto) y sus datos salen de public.metodos_pago (solo los activos). No se escriben aquí.',
     garantia_dias_por_defecto: 30,
 };
 
@@ -189,7 +198,7 @@ const faqPorDefecto = [
         id: 'metodos_pago',
         pregunta: '¿Qué métodos de pago aceptan?',
         palabras_clave: ['pago', 'nequi', 'daviplata', 'bancolombia', 'binance', 'usdt', 'transfiya', 'transferencia'],
-        respuesta: 'Por ahora recibimos Nequi y Daviplata. Te compartimos los datos de la cuenta al confirmar tu pedido. Envíanos el comprobante con su número de referencia.',
+        respuesta: 'Al confirmar tu pedido te mostramos los métodos disponibles (locales y, si están habilitadas, criptomonedas).',
         pendiente_configurar: false,
     },
     {
@@ -260,7 +269,9 @@ const promocionesPorDefecto = [
     },
 ];
 
-const negocio = { ...negocioPorDefecto, ...(anterior.negocio ?? {}), metodos_pago: ['Nequi', 'Daviplata'] };
+const negocio = { ...negocioPorDefecto, ...(anterior.negocio ?? {}) };
+delete negocio.metodos_pago; // ya no es una lista fija: son los activos de public.metodos_pago
+negocio.nota_metodos_pago = negocioPorDefecto.nota_metodos_pago;
 const horario = negocio.horario_atencion ?? WA.HORARIO;
 
 // FAQ: se conservan las editadas a mano, salvo las de reglas de negocio (se sobrescriben) y se agregan las que falten

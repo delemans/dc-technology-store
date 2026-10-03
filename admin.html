@@ -336,11 +336,16 @@
                     <section class="rounded-3xl bg-white/[0.03] backdrop-blur-xl ring-1 ring-white/10 p-5">
                         <div class="flex items-center justify-between gap-3 mb-1">
                             <h3 class="font-tech text-lg font-black uppercase tracking-wider"><i class="fa-solid fa-building-columns text-dcRed mr-2"></i>Métodos de pago</h3>
+                            <div class="flex gap-2">
+                            <button type="button" id="btn-nuevo-metodo" class="btn-cyber inline-flex items-center gap-2 h-11 px-4 rounded-xl bg-dcRed text-white text-[11px] font-black uppercase tracking-wider">
+                                <i class="fa-solid fa-plus"></i> Agregar
+                            </button>
                             <button type="button" id="btn-recargar-metodos" aria-label="Actualizar métodos de pago" class="btn-cyber w-11 h-11 grid place-items-center rounded-xl bg-white/[0.04] ring-1 ring-white/10 text-neutral-300">
                                 <i class="fa-solid fa-rotate"></i>
                             </button>
+                            </div>
                         </div>
-                        <p class="text-xs text-neutral-500 mb-4">Cuentas de <b class="text-neutral-300">public.metodos_pago</b>. Solo las activas deben compartirse con clientes.</p>
+                        <p class="text-xs text-neutral-500 mb-4">Billeteras, transferencias, enlaces de pago y criptomonedas. Solo los <b class="text-neutral-300">activos</b> aparecen en la tienda y los comparte el bot. En cripto, la dirección se valida según su red.</p>
                         <div id="lista-metodos-pago" class="space-y-2"></div>
                     </section>
 
@@ -463,6 +468,79 @@
                 </button>
             </div>
         </nav>
+    </div>
+
+
+    <!-- ============ MODAL: MÉTODO DE PAGO (crear / editar) ============ -->
+    <div id="modal-metodo" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center" hidden role="dialog" aria-modal="true" aria-labelledby="modal-metodo-titulo">
+        <div data-cerrar-modal class="modal-fondo absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
+        <form id="form-metodo" novalidate class="modal-panel relative w-full sm:max-w-lg max-h-[92vh] overflow-y-auto rounded-t-3xl sm:rounded-3xl bg-dcDarkCard/95 backdrop-blur-xl ring-1 ring-white/10 shadow-2xl shadow-black/70 p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+            <div class="sm:hidden mx-auto mb-5 h-1.5 w-12 rounded-full bg-white/15"></div>
+            <div class="flex items-start justify-between gap-3 mb-5">
+                <div>
+                    <p class="text-[10px] font-black uppercase tracking-[0.25em] text-dcRed">Métodos de pago</p>
+                    <h3 id="modal-metodo-titulo" class="font-tech text-xl font-black uppercase tracking-wider mt-1">Nuevo método</h3>
+                </div>
+                <button type="button" data-cerrar-modal aria-label="Cerrar" class="w-11 h-11 grid place-items-center rounded-xl bg-white/5 text-neutral-400 hover:text-white">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="space-y-4">
+                <label class="block">
+                    <span class="block text-[10px] font-bold uppercase tracking-wider text-neutral-400 mb-2">Tipo</span>
+                    <select id="metodo-tipo" required class="w-full min-h-[52px] rounded-2xl bg-dcDarkBg/70 ring-1 ring-white/10 px-4 text-base sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-dcRed/60"></select>
+                </label>
+                <label class="block">
+                    <span class="block text-[10px] font-bold uppercase tracking-wider text-neutral-400 mb-2">Nombre visible para el cliente</span>
+                    <input id="metodo-nombre" type="text" maxlength="60" autocomplete="off" placeholder="Ej: Nequi DC Technology" class="w-full min-h-[52px] rounded-2xl bg-dcDarkBg/70 ring-1 ring-white/10 px-4 text-base sm:text-sm text-white placeholder:text-neutral-600 focus:outline-none focus:ring-2 focus:ring-dcRed/60">
+                </label>
+                <div id="metodo-bloque-cripto" class="grid grid-cols-2 gap-3" hidden>
+                    <label class="block">
+                        <span class="block text-[10px] font-bold uppercase tracking-wider text-neutral-400 mb-2">Moneda</span>
+                        <select id="metodo-moneda" class="w-full min-h-[52px] rounded-2xl bg-dcDarkBg/70 ring-1 ring-white/10 px-4 text-base sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-dcRed/60"></select>
+                    </label>
+                    <label class="block">
+                        <span class="block text-[10px] font-bold uppercase tracking-wider text-amber-300 mb-2"><i class="fa-solid fa-triangle-exclamation"></i> Red</span>
+                        <select id="metodo-red" class="w-full min-h-[52px] rounded-2xl bg-dcDarkBg/70 ring-2 ring-amber-500/40 px-4 text-base sm:text-sm font-bold text-white focus:outline-none focus:ring-amber-400"></select>
+                    </label>
+                </div>
+                <label class="block" id="metodo-bloque-numero">
+                    <span id="metodo-numero-etiqueta" class="block text-[10px] font-bold uppercase tracking-wider text-neutral-400 mb-2">Número</span>
+                    <input id="metodo-numero" type="text" autocomplete="off" spellcheck="false" class="w-full min-h-[52px] rounded-2xl bg-dcDarkBg/70 ring-1 ring-white/10 px-4 text-base sm:text-sm font-mono text-white focus:outline-none focus:ring-2 focus:ring-dcRed/60">
+                    <span id="metodo-numero-estado" class="mt-1.5 block text-[11px] font-bold" aria-live="polite"></span>
+                </label>
+                <label class="block" id="metodo-bloque-memo" hidden>
+                    <span class="block text-[10px] font-bold uppercase tracking-wider text-neutral-400 mb-2">Memo / tag (solo si tu billetera lo exige)</span>
+                    <input id="metodo-memo" type="text" maxlength="60" autocomplete="off" class="w-full min-h-[52px] rounded-2xl bg-dcDarkBg/70 ring-1 ring-white/10 px-4 text-base sm:text-sm font-mono text-white focus:outline-none focus:ring-2 focus:ring-dcRed/60">
+                </label>
+                <label class="block">
+                    <span class="block text-[10px] font-bold uppercase tracking-wider text-neutral-400 mb-2">Titular (opcional)</span>
+                    <input id="metodo-titular" type="text" maxlength="80" autocomplete="off" class="w-full min-h-[52px] rounded-2xl bg-dcDarkBg/70 ring-1 ring-white/10 px-4 text-base sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-dcRed/60">
+                </label>
+                <label class="block" id="metodo-bloque-url">
+                    <span id="metodo-url-etiqueta" class="block text-[10px] font-bold uppercase tracking-wider text-neutral-400 mb-2">Enlace de pago (opcional)</span>
+                    <input id="metodo-url" type="url" inputmode="url" placeholder="https://…" autocomplete="off" class="w-full min-h-[52px] rounded-2xl bg-dcDarkBg/70 ring-1 ring-white/10 px-4 text-base sm:text-sm text-white placeholder:text-neutral-600 focus:outline-none focus:ring-2 focus:ring-dcRed/60">
+                </label>
+                <label class="block">
+                    <span class="block text-[10px] font-bold uppercase tracking-wider text-neutral-400 mb-2">Imagen del QR (opcional, https)</span>
+                    <input id="metodo-qr" type="url" inputmode="url" placeholder="https://…/qr.png" autocomplete="off" class="w-full min-h-[52px] rounded-2xl bg-dcDarkBg/70 ring-1 ring-white/10 px-4 text-base sm:text-sm text-white placeholder:text-neutral-600 focus:outline-none focus:ring-2 focus:ring-dcRed/60">
+                </label>
+                <label class="block" id="metodo-bloque-tasa" hidden>
+                    <span class="block text-[10px] font-bold uppercase tracking-wider text-neutral-400 mb-2">Tasa: COP por 1 <span id="metodo-tasa-moneda">USDT</span> (el bot cotiza con ella; vence a las 24 h)</span>
+                    <input id="metodo-tasa" type="number" min="0" step="0.01" inputmode="decimal" placeholder="Ej: 4050" class="w-full min-h-[52px] rounded-2xl bg-dcDarkBg/70 ring-1 ring-white/10 px-4 text-base sm:text-sm text-white placeholder:text-neutral-600 focus:outline-none focus:ring-2 focus:ring-dcRed/60">
+                </label>
+                <label class="block">
+                    <span class="block text-[10px] font-bold uppercase tracking-wider text-neutral-400 mb-2">Instrucciones para el cliente (opcional)</span>
+                    <textarea id="metodo-instrucciones" rows="2" maxlength="500" class="w-full rounded-2xl bg-dcDarkBg/70 ring-1 ring-white/10 px-4 py-3 text-base sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-dcRed/60"></textarea>
+                </label>
+                <label class="flex items-center gap-3 rounded-2xl bg-dcDarkBg/60 ring-1 ring-white/10 p-4 cursor-pointer">
+                    <input id="metodo-activo" type="checkbox" class="w-5 h-5 accent-red-600">
+                    <span class="text-sm font-bold">Activo (visible en la tienda y para el bot)</span>
+                </label>
+                <p id="metodo-aviso-red" class="hidden rounded-2xl bg-amber-500/10 ring-1 ring-amber-500/30 px-4 py-3 text-xs text-amber-200"></p>
+            </div>
+            <button type="submit" id="btn-guardar-metodo" class="btn-cyber ancho mt-6 w-full min-h-[56px] rounded-2xl bg-dcRed text-xs font-black uppercase tracking-wider text-white disabled:opacity-60">Guardar método</button>
+        </form>
     </div>
 
     <!-- ============ MODAL: EDICIÓN RÁPIDA ============ -->

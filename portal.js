@@ -498,6 +498,13 @@ function pintarEstadoSistema(operativo) {
   const { error } = await consultarPedido('0');
   pintarEstadoSistema(!error);
 
+  // Formas de pago activas (sin datos de cuenta: esos los da el bot al pagar)
+  supabaseClient.rpc('metodos_pago_publicos').then(({ data, error }) => {
+    if (error || !data?.length) return;
+    document.getElementById('formas-pago-lista').innerHTML = htmlFormasDePago(data, { compacto: true });
+    document.getElementById('formas-pago').hidden = false;
+  });
+
   // Enlace directo desde WhatsApp: portal.html?codigo=DC-1045
   const codigoURL = new URLSearchParams(location.search).get('codigo');
   if (codigoURL) {

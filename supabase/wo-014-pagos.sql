@@ -106,8 +106,11 @@ begin
         return query select false, 'Solo el administrador puede validar pagos.', null::text;
         return;
     end if;
-    if v_metodo not in ('NEQUI', 'DAVIPLATA') then
-        return query select false, 'Método no permitido: por ahora solo NEQUI o DAVIPLATA.', null::text;
+    -- Cualquier valor del enum public.metodo_pago (ampliado en wo-027-metodos-pago.sql)
+    if not exists (select 1 from pg_enum e join pg_type t on t.oid = e.enumtypid
+                   join pg_namespace n on n.oid = t.typnamespace
+                   where n.nspname = 'public' and t.typname = 'metodo_pago' and e.enumlabel = v_metodo) then
+        return query select false, 'Método de pago no reconocido.', null::text;
         return;
     end if;
     if v_ref is null or p_monto is null or p_monto <= 0 then

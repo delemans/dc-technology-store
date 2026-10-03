@@ -166,3 +166,37 @@ document.addEventListener('pointerdown', (e) => {
         mostrarToast('Conexión restablecida.', 'ok', 2500);
     });
 })();
+
+/* ==================== FORMAS DE PAGO (tienda, portal y modal de producto) ==================== */
+// Recibe las filas de la RPC pública metodos_pago_publicos() (sin números ni direcciones) y las pinta
+// agrupadas en "locales" y "cripto" con su ícono. En cripto muestra la red: es lo que evita pérdidas.
+function htmlFormasDePago(metodos, { compacto = false } = {}) {
+    const WA = window.PlantillasWA;
+    if (!WA || !metodos?.length) return '';
+    const chip = (m) => {
+        const t = WA.tipoPago(m.tipo) ?? { icono: 'fa-solid fa-wallet', color: '#64748B', nombre: m.tipo };
+        const red = m.categoria === 'cripto' && m.red && m.red !== 'BINANCE_PAY' ? ` · ${m.red}` : '';
+        return `<span class="inline-flex items-center gap-2 rounded-xl bg-white/[0.04] ring-1 ring-white/10 ${compacto ? 'px-2.5 py-1.5 text-[11px]' : 'px-3 py-2 text-xs'} font-bold text-white">
+            <span class="grid place-items-center w-6 h-6 rounded-lg text-white text-[11px]" style="background:${escaparHTML(t.color)}"><i class="${escaparHTML(t.icono)}"></i></span>
+            ${escaparHTML(m.tipo === 'BINANCE_PAY' ? `Binance Pay${m.moneda ? ` (${m.moneda})` : ''}` : m.categoria === 'cripto' ? (m.moneda || t.nombre) : (m.nombre || t.nombre))}${escaparHTML(red)}</span>`;
+    };
+    const grupos = Object.entries(WA.CATEGORIAS_PAGO)
+        .map(([cat, titulo]) => [cat, titulo, metodos.filter((m) => m.categoria === cat)])
+        .filter(([, , lista]) => lista.length);
+    return grupos.map(([cat, titulo, lista]) => `
+        <div class="space-y-2">
+            <p class="text-[10px] font-black uppercase tracking-widest text-neutral-400"><i class="fa-solid ${cat === 'cripto' ? 'fa-coins' : 'fa-wallet'} mr-1 text-dcRed"></i>${escaparHTML(titulo)}</p>
+            <div class="flex flex-wrap gap-2">${lista.map(chip).join('')}</div>
+            ${cat === 'cripto' ? '<p class="text-[11px] text-amber-300"><i class="fa-solid fa-triangle-exclamation mr-1"></i>Envía solo por la red indicada: otra red = pérdida de los fondos.</p>' : ''}
+        </div>`).join('');
+}
+
+// Frase corta para textos ("Nequi, Daviplata o cripto (USDT · TRC20)"); genérica si aún no hay datos
+function resumenFormasDePago(metodos) {
+    if (!metodos?.length) return 'transferencia o billetera digital';
+    const locales = [...new Set(metodos.filter((m) => m.categoria !== 'cripto').map((m) => m.nombre || m.tipo))];
+    const cripto = [...new Set(metodos.filter((m) => m.categoria === 'cripto').map((m) => (m.red && m.red !== 'BINANCE_PAY' ? `${m.moneda} ${m.red}` : m.nombre || m.tipo)))];
+    const partes = [...locales.slice(0, 3)];
+    if (cripto.length) partes.push(`cripto (${cripto.slice(0, 3).join(', ')})`);
+    return partes.length > 1 ? `${partes.slice(0, -1).join(', ')} o ${partes.at(-1)}` : partes[0];
+}
