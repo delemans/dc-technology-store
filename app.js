@@ -264,7 +264,7 @@ async function cargarCatalogo() {
         const respuesta = await fetch('productos.json');
         if (!respuesta.ok) throw new Error(`HTTP ${respuesta.status}`);
         const datos = await respuesta.json();
-        estado.productos = datos.map((p) => ({ ...p, tipo: clasificarCategoria(p) }));
+        estado.productos = await aplicarPreciosBase(datos.map((p) => ({ ...p, tipo: clasificarCategoria(p) })));
     } catch (error) {
         console.error('Error al cargar productos.json', error);
         grid.innerHTML = `<p class="col-span-full rounded-3xl bg-red-500/10 ring-1 ring-red-500/30 p-6 text-center text-sm text-red-200">No pudimos cargar el catálogo. Recarga la página o escríbenos por WhatsApp.</p>`;
@@ -278,6 +278,28 @@ async function cargarCatalogo() {
     abrirDesdeEnlace();
     cargarPromocionesDia();
     cargarFormasDePago();
+    document.dispatchEvent(new CustomEvent('dc:catalogo-listo')); // carrito.js: armador de combos
+}
+
+// Precios vigentes DESDE LA BASE (wo-032), los mismos que cobra el servidor al crear la orden web.
+// Un producto que está en la base solo muestra sus variantes activas; uno que aún no está conserva
+// productos.json. Si la base no responde en 3 s se pinta con productos.json (el servidor igual cobra lo de la base).
+async function aplicarPreciosBase(productos) {
+    if (!supabaseTienda) return productos;
+    const consulta = supabaseTienda.rpc('precios_publicos').then(({ data, error }) => (error ? null : data));
+    const data = await Promise.race([consulta, new Promise((r) => setTimeout(() => r(null), 3000))]).catch(() => null);
+    if (!Array.isArray(data) || !data.length) return productos;
+    const porProducto = new Map();
+    data.forEach((x) => porProducto.set(x.producto_id, [...(porProducto.get(x.producto_id) ?? []), x]));
+    return productos.map((p) => {
+        const base = porProducto.get(p.id);
+        if (!base) return p;
+        const variantes = (p.variantes ?? []).map((v) => {
+            const b = base.find((x) => x.variante === v.nombre);
+            return b ? { ...v, precio: Number(b.precio), precio_anterior: b.precio_anterior === null ? null : Number(b.precio_anterior) } : null;
+        }).filter(Boolean);
+        return variantes.length ? { ...p, variantes } : null;
+    }).filter(Boolean);
 }
 
 /* ==================== FORMAS DE PAGO (supabase/wo-027-metodos-pago.sql) ==================== */
@@ -829,7 +851,26 @@ function continuarCompra() {
     $('terminos-lista').innerHTML = TERMINOS[grupoTerminos(producto.tipo)]
         .map((t) => `<li class="flex items-start gap-3"><i class="fa-solid fa-circle-exclamation text-amber-400 mt-1"></i><span>${t}</span></li>`).join('');
     $('terminos-acepto').checked = false;
+    // Carrito con pago en la web (carrito.js): para todo lo que tiene precio. Lo que se cotiza sigue por WhatsApp.
+    const conCarrito = Boolean(window.Carrito) && !esCotizable(producto) && totales().unitario > 0;
+    $('btn-terminos-carrito').hidden = !conCarrito;
+    $('btn-terminos-whatsapp').innerHTML = conCarrito
+        ? '<i class="fa-brands fa-whatsapp text-lg"></i> Prefiero pedir por WhatsApp'
+        : '<i class="fa-brands fa-whatsapp text-lg"></i> Aceptar y pedir por WhatsApp';
     abrirModal($('modal-terminos'));
+}
+
+// Agrega la selección al carrito (una línea por unidad) y abre el pago paso a paso
+async function agregarAlCarrito() {
+    const acepto = $('terminos-acepto');
+    if (!acepto.checked) { acepto.reportValidity(); acepto.focus(); return; }
+    const { producto, variante, cantidad, cupon } = estado.seleccion;
+    for (let i = 0; i < cantidad; i++) window.Carrito.agregar(producto, variante, { silencioso: true });
+    if (cupon) window.Carrito.usarCupon(cupon);
+    await cerrarModal($('modal-terminos'));
+    await cerrarModal($('product-modal'));
+    mostrarToast(`${producto.nombre} agregado al carrito`, 'ok', 2500);
+    window.Carrito.abrir();
 }
 
 function enviarPedido(e) {
@@ -1048,7 +1089,7 @@ async function cerrarModal(modal) {
     modal.hidden = true;
     delete modal.dataset.cerrando;
     modal.getAnimations({ subtree: true }).forEach((a) => a.cancel());
-    if (!document.querySelector('[role="dialog"]:not([hidden])')) bloquearScroll(false);
+    if (!document.querySelector('[role="dialog"]:not([hidden]):not(#hoja)')) bloquearScroll(false);
     if (modal.id === 'product-modal') {
         try { history.replaceState(null, '', location.pathname); } catch { /* sin historial */ }
         metaProducto(null);
@@ -1096,13 +1137,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.querySelectorAll('[data-cerrar]').forEach((el) => el.addEventListener('click', () => cerrarModal(el.closest('[role="dialog"]'))));
     document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') [...document.querySelectorAll('[role="dialog"]:not([hidden])')].reverse().slice(0, 1).forEach(cerrarModal);
+        if (e.key === 'Escape') [...document.querySelectorAll('[role="dialog"]:not([hidden]):not(#hoja)')].reverse().slice(0, 1).forEach(cerrarModal);
     });
     $('cantidad-menos').addEventListener('click', () => cambiarCantidad(-1));
     $('cantidad-mas').addEventListener('click', () => cambiarCantidad(1));
     $('form-cupon').addEventListener('submit', aplicarCupon);
     $('btn-continuar').addEventListener('click', continuarCompra);
     $('form-terminos').addEventListener('submit', enviarPedido);
+    $('btn-terminos-carrito').addEventListener('click', agregarAlCarrito);
 
     // Acceso discreto al panel: 6 clics seguidos al logo (el panel igual exige iniciar sesión)
     let clicsLogo = 0;

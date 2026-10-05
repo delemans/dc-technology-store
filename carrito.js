@@ -1,4 +1,5 @@
-// carrito.js — Carrito, armado de combos y pago paso a paso del portal (cliente.html).
+// carrito.js — Carrito, armado de combos y pago paso a paso. Lo usan el portal (cliente.html + cliente.js)
+// y la tienda (index.html + tienda-carrito.js): ambos le dan la misma API window.DC.
 // El carrito vive en el dispositivo (sin datos sensibles). Dos formas de cerrar la compra:
 //  · En la web (WO-030): crea la orden en Supabase, muestra los datos del método y el cliente sube su
 //    comprobante (bucket privado, ruta de un solo uso). El equipo lo valida en el panel.
@@ -349,7 +350,7 @@
                 <p class="font-tech text-xl font-black mt-4">Orden ${escaparHTML(orden.codigo)}</p>
                 <p class="text-sm text-neutral-400 mt-2">Validamos tu pago y te avisamos por WhatsApp. Al validarlo, tu pedido sale en máximo ${WA.ENTREGA_MAX_MIN} minutos dentro del horario.</p>
                 <div class="grid gap-2 mt-5">
-                    <a href="#cuenta" class="btn-p" data-ir-pedidos><i class="fa-solid fa-receipt"></i> Seguir en Mis pedidos</a>
+                    <a href="${escaparHTML(window.DC.rutaPedidos ?? '#cuenta')}" class="btn-p" data-ir-pedidos><i class="fa-solid fa-receipt"></i> Seguir en Mis pedidos</a>
                     <a class="btn-s" target="_blank" rel="noopener" href="${escaparHTML(WA.enlace(WA.NUMERO_TIENDA, aviso))}"><i class="fa-brands fa-whatsapp text-emerald-400"></i> Avisar por WhatsApp (opcional)</a>
                 </div>
             </div>`);
@@ -498,6 +499,12 @@
     });
     document.addEventListener('dc:vista', (e) => { if (e.detail === 'combos') pintarCombo(); });
 
-    window.Carrito = { agregar, abrir: abrirCarrito, lineas: () => lineas, combos, aPagar, pctCombo, abrirOrden, ordenes: leerOrdenes };
+    // Cupón ya validado en otra pantalla (la ficha de producto de la tienda): pasa al carrito
+    function usarCupon(c) {
+        if (!c?.codigo || !(Number(c.porcentaje) > 0)) return;
+        cupon = { codigo: c.codigo, porcentaje: Number(c.porcentaje) };
+    }
+
+    window.Carrito = { agregar, abrir: () => { pago.paso = 1; abrirCarrito(); }, usarCupon, lineas: () => lineas, combos, aPagar, pctCombo, abrirOrden, ordenes: leerOrdenes };
     window.Combos = { iniciarCon };
 })();

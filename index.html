@@ -60,6 +60,8 @@
     <!-- Tema claro/oscuro (antes de pintar, sin destello) -->
     <script src="tema.js"></script>
     <link rel="stylesheet" href="tema.css">
+    <!-- Carrito, combos y pago web: mismos estilos que el portal (carrito.js) -->
+    <link rel="stylesheet" href="estilos/cliente.css">
     <style>
         html { -webkit-tap-highlight-color: transparent; }
         [hidden] { display: none !important; }
@@ -205,7 +207,7 @@
         @keyframes fade-slide-in { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
         .entrada { animation: fade-slide-in .5s cubic-bezier(.2, .8, .2, 1) both; }
         @keyframes toast-progress { from { transform: scaleX(1); } to { transform: scaleX(0); } }
-        .skeleton { position: relative; overflow: hidden; background: rgb(var(--tinta) / .05); }
+        .skeleton { position: relative; overflow: hidden; background: rgb(var(--tinta) / .05); min-height: 0; }
         .skeleton::after { content: ''; position: absolute; inset: 0; transform: translateX(-100%); background: linear-gradient(90deg, transparent, rgba(255, 0, 51, .14), transparent); animation: shimmer 1.4s infinite; }
         @keyframes shimmer { to { transform: translateX(100%); } }
 
@@ -275,9 +277,13 @@
 
             <div class="flex items-center gap-2">
                 <button type="button" data-alternar-tema class="btn-cyber w-12 h-12 shrink-0 grid place-items-center rounded-2xl bg-white/[0.04] ring-1 ring-white/10" aria-label="Cambiar tema"><i class="fa-solid fa-sun"></i></button>
-                <a href="portal.html" class="btn-cyber inline-flex items-center justify-center gap-2 min-h-[48px] min-w-[48px] px-3 sm:px-4 rounded-2xl bg-white/[0.04] ring-1 ring-white/10 text-xs font-bold uppercase tracking-wider" aria-label="Portal de clientes">
-                    <i class="fa-solid fa-magnifying-glass-location"></i><span class="hidden sm:inline">Mi pedido</span>
+                <a href="cliente.html#cuenta" class="btn-cyber inline-flex items-center justify-center gap-2 min-h-[48px] min-w-[48px] px-3 sm:px-4 rounded-2xl bg-white/[0.04] ring-1 ring-white/10 text-xs font-bold uppercase tracking-wider" aria-label="Mis pedidos">
+                    <i class="fa-solid fa-receipt"></i><span class="hidden sm:inline">Mis pedidos</span>
                 </a>
+                <!-- Carrito (carrito.js): el contador se actualiza solo -->
+                <button type="button" data-abrir-carrito class="btn-cyber relative w-12 h-12 shrink-0 grid place-items-center rounded-2xl bg-dcRed text-white shadow-lg shadow-red-600/30" aria-label="Abrir carrito">
+                    <i class="fa-solid fa-cart-shopping"></i><span data-contador-carrito class="contador" hidden>0</span>
+                </button>
             </div>
         </div>
     </header>
@@ -309,6 +315,26 @@
                 </div>
                 <div id="promos-grid" class="promo-carrusel sin-scrollbar"></div>
             </div>
+        </section>
+
+        <!-- Arma tu combo (carrito.js + reglas_combo de la base): plegado para no alargar la página -->
+        <section id="combos" class="max-w-7xl mx-auto px-4 pb-10" aria-labelledby="titulo-combos">
+            <details id="combos-caja" class="rounded-3xl bg-white/[0.03] ring-1 ring-white/10 backdrop-blur-xl p-5">
+                <summary class="cursor-pointer list-none flex flex-wrap items-center justify-between gap-4">
+                    <span class="min-w-0">
+                        <span class="block text-[10px] font-black uppercase tracking-[0.3em] text-dcRed">Varias plataformas, un solo pago</span>
+                        <span id="titulo-combos" class="block mt-1 font-tech text-2xl font-black uppercase">Arma tu <span class="text-dcRed">combo</span></span>
+                        <span id="combo-reglas" class="reglas-combo mt-3" hidden></span>
+                    </span>
+                    <span class="btn-p"><i class="fa-solid fa-layer-group"></i> Armar combo</span>
+                </summary>
+                <ol class="stepper mt-5" aria-label="Pasos del combo">
+                    <li data-paso-combo="1" class="activo"><span>1</span>Plataformas</li>
+                    <li data-paso-combo="2"><span>2</span>Planes</li>
+                    <li data-paso-combo="3"><span>3</span>Listo</li>
+                </ol>
+                <div id="combo-contenido" class="mt-5"></div>
+            </details>
         </section>
 
         <section id="catalogo" class="max-w-7xl mx-auto px-4 pb-10" aria-labelledby="category-title">
@@ -521,7 +547,10 @@
                 <span class="text-xs text-neutral-300">Leí y acepto estas condiciones. Entiendo que incumplirlas anula la garantía sin reembolso.</span>
             </label>
             <div class="grid gap-3 mt-6">
-                <button type="submit" class="btn-cyber ancho verde min-h-[56px] rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-xs font-black uppercase tracking-wider text-white flex items-center justify-center gap-2">
+                <button type="button" id="btn-terminos-carrito" hidden class="btn-cyber ancho min-h-[56px] rounded-2xl bg-dcRed hover:bg-dcRedDark text-xs font-black uppercase tracking-wider text-white shadow-lg shadow-red-600/30 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-cart-plus text-lg"></i> Aceptar y agregar al carrito
+                </button>
+                <button type="submit" id="btn-terminos-whatsapp" class="btn-cyber ancho verde min-h-[56px] rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-xs font-black uppercase tracking-wider text-white flex items-center justify-center gap-2">
                     <i class="fa-brands fa-whatsapp text-lg"></i> Aceptar y pedir por WhatsApp
                 </button>
                 <button type="button" data-cerrar class="min-h-[48px] rounded-2xl bg-white/5 ring-1 ring-white/10 text-xs font-bold uppercase tracking-wider text-neutral-300">Volver</button>
@@ -560,6 +589,19 @@
         </div>
     </div>
 
+    <!-- ============ HOJA DEL CARRITO Y PAGO WEB (carrito.js, igual que el portal) ============ -->
+    <div id="hoja" class="hoja" hidden role="dialog" aria-modal="true" aria-labelledby="hoja-titulo">
+        <div class="hoja-fondo" data-cerrar-hoja></div>
+        <div class="hoja-panel">
+            <div class="hoja-asa" aria-hidden="true"></div>
+            <div class="flex items-center justify-between gap-3 mb-4">
+                <h2 id="hoja-titulo" class="font-tech text-lg font-black uppercase tracking-wider"></h2>
+                <button type="button" data-cerrar-hoja class="w-11 h-11 grid place-items-center rounded-xl bg-white/5 text-neutral-400 hover:text-white" aria-label="Cerrar"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div id="hoja-cuerpo"></div>
+        </div>
+    </div>
+
     <!-- Toasts (abajo a la izquierda para no tapar el copiloto) -->
     <div id="toasts" class="fixed z-[60] left-4 right-24 sm:right-auto bottom-[max(1rem,env(safe-area-inset-bottom))] flex flex-col items-start gap-2 pointer-events-none" aria-live="polite"></div>
 
@@ -567,6 +609,8 @@
     <script src="plantillas-whatsapp.js"></script>
     <script src="ui.js"></script>
     <script src="app.js"></script>
+    <script src="tienda-carrito.js"></script>
+    <script src="carrito.js"></script>
     <script src="copiloto.js"></script>
 
 </body>
