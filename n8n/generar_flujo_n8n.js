@@ -210,6 +210,10 @@ function armarContexto() {
             ? `tasa vigente: 1 ${c.moneda} = ${cop(c.tasa_cop)}`
             : 'SIN TASA VIGENTE: no cotices este método; ofrece un pago local o un asesor'}`;
     };
+    // WO-029: reglas de combo en vivo (reglas_combo_publicas). Sin reglas = no se ofrece descuento por combo
+    const reglas = $('Reglas combo').all().map((i) => i.json)
+        .map((r) => ({ min: Number(r.min_plataformas), pct: Number(r.descuento_pct) })).filter((r) => r.min >= 2 && r.pct > 0)
+        .sort((a, b) => a.min - b.min);
     const locales = cuentas.filter((c) => c.categoria !== 'cripto');
     const criptos = cuentas.filter((c) => c.categoria === 'cripto');
     const ahora = new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota', dateStyle: 'full', timeStyle: 'short' });
@@ -226,6 +230,12 @@ function armarContexto() {
             'Criptomonedas:',
             ...(criptos.length ? criptos.map(linea) : ['- (ninguna activa: no ofrezcas cripto)']),
         ] : ['- NO hay métodos activos: no compartas datos de pago; escala a un asesor.']),
+        '',
+        'DESCUENTO POR COMBO (plataformas DISTINTAS del catálogo digital en un mismo pedido; se aplica la regla con el mayor mínimo alcanzado):',
+        ...(reglas.length
+            ? [...reglas.map((r, i) => `- ${r.min}${i === reglas.length - 1 ? ' o más' : ''} plataformas: ${r.pct}% de descuento`),
+                '- Cotiza SIEMPRE con la marca [COMBO] (nunca calcules tú). El cupón DCTECH2026 no se acumula con el combo.']
+            : ['- NO hay descuento por combo activo: no lo ofrezcas.']),
         '',
         'PROMOCIONES ACTIVAS:',
         ...(base.promociones ?? []).filter((p) => p.activa && !p.pendiente_configurar).map((p) => `- ${p.descripcion}`),
@@ -273,10 +283,41 @@ function revisarRespuesta() {
             if (prod && v) digital = { producto: prod.nombre, variante: v.nombre, precio: v.precio };
         } catch { /* JSON inválido: se ignora la marca */ }
     }
+    // [COMBO] {"items":[...]}: precios del catálogo + regla vigente de la base (misma lógica que descuento_combo()
+    // en Supabase y que el carrito del portal). La IA nunca pone el precio de un combo.
+    const reglas = $('Reglas combo').all().map((i) => i.json)
+        .map((x) => ({ min: Number(x.min_plataformas), pct: Number(x.descuento_pct) })).filter((x) => x.min >= 2 && x.pct > 0);
+    const pctCombo = (n) => reglas.filter((x) => x.min <= n).sort((a, b) => b.min - a.min)[0]?.pct ?? 0;
+    let totalCombo = null;
+    r = r.replace(/\[COMBO\]\s*(\{[\s\S]*?\]\s*\})/g, (_, json) => {
+        try {
+            const elegidos = [];
+            for (const it of JSON.parse(json).items ?? []) {
+                const prod = kb.catalogo.find((x) => normalizar(x.nombre) === normalizar(it.producto)
+                    && ['streaming', 'licencias', 'pines', 'recargas'].includes(x.tipo));
+                const v = prod && (prod.variantes.find((x) => normalizar(x.nombre) === normalizar(it.variante))
+                    ?? (prod.variantes.length === 1 ? prod.variantes[0] : null));
+                if (!prod || !v || !(Number(v.precio) > 0)) return '(el precio de ese combo te lo confirma un asesor)';
+                if (!elegidos.some((e) => e.producto === prod.nombre)) elegidos.push({ producto: prod.nombre, variante: v.nombre, precio: Number(v.precio) });
+            }
+            if (elegidos.length < 2) return '(un combo necesita al menos 2 plataformas distintas)';
+            const subtotal = elegidos.reduce((s, e) => s + e.precio, 0);
+            const pct = pctCombo(elegidos.length);
+            const ahorro = Math.round((subtotal * pct) / 100);
+            totalCombo = subtotal - ahorro;
+            return [
+                `🧩 *Tu combo · ${elegidos.length} plataformas*`,
+                ...elegidos.map((e) => `• ${e.producto} – ${e.variante}: ${cop(e.precio)}`),
+                ...(pct ? [`Subtotal: ${cop(subtotal)}`, `Descuento combo -${pct}%: -${cop(ahorro)}`] : []),
+                `*Total: ${cop(totalCombo)}*`,
+            ].join('\n');
+        } catch { return '(el precio de ese combo te lo confirma un asesor)'; }
+    });
     const metodos = $('Metodos de pago').all().map((i) => i.json).filter((m) => m && m.categoria === 'cripto');
-    r = r.replace(/\[MONTO_CRIPTO\s+cop=([\d.,]+)\s+moneda=([A-Z0-9]+)\s+red=([A-Z0-9_]+)\s*\]/gi, (_, cop, moneda, red) => {
+    r = r.replace(/\[MONTO_CRIPTO\s+cop=([\d.,]+|COMBO)\s+moneda=([A-Z0-9]+)\s+red=([A-Z0-9_]+)\s*\]/gi, (_, cop, moneda, red) => {
         const metodo = metodos.find((x) => String(x.moneda).toUpperCase() === moneda.toUpperCase() && String(x.red).toUpperCase() === red.toUpperCase());
-        const monto = metodo ? montoCripto(Number(String(cop).replace(/[.,]/g, '')), metodo) : null;
+        const pesos = /^combo$/i.test(cop) ? totalCombo : Number(String(cop).replace(/[.,]/g, ''));
+        const monto = metodo && pesos ? montoCripto(pesos, metodo) : null;
         return monto !== null ? `*${monto} ${metodo.moneda}*` : '(el monto en cripto te lo confirma un asesor)';
     });
     r = r
@@ -653,6 +694,11 @@ nodo('Metodos de pago', 'n8n-nodes-base.httpRequest', 4.2, [1120, 140], {
     nodeCredentialType: 'supabaseApi',
     options: { timeout: 8000 },
 }, { onError: 'continueRegularOutput', alwaysOutputData: true, executeOnce: true });
+// WO-029: reglas de descuento por combo (las mismas que usa descuento_combo() y el portal)
+nodo('Reglas combo', 'n8n-nodes-base.httpRequest', 4.2, [1230, 300], supabaseRpc('reglas_combo_publicas', {
+    config: 'Config bot',
+    body: '={{ JSON.stringify({}) }}',
+}), { onError: 'continueRegularOutput', alwaysOutputData: true, executeOnce: true });
 nodoCodigo('Armar contexto', [1340, 140], armarContexto, { conUtilidades: true });
 nodo('Agente IA', '@n8n/n8n-nodes-langchain.agent', 1.7, [1560, 140], {
     promptType: 'define',
@@ -865,7 +911,8 @@ unir('Registrar baja', 'Respuesta fija');
 unir('Respuesta fija', 'Enviar respuesta');
 unir('Escalar a asesor', 'Enviar respuesta');
 unir('Base de conocimiento', 'Metodos de pago');
-unir('Metodos de pago', 'Armar contexto');
+unir('Metodos de pago', 'Reglas combo');
+unir('Reglas combo', 'Armar contexto');
 unir('Armar contexto', 'Agente IA');
 unir('SiliconFlow · DeepSeek-V3', 'Agente IA', 0, 'ai_languageModel');
 unir('Memoria por cliente', 'Agente IA', 0, 'ai_memory');

@@ -87,6 +87,8 @@ const reglasNegocio = [
     `Entrega: máximo ${WA.ENTREGA_MAX_MIN} minutos después de VALIDAR el pago, en horario (${WA.HORARIO}). Fuera de horario, el pedido se procesa al abrir. Nunca prometas entrega antes de validar el pago.`,
     'Cupón DCTECH2026: 10% SOLO en la primera compra del número de WhatsApp. Un cupón por compra, no acumulable. Se confirma al validar el pago: si el número ya tiene compras, el descuento no aplica.',
     'Precios: solo los del catálogo de este archivo. No negocies descuentos fuera de las promociones activas.',
+    'COMBOS: varias plataformas DISTINTAS del catálogo digital en un mismo pedido tienen el descuento por combo vigente (sección "DESCUENTO POR COMBO" del contexto: sale de la base y lo cambia el administrador). Nunca calcules el precio de un combo ni inventes porcentajes: usa la marca [COMBO]. Si no hay reglas activas, no ofrezcas descuento por combo.',
+    'El cupón DCTECH2026 NO se acumula con el descuento por combo: solo aplica a los productos que van fuera del combo.',
     'Nunca envíes cuentas, contraseñas ni seriales de forma automática: un humano aprueba la entrega (modo sombra).',
     'Nunca pidas contraseñas, códigos de verificación ni datos bancarios completos al cliente.',
 ];
@@ -115,6 +117,8 @@ const flujoDigital = [
     'VENTA DIGITAL (sin pasar a un asesor): 1) confirma producto, opción y total (aplica DCTECH2026 solo si es la primera compra); 2) muestra los métodos activos (locales y cripto) y da los datos del que elija; 3) pide el comprobante: captura con número de referencia, o el hash (TXID) si pagó en cripto.',
     `Cuando el cliente envía el comprobante: confirma que lo recibiste y que, al validarlo, su pedido sale en máximo ${WA.ENTREGA_MAX_MIN} minutos dentro del horario. Nunca digas que el pago está aprobado: lo valida el equipo.`,
     'Las cuentas, perfiles, seriales y códigos los envía el sistema por este chat al validar el pago. Tú nunca escribes credenciales ni inventas accesos.',
+    'COMBOS: cuando el cliente quiera 2 o más plataformas, cotiza con la marca [COMBO] {"items":[{"producto":"<nombre exacto>","variante":"<opción exacta>"}, ...]} en una línea aparte: el sistema la reemplaza por el desglose exacto (precios del catálogo y descuento vigente). Vuelve a usarla cada vez que menciones el total del combo. Si pide 1 sola plataforma y hay regla de combo, puedes contarle cuánto ahorraría agregando otra (sin presionar).',
+    'PAGO DE UN COMBO EN CRIPTO: escribe [MONTO_CRIPTO cop=COMBO moneda=<MONEDA> red=<RED>] en la MISMA respuesta que la marca [COMBO]; el sistema usa el total del combo. En un combo NO uses la marca [PEDIDO_DIGITAL]: el equipo procesa el pedido al validar el pago.',
     'SOPORTE DIGITAL: si algo no funciona, primero da los pasos de las FAQ de soporte (inicio de sesión, límite de pantallas, activación). Escala solo si después de esos pasos el problema sigue.',
 ];
 
@@ -139,6 +143,13 @@ const faqObligatorias = (horario) => [
         pregunta: '¿Cómo funciona el cupón DCTECH2026?',
         palabras_clave: ['cupon', 'descuento', 'dctech2026', 'codigo promocional', 'promo', 'primera compra'],
         respuesta: 'DCTECH2026 te da 10% de descuento solo en tu primera compra (se verifica con tu número de WhatsApp al validar el pago). Es un cupón por compra y no se acumula con otros. No aplica a servicios cotizados.',
+        pendiente_configurar: false,
+    },
+    {
+        id: 'combos',
+        pregunta: '¿Tienen combos o descuento por llevar varias plataformas?',
+        palabras_clave: ['combo', 'combos', 'varias plataformas', 'paquete', 'dos plataformas', 'tres plataformas', 'descuento por varias'],
+        respuesta: 'Sí: si llevas varias plataformas distintas en un mismo pedido te aplicamos el descuento por combo vigente; dime cuáles quieres y te doy el total exacto. También puedes armarlo en dctecnology.xyz/cliente.html#combos. El descuento de combo no se acumula con cupones.',
         pendiente_configurar: false,
     },
     {
@@ -315,6 +326,15 @@ const resultado = {
     promociones: anterior.promociones ?? promocionesPorDefecto,
     reglas_uso: anterior.reglas_uso ?? reglasUso,
     notificaciones,
+    // WO-029: los porcentajes NO van aquí (cambian desde el panel). n8n los lee en vivo de Supabase.
+    combos: {
+        fuente_reglas: 'Supabase: reglas_combo_publicas() (lista) · descuento_combo(n) (porcentaje para n plataformas)',
+        cuenta: 'plataformas distintas del catálogo digital (streaming, licencias, pines, recargas) en un mismo pedido',
+        regla: 'se aplica la regla activa con el mayor mínimo de plataformas que alcance el combo',
+        cupon: 'no se acumula: el cupón solo aplica a productos fuera del combo',
+        marca: '[COMBO] {"items":[{"producto":"…","variante":"…"}]} → la reemplaza el nodo "Revisar respuesta" de n8n',
+        portal: 'https://dctecnology.xyz/cliente.html#combos',
+    },
     plantillas,
     catalogo,
 };
