@@ -275,7 +275,7 @@
             </div>`;
         t.querySelector('[data-accesos]')?.addEventListener('click', (ev) => verAccesos(p, ev.currentTarget));
         t.querySelector('[data-falla]')?.addEventListener('click', () => {
-            window.Soporte?.iniciarConPedido({ codigo: p.codigo, producto: p.producto, garantiaDias: diasGarantia(p), serialFinal: p.serial_final });
+            window.Soporte?.iniciarConPedido({ codigo: p.codigo, producto: p.producto, garantiaDias: diasGarantia(p), serialFinal: p.serial_final, compraId: p.compra_id });
             location.hash = '#soporte';
         });
         return t;
@@ -538,7 +538,7 @@
 
     /* ==================== Arranque ==================== */
 
-    window.Sesion = { activa: () => Boolean(leerSesion()), cargarHistorial, cerrarSesion };
+    window.Sesion = { activa: () => Boolean(leerSesion()), token: () => leerSesion()?.token ?? null, cargarHistorial, cerrarSesion };
 
     document.addEventListener('DOMContentLoaded', () => {
         cargarHistorial();

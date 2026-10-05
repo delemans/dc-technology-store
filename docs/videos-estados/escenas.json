@@ -1,0 +1,35 @@
+{
+  "formato": { "ancho": 1080, "alto": 1920, "fps": 30, "fondo": "#0B0F19", "acento": ["#FF2A5F", "#E50914"], "fuentes": ["Outfit", "Inter"] },
+  "cierre": { "duracion_s": 2, "textos": ["dctecnology.xyz", "Escríbenos por WhatsApp"] },
+  "videos": [
+    { "id": "compra-3-toques", "duracion_s": 20, "escenas": [
+      { "url": "cliente.html#inicio", "accion": "deslizar carrusel #inicio-destacados", "rotulo": "¿Tu plataforma favorita?", "s": 3 },
+      { "url": "cliente.html#catalogo", "accion": "filtro Streaming → tocar .prod", "rotulo": "Elige tu plan", "s": 5 },
+      { "url": null, "accion": "hoja del producto → elegir variante → [data-agregar]", "rotulo": "Agrégalo al carrito", "s": 5 },
+      { "url": null, "accion": "carrito → pasos hasta Pago", "rotulo": "Paga como quieras", "s": 5 }
+    ] },
+    { "id": "combo-ahorra", "duracion_s": 25, "escenas": [
+      { "url": "cliente.html#combos", "accion": "mostrar #combo-reglas", "rotulo": "Más plataformas, menos pagas", "s": 4 },
+      { "url": null, "accion": "elegir 2 .prod → .sello-combo", "rotulo": "Combina 2…", "s": 6 },
+      { "url": null, "accion": "elegir la 3.ª → ficha .alcanzada", "rotulo": "…o 3 y ahorra más", "s": 6 },
+      { "url": null, "accion": "[data-seguir] → totales del combo", "rotulo": "Todo en un solo pago", "s": 7 }
+    ] },
+    { "id": "comprobante-web", "duracion_s": 25, "escenas": [
+      { "url": null, "accion": "carrito → [data-pagar-web]", "rotulo": "Sin salir de la página", "s": 5 },
+      { "url": null, "accion": "hoja 'Paga tu pedido' → [data-copiar]", "rotulo": "Copia y paga", "s": 6 },
+      { "url": null, "accion": "[data-zona] → vista previa", "rotulo": "Sube tu comprobante", "s": 6 },
+      { "url": null, "accion": "envío → .exito-check", "rotulo": "Lo validamos y te avisamos", "s": 6 }
+    ] },
+    { "id": "pedidos-whatsapp", "duracion_s": 25, "escenas": [
+      { "url": "cliente.html#cuenta", "accion": "número → 'Enviarme el código'", "rotulo": "Sin contraseñas", "s": 5 },
+      { "url": null, "accion": "pegar código en .otp → .exito", "rotulo": "Entra con un código", "s": 6 },
+      { "url": null, "accion": "historial: .linea-tiempo + .garantia", "rotulo": "Sigue cada pedido", "s": 6 },
+      { "url": null, "accion": "[data-accesos] → .accesos-inline velado (no revelar)", "rotulo": "Tus accesos, seguros", "s": 6 }
+    ] },
+    { "id": "soporte-garantia", "duracion_s": 20, "escenas": [
+      { "url": "cliente.html#cuenta", "accion": "[data-falla] en un pedido entregado", "rotulo": "¿Algo falla?", "s": 4 },
+      { "url": "cliente.html#soporte", "accion": "elegir problema → pasos", "rotulo": "Te guiamos paso a paso", "s": 6 },
+      { "url": null, "accion": "[data-registrar] → confirmación", "rotulo": "Queda registrado con tu garantía", "s": 6 }
+    ] }
+  ]
+}

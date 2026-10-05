@@ -229,6 +229,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('btn-recargar-notif').addEventListener('click', cargarNotificaciones);
     document.getElementById('promo-buscar').addEventListener('input', pintarPromociones);
     document.getElementById('comprobantes-web-recargar').addEventListener('click', cargarComprobantesWeb);
+    document.getElementById('combos-validar-recargar').addEventListener('click', cargarCombosPorValidar);
+    document.getElementById('reportes-falla-recargar').addEventListener('click', cargarReportesFalla);
+    document.getElementById('precios-buscar').addEventListener('input', pintarPrecios);
     document.getElementById('combo-regla-nueva').addEventListener('click', () => { reglasCombo.nueva = true; pintarReglasCombo(); document.querySelector('#combo-reglas-lista form:last-child [name="min"]')?.focus(); });
     document.getElementById('bot-buscar').addEventListener('input', pintarCatalogoBot);
     document.getElementById('form-pago').addEventListener('submit', protegido(guardarPago, 'modal-pago'));
@@ -1168,9 +1171,9 @@ function mostrarVista(vista) {
     ui.vista = vista;
     document.getElementById('vista-pedidos').hidden = vista !== 'pedidos';
     document.getElementById('vista-pagos-bot').hidden = vista !== 'pagos-bot';
-    if (vista === 'pagos-bot') cargarComprobantesWeb();
+    if (vista === 'pagos-bot') { cargarComprobantesWeb(); cargarCombosPorValidar(); cargarReportesFalla(); }
     document.getElementById('vista-productos').hidden = vista !== 'productos';
-    if (vista === 'productos') { cargarPromociones(); cargarReglasCombo(); }
+    if (vista === 'productos') { cargarPromociones(); cargarReglasCombo(); cargarPrecios(); }
     pintarNavegacion();
     window.scrollTo({ top: 0, behavior: 'smooth' });
     document.getElementById('zona-pedidos').scrollTo({ top: 0, behavior: 'smooth' });
@@ -1313,7 +1316,7 @@ async function cargarComprobantesWeb() {
     const caja = document.getElementById('comprobantes-web-lista');
     if (!caja) return;
     const { data, error } = await supabaseClient.from('ordenes_web')
-        .select('codigo, whatsapp, nombre, items, total_declarado, metodo, red, cupon, estado, nota_admin, created_at, comprobantes_web(ruta, referencia, created_at)')
+        .select('*, comprobantes_web(ruta, referencia, created_at)')
         .in('estado', ['COMPROBANTE_RECIBIDO', 'ESPERANDO_PAGO', 'RECHAZADO'])
         .order('created_at', { ascending: false })
         .limit(40);
@@ -1347,8 +1350,9 @@ function tarjetaOrdenWeb(o) {
             <span class="text-xs font-bold ${color}">${escaparHTML(texto)}</span>
         </div>
         <ul class="text-xs text-neutral-300 space-y-0.5">${(o.items ?? []).map((i) => `<li>• ${escaparHTML(i.producto)}${i.variante ? ` – ${escaparHTML(i.variante)}` : ''}: ${escaparHTML(PlantillasWA.precioCOP(i.precio))}${i.combo ? ' <span class="text-dcRed">(combo)</span>' : ''}</li>`).join('')}</ul>
-        <p class="text-sm"><b>Total declarado: ${escaparHTML(PlantillasWA.precioCOP(o.total_declarado))}</b> <span class="text-neutral-400">· ${escaparHTML(o.metodo)}${o.red ? ` (${escaparHTML(o.red)})` : ''}${o.cupon ? ` · cupón ${escaparHTML(o.cupon)}` : ''}</span></p>
+        <p class="text-sm"><b>${o.total_servidor ? 'Total (calculado por el servidor)' : 'Total declarado'}: ${escaparHTML(PlantillasWA.precioCOP(o.total_servidor ?? o.total_declarado))}</b> <span class="text-neutral-400">· ${escaparHTML(o.metodo)}${o.red ? ` (${escaparHTML(o.red)})` : ''}${o.cupon ? ` · cupón ${escaparHTML(o.cupon)}` : ''}</span></p>
         ${comprobantes.length ? `<div class="flex flex-wrap gap-2">${comprobantes.map((c, i) => `<button type="button" data-ver="${escaparHTML(c.ruta)}" class="min-h-[44px] px-3 rounded-xl bg-white/5 ring-1 ring-white/10 text-xs font-bold hover:ring-dcRed/50"><i class="fa-solid fa-file-image mr-1"></i> Comprobante ${comprobantes.length - i}${c.referencia ? ` · ref ${escaparHTML(c.referencia)}` : ''}</button>`).join('')}</div>` : '<p class="text-xs text-neutral-500">El cliente aún no sube el comprobante.</p>'}
+        ${o.despacho_nota ? `<p class="text-xs text-amber-300"><i class="fa-solid fa-truck-fast"></i> ${escaparHTML(o.despacho_nota)}</p>` : ''}
         ${o.estado === 'RECHAZADO' && o.nota_admin ? `<p class="text-xs text-red-300">Motivo enviado: ${escaparHTML(o.nota_admin)}</p>` : ''}
         ${o.estado === 'COMPROBANTE_RECIBIDO' ? `
         <div class="flex flex-wrap gap-2">
@@ -1372,6 +1376,156 @@ function tarjetaOrdenWeb(o) {
     t.querySelector('[data-validar]')?.addEventListener('click', () => resolver(true));
     t.querySelector('[data-rechazar]')?.addEventListener('click', () => resolver(false));
     return t;
+}
+
+/* ==================== FASE 3 (supabase/wo-032-fase3.sql) ==================== */
+
+const campoPanel = 'min-h-[44px] bg-dcDarkBg/70 ring-1 ring-white/10 rounded-xl px-3 text-base sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-dcRed/60';
+const faltaSql = (error, archivo) => (['42P01', 'PGRST205', 'PGRST202'].includes(error?.code) ? `Ejecuta supabase/${archivo} para activar esta sección.` : `No se pudo cargar: ${error?.message ?? 'sin respuesta'}`);
+
+// ---------- Precios del catálogo ----------
+const precios = { lista: [], error: null };
+
+async function cargarPrecios() {
+    const { data, error } = await supabaseClient.from('catalogo_precios')
+        .select('producto_id, variante, producto, tipo, precio, precio_anterior, activo, updated_at').order('producto').order('precio');
+    precios.error = error ? faltaSql(error, 'wo-032-fase3.sql') : null;
+    precios.lista = data ?? [];
+    pintarPrecios();
+}
+
+function pintarPrecios() {
+    const caja = document.getElementById('precios-lista');
+    if (!caja) return;
+    if (precios.error) { caja.innerHTML = filaVacia(precios.error, 'fa-triangle-exclamation'); return; }
+    const pausadas = precios.lista.filter((x) => !x.activo).length;
+    document.getElementById('precios-resumen').textContent = `${precios.lista.length} variantes · ${pausadas} pausada${pausadas === 1 ? '' : 's'}`;
+    const termino = document.getElementById('precios-buscar').value.trim().toLowerCase();
+    const lista = precios.lista.filter((x) => !termino || `${x.producto} ${x.variante} ${x.tipo}`.toLowerCase().includes(termino));
+    if (!lista.length) { caja.innerHTML = filaVacia('Ningún precio coincide.', 'fa-tags'); return; }
+    const grupos = new Map();
+    lista.forEach((x) => grupos.set(x.producto_id, [...(grupos.get(x.producto_id) ?? []), x]));
+    caja.replaceChildren(...[...grupos.values()].slice(0, 60).map((vs) => {
+        const t = document.createElement('article');
+        t.className = 'rounded-2xl bg-dcDarkBg/50 ring-1 ring-white/10 p-3 space-y-2';
+        t.innerHTML = `<p class="text-sm font-bold">${escaparHTML(vs[0].producto)} <span class="text-[10px] uppercase tracking-wider text-neutral-500">· ${escaparHTML(vs[0].tipo)}</span></p>`;
+        vs.forEach((v) => t.append(filaPrecio(v)));
+        return t;
+    }));
+    if (grupos.size > 60) caja.insertAdjacentHTML('beforeend', filaVacia(`Mostrando 60 de ${grupos.size} productos: usa el buscador.`, 'fa-filter'));
+}
+
+function filaPrecio(v) {
+    const f = document.createElement('form');
+    f.className = `flex flex-wrap items-end gap-2 ${v.activo ? '' : 'opacity-60'}`;
+    f.innerHTML = `
+        <span class="flex-1 min-w-[9rem] text-xs text-neutral-300 pb-3">${escaparHTML(v.variante)}</span>
+        <label class="w-28"><span class="block text-[10px] font-bold uppercase tracking-wider text-neutral-500 mb-1">Precio</span>
+            <input name="precio" type="number" min="0" step="100" required class="${campoPanel} w-full" value="${Number(v.precio)}"></label>
+        <label class="w-28"><span class="block text-[10px] font-bold uppercase tracking-wider text-neutral-500 mb-1">Antes</span>
+            <input name="anterior" type="number" min="0" step="100" class="${campoPanel} w-full" value="${v.precio_anterior ?? ''}" placeholder="—"></label>
+        <label class="flex items-center gap-1.5 min-h-[44px] text-[11px] font-bold text-neutral-300"><input name="activo" type="checkbox" class="w-5 h-5 accent-[#FF0033]" ${v.activo ? 'checked' : ''}> Activa</label>
+        <button type="submit" class="min-h-[44px] px-3 rounded-xl bg-dcRed text-white text-xs font-bold" aria-label="Guardar precio de ${escaparHTML(v.variante)}"><i class="fa-solid fa-floppy-disk"></i></button>`;
+    f.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const boton = f.querySelector('[type="submit"]');
+        boton.disabled = true;
+        const anterior = f.anterior.value.trim() === '' ? null : Number(f.anterior.value);
+        const { data, error } = await supabaseClient.rpc('guardar_precio', {
+            p_producto_id: v.producto_id, p_variante: v.variante, p_precio: Number(f.precio.value), p_precio_anterior: anterior, p_activo: f.activo.checked,
+        }).maybeSingle();
+        boton.disabled = false;
+        if (error || !data?.ok) { mostrarToast(data?.mensaje ?? 'No se pudo guardar el precio.', 'error', 5000); Sonidos.error(); return; }
+        Object.assign(v, { precio: Number(f.precio.value), precio_anterior: anterior, activo: f.activo.checked });
+        f.classList.toggle('opacity-60', !v.activo);
+        mostrarToast(`${v.producto} · ${v.variante}: ${data.mensaje}`, 'ok', 3500);
+        pintarPrecios();
+    });
+    return f;
+}
+
+// ---------- Combos por validar ----------
+async function cargarCombosPorValidar() {
+    const caja = document.getElementById('combos-validar-lista');
+    if (!caja) return;
+    const [{ data, error }, { data: metodos }] = await Promise.all([
+        supabaseClient.rpc('combos_por_validar'),
+        supabaseClient.from('metodos_pago').select('tipo, banco_alias, red, activo').eq('activo', true).order('orden'),
+    ]);
+    if (error) { caja.innerHTML = filaVacia(faltaSql(error, 'wo-032-fase3.sql'), 'fa-triangle-exclamation'); return; }
+    const cuenta = document.getElementById('combos-validar-cuenta');
+    cuenta.textContent = (data ?? []).length;
+    cuenta.hidden = !(data ?? []).length;
+    if (!(data ?? []).length) { caja.innerHTML = filaVacia('No hay combos esperando validación de pago.', 'fa-circle-check'); return; }
+    const tipos = [...new Map((metodos ?? []).map((m) => [m.tipo, m])).values()];
+    caja.replaceChildren(...data.map((c) => {
+        const t = document.createElement('form');
+        t.className = 'rounded-2xl bg-dcDarkBg/50 ring-1 ring-white/10 p-4 space-y-3';
+        t.innerHTML = `
+            <div class="flex flex-wrap items-start justify-between gap-2">
+                <p class="font-mono text-sm font-bold">${escaparHTML(c.referencia)} <span class="text-neutral-500 font-sans font-normal">· +${escaparHTML(c.cliente)}${c.cliente_nombre ? ` (${escaparHTML(c.cliente_nombre)})` : ''}</span></p>
+                <span class="text-sm font-black">${escaparHTML(PlantillasWA.precioCOP(c.total))}</span>
+            </div>
+            <ul class="text-xs text-neutral-300 space-y-0.5">${(c.lineas ?? []).map((l) => `<li>• ${escaparHTML(l.referencia)} · ${escaparHTML(l.producto)}${l.variante ? ` – ${escaparHTML(l.variante)}` : ''}: ${escaparHTML(PlantillasWA.precioCOP(l.precio))} <span class="${l.estado_compra === 'PENDIENTE_PAGO' ? 'text-amber-300' : 'text-emerald-300'}">(${escaparHTML(l.estado_compra ?? 'sin compra')})</span></li>`).join('')}</ul>
+            <div class="flex flex-wrap gap-2">
+                <select name="metodo" required class="${campoPanel}">${tipos.map((m) => `<option value="${escaparHTML(m.tipo)}">${escaparHTML(m.banco_alias ?? m.tipo)}</option>`).join('') || '<option value="NEQUI">Nequi</option>'}</select>
+                <input name="referencia" required maxlength="80" placeholder="Referencia del comprobante" class="${campoPanel} flex-1 min-w-[10rem]">
+                <input name="monto" type="number" required min="1" step="1" value="${Math.round(Number(c.total))}" class="${campoPanel} w-32" aria-label="Monto recibido">
+                <button type="submit" class="min-h-[44px] px-4 rounded-xl bg-emerald-600 text-white text-xs font-bold"><i class="fa-solid fa-check mr-1"></i> Validar combo</button>
+            </div>`;
+        t.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const boton = t.querySelector('[type="submit"]');
+            boton.disabled = true;
+            const { data: r, error: err } = await supabaseClient.rpc('validar_pago_combo', {
+                p_grupo: c.referencia, p_metodo: t.metodo.value, p_referencia: t.referencia.value.trim(), p_monto: Number(t.monto.value),
+            }).maybeSingle();
+            boton.disabled = false;
+            if (err || !r?.ok) { mostrarToast(r?.mensaje ?? 'No se pudo validar el combo.', 'error', 6000); Sonidos.error(); return; }
+            mostrarToast(`Combo ${c.referencia}: ${r.mensaje}`, 'ok', 5000);
+            cargarCombosPorValidar();
+        });
+        return t;
+    }));
+}
+
+// ---------- Reportes de falla ----------
+async function cargarReportesFalla() {
+    const caja = document.getElementById('reportes-falla-lista');
+    if (!caja) return;
+    const { data, error } = await supabaseClient.from('reportes_falla')
+        .select('id, compra_id, whatsapp, producto, problema, detalle, en_garantia, estado, created_at')
+        .eq('estado', 'ABIERTO').order('created_at', { ascending: true }).limit(40);
+    if (error) { caja.innerHTML = filaVacia(faltaSql(error, 'wo-032-fase3.sql'), 'fa-triangle-exclamation'); return; }
+    const cuenta = document.getElementById('reportes-falla-cuenta');
+    cuenta.textContent = (data ?? []).length;
+    cuenta.hidden = !(data ?? []).length;
+    if (!(data ?? []).length) { caja.innerHTML = filaVacia('No hay reportes abiertos.', 'fa-circle-check'); return; }
+    caja.replaceChildren(...data.map((r) => {
+        const t = document.createElement('form');
+        t.className = 'rounded-2xl bg-dcDarkBg/50 ring-1 ring-white/10 p-4 space-y-2';
+        t.innerHTML = `
+            <div class="flex flex-wrap items-start justify-between gap-2">
+                <p class="text-sm font-bold">#${escaparHTML(r.id)} · ${escaparHTML(r.producto ?? 'Producto')}</p>
+                <span class="text-[11px] font-bold ${r.en_garantia ? 'text-emerald-300' : 'text-neutral-400'}"><i class="fa-solid fa-shield-halved"></i> ${r.en_garantia ? 'En garantía' : 'Sin garantía'}</span>
+            </div>
+            <p class="text-xs text-neutral-400">Cliente +${escaparHTML(r.whatsapp)} · compra ${escaparHTML(r.compra_id)} · ${escaparHTML(new Date(r.created_at).toLocaleString('es-CO', { timeZone: 'America/Bogota', dateStyle: 'short', timeStyle: 'short' }))}</p>
+            <p class="text-sm"><b>Problema:</b> ${escaparHTML(r.problema)}</p>
+            ${r.detalle ? `<p class="text-xs text-neutral-300">${escaparHTML(r.detalle)}</p>` : ''}
+            <div class="flex flex-wrap gap-2 pt-1">
+                <a class="min-h-[44px] px-3 inline-flex items-center rounded-xl bg-emerald-600/20 ring-1 ring-emerald-500/40 text-emerald-300 text-xs font-bold" target="_blank" rel="noopener" href="https://wa.me/${escaparHTML(r.whatsapp)}"><i class="fa-brands fa-whatsapp mr-1"></i> Escribirle</a>
+                <input name="nota" required maxlength="300" placeholder="Solución (el cliente la recibe por WhatsApp)" class="${campoPanel} flex-1 min-w-[12rem]">
+                <button type="submit" class="min-h-[44px] px-4 rounded-xl bg-dcRed text-white text-xs font-bold"><i class="fa-solid fa-check mr-1"></i> Resuelto</button>
+            </div>`;
+        t.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const { data: x, error: err } = await supabaseClient.rpc('resolver_reporte', { p_id: r.id, p_nota: t.nota.value.trim() }).maybeSingle();
+            if (err || !x?.ok) { mostrarToast(x?.mensaje ?? 'No se pudo cerrar el reporte.', 'error', 5000); Sonidos.error(); return; }
+            mostrarToast(x.mensaje, 'ok', 4000);
+            cargarReportesFalla();
+        });
+        return t;
+    }));
 }
 
 /* ==================== DESCUENTO POR COMBO (public.reglas_combo · wo-029) ==================== */

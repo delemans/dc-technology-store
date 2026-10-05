@@ -99,8 +99,11 @@
             <p class="etiqueta"><i class="fa-solid fa-headset text-dcRed"></i> Te pasamos con un asesor</p>
             ${s.pedido ? '' : '<label class="block"><span class="etiqueta">Código de tu pedido (si lo tienes)</span><input class="campo font-mono uppercase" name="pedido" autocomplete="off" placeholder="DC-…"></label>'}
             <label class="block"><span class="etiqueta">Cuéntanos qué ves (opcional)</span><textarea class="campo py-3" name="detalle" rows="3" maxlength="400" placeholder="Ej.: dice 'contraseña incorrecta' en el TV"></textarea></label>
-            <button type="submit" class="btn-p btn-w w-full"><i class="fa-brands fa-whatsapp"></i> Hablar con un asesor</button>
-            <p class="text-[11px] text-neutral-500">Te enviamos con el resumen de lo que ya probaste: no tendrás que repetirlo.</p></form>`;
+            ${puedeRegistrar() ? '<button type="button" class="btn-p w-full" data-registrar><i class="fa-solid fa-clipboard-check"></i> Registrar reporte</button>' : ''}
+            <button type="submit" class="${puedeRegistrar() ? 'btn-s' : 'btn-p btn-w'} w-full"><i class="fa-brands fa-whatsapp ${puedeRegistrar() ? 'text-emerald-400' : ''}"></i> Hablar con un asesor</button>
+            ${!puedeRegistrar() && s.pedido ? '<p class="text-[11px] text-neutral-400"><i class="fa-solid fa-circle-info text-dcRed"></i> ¿Quieres dejarlo registrado con tu garantía? <a href="#cuenta" class="font-bold underline">Entra con tu WhatsApp en Mis pedidos</a> y repórtalo desde tu pedido.</p>' : ''}
+            <p class="text-[11px] text-neutral-500">${puedeRegistrar() ? 'El reporte queda registrado con tu pedido y tu garantía, y un asesor te escribe por WhatsApp.' : 'Te enviamos con el resumen de lo que ya probaste: no tendrás que repetirlo.'}</p></form>`;
+        zona.querySelector('[data-registrar]')?.addEventListener('click', (e) => registrarReporte(zona, e.currentTarget));
         zona.querySelector('[data-form]').addEventListener('submit', (e) => {
             e.preventDefault();
             const form = e.target;
@@ -119,6 +122,36 @@
             window.open(WA.enlace(WA.NUMERO_TIENDA, texto), '_blank', 'noopener');
             mostrarToast('Abrimos WhatsApp con tu caso. Envía el mensaje y un asesor te responde.', 'ok', 6000);
         });
+    }
+
+    // WO-032: el reporte queda en el panel con su pedido y su garantía (requiere sesión verificada por WhatsApp)
+    const puedeRegistrar = () => Boolean(s.pedido?.compraId && window.Sesion?.activa?.() && window.DC.sb);
+    async function registrarReporte(zona, boton) {
+        const form = zona.querySelector('[data-form]');
+        const probados = s.problema.pasos.filter((_, i) => s.hechos.has(i));
+        const detalle = [
+            probados.length ? `Ya probó: ${probados.map((p) => p.replace(/\.$/, '')).join('; ')}` : '',
+            form.detalle.value.trim(),
+        ].filter(Boolean).join(' · ').slice(0, 600);
+        boton.disabled = true;
+        boton.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Registrando…';
+        const { data, error } = await window.DC.sb.rpc('reportar_falla', {
+            p_token: window.Sesion.token(), p_compra_id: s.pedido.compraId, p_problema: s.problema.texto.slice(0, 160), p_detalle: detalle || null,
+        });
+        const r = data?.[0];
+        if (error || !r?.ok) {
+            boton.disabled = false;
+            boton.innerHTML = '<i class="fa-solid fa-clipboard-check"></i> Registrar reporte';
+            mostrarToast(r?.mensaje === 'SESION_INVALIDA' ? 'Tu sesión terminó: entra de nuevo en Mis pedidos.' : (r?.mensaje ?? 'No pudimos registrar el reporte. Escríbenos por WhatsApp.'), 'error', 6000);
+            return;
+        }
+        zona.innerHTML = `<div class="tarjeta text-center py-6">
+            <div class="exito-check" aria-hidden="true"><i class="fa-solid fa-check"></i></div>
+            <p class="font-tech text-lg font-black mt-4">Reporte #${escaparHTML(r.reporte_id)} registrado</p>
+            <p class="text-sm text-neutral-400 mt-1">${escaparHTML(r.mensaje)}</p>
+            ${s.pedido.garantiaDias > 0 ? `<p class="text-sm text-emerald-300 mt-2"><i class="fa-solid fa-shield-halved"></i> Lo cubre tu garantía (quedan ${escaparHTML(s.pedido.garantiaDias)} días).</p>` : ''}
+            <a href="#cuenta" class="btn-s mt-4"><i class="fa-solid fa-receipt"></i> Volver a Mis pedidos</a></div>`;
+        navigator.vibrate?.(20);
     }
 
     function reiniciar(repintar = true) {

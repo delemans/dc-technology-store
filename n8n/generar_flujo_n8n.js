@@ -402,18 +402,21 @@ function crearTriangulacion() {
     memoria.pedidos = memoria.pedidos || {};
     const ahora = Date.now();
     for (const [k, t] of Object.entries(memoria.pedidos)) if (ahora - t > 2 * 3600e3) delete memoria.pedidos[k];
+    // Orden web (WO-033): la referencia ya existe en la base y el pago ya está validado → sin antirrepetición
+    const web = Boolean(p.referencia);
     const clave = `${item.numero}|${p.producto}|${p.variante}`;
-    if (memoria.pedidos[clave]) return []; // la IA repitió el pedido: no se cotiza dos veces
-    memoria.pedidos[clave] = ahora;
+    if (!web && memoria.pedidos[clave]) return []; // la IA repitió el pedido: no se cotiza dos veces
+    if (!web) memoria.pedidos[clave] = ahora;
 
     const alfabeto = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
     let referencia = 'DC-';
     for (let i = 0; i < 5; i++) referencia += alfabeto[Math.floor(Math.random() * alfabeto.length)];
-    const msg = $('Normalizar mensaje').first().json;
+    if (web) referencia = p.referencia;
+    const nombre = item.nombre ?? $('Normalizar mensaje').first().json.nombre;
     return [{ json: {
         referencia,
         cliente: item.numero,
-        cliente_nombre: String(msg.nombre ?? '').slice(0, 60),
+        cliente_nombre: String(nombre ?? '').slice(0, 60),
         producto: p.producto,
         variante: p.variante,
         precio_venta: p.precio,
@@ -580,39 +583,62 @@ function crearCombo() {
     const cfg = $('Config bot').first().json;
     const item = $input.first().json;
     const c = item.combo;
-    if (!c || !Array.isArray(c.items) || c.items.length < 2 || !soloDigitos(cfg.numero_proveedor) || !soloDigitos(cfg.numero_aviso_admin)) return [];
+    const web = Boolean(c?.referencia && Array.isArray(c?.lineas));
+    if (!c || (!web && (!Array.isArray(c.items) || c.items.length < 2)) || !soloDigitos(cfg.numero_proveedor) || !soloDigitos(cfg.numero_aviso_admin)) return [];
     const memoria = $getWorkflowStaticData('global');
     memoria.pedidos = memoria.pedidos || {};
     const ahora = Date.now();
     for (const [k, t] of Object.entries(memoria.pedidos)) if (ahora - t > 2 * 3600e3) delete memoria.pedidos[k];
-    const clave = `${item.numero}|combo|${c.items.map((x) => `${x.producto}/${x.variante}`).sort().join('|')}`;
-    if (memoria.pedidos[clave]) return [];
-    memoria.pedidos[clave] = ahora;
+    if (!web) {
+        const clave = `${item.numero}|combo|${c.items.map((x) => `${x.producto}/${x.variante}`).sort().join('|')}`;
+        if (memoria.pedidos[clave]) return [];
+        memoria.pedidos[clave] = ahora;
+    }
 
     const alfabeto = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
     let referencia = 'DC-';
     for (let i = 0; i < 5; i++) referencia += alfabeto[Math.floor(Math.random() * alfabeto.length)];
-    // Precio cobrado por línea: lista − descuento del combo; el redondeo se ajusta en la última
-    const lineas = c.items.map((x, i) => ({ referencia: `${referencia}${i + 1}`, producto: x.producto, variante: x.variante,
-        precio_venta: Math.round(x.precio * (1 - (Number(c.pct) || 0) / 100)) }));
-    lineas[lineas.length - 1].precio_venta += c.total - lineas.reduce((s2, l) => s2 + l.precio_venta, 0);
-    const msg = $('Normalizar mensaje').first().json;
-    const nombre = String(msg.nombre ?? '').slice(0, 60);
+    let lineas;
+    if (web) {
+        // Orden web: referencias y precios cobrados vienen de la base (crear_orden_web / despachar_orden_web)
+        referencia = c.referencia;
+        lineas = c.lineas.map((l) => ({ referencia: l.referencia, producto: l.producto, variante: l.variante, precio_venta: Number(l.precio_venta) }));
+    } else {
+        // Precio cobrado por línea: lista − descuento del combo; el redondeo se ajusta en la última
+        lineas = c.items.map((x, i) => ({ referencia: `${referencia}${i + 1}`, producto: x.producto, variante: x.variante,
+            precio_venta: Math.round(x.precio * (1 - (Number(c.pct) || 0) / 100)) }));
+        lineas[lineas.length - 1].precio_venta += c.total - lineas.reduce((s2, l) => s2 + l.precio_venta, 0);
+    }
+    const total = web ? lineas.reduce((s2, l) => s2 + l.precio_venta, 0) : c.total;
+    const nombre = String(item.nombre ?? $('Normalizar mensaje').first().json.nombre ?? '').slice(0, 60);
+    // Mismas columnas en todas las filas (PostgREST: inserción/upsert por lote)
+    const fila = (x) => ({ referencia: x.referencia, cliente: item.numero, cliente_nombre: nombre, producto: x.producto, variante: x.variante,
+        precio_venta: x.precio_venta, estado: 'COTIZANDO', esperando: x.esperando ?? null, es_combo: x.es_combo ?? false,
+        grupo: x.grupo ?? null, lineas: x.lineas ?? null });
     const filas = [
-        { referencia, cliente: item.numero, cliente_nombre: nombre, producto: `Combo · ${lineas.length} plataformas`,
-          variante: lineas.map((l) => l.producto).join(' + ').slice(0, 200), precio_venta: c.total, estado: 'COTIZANDO',
-          esperando: 'COTIZACION', es_combo: true, lineas },
-        ...lineas.map((l) => ({ referencia: l.referencia, cliente: item.numero, cliente_nombre: nombre, producto: l.producto,
-          variante: l.variante, precio_venta: l.precio_venta, estado: 'COTIZANDO', grupo: referencia })),
+        fila({ referencia, producto: web ? `Pedido web · ${lineas.length} plataformas` : `Combo · ${lineas.length} plataformas`,
+            variante: lineas.map((l) => l.producto).join(' + ').slice(0, 200), precio_venta: total, esperando: 'COTIZACION', es_combo: true, lineas }),
+        ...lineas.map((l) => fila({ ...l, grupo: referencia })),
     ];
     return [{ json: {
-        referencia, cliente: item.numero, cliente_nombre: nombre, total: c.total, pct: c.pct, lineas, filas,
+        referencia, cliente: item.numero, cliente_nombre: nombre, total, pct: c.pct ?? 0, web, lineas, filas,
         texto_proveedor: [
             `Hola, cotización pedido *#${referencia}* (combo):`,
             ...lineas.map((l, i) => `${i + 1}. ${l.producto}${l.variante ? ` – ${l.variante}` : ''}`),
             'Por favor responde citando este mensaje con el precio de CADA línea (ej: "1. 12.000") y avísame si alguna no está disponible.',
         ].join('\n'),
     } }];
+}
+
+// E1 · Orden web validada (tomar_despachos, WO-033) → el mismo arranque que un pedido por WhatsApp
+function prepararDespacho() {
+    const o = $input.first().json;
+    if (!o || !o.referencia) return []; // nada por despachar
+    const base = { numero: o.cliente, nombre: o.cliente_nombre ?? '' };
+    if (o.es_combo && Array.isArray(o.lineas) && o.lineas.length) {
+        return [{ json: { ...base, combo: { referencia: o.referencia, lineas: o.lineas } } }];
+    }
+    return [{ json: { ...base, pedido: { referencia: o.referencia, producto: o.producto, variante: o.variante, precio: Number(o.precio_venta) } } }];
 }
 
 // D2 · Líneas del combo, una por item, para vincular cada una al panel
@@ -893,8 +919,10 @@ const nodo = (name, type, typeVersion, position, parameters, extra = {}) => {
 };
 const nodoCodigo = (name, position, fn, opciones = {}, extra = {}) =>
     nodo(name, 'n8n-nodes-base.code', 2, position, { jsCode: codigo(fn, opciones) }, extra);
-const set = (asignaciones) => ({
+const set = (asignaciones, { incluirEntrada = false } = {}) => ({
     assignments: { assignments: Object.entries(asignaciones).map(([name, value]) => ({ id: uuid(), name, value, type: 'string' })) },
+    // incluirEntrada: conserva los campos que llegan (p. ej. "despacho" desde el disparador programado)
+    ...(incluirEntrada ? { includeOtherFields: true, include: 'all' } : {}),
     options: {},
 });
 const supabaseRpc = (rpc, cuerpoJson) => ({
@@ -927,12 +955,16 @@ const configComun = {
 /* ---------- A) Bot de WhatsApp ---------- */
 nodo('Webhook Evolution', 'n8n-nodes-base.webhook', 2, [0, 0],
     { httpMethod: 'POST', path: 'dc-whatsapp', responseMode: 'onReceived', options: {} }, { webhookId: uuid() });
+// WO-033: cada minuto se revisa si hay órdenes web validadas para arrancar su compra al proveedor.
+// Pasa por "Config bot" (los nodos de la triangulación leen su configuración) y "Origen" la separa del chat.
+nodo('Despacho web cada minuto', 'n8n-nodes-base.scheduleTrigger', 1.2, [-220, 220], { rule: { interval: [{ field: 'minutes', minutesInterval: 1 }] } });
+nodo('Marcar despacho', 'n8n-nodes-base.set', 3.4, [0, 220], set({ despacho: 'si' }));
 nodo('Config bot', 'n8n-nodes-base.set', 3.4, [220, 0], set({
     ...configComun,
     numero_aviso_admin: '',
     numero_proveedor: '', // WhatsApp de ALL NECESSARY COLOMBIA (vacío = triangulación desactivada)
     palabras_asesor: kb.escalamiento.palabras_clave.join(','),
-}));
+}, { incluirEntrada: true }));
 nodoCodigo('Normalizar mensaje', [440, 0], normalizarMensaje, { conUtilidades: true });
 const regla = (valor, salida, campo = 'ruta') => ({
     conditions: {
@@ -1012,6 +1044,12 @@ const supabaseTabla = (metodo, filtro, cuerpo) => ({
     } : {}),
     options: { timeout: 15000 },
 });
+// Upsert: un pedido por WhatsApp se inserta; una orden web (WO-033) ya existe y solo se completa
+const supabaseUpsert = (cuerpo) => {
+    const n = supabaseTabla('POST', '?on_conflict=referencia', cuerpo);
+    n.headerParameters.parameters[0].value = 'resolution=merge-duplicates,return=minimal';
+    return n;
+};
 const REF = "$('Crear triangulación').first().json.referencia";
 const porReferencia = `?referencia=eq.{{ ${REF} }}`;
 const enviarA = (numeroExpr, textoExpr) => ({
@@ -1026,8 +1064,15 @@ const PROVEEDOR = "String($('Config bot').first().json.numero_proveedor).replace
 const ADMIN = "String($('Config bot').first().json.numero_aviso_admin).replace(/\\D/g, '')";
 const terminal = { onError: 'continueErrorOutput' };
 
+// WO-033: entrada del despacho de órdenes web
+nodo('Origen', 'n8n-nodes-base.switch', 3.2, [330, 0], {
+    rules: { values: [regla('si', 'Despacho', 'despacho')] },
+    options: { fallbackOutput: 'extra', renameFallbackOutput: 'WhatsApp' },
+});
+nodo('Órdenes por despachar', 'n8n-nodes-base.httpRequest', 4.2, [1780, 440], rpcPanel('tomar_despachos', '={{ JSON.stringify({}) }}'), { onError: 'continueRegularOutput' });
+nodoCodigo('Preparar despacho', [1890, 600], prepararDespacho);
 nodoCodigo('Crear triangulación', [2000, Y], crearTriangulacion, { conUtilidades: true });
-nodo('Registrar triangulación', 'n8n-nodes-base.httpRequest', 4.2, [2220, Y], supabaseTabla('POST', '',
+nodo('Registrar triangulación', 'n8n-nodes-base.httpRequest', 4.2, [2220, Y], supabaseUpsert(
     "={{ JSON.stringify({ referencia: $json.referencia, cliente: $json.cliente, cliente_nombre: $json.cliente_nombre, producto: $json.producto, variante: $json.variante, precio_venta: $json.precio_venta, estado: 'COTIZANDO', esperando: 'COTIZACION', resume_url: $execution.resumeUrl }) }}"));
 nodo('Vincular al panel', 'n8n-nodes-base.httpRequest', 4.2, [2330, Y - 160],
     rpcPanel('vincular_triangulacion', `={{ JSON.stringify({ p_referencia: ${REF} }) }}`),
@@ -1096,8 +1141,8 @@ const REFC = "$('Crear combo').first().json.referencia";
 const porReferenciaCombo = `?referencia=eq.{{ ${REFC} }}`;
 const lineasPanel = (expr) => rpcPanel('actualizar_lineas_combo', `={{ JSON.stringify({ p_grupo: ${REFC}, p_lineas: ${expr} }) }}`);
 nodoCodigo('Crear combo', [2000, YC], crearCombo, { conUtilidades: true });
-nodo('Registrar combo', 'n8n-nodes-base.httpRequest', 4.2, [2220, YC], supabaseTabla('POST', '',
-    "={{ JSON.stringify([Object.assign({}, $json.filas[0], { resume_url: $execution.resumeUrl })].concat($json.filas.slice(1))) }}"));
+nodo('Registrar combo', 'n8n-nodes-base.httpRequest', 4.2, [2220, YC], supabaseUpsert(
+    "={{ JSON.stringify($json.filas.map(function (f, i) { return Object.assign({}, f, { resume_url: i === 0 ? $execution.resumeUrl : null }); })) }}"));
 nodoCodigo('Líneas del combo', [2330, YC - 160], lineasCombo);
 nodo('Vincular combo al panel', 'n8n-nodes-base.httpRequest', 4.2, [2440, YC - 160],
     rpcPanel('vincular_triangulacion', '={{ JSON.stringify({ p_referencia: $json.referencia }) }}'),
@@ -1235,7 +1280,14 @@ const unir = (desde, hacia, salida = 0, tipo = 'main') => {
     conexiones[desde][tipo][salida].push({ node: hacia, type: tipo, index: 0 });
 };
 unir('Webhook Evolution', 'Config bot');
-unir('Config bot', 'Normalizar mensaje');
+unir('Config bot', 'Origen');
+unir('Origen', 'Órdenes por despachar', 0);
+unir('Origen', 'Normalizar mensaje', 1);
+unir('Despacho web cada minuto', 'Marcar despacho');
+unir('Marcar despacho', 'Config bot');
+unir('Órdenes por despachar', 'Preparar despacho');
+unir('Preparar despacho', 'Crear triangulación');
+unir('Preparar despacho', 'Crear combo');
 unir('Normalizar mensaje', 'Ruta');
 unir('Ruta', 'Registrar baja', 0);
 unir('Ruta', 'Escalar a asesor', 1);
