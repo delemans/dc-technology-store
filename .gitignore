@@ -8,3 +8,6 @@ herramientas/.n8n-credenciales.json
 
 # Dependencias de compilación (se instalan con npm install)
 node_modules/
+
+# Videos de estados (pesados: se comparten por WhatsApp, no se publican en el sitio)
+docs/videos-estados/mp4/
