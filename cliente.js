@@ -21,7 +21,7 @@ const COTIZABLES = ['servicios', 'alquiler'];
 const VISTAS = ['inicio', 'catalogo', 'combos', 'cuenta', 'soporte'];
 const CLAVE_RECIENTES = 'dc_cliente_pedidos';
 
-const estado = { productos: [], promos: [], metodos: [], reglasCombo: [], filtro: 'todas', busqueda: '', vista: null };
+const estado = { productos: [], promos: [], metodos: [], reglasCombo: [], preciosBase: false, filtro: 'todas', busqueda: '', vista: null };
 
 /* ==================== Utilidades ==================== */
 
@@ -218,6 +218,26 @@ async function cargarDatos() {
         $('inicio-promos-lista').replaceChildren(...estado.promos.map((p) => tarjetaProducto(p)));
     });
     sb.rpc('metodos_pago_publicos').then(({ data }) => { estado.metodos = data ?? []; });
+    // Precios vigentes DESDE LA BASE (wo-032): reemplazan los de productos.json. Un producto que está en la
+    // base solo muestra sus variantes activas; uno que aún no está en la base conserva lo de productos.json.
+    sb.rpc('precios_publicos').then(({ data, error }) => {
+        if (error || !Array.isArray(data) || !data.length) return;
+        const porProducto = new Map();
+        data.forEach((x) => porProducto.set(x.producto_id, [...(porProducto.get(x.producto_id) ?? []), x]));
+        estado.productos = estado.productos.map((p) => {
+            const base = porProducto.get(p.id);
+            if (!base) return p;
+            const variantes = (p.variantes ?? []).map((v) => {
+                const b = base.find((x) => x.variante === v.nombre);
+                return b ? { ...v, precio: Number(b.precio), precio_anterior: b.precio_anterior === null ? null : Number(b.precio_anterior) } : null;
+            }).filter(Boolean);
+            return variantes.length ? { ...p, variantes } : null;
+        }).filter(Boolean);
+        estado.preciosBase = true;
+        pintarInicio();
+        pintarCatalogo();
+        document.dispatchEvent(new CustomEvent('dc:precios-base'));
+    });
     // Descuentos por combo (wo-029): sin el SQL aplicado no hay descuento (nunca se inventa uno)
     sb.rpc('reglas_combo_publicas').then(({ data }) => {
         estado.reglasCombo = (data ?? []).map((r) => ({ min: Number(r.min_plataformas), pct: Number(r.descuento_pct) })).filter((r) => r.min >= 2 && r.pct > 0);

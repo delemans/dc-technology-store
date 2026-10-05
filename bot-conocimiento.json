@@ -1,5 +1,5 @@
 {
-  "version": "2026-10-05T15:06:06.238Z",
+  "version": "2026-10-05T17:53:03.347Z",
   "instrucciones_agente": [
     "Responde solo con información de este archivo; si no sabes algo, escala a un asesor (ver \"escalamiento\").",
     "No envíes entradas con \"pendiente_configurar\": true.",
@@ -330,7 +330,12 @@
       "PAGO_RECIBIDO": "pago_recibido",
       "ENTREGA_CONFIRMADA": "entrega_confirmada",
       "SOLICITUD_RESENA": "solicitud_resena",
-      "OTP": "codigo_acceso"
+      "OTP": "codigo_acceso",
+      "ORDEN_VALIDADA": "orden_validada",
+      "ORDEN_RECHAZADA": "orden_rechazada",
+      "REPORTE_RESUELTO": "reporte_resuelto",
+      "ADMIN_COMPROBANTE": "admin_comprobante",
+      "ADMIN_FALLA": "admin_falla"
     },
     "rpc_tomar": "tomar_notificaciones",
     "rpc_marcar": "marcar_notificacion",
@@ -383,6 +388,11 @@
     "entrega_confirmada": "🎉 *¡Tu pedido fue entregado!* · ⚡ *DC Technology*\n\n📦 Pedido: *#{pedido}*\n🛒 Producto: {producto}\n🛡️ Garantía activa: *{garantia_dias} días* (hasta el {garantia_hasta}).\n\n🔐 Tus datos de acceso se entregan *solo por este chat oficial*. Si no los ves arriba, responde *ACCESOS* y te los reenviamos.\n📌 Para conservar tu garantía: no cambies correo ni contraseña y usa solo tu perfil asignado.\n\n🔎 Tu pedido y garantía:\nhttps://dctecnology.xyz/portal.html?codigo={codigo}\n\n¿Necesitas ayuda? Responde *SOPORTE* 🛠️",
     "solicitud_resena": "⭐ *¿Cómo te fue con {producto}?* · ⚡ *DC Technology*\n\nYa pasó un día desde tu entrega y queremos confirmar que todo funciona al 100%.\n\n👉 Califícanos en 30 segundos (reseña de compra verificada):\nhttps://dctecnology.xyz/portal.html?codigo={codigo}#resena\n_Solo necesitas los últimos 4 dígitos de tu WhatsApp._\n\n¿Algo no va bien? Responde *SOPORTE* y lo resolvemos de inmediato.\n_Si prefieres no recibir estos mensajes, responde *NO*._",
     "codigo_acceso": "🔐 *Tu código de acceso* · ⚡ *DC Technology*\n\n*{codigo}*\n\nEscríbelo en dctecnology.xyz para ver tus pedidos y accesos.\n⏱️ Vence en *5 minutos*.\n\n⚠️ No lo compartas con nadie: ningún asesor de DC Technology te lo pedirá.\n_Si no lo solicitaste, ignora este mensaje._",
+    "orden_validada": "✅ *¡Pago validado!* · ⚡ *DC Technology*\n\nTu orden *{codigo}* por *${total}* ya está confirmada y entra a proceso.\n⏱️ Entrega: máximo *15 minutos* (lunes a sábado, 8:00 a.m. a 8:00 p.m.).\n\n🔎 Síguela en Mis pedidos: dctecnology.xyz/cliente.html#cuenta",
+    "orden_rechazada": "⚠️ *Revisamos tu comprobante* · ⚡ *DC Technology*\n\nNo pudimos validar el pago de tu orden *{codigo}*.\nMotivo: {motivo}\n\nPuedes subir otro comprobante en Mis pedidos (dctecnology.xyz/cliente.html#cuenta) o responder aquí y te ayudamos.",
+    "reporte_resuelto": "🛠️ *Tu reporte fue atendido* · ⚡ *DC Technology*\n\nProducto: {producto}\nSolución: {nota}\n\n¿Sigue fallando? Responde *SOPORTE* y lo revisamos de nuevo.",
+    "admin_comprobante": "🧾 *Comprobante nuevo en el portal*\nOrden: *{codigo}* · ${total} · {metodo}\nCliente: +{cliente}\nReferencia: {referencia}\nValídalo en el panel → Pagos & Agente Bot → Comprobantes web.",
+    "admin_falla": "🛠️ *Falla reportada en el portal*\nReporte #{reporte} · Cliente: +{cliente}\nProducto: {producto}\nProblema: {problema}\nEn garantía: {garantia}\nAtiéndelo y ciérralo en el panel (Reportes de falla).",
     "escalar_asesor": "🙋 *Te paso con un asesor humano* · ⚡ *DC Technology*\n\nNuestro equipo te responde por este chat en horario de atención (lunes a sábado, 8:00 a.m. a 8:00 p.m.).\nYa tenemos tu pedido *#{pedido}* a la mano.",
     "entrega_credenciales": "🔐 *¡Tus accesos están listos!* · ⚡ *DC Technology*\n\n📦 Pedido: *#{pedido}*\n🛒 Producto: {producto}\n\n👤 Usuario / correo: ```{usuario}```\n🔑 Clave: ```{clave}```\n🙋 Perfil: ```{perfil}```\n🔢 PIN: ```{pin}```\n\n📌 Para conservar tu garantía: no cambies correo ni contraseña, usa solo tu perfil y no compartas el acceso.\n\n¿Algo no funciona? Responde *SOPORTE* 🛠️"
   },

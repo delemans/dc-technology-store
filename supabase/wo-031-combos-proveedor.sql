@@ -15,6 +15,34 @@
 --     administrador lo fuerce explícitamente (#pago DC-XXXXX forzar).
 -- =====================================================================
 
+-- 0) Verificación previa: si falta wo-024 o wo-026, se detiene ANTES de crear nada y dice qué falta
+do $$
+declare
+    v_faltan text[] := '{}';
+    c text;
+begin
+    if to_regclass('public.triangulaciones') is null then
+        raise exception 'Nada se aplicó. Falta la tabla public.triangulaciones: aplica primero wo-024-triangulacion.sql y luego wo-026-triangulacion-panel.sql.';
+    end if;
+    foreach c in array array['pedido_id', 'compra_id', 'vinculo_error'] loop
+        if not exists (select 1 from information_schema.columns
+                       where table_schema = 'public' and table_name = 'triangulaciones' and column_name = c) then
+            v_faltan := array_append(v_faltan, 'columna triangulaciones.' || c);
+        end if;
+    end loop;
+    if to_regprocedure('public.vincular_triangulacion(text)') is null then
+        v_faltan := array_append(v_faltan, 'función vincular_triangulacion()'::text);
+    end if;
+    if to_regprocedure('public.avanzar_compra_triangulada(text, text, numeric, text)') is null then
+        v_faltan := array_append(v_faltan, 'función avanzar_compra_triangulada()'::text);
+    end if;
+    if array_length(v_faltan, 1) > 0 then
+        raise exception 'Nada se aplicó. Falta wo-026-triangulacion-panel.sql (%). Aplícalo y vuelve a ejecutar este archivo.',
+            array_to_string(v_faltan, ', ');
+    end if;
+end;
+$$;
+
 alter table public.triangulaciones
     add column if not exists grupo        text,
     add column if not exists es_combo     boolean not null default false,

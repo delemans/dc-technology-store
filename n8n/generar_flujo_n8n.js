@@ -366,7 +366,13 @@ function armarNotificacion() {
     if (!plantilla) throw new Error(`Sin plantilla para ${n.tipo}`);
     const texto = rellenar(plantilla, n.variables ?? {});
     if (texto.length < 20) throw new Error('Mensaje vacío o incompleto');
-    return [{ json: { id: n.id, tipo: n.tipo, numero: n.destino, texto } }];
+    // ADMIN_*: avisos para ti (comprobante nuevo, falla reportada) → tu número de aviso, no el del cliente
+    let numero = n.destino;
+    if (String(n.tipo).startsWith('ADMIN_')) {
+        numero = soloDigitos($('Config posventa').first().json.numero_aviso_admin);
+        if (!numero) throw new Error('Falta numero_aviso_admin en "Config posventa"');
+    }
+    return [{ json: { id: n.id, tipo: n.tipo, numero, texto } }];
 }
 
 // B2 · Recuerda a quién se pidió reseña (el bot interpreta su "NO" como baja durante 7 días)
@@ -1170,7 +1176,7 @@ nodo('Reanudar espera', 'n8n-nodes-base.httpRequest', 4.2, [1560, -620], {
 
 /* ---------- B) Posventa ---------- */
 nodo('Cada minuto', 'n8n-nodes-base.scheduleTrigger', 1.2, [0, 700], { rule: { interval: [{ field: 'minutes', minutesInterval: 1 }] } });
-nodo('Config posventa', 'n8n-nodes-base.set', 3.4, [220, 700], set({ ...configComun, lote: '5' }));
+nodo('Config posventa', 'n8n-nodes-base.set', 3.4, [220, 700], set({ ...configComun, lote: '5', numero_aviso_admin: '' }));
 nodo('Plantillas posventa', 'n8n-nodes-base.httpRequest', 4.2, [440, 700], {
     url: "={{ $('Config posventa').first().json.url_conocimiento }}",
     options: { timeout: 8000, response: { response: { responseFormat: 'json' } } },

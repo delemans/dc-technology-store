@@ -250,6 +250,47 @@
 
         // WO-028: código de acceso al portal de clientes (supabase/wo-028-portal.sql → solicitar_otp).
         // La cola borra el código apenas se envía y lo cancela si no sale en 5 minutos.
+        // WO-032: órdenes web (portal) y reportes de falla
+        ordenValidada: ({ codigo, total }) => [
+            `✅ *¡Pago validado!* · ${FIRMA}`,
+            '',
+            `Tu orden *${codigo}* por *$${total}* ya está confirmada y entra a proceso.`,
+            `⏱️ Entrega: máximo *${ENTREGA_MAX_MIN} minutos* (${HORARIO}).`,
+            '',
+            '🔎 Síguela en Mis pedidos: dctecnology.xyz/cliente.html#cuenta',
+        ].join('\n'),
+        ordenRechazada: ({ codigo, motivo }) => [
+            `⚠️ *Revisamos tu comprobante* · ${FIRMA}`,
+            '',
+            `No pudimos validar el pago de tu orden *${codigo}*.`,
+            `Motivo: ${motivo}`,
+            '',
+            'Puedes subir otro comprobante en Mis pedidos (dctecnology.xyz/cliente.html#cuenta) o responder aquí y te ayudamos.',
+        ].join('\n'),
+        reporteResuelto: ({ producto, nota }) => [
+            `🛠️ *Tu reporte fue atendido* · ${FIRMA}`,
+            '',
+            `Producto: ${producto}`,
+            `Solución: ${nota}`,
+            '',
+            '¿Sigue fallando? Responde *SOPORTE* y lo revisamos de nuevo.',
+        ].join('\n'),
+        adminComprobante: ({ codigo, cliente, metodo, total, referencia }) => [
+            '🧾 *Comprobante nuevo en el portal*',
+            `Orden: *${codigo}* · $${total} · ${metodo}`,
+            `Cliente: +${cliente}`,
+            `Referencia: ${referencia}`,
+            'Valídalo en el panel → Pagos & Agente Bot → Comprobantes web.',
+        ].join('\n'),
+        adminFalla: ({ reporte, cliente, producto, problema, garantia }) => [
+            '🛠️ *Falla reportada en el portal*',
+            `Reporte #${reporte} · Cliente: +${cliente}`,
+            `Producto: ${producto}`,
+            `Problema: ${problema}`,
+            `En garantía: ${garantia}`,
+            'Atiéndelo y ciérralo en el panel (Reportes de falla).',
+        ].join('\n'),
+
         codigoAcceso: ({ codigo }) => [
             `🔐 *Tu código de acceso* · ${FIRMA}`,
             '',

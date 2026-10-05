@@ -202,12 +202,21 @@
         const m = pago.metodo;
         boton.disabled = true;
         boton.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Creando tu orden…';
-        const total = aPagar();
+        const totalNavegador = aPagar();
         const items = lineas.map((l) => ({ producto: l.nombre, variante: l.variante, precio: l.precio, combo: l.combo ?? '' }));
-        const { data, error } = await window.DC.sb.rpc('crear_orden_web', {
-            p_whatsapp: datos.whatsapp, p_nombre: datos.nombre ?? null, p_items: items, p_total: total,
+        // wo-032: el navegador solo dice QUÉ compra; el precio, el combo y el cupón los calcula el servidor
+        let { data, error } = await window.DC.sb.rpc('crear_orden_web', {
+            p_whatsapp: datos.whatsapp, p_nombre: datos.nombre ?? null,
+            p_items: lineas.map((l) => ({ producto_id: l.id, variante: l.variante, combo: l.combo ?? '' })),
             p_metodo: m.tipo, p_red: m.red ?? null, p_cupon: cupon?.codigo ?? null,
         });
+        if (error?.code === 'PGRST202') {
+            // Base sin wo-032 todavía: versión anterior (wo-030), el equipo valida el monto a mano
+            ({ data, error } = await window.DC.sb.rpc('crear_orden_web', {
+                p_whatsapp: datos.whatsapp, p_nombre: datos.nombre ?? null, p_items: items, p_total: totalNavegador,
+                p_metodo: m.tipo, p_red: m.red ?? null, p_cupon: cupon?.codigo ?? null,
+            }));
+        }
         const r = data?.[0];
         if (error || !r?.ok) {
             boton.disabled = false;
@@ -215,7 +224,10 @@
             mostrarToast(r?.mensaje ?? (error?.code === 'PGRST202' ? 'El pago en la web aún no está activo: confirma por WhatsApp.' : 'No pudimos crear la orden. Intenta de nuevo o confirma por WhatsApp.'), 'error', 6000);
             return;
         }
-        const orden = { codigo: r.codigo, secreto: r.secreto, total, pago: r.pago, items, estado: 'ESPERANDO_PAGO', creado: new Date().toISOString() };
+        const total = Number(r.total) > 0 ? Number(r.total) : totalNavegador;
+        if (total !== totalNavegador) mostrarToast(`Actualizamos el total con los precios vigentes: ${precioCOP(total)}.`, 'info', 6000);
+        if (r.detalle?.cupon_mensaje) mostrarToast(r.detalle.cupon_mensaje, 'info', 6000);
+        const orden = { codigo: r.codigo, secreto: r.secreto, total, pago: r.pago, items: r.detalle?.lineas ?? items, estado: 'ESPERANDO_PAGO', creado: new Date().toISOString() };
         guardarOrden(orden);
         lineas = [];
         cupon = null;
@@ -457,6 +469,18 @@
     });
     document.addEventListener('dc:catalogo-listo', () => pintarCombo());
     document.addEventListener('dc:reglas-combo', () => pintarCombo());
+    // Precios de la base: el carrito guardado en el dispositivo se pone al día (una variante que ya no se
+    // vende sale del carrito con aviso)
+    document.addEventListener('dc:precios-base', () => {
+        const antes = lineas.length;
+        lineas = lineas.map((l) => {
+            const v = window.DC.estado.productos.find((p) => p.id === l.id)?.variantes?.find((x) => x.nombre === l.variante);
+            return v ? { ...l, precio: Number(v.precio) || 0 } : null;
+        }).filter(Boolean);
+        if (lineas.length < antes) mostrarToast('Quitamos del carrito un producto que ya no está disponible.', 'info', 5000);
+        guardar();
+        pintarCombo();
+    });
     document.addEventListener('dc:vista', (e) => { if (e.detail === 'combos') pintarCombo(); });
 
     window.Carrito = { agregar, abrir: abrirCarrito, lineas: () => lineas, combos, aPagar, pctCombo, abrirOrden, ordenes: leerOrdenes };

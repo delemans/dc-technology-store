@@ -53,6 +53,11 @@ const plantillas = {
     entrega_confirmada: WA.entregaConfirmada({ pedido: '{pedido}', producto: '{producto}', garantiaDias: '{garantia_dias}', garantiaHasta: '{garantia_hasta}', codigo: '{codigo}' }),
     solicitud_resena: WA.solicitudResena({ producto: '{producto}', codigo: '{codigo}' }),
     codigo_acceso: WA.codigoAcceso({ codigo: '{codigo}' }),
+    orden_validada: WA.ordenValidada({ codigo: '{codigo}', total: '{total}' }),
+    orden_rechazada: WA.ordenRechazada({ codigo: '{codigo}', motivo: '{motivo}' }),
+    reporte_resuelto: WA.reporteResuelto({ producto: '{producto}', nota: '{nota}' }),
+    admin_comprobante: WA.adminComprobante({ codigo: '{codigo}', cliente: '{cliente}', metodo: '{metodo}', total: '{total}', referencia: '{referencia}' }),
+    admin_falla: WA.adminFalla({ reporte: '{reporte}', cliente: '{cliente}', producto: '{producto}', problema: '{problema}', garantia: '{garantia}' }),
     escalar_asesor: WA.escalarAsesor({ pedido: '{pedido}' }),
     entrega_credenciales: WA.entregaCredenciales({ pedido: '{pedido}', producto: '{producto}', usuario: '{usuario}', clave: '{clave}', perfil: '{perfil}', pin: '{pin}' }),
 };
@@ -64,6 +69,11 @@ const notificaciones = {
         ENTREGA_CONFIRMADA: 'entrega_confirmada', // compra pasa a ENTREGADO / ENTREGADO_INMEDIATO
         SOLICITUD_RESENA: 'solicitud_resena',     // 24 h después de la entrega, en horario
         OTP: 'codigo_acceso',                     // WO-028: código del portal (prioridad 0, vence en 5 min)
+        ORDEN_VALIDADA: 'orden_validada',         // WO-032: el admin validó el comprobante web
+        ORDEN_RECHAZADA: 'orden_rechazada',       // WO-032: comprobante rechazado (con motivo)
+        REPORTE_RESUELTO: 'reporte_resuelto',     // WO-032: reporte de falla cerrado
+        ADMIN_COMPROBANTE: 'admin_comprobante',   // WO-032: al número de aviso del admin
+        ADMIN_FALLA: 'admin_falla',               // WO-032: al número de aviso del admin
     },
     rpc_tomar: 'tomar_notificaciones',   // p_lote (máx. 10). Ya filtra: 1 por número, 60 s entre mensajes al mismo número
     rpc_marcar: 'marcar_notificacion',   // p_id, p_ok, p_error, p_wamid. 3 fallos → FALLIDO (reintento manual en el panel)
