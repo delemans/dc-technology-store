@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="es-CO" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <!-- Seguridad: solo se ejecuta JavaScript propio y de CDNs fijados con hash (ningún script en línea) -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src 'self' data: https://cdnjs.cloudflare.com https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://vyqcizwfmjlflncdwzve.supabase.co wss://vyqcizwfmjlflncdwzve.supabase.co https://cdn.jsdelivr.net; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="referrer" content="no-referrer">
+    <meta name="theme-color" content="#0B0F19">
+    <title>Portal de Clientes | DC Technology</title>
+    <meta name="description" content="Compra, arma tu combo, paga con métodos locales o cripto y gestiona tus pedidos y garantías en el portal de clientes de DC Technology.">
+    <link rel="canonical" href="https://dctecnology.xyz/cliente.html">
+    <link rel="icon" href="https://i.ibb.co/LDN4xyW0/Mesa-de-trabajo-1.png">
+    <!-- Estilos compilados con Tailwind (npm run css) + estilos propios del portal -->
+    <link rel="stylesheet" href="estilos/tailwind.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" integrity="sha384-iw3OoTErCYJJB9mCa8LNS2hbsQ7M3C0EpIsO/H5+EGAkPGc6rk+V8i04oW/K5xq0" crossorigin="anonymous" referrerpolicy="no-referrer">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;700;800;900&display=swap" rel="stylesheet">
+    <!-- Tema claro/oscuro (antes de pintar, sin destello) -->
+    <script src="tema.js"></script>
+    <link rel="stylesheet" href="tema.css">
+    <link rel="stylesheet" href="estilos/cliente.css">
+</head>
+<body class="bg-dcDarkBg text-white min-h-screen font-sans antialiased selection:bg-dcRed/40">
+    <div class="fondo-portal" aria-hidden="true"><span></span><span></span></div>
+
+    <!-- ============ CABECERA ============ -->
+    <header class="cab sticky top-0 z-40 bg-dcDarkBg/80 backdrop-blur-xl border-b border-white/10 pt-[env(safe-area-inset-top)]">
+        <div class="max-w-6xl mx-auto px-4 h-16 flex items-center gap-3">
+            <a href="#inicio" class="flex items-center gap-2.5 min-h-[44px]" aria-label="Portal DC Technology, inicio">
+                <img src="https://i.ibb.co/LDN4xyW0/Mesa-de-trabajo-1.png" alt="" class="w-9 h-9 object-contain" width="36" height="36">
+                <span class="leading-none">
+                    <span class="block font-tech font-black text-sm tracking-[0.14em] uppercase">DC <span class="text-dcRed">Technology</span></span>
+                    <span class="block mt-0.5 text-[9px] font-bold uppercase tracking-[0.3em] text-neutral-500">Portal de clientes</span>
+                </span>
+            </a>
+            <!-- Navegación de escritorio -->
+            <nav class="hidden md:flex items-center gap-1 ml-6" aria-label="Secciones">
+                <a href="#inicio" data-nav="inicio" class="nav-sup">Inicio</a>
+                <a href="#catalogo" data-nav="catalogo" class="nav-sup">Catálogo</a>
+                <a href="#combos" data-nav="combos" class="nav-sup">Combos</a>
+                <a href="#cuenta" data-nav="cuenta" class="nav-sup">Mis pedidos</a>
+                <a href="#soporte" data-nav="soporte" class="nav-sup">Soporte</a>
+            </nav>
+            <div class="ml-auto flex items-center gap-2">
+                <button type="button" data-alternar-tema class="w-11 h-11 grid place-items-center rounded-2xl bg-white/[0.04] ring-1 ring-white/10" aria-label="Cambiar tema"><i class="fa-solid fa-sun"></i></button>
+                <button type="button" data-abrir-carrito class="relative w-11 h-11 grid place-items-center rounded-2xl bg-white/[0.04] ring-1 ring-white/10" aria-label="Abrir carrito">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                    <span data-contador-carrito class="contador" hidden>0</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main id="vistas" class="relative z-10 max-w-6xl mx-auto px-4 pt-6 pb-32 md:pb-16">
+
+        <!-- ============ INICIO ============ -->
+        <section id="vista-inicio" class="vista" data-vista="inicio" aria-labelledby="t-inicio">
+            <div class="hero">
+                <p class="text-[10px] font-black uppercase tracking-[0.3em] text-dcRed mb-2">Portal de clientes</p>
+                <h1 id="t-inicio" class="font-tech text-3xl sm:text-5xl font-black uppercase leading-[1.05]">Compra, paga y gestiona <span class="text-dcRed dc-text-glow">todo en un lugar</span></h1>
+                <p class="mt-3 max-w-xl text-sm text-neutral-400">Elige tus plataformas, arma un combo, paga con métodos locales o cripto y consulta tus pedidos y garantías sin esperar.</p>
+                <ol class="pasos-inicio" aria-label="Cómo funciona">
+                    <li><i class="fa-solid fa-hand-pointer"></i><b>Elige</b><span>Plataforma y plan</span></li>
+                    <li><i class="fa-solid fa-wallet"></i><b>Paga</b><span>Local o cripto</span></li>
+                    <li><i class="fa-solid fa-bolt"></i><b>Recibe</b><span>Máx. 15 min tras validar</span></li>
+                    <li><i class="fa-solid fa-shield-halved"></i><b>Disfruta</b><span>Con garantía</span></li>
+                </ol>
+                <div class="mt-6 flex flex-wrap gap-2">
+                    <a href="#catalogo" class="btn-p"><i class="fa-solid fa-grip"></i> Ver catálogo</a>
+                    <a href="#combos" class="btn-s"><i class="fa-solid fa-layer-group"></i> Arma tu combo</a>
+                </div>
+            </div>
+            <h2 class="titulo-sec">Categorías</h2>
+            <div id="inicio-categorias" class="grid grid-cols-2 sm:grid-cols-4 gap-3"></div>
+            <div id="inicio-promos" hidden>
+                <h2 class="titulo-sec"><i class="fa-solid fa-fire text-dcRed"></i> Promociones del día</h2>
+                <div id="inicio-promos-lista" class="rejilla"></div>
+            </div>
+            <h2 class="titulo-sec">Más pedidos</h2>
+            <div id="inicio-destacados" class="rejilla"></div>
+        </section>
+
+        <!-- ============ CATÁLOGO ============ -->
+        <section id="vista-catalogo" class="vista" data-vista="catalogo" hidden aria-labelledby="t-catalogo">
+            <h1 id="t-catalogo" class="font-tech text-2xl sm:text-3xl font-black uppercase">Catálogo</h1>
+            <label class="buscador mt-4">
+                <span class="sr-only">Buscar</span>
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input id="cat-buscar" type="search" placeholder="Buscar Netflix, Office, recargas…" autocomplete="off" enterkeyhint="search">
+            </label>
+            <div id="cat-filtros" class="chips sin-scrollbar mt-3" role="tablist" aria-label="Categorías"></div>
+            <p id="cat-cuenta" class="mt-4 text-xs text-neutral-500"></p>
+            <div id="cat-lista" class="rejilla mt-2"></div>
+        </section>
+
+        <!-- ============ COMBOS ============ -->
+        <section id="vista-combos" class="vista" data-vista="combos" hidden aria-labelledby="t-combos">
+            <h1 id="t-combos" class="font-tech text-2xl sm:text-3xl font-black uppercase">Arma tu <span class="text-dcRed">combo</span></h1>
+            <p class="mt-2 text-sm text-neutral-400">Elige varias plataformas y llévalas en un solo pedido y un solo pago.</p>
+            <ol class="stepper mt-5" aria-label="Pasos del combo">
+                <li data-paso-combo="1" class="activo"><span>1</span>Plataformas</li>
+                <li data-paso-combo="2"><span>2</span>Planes</li>
+                <li data-paso-combo="3"><span>3</span>Listo</li>
+            </ol>
+            <div id="combo-contenido" class="mt-5"></div>
+        </section>
+
+        <!-- ============ MIS PEDIDOS / AUTOGESTIÓN ============ -->
+        <section id="vista-cuenta" class="vista" data-vista="cuenta" hidden aria-labelledby="t-cuenta">
+            <h1 id="t-cuenta" class="font-tech text-2xl sm:text-3xl font-black uppercase">Mis pedidos</h1>
+            <form id="form-rastreo" class="tarjeta mt-4 flex flex-col sm:flex-row gap-3">
+                <label class="flex-1">
+                    <span class="etiqueta">Código de tu pedido</span>
+                    <input id="rastreo-codigo" class="campo font-mono uppercase" required autocomplete="off" spellcheck="false" placeholder="Ej: DC-7K2Q9">
+                </label>
+                <button type="submit" class="btn-p sm:self-end"><i class="fa-solid fa-magnifying-glass"></i> Consultar</button>
+            </form>
+            <div id="cuenta-resultado" class="mt-4"></div>
+            <div id="cuenta-recientes" class="mt-6"></div>
+            <div class="tarjeta mt-6">
+                <p class="etiqueta"><i class="fa-solid fa-lock text-dcRed"></i> Acceso con tu WhatsApp</p>
+                <p class="text-sm text-neutral-400">Muy pronto podrás entrar con un código que te enviamos por WhatsApp (sin correos ni contraseñas) para ver todos tus pedidos y tus accesos aquí mismo.</p>
+            </div>
+        </section>
+
+        <!-- ============ SOPORTE ============ -->
+        <section id="vista-soporte" class="vista" data-vista="soporte" hidden aria-labelledby="t-soporte">
+            <h1 id="t-soporte" class="font-tech text-2xl sm:text-3xl font-black uppercase">Soporte</h1>
+            <p class="mt-2 text-sm text-neutral-400">Resolvamos juntos el problema en menos de un minuto. Si no se arregla, te pasamos con un asesor con todo ya explicado.</p>
+            <ol class="stepper mt-5" aria-label="Pasos del soporte">
+                <li data-paso-soporte="1" class="activo"><span>1</span>Producto</li>
+                <li data-paso-soporte="2"><span>2</span>Problema</li>
+                <li data-paso-soporte="3"><span>3</span>Solución</li>
+            </ol>
+            <div id="soporte-contenido" class="mt-5"></div>
+        </section>
+    </main>
+
+    <!-- ============ MENÚ INFERIOR (móvil) ============ -->
+    <nav class="menu-inferior md:hidden" aria-label="Navegación principal">
+        <a href="#inicio" data-nav="inicio"><i class="fa-solid fa-house"></i><span>Inicio</span></a>
+        <a href="#catalogo" data-nav="catalogo"><i class="fa-solid fa-grip"></i><span>Catálogo</span></a>
+        <button type="button" data-abrir-carrito class="central" aria-label="Carrito"><i class="fa-solid fa-cart-shopping"></i><span data-contador-carrito class="contador" hidden>0</span></button>
+        <a href="#cuenta" data-nav="cuenta"><i class="fa-solid fa-receipt"></i><span>Pedidos</span></a>
+        <a href="#soporte" data-nav="soporte"><i class="fa-solid fa-headset"></i><span>Soporte</span></a>
+    </nav>
+
+    <!-- ============ HOJA MODAL (producto, carrito, pago) ============ -->
+    <div id="hoja" class="hoja" hidden role="dialog" aria-modal="true" aria-labelledby="hoja-titulo">
+        <div class="hoja-fondo" data-cerrar-hoja></div>
+        <div class="hoja-panel">
+            <div class="hoja-asa" aria-hidden="true"></div>
+            <div class="flex items-center justify-between gap-3 mb-4">
+                <h2 id="hoja-titulo" class="font-tech text-lg font-black uppercase tracking-wider"></h2>
+                <button type="button" data-cerrar-hoja class="w-11 h-11 grid place-items-center rounded-xl bg-white/5 text-neutral-400 hover:text-white" aria-label="Cerrar"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div id="hoja-cuerpo"></div>
+        </div>
+    </div>
+
+    <div id="toasts" class="fixed z-[80] left-4 bottom-24 md:bottom-6 flex flex-col gap-2 w-[min(22rem,calc(100vw-2rem))]" aria-live="polite"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js" integrity="sha384-Rj26LVGvoeRVR6+mwQmFfcR3QOBEwT+ZmuCWpuiqeTzJpCs0ER4ITAWGb4Hiy3Ok" crossorigin="anonymous"></script>
+    <script src="plantillas-whatsapp.js"></script>
+    <script src="ui.js"></script>
+    <script src="cliente.js"></script>
+    <script src="carrito.js"></script>
+    <script src="soporte.js"></script>
+</body>
+</html>

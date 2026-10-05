@@ -1,0 +1,152 @@
+{
+  "_nota": "Árbol del asistente de soporte del portal (soporte.js). Se edita sin tocar código: cada problema tiene pasos que el cliente prueba antes de hablar con un asesor. 'garantia': true = el caso lo cubre la garantía vigente; 'escalar_directo': true = no tiene pasos posibles del lado del cliente.",
+  "productos": [
+    {
+      "id": "streaming",
+      "texto": "Streaming",
+      "detalle": "Netflix, Max, Disney, Prime…",
+      "icono": "fa-tv",
+      "problemas": [
+        {
+          "id": "clave_incorrecta",
+          "texto": "Dice contraseña o correo incorrecto",
+          "pasos": [
+            "Copia el correo y la clave exactamente como te llegaron (sin espacios al final ni mayúsculas cambiadas).",
+            "Cierra la app por completo y vuelve a abrirla.",
+            "Si estás en un televisor, prueba primero en el celular: así descartamos el teclado del TV."
+          ]
+        },
+        {
+          "id": "clave_cambiada",
+          "texto": "Funcionaba y ahora ya no entra",
+          "garantia": true,
+          "escalar_directo": true,
+          "pasos": ["No cambies nada en la cuenta. Esto lo revisamos nosotros y lo cubre tu garantía si está vigente."]
+        },
+        {
+          "id": "pantallas",
+          "texto": "Dice que hay demasiadas pantallas en uso",
+          "pasos": [
+            "Usa la cuenta solo en la cantidad de dispositivos de tu plan.",
+            "Cierra la sesión en los dispositivos que no estés usando.",
+            "Espera 10 minutos y vuelve a intentar."
+          ]
+        },
+        {
+          "id": "codigo_verificacion",
+          "texto": "Me pide un código de verificación",
+          "escalar_directo": true,
+          "pasos": ["No intentes adivinar el código ni pidas otro varias veces: te lo conseguimos nosotros."]
+        },
+        {
+          "id": "perfil",
+          "texto": "No encuentro mi perfil o me pide PIN",
+          "pasos": [
+            "Entra solo al perfil con el nombre que te indicamos al entregar.",
+            "Si te pide PIN de perfil, usa el que aparece en tu mensaje de entrega."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "licencias",
+      "texto": "Software y licencias",
+      "detalle": "Office, Windows, Canva, IA…",
+      "icono": "fa-key",
+      "problemas": [
+        {
+          "id": "no_activa",
+          "texto": "La licencia no activa",
+          "pasos": [
+            "Copia el serial completo, sin espacios, y pégalo en \"Activar licencia\" o \"Canjear código\".",
+            "Verifica que la versión instalada coincida con la licencia (por ejemplo Office 2021 con licencia 2021).",
+            "Conéctate a internet y reinicia el programa antes de reintentar."
+          ]
+        },
+        {
+          "id": "ya_usada",
+          "texto": "Dice que la clave ya fue usada",
+          "garantia": true,
+          "escalar_directo": true,
+          "pasos": ["Guarda una captura del mensaje de error: con ella te damos una solución bajo garantía."]
+        },
+        {
+          "id": "donde_activar",
+          "texto": "No sé dónde activarla",
+          "pasos": [
+            "Abre el programa (por ejemplo Word) → Cuenta → Cambiar clave de producto.",
+            "En Windows: Configuración → Sistema → Activación → Cambiar clave de producto."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pines",
+      "texto": "Pines y recargas",
+      "detalle": "Códigos, saldo, juegos",
+      "icono": "fa-gamepad",
+      "problemas": [
+        {
+          "id": "codigo_no_funciona",
+          "texto": "El código no funciona",
+          "pasos": [
+            "Escribe el código tal cual, sin espacios ni guiones de más.",
+            "Canjéalo en la región correcta (Colombia) y en la plataforma del pin."
+          ]
+        },
+        {
+          "id": "recarga_no_llega",
+          "texto": "La recarga no me llegó",
+          "pasos": [
+            "Revisa que el número o ID que nos diste sea el correcto.",
+            "Algunas recargas tardan hasta 15 minutos en reflejarse: reinicia la app o el celular."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tecnologia",
+      "texto": "Tecnología",
+      "detalle": "Relojes, audífonos, powerbank",
+      "icono": "fa-headphones",
+      "problemas": [
+        {
+          "id": "no_enciende",
+          "texto": "No enciende o no carga",
+          "pasos": [
+            "Cárgalo 30 minutos con un cargador de 5V/1A (no uses carga rápida).",
+            "Mantén presionado el botón de encendido 10 segundos."
+          ]
+        },
+        {
+          "id": "bluetooth",
+          "texto": "No se conecta por Bluetooth",
+          "pasos": [
+            "Olvida el dispositivo en el Bluetooth del celular y vuelve a vincularlo.",
+            "Usa la app recomendada en el manual y dale los permisos que pide."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "otro",
+      "texto": "Otra cosa",
+      "detalle": "Pagos, pedidos, otros",
+      "icono": "fa-circle-question",
+      "problemas": [
+        {
+          "id": "pago",
+          "texto": "Pagué y no he recibido mi pedido",
+          "escalar_directo": true,
+          "pasos": ["La entrega es de máximo 15 minutos después de validar tu pago en horario de atención. Si ya pasó ese tiempo, escríbenos con tu comprobante."]
+        },
+        {
+          "id": "libre",
+          "texto": "Es otra cosa",
+          "escalar_directo": true,
+          "pasos": ["Cuéntanos qué pasa y te ayudamos."]
+        }
+      ]
+    }
+  ]
+}
