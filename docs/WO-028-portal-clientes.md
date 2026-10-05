@@ -95,9 +95,9 @@ El árbol es un JSON editable: agregar un caso no requiere tocar código. Las re
 | Fase | Entrega | Depende de |
 |---|---|---|
 | 1 ✅ | `wo-028-portal.sql` (sesiones, OTP, `mis_pedidos`, `ver_accesos`) + `sesion.js` en `cliente.html#cuenta` (entrar, historial, accesos con re-verificación cada 24 h) | Decisiones 2 y 3 |
-| 2 | `pagar.html` de un ítem: métodos, monto único, comprobante (Storage) | Decisión 1 |
+| 2 ✅ (parcial) | `wo-030-comprobantes.sql`: orden web (DC-XXXXX) + comprobante a Storage privado con ruta de un solo uso; validación en el panel (Pagos & Agente Bot → Comprobantes web). Falta: total recalculado en el servidor cuando los precios migren a la base | Decisión 1 |
 | 3 | Carrito multi-ítem (`ordenes`) | Fase 2 |
-| 4 | Ver accesos + soporte guiado + reportes en el panel | Fase 1 |
+| 4 ✅ (accesos) | Accesos dentro de la tarjeta del pedido (velados, copia por línea, cierre a los 60 s, re-verificación cada 24 h). Pendiente: reportes de falla en el panel | Fase 1 |
 | 5 ✅ | Descuento por combo: `wo-029-combos.sql` (reglas editables en el panel, inicio 2 = 10 % y 3+ = 15 %; el cupón no se acumula con el combo) | Decisión 4 |
 
 ## 7. Decisiones del director antes de empezar

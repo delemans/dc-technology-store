@@ -301,6 +301,16 @@
                     </div>
                 </div>
 
+                <!-- Comprobantes subidos desde el portal (public.ordenes_web · wo-030) -->
+                <section id="comprobantes-web" class="mb-6 rounded-3xl bg-white/[0.03] ring-1 ring-white/10 p-4 sm:p-5" aria-labelledby="t-comprobantes-web">
+                    <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
+                        <h3 id="t-comprobantes-web" class="font-tech text-sm font-black uppercase tracking-[0.15em]"><i class="fa-solid fa-cloud-arrow-up text-dcRed mr-1"></i> Comprobantes web <span id="comprobantes-web-cuenta" class="ml-1 px-2 py-0.5 rounded-md bg-dcRed/15 text-dcRed text-[10px]" hidden>0</span></h3>
+                        <button type="button" id="comprobantes-web-recargar" class="min-h-[44px] px-4 rounded-xl bg-white/5 ring-1 ring-white/10 text-xs font-bold text-neutral-300 hover:text-white"><i class="fa-solid fa-rotate-right mr-1"></i> Actualizar</button>
+                    </div>
+                    <p class="text-xs text-neutral-500 mb-3 max-w-2xl">Órdenes pagadas desde el portal. El total lo declara el navegador: compáralo con el comprobante antes de validar. Al validar, despacha el pedido como de costumbre.</p>
+                    <div id="comprobantes-web-lista" class="grid gap-3 lg:grid-cols-2"></div>
+                </section>
+
                 <!-- Métricas -->
                 <section class="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 mb-6" aria-label="Métricas de pagos y fidelización">
                     <div class="rounded-2xl sm:rounded-3xl bg-white/[0.03] backdrop-blur-xl ring-1 ring-white/10 p-3 sm:p-5">

@@ -305,6 +305,7 @@
                 <div><b>${pedidos.filter(enCurso).length}</b><span>En curso</span></div>
                 <div><b>${activas}</b><span>Garantías activas</span></div>
             </div>
+            <div data-ordenes-web></div>
             <div class="chips mt-4" role="tablist" aria-label="Filtrar pedidos" data-filtros></div>
             <div class="space-y-3 mt-4" data-lista></div>`;
         c.querySelector('[data-filtros]').replaceChildren(...filtros.map(([id, texto, n]) => {
@@ -326,8 +327,48 @@
                 ${pedidos.length ? '' : '<a href="#catalogo" class="btn-p mt-4"><i class="fa-solid fa-grip"></i> Ver catálogo</a>'}
             </div>`;
         } else zona.replaceChildren(...lista.map(tarjetaPedido));
+        pintarOrdenesWeb(c.querySelector('[data-ordenes-web]'), s.ordenes ?? []);
         c.querySelector('[data-recargar]').addEventListener('click', (e) => { e.currentTarget.querySelector('i').classList.add('fa-spin'); cargarHistorial(); });
         c.querySelector('[data-salir]').addEventListener('click', cerrarSesion);
+    }
+
+    // Órdenes web: estado del comprobante y botón para subirlo (si esta orden se creó en este dispositivo)
+    const ESTADO_ORDEN = {
+        ESPERANDO_PAGO: ['Esperando tu comprobante', 'fa-hourglass-half', 'aviso'],
+        COMPROBANTE_RECIBIDO: ['Comprobante en revisión', 'fa-magnifying-glass-dollar', 'curso'],
+        VALIDADO: ['Pago validado', 'fa-circle-check', 'bueno'],
+        RECHAZADO: ['Comprobante rechazado', 'fa-circle-xmark', 'malo'],
+        VENCIDO: ['Orden vencida', 'fa-hourglass-end', 'apagado'],
+    };
+    function pintarOrdenesWeb(caja, ordenes) {
+        if (!caja || !ordenes.length) return;
+        const locales = window.Carrito?.ordenes?.() ?? [];
+        caja.innerHTML = '<p class="titulo-sec !mt-6 !mb-3">Pagos desde la web</p><div class="space-y-3" data-lista-web></div>';
+        caja.querySelector('[data-lista-web]').replaceChildren(...ordenes.map((o, i) => {
+            const [texto, icono, tono] = ESTADO_ORDEN[o.estado] ?? [o.estado, 'fa-circle-info', 'curso'];
+            const local = locales.find((x) => x.codigo === o.codigo && x.secreto);
+            const puedeSubir = ['ESPERANDO_PAGO', 'RECHAZADO'].includes(o.estado);
+            const productos = (Array.isArray(o.items) ? o.items : []).map((x) => x.producto).filter(Boolean);
+            const t = document.createElement('article');
+            t.className = `pedido tono-${tono}`;
+            t.style.setProperty('--i', i);
+            t.innerHTML = `
+                <header>
+                    <div class="min-w-0">
+                        <p class="etiqueta !mb-1">Orden <span class="font-mono">${escaparHTML(o.codigo)}</span> · ${escaparHTML(fecha(o.created_at))}</p>
+                        <h3>${escaparHTML(productos.slice(0, 3).join(' + ') || 'Tu pedido')}${productos.length > 3 ? ` +${productos.length - 3}` : ''}</h3>
+                        <p class="text-sm mt-1"><b>${escaparHTML(window.DC.precioCOP(o.total_declarado))}</b> <span class="text-neutral-400">· ${escaparHTML(o.metodo ?? '')}</span></p>
+                    </div>
+                    <span class="estado"><i class="fa-solid ${icono}"></i> ${escaparHTML(texto)}</span>
+                </header>
+                ${o.estado === 'RECHAZADO' && o.nota_admin ? `<p class="alerta-red mt-3"><i class="fa-solid fa-circle-info"></i> ${escaparHTML(o.nota_admin)}</p>` : ''}
+                <div class="acciones">
+                    ${puedeSubir && local ? '<button type="button" class="btn-p" data-subir><i class="fa-solid fa-cloud-arrow-up"></i> Subir comprobante</button>' : ''}
+                    ${puedeSubir && !local ? `<a class="btn-s" target="_blank" rel="noopener" href="${escaparHTML(WA.enlace(WA.NUMERO_TIENDA, `Hola, envío el comprobante de mi orden ${o.codigo}.`))}"><i class="fa-brands fa-whatsapp"></i> Enviar comprobante por WhatsApp</a>` : ''}
+                </div>`;
+            t.querySelector('[data-subir]')?.addEventListener('click', () => window.Carrito.abrirOrden(local));
+            return t;
+        }));
     }
 
     async function cargarHistorial() {
@@ -342,6 +383,9 @@
             return;
         }
         s.pedidos = data ?? [];
+        // Órdenes pagadas desde la web (wo-030). Si el SQL aún no está aplicado, simplemente no se muestran
+        const web = await rpc('mis_ordenes_web', { p_token: sesion.token });
+        s.ordenes = web.error ? [] : (web.data ?? []);
         pintarHistorial();
     }
 
@@ -382,40 +426,76 @@
         if (r.mensaje === 'SESION_INVALIDA') { sesionVencida(); return; }
         if (r.mensaje === 'REVERIFICAR') { reverificar(p, boton); return; }
         if (!r.ok) { mostrarToast(r.mensaje, 'error'); return; }
-        mostrarAccesos(p, r.accesos);
+        mostrarAccesos(p, r.accesos, boton);
     }
 
-    function mostrarAccesos(p, accesos) {
-        const cuerpo = document.createElement('div');
-        cuerpo.innerHTML = `
-            <p class="text-sm text-neutral-400">Pedido <b class="font-mono text-white">#${escaparHTML(p.codigo)}</b> · ${escaparHTML(p.producto ?? '')}</p>
-            <div class="accesos-caja mt-4 oculto" data-caja>
-                <pre class="font-mono" data-texto></pre>
+    // Los accesos se abren DENTRO de la tarjeta del pedido: velados hasta tocarlos, copia por línea,
+    // cierre automático y texto exacto (textContent: * _ ~ y espacios tal cual, nunca como HTML).
+    function mostrarAccesos(p, accesos, boton) {
+        const tarjeta = boton?.closest('.pedido');
+        if (!tarjeta) return;
+        tarjeta.querySelector('.accesos-inline')?.cerrar?.();
+        const lineas = String(accesos ?? '').split(/\r?\n/).map((l) => l.trimEnd()).filter(Boolean);
+        const panel = document.createElement('div');
+        panel.className = 'accesos-inline';
+        panel.setAttribute('role', 'region');
+        panel.setAttribute('aria-label', `Accesos del pedido ${p.codigo}`);
+        panel.innerHTML = `
+            <div class="accesos-cabecera">
+                <span><i class="fa-solid fa-key"></i> Tus accesos</span>
+                <span class="text-[11px] text-neutral-400" data-cuenta></span>
+                <button type="button" class="icono-btn !w-9 !h-9" data-cerrar aria-label="Ocultar accesos"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="accesos-caja oculto" data-caja>
+                <div class="accesos-lineas" data-lineas></div>
                 <button type="button" class="velo" data-mostrar><i class="fa-solid fa-eye"></i> Toca para mostrar</button>
             </div>
             <div class="grid grid-cols-2 gap-2 mt-3">
                 <button type="button" class="btn-s" data-alternar><i class="fa-solid fa-eye"></i> Mostrar</button>
-                <button type="button" class="btn-p" data-copiar><i class="fa-solid fa-copy"></i> Copiar</button>
+                <button type="button" class="btn-p" data-copiar><i class="fa-solid fa-copy"></i> Copiar todo</button>
             </div>
-            <p class="text-xs text-neutral-500 mt-3 text-center" data-cuenta></p>
-            <div class="alerta-red mt-4"><i class="fa-solid fa-triangle-exclamation"></i> Para conservar tu garantía no cambies el correo ni la contraseña y usa solo tu perfil asignado. Este acceso quedó registrado por seguridad.</div>`;
-        // textContent: la clave se muestra EXACTA (con * _ ~ y espacios), nunca como HTML
-        cuerpo.querySelector('[data-texto]').textContent = accesos;
-        const cajaAcc = cuerpo.querySelector('[data-caja]');
-        const alternar = cuerpo.querySelector('[data-alternar]');
+            <p class="alerta-red mt-3"><i class="fa-solid fa-triangle-exclamation"></i> Para conservar tu garantía no cambies el correo ni la contraseña y usa solo tu perfil asignado. Esta consulta quedó registrada.</p>`;
+        panel.querySelector('[data-lineas]').replaceChildren(...lineas.map((l) => {
+            const fila = document.createElement('div');
+            fila.className = 'linea-acceso';
+            const pre = document.createElement('pre');
+            pre.className = 'font-mono';
+            pre.textContent = l;
+            const copiar = document.createElement('button');
+            copiar.type = 'button';
+            copiar.className = 'icono-btn !w-9 !h-9';
+            copiar.setAttribute('aria-label', 'Copiar esta línea');
+            copiar.innerHTML = '<i class="fa-regular fa-copy"></i>';
+            copiar.addEventListener('click', () => copiarTexto(l, 'Copiado'));
+            fila.append(pre, copiar);
+            return fila;
+        }));
+        const cajaAcc = panel.querySelector('[data-caja]');
+        const alternar = panel.querySelector('[data-alternar]');
         const visible = (si) => {
             cajaAcc.classList.toggle('oculto', !si);
             alternar.innerHTML = si ? '<i class="fa-solid fa-eye-slash"></i> Ocultar' : '<i class="fa-solid fa-eye"></i> Mostrar';
         };
-        cuerpo.querySelector('[data-mostrar]').addEventListener('click', () => visible(true));
+        panel.querySelector('[data-mostrar]').addEventListener('click', () => visible(true));
         alternar.addEventListener('click', () => visible(cajaAcc.classList.contains('oculto')));
-        cuerpo.querySelector('[data-copiar]').addEventListener('click', () => copiarTexto(accesos, 'Accesos copiados'));
+        panel.querySelector('[data-copiar]').addEventListener('click', () => copiarTexto(accesos, 'Accesos copiados'));
         let resto = OCULTAR_ACCESOS_SEG;
-        const cuenta = cuerpo.querySelector('[data-cuenta]');
-        const tic = () => { cuenta.innerHTML = `<i class="fa-regular fa-clock"></i> Se cerrará solo en ${resto}s`; };
+        const cuenta = panel.querySelector('[data-cuenta]');
+        const tic = () => { cuenta.innerHTML = `<i class="fa-regular fa-clock"></i> se ocultan en ${resto}s`; };
+        const cerrar = () => {
+            clearInterval(id);
+            panel.querySelectorAll('pre').forEach((x) => { x.textContent = ''; }); // la clave no queda en la página
+            panel.classList.add('cerrando');
+            setTimeout(() => panel.remove(), 260);
+            if (boton?.isConnected) boton.hidden = false;
+        };
+        panel.cerrar = cerrar;
         tic();
-        const id = setInterval(() => { resto -= 1; tic(); if (resto <= 0) cerrarHoja(); }, 1000);
-        abrirHoja('Tus accesos', cuerpo, { alCerrar: () => { clearInterval(id); cuerpo.querySelector('[data-texto]').textContent = ''; } });
+        const id = setInterval(() => { resto -= 1; if (!panel.isConnected) { clearInterval(id); return; } tic(); if (resto <= 0) cerrar(); }, 1000);
+        panel.querySelector('[data-cerrar]').addEventListener('click', cerrar);
+        boton.hidden = true;
+        tarjeta.querySelector('.acciones').before(panel);
+        panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 
     // Pasadas 24 h desde la última verificación se pide un código nuevo antes de mostrar claves

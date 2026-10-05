@@ -228,6 +228,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('form-metodo').addEventListener('submit', protegido(guardarMetodo, 'modal-metodo'));
     document.getElementById('btn-recargar-notif').addEventListener('click', cargarNotificaciones);
     document.getElementById('promo-buscar').addEventListener('input', pintarPromociones);
+    document.getElementById('comprobantes-web-recargar').addEventListener('click', cargarComprobantesWeb);
     document.getElementById('combo-regla-nueva').addEventListener('click', () => { reglasCombo.nueva = true; pintarReglasCombo(); document.querySelector('#combo-reglas-lista form:last-child [name="min"]')?.focus(); });
     document.getElementById('bot-buscar').addEventListener('input', pintarCatalogoBot);
     document.getElementById('form-pago').addEventListener('submit', protegido(guardarPago, 'modal-pago'));
@@ -1167,6 +1168,7 @@ function mostrarVista(vista) {
     ui.vista = vista;
     document.getElementById('vista-pedidos').hidden = vista !== 'pedidos';
     document.getElementById('vista-pagos-bot').hidden = vista !== 'pagos-bot';
+    if (vista === 'pagos-bot') cargarComprobantesWeb();
     document.getElementById('vista-productos').hidden = vista !== 'productos';
     if (vista === 'productos') { cargarPromociones(); cargarReglasCombo(); }
     pintarNavegacion();
@@ -1297,6 +1299,79 @@ async function alternarPromocion(p, activar, boton) {
     if (activar) promo.activas.set(p.id, data.vence_at);
     pintarPromociones();
     mostrarToast(activar ? `${p.nombre} está en la portada hasta la medianoche.` : `${p.nombre} salió de la portada.`, 'ok', 3500);
+}
+
+/* ==================== COMPROBANTES WEB (public.ordenes_web · wo-030) ==================== */
+
+const ESTADOS_ORDEN_WEB = {
+    ESPERANDO_PAGO: ['Sin comprobante', 'text-neutral-400'],
+    COMPROBANTE_RECIBIDO: ['Por validar', 'text-sky-300'],
+    RECHAZADO: ['Rechazado', 'text-red-300'],
+};
+
+async function cargarComprobantesWeb() {
+    const caja = document.getElementById('comprobantes-web-lista');
+    if (!caja) return;
+    const { data, error } = await supabaseClient.from('ordenes_web')
+        .select('codigo, whatsapp, nombre, items, total_declarado, metodo, red, cupon, estado, nota_admin, created_at, comprobantes_web(ruta, referencia, created_at)')
+        .in('estado', ['COMPROBANTE_RECIBIDO', 'ESPERANDO_PAGO', 'RECHAZADO'])
+        .order('created_at', { ascending: false })
+        .limit(40);
+    if (error) {
+        caja.innerHTML = filaVacia(['42P01', 'PGRST205', 'PGRST200'].includes(error.code)
+            ? 'Ejecuta supabase/wo-030-comprobantes.sql para recibir comprobantes desde el portal.'
+            : `No se pudieron leer las órdenes web: ${error.message}`, 'fa-triangle-exclamation');
+        return;
+    }
+    const porValidar = (data ?? []).filter((o) => o.estado === 'COMPROBANTE_RECIBIDO').length;
+    const cuenta = document.getElementById('comprobantes-web-cuenta');
+    cuenta.textContent = porValidar;
+    cuenta.hidden = porValidar === 0;
+    // Primero lo que tiene comprobante por validar
+    const lista = (data ?? []).sort((a, b) => Number(b.estado === 'COMPROBANTE_RECIBIDO') - Number(a.estado === 'COMPROBANTE_RECIBIDO'));
+    if (!lista.length) { caja.innerHTML = filaVacia('No hay comprobantes web pendientes.', 'fa-circle-check'); return; }
+    caja.replaceChildren(...lista.map(tarjetaOrdenWeb));
+}
+
+function tarjetaOrdenWeb(o) {
+    const [texto, color] = ESTADOS_ORDEN_WEB[o.estado] ?? [o.estado, 'text-neutral-300'];
+    const comprobantes = [...(o.comprobantes_web ?? [])].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    const t = document.createElement('article');
+    t.className = 'rounded-2xl bg-dcDarkBg/50 ring-1 ring-white/10 p-4 space-y-3';
+    t.innerHTML = `
+        <div class="flex flex-wrap items-start justify-between gap-2">
+            <div class="min-w-0">
+                <p class="font-mono text-sm font-bold">${escaparHTML(o.codigo)} <span class="text-neutral-500 font-sans font-normal">· ${escaparHTML(new Date(o.created_at).toLocaleString('es-CO', { timeZone: 'America/Bogota', dateStyle: 'short', timeStyle: 'short' }))}</span></p>
+                <p class="text-xs text-neutral-400 mt-0.5">+${escaparHTML(o.whatsapp)}${o.nombre ? ` · ${escaparHTML(o.nombre)}` : ''}</p>
+            </div>
+            <span class="text-xs font-bold ${color}">${escaparHTML(texto)}</span>
+        </div>
+        <ul class="text-xs text-neutral-300 space-y-0.5">${(o.items ?? []).map((i) => `<li>• ${escaparHTML(i.producto)}${i.variante ? ` – ${escaparHTML(i.variante)}` : ''}: ${escaparHTML(PlantillasWA.precioCOP(i.precio))}${i.combo ? ' <span class="text-dcRed">(combo)</span>' : ''}</li>`).join('')}</ul>
+        <p class="text-sm"><b>Total declarado: ${escaparHTML(PlantillasWA.precioCOP(o.total_declarado))}</b> <span class="text-neutral-400">· ${escaparHTML(o.metodo)}${o.red ? ` (${escaparHTML(o.red)})` : ''}${o.cupon ? ` · cupón ${escaparHTML(o.cupon)}` : ''}</span></p>
+        ${comprobantes.length ? `<div class="flex flex-wrap gap-2">${comprobantes.map((c, i) => `<button type="button" data-ver="${escaparHTML(c.ruta)}" class="min-h-[44px] px-3 rounded-xl bg-white/5 ring-1 ring-white/10 text-xs font-bold hover:ring-dcRed/50"><i class="fa-solid fa-file-image mr-1"></i> Comprobante ${comprobantes.length - i}${c.referencia ? ` · ref ${escaparHTML(c.referencia)}` : ''}</button>`).join('')}</div>` : '<p class="text-xs text-neutral-500">El cliente aún no sube el comprobante.</p>'}
+        ${o.estado === 'RECHAZADO' && o.nota_admin ? `<p class="text-xs text-red-300">Motivo enviado: ${escaparHTML(o.nota_admin)}</p>` : ''}
+        ${o.estado === 'COMPROBANTE_RECIBIDO' ? `
+        <div class="flex flex-wrap gap-2">
+            <input data-nota maxlength="300" placeholder="Motivo si lo rechazas (el cliente lo verá)" class="flex-1 min-w-[12rem] min-h-[44px] bg-dcDarkBg/70 ring-1 ring-white/10 rounded-xl px-3 text-base sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-dcRed/60">
+            <button type="button" data-rechazar class="min-h-[44px] px-4 rounded-xl bg-white/5 ring-1 ring-white/10 text-xs font-bold text-red-300">Rechazar</button>
+            <button type="button" data-validar class="min-h-[44px] px-4 rounded-xl bg-emerald-600 text-white text-xs font-bold"><i class="fa-solid fa-check mr-1"></i> Validar</button>
+        </div>` : ''}`;
+    t.querySelectorAll('[data-ver]').forEach((b) => b.addEventListener('click', async () => {
+        // Enlace firmado de 5 minutos: el bucket es privado
+        const { data, error } = await supabaseClient.storage.from('comprobantes').createSignedUrl(b.dataset.ver, 300);
+        if (error || !data?.signedUrl) { mostrarToast('No se pudo abrir el comprobante.', 'error'); return; }
+        window.open(data.signedUrl, '_blank', 'noopener');
+    }));
+    const resolver = async (aprobar) => {
+        const nota = t.querySelector('[data-nota]')?.value.trim() ?? '';
+        const { data, error } = await supabaseClient.rpc('resolver_orden_web', { p_codigo: o.codigo, p_aprobar: aprobar, p_nota: nota || null }).maybeSingle();
+        if (error || !data?.ok) { mostrarToast(data?.mensaje ?? 'No se pudo actualizar la orden.', 'error', 5000); Sonidos.error(); return; }
+        mostrarToast(data.mensaje, 'ok', 5000);
+        cargarComprobantesWeb();
+    };
+    t.querySelector('[data-validar]')?.addEventListener('click', () => resolver(true));
+    t.querySelector('[data-rechazar]')?.addEventListener('click', () => resolver(false));
+    return t;
 }
 
 /* ==================== DESCUENTO POR COMBO (public.reglas_combo · wo-029) ==================== */

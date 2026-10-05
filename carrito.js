@@ -1,12 +1,17 @@
 // carrito.js — Carrito, armado de combos y pago paso a paso del portal (cliente.html).
-// El carrito vive en el dispositivo (sin datos sensibles). El pago se confirma hoy por WhatsApp con el
-// pedido completo ya escrito; el bot entrega los datos del método elegido y recibe el comprobante.
+// El carrito vive en el dispositivo (sin datos sensibles). Dos formas de cerrar la compra:
+//  · En la web (WO-030): crea la orden en Supabase, muestra los datos del método y el cliente sube su
+//    comprobante (bucket privado, ruta de un solo uso). El equipo lo valida en el panel.
+//  · Por WhatsApp: abre el chat con el pedido completo ya escrito (el bot da los datos de pago).
 // Descuento por combo: reglas de supabase/wo-029-combos.sql (el cupón no se acumula con el combo).
 
 (() => {
     const { WA, abrirHoja, cerrarHoja, precioCOP, leerLocal, guardarLocal } = window.DC;
     const CLAVE = 'dc_cliente_carrito';
     const CLAVE_DATOS = 'dc_cliente_datos';
+    const CLAVE_ORDENES = 'dc_cliente_ordenes'; // [{ codigo, secreto, total, pago, items, estado, creado }] solo en este dispositivo
+    const TIPOS_ARCHIVO = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'application/pdf': 'pdf' };
+    const MAX_BYTES = 5 * 1024 * 1024;
     const DIGITALES = ['streaming', 'licencias', 'pines', 'recargas'];
 
     let lineas = leerLocal(CLAVE, []);   // [{ uid, id, nombre, variante, precio, imagen, tipo, combo }]
@@ -164,9 +169,10 @@
             ${!metodos.length ? '<p class="tarjeta text-sm text-neutral-400">Te enviamos las opciones de pago disponibles por WhatsApp.</p>' : ''}
             ${pago.metodo?.categoria === 'cripto' && pago.metodo.red !== 'BINANCE_PAY' ? `<p class="alerta-red mt-3"><i class="fa-solid fa-triangle-exclamation"></i> Envía <b>solo ${escaparHTML(pago.metodo.moneda)} por la red ${escaparHTML(pago.metodo.red)}</b>. Otra red = pérdida total de los fondos. El monto exacto en ${escaparHTML(pago.metodo.moneda)} te lo da el bot con la tasa del día.</p>` : ''}
             ${totales()}
-            <div class="tarjeta mt-4 text-sm text-neutral-400"><i class="fa-brands fa-whatsapp text-emerald-400"></i> Al confirmar se abre WhatsApp con tu pedido listo: te damos los datos de pago y nos envías ahí el comprobante (o el hash si pagas en cripto).</div>
-            <div class="flex gap-2 mt-4"><button type="button" class="btn-s" data-atras><i class="fa-solid fa-arrow-left"></i></button>
-            <button type="button" class="btn-p btn-w flex-1" data-confirmar><i class="fa-brands fa-whatsapp"></i> Confirmar pedido</button></div>`;
+            ${window.DC.sb && pago.metodo ? `<button type="button" class="btn-p w-full mt-5" data-pagar-web><i class="fa-solid fa-cloud-arrow-up"></i> Pagar y subir el comprobante aquí</button>
+            <p class="text-[11px] text-neutral-500 text-center mt-2">Te damos los datos de pago y subes la captura sin salir de la página.</p>` : ''}
+            <div class="flex gap-2 mt-3"><button type="button" class="btn-s" data-atras aria-label="Atrás"><i class="fa-solid fa-arrow-left"></i></button>
+            <button type="button" class="${window.DC.sb && pago.metodo ? 'btn-s' : 'btn-p btn-w'} flex-1" data-confirmar><i class="fa-brands fa-whatsapp ${window.DC.sb && pago.metodo ? 'text-emerald-400' : ''}"></i> Confirmar por WhatsApp</button></div>`;
         zona.querySelectorAll('[data-cat]').forEach((b) => b.addEventListener('click', () => { pago.categoria = b.dataset.cat; abrirCarrito(); }));
         zona.querySelector('[data-metodos]').replaceChildren(...lista.map((m) => {
             const t = WA.tipoPago(m.tipo) ?? { icono: 'fa-solid fa-wallet', color: '#64748B', nombre: m.tipo };
@@ -182,6 +188,146 @@
         }));
         zona.querySelector('[data-atras]').addEventListener('click', () => irPaso(2));
         zona.querySelector('[data-confirmar]').addEventListener('click', confirmar);
+        zona.querySelector('[data-pagar-web]')?.addEventListener('click', (e) => pagarWeb(e.currentTarget));
+    }
+
+    /* ---------- Pago en la web + comprobante (supabase/wo-030-comprobantes.sql) ---------- */
+    const leerOrdenes = () => leerLocal(CLAVE_ORDENES, []);
+    function guardarOrden(orden) {
+        guardarLocal(CLAVE_ORDENES, [orden, ...leerOrdenes().filter((o) => o.codigo !== orden.codigo)].slice(0, 10));
+    }
+
+    async function pagarWeb(boton) {
+        const datos = leerLocal(CLAVE_DATOS, {});
+        const m = pago.metodo;
+        boton.disabled = true;
+        boton.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Creando tu orden…';
+        const total = aPagar();
+        const items = lineas.map((l) => ({ producto: l.nombre, variante: l.variante, precio: l.precio, combo: l.combo ?? '' }));
+        const { data, error } = await window.DC.sb.rpc('crear_orden_web', {
+            p_whatsapp: datos.whatsapp, p_nombre: datos.nombre ?? null, p_items: items, p_total: total,
+            p_metodo: m.tipo, p_red: m.red ?? null, p_cupon: cupon?.codigo ?? null,
+        });
+        const r = data?.[0];
+        if (error || !r?.ok) {
+            boton.disabled = false;
+            boton.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Pagar y subir el comprobante aquí';
+            mostrarToast(r?.mensaje ?? (error?.code === 'PGRST202' ? 'El pago en la web aún no está activo: confirma por WhatsApp.' : 'No pudimos crear la orden. Intenta de nuevo o confirma por WhatsApp.'), 'error', 6000);
+            return;
+        }
+        const orden = { codigo: r.codigo, secreto: r.secreto, total, pago: r.pago, items, estado: 'ESPERANDO_PAGO', creado: new Date().toISOString() };
+        guardarOrden(orden);
+        lineas = [];
+        cupon = null;
+        pago.paso = 1;
+        guardar();
+        navigator.vibrate?.(20);
+        abrirOrden(orden);
+    }
+
+    // Hoja de la orden: datos de pago del método elegido + subida del comprobante
+    function abrirOrden(orden) {
+        const pg = orden.pago ?? {};
+        const cripto = pg.categoria === 'cripto';
+        const monto = cripto ? WA.montoCripto(orden.total, pg) : null;
+        const copiable = (etiqueta, valor) => (valor ? `<div class="dato-pago"><span><small>${escaparHTML(etiqueta)}</small><b class="font-mono">${escaparHTML(valor)}</b></span>
+            <button type="button" class="icono-btn" data-copiar="${escaparHTML(valor)}" aria-label="Copiar ${escaparHTML(etiqueta)}"><i class="fa-regular fa-copy"></i></button></div>` : '');
+        const cuerpo = document.createElement('div');
+        cuerpo.innerHTML = `
+            <div class="orden-cabecera">
+                <span><small>Tu orden</small><b class="font-mono">${escaparHTML(orden.codigo)}</b></span>
+                <span class="text-right"><small>Total a pagar</small><b>${precioCOP(orden.total)}</b></span>
+            </div>
+            <p class="etiqueta mt-5">1 · Paga con ${escaparHTML(pg.nombre ?? pg.tipo ?? 'el método elegido')}</p>
+            <div class="space-y-2">
+                ${cripto ? copiable(`Monto exacto en ${pg.moneda}`, monto !== null ? String(monto) : '') : ''}
+                ${cripto && monto === null ? '<p class="alerta-red">La tasa de hoy no está publicada: un asesor te confirma el monto en cripto antes de pagar.</p>' : ''}
+                ${copiable(cripto ? (pg.red === 'BINANCE_PAY' ? 'Pay ID / correo de Binance' : `Dirección ${pg.moneda} · red ${pg.red}`) : 'Número o cuenta', pg.numero_cuenta)}
+                ${copiable('Memo / tag (obligatorio)', pg.memo)}
+                ${pg.titular ? `<p class="text-xs text-neutral-400"><i class="fa-solid fa-user-check text-dcRed"></i> Titular: <b class="text-white">${escaparHTML(pg.titular)}</b></p>` : ''}
+                ${pg.url_pago ? `<a class="btn-s w-full" href="${escaparHTML(pg.url_pago)}" target="_blank" rel="noopener"><i class="fa-solid fa-arrow-up-right-from-square"></i> Abrir enlace de pago</a>` : ''}
+                ${pg.qr_url ? `<img src="${escaparHTML(pg.qr_url)}" alt="Código QR de pago" class="qr-pago">` : ''}
+                ${pg.instrucciones ? `<p class="text-xs text-neutral-400">${escaparHTML(pg.instrucciones)}</p>` : ''}
+                ${cripto && pg.red !== 'BINANCE_PAY' ? `<p class="alerta-red"><i class="fa-solid fa-triangle-exclamation"></i> Envía <b>solo ${escaparHTML(pg.moneda)} por la red ${escaparHTML(pg.red)}</b>. Otra red = pérdida total de los fondos.</p>` : ''}
+            </div>
+            <p class="etiqueta mt-6">2 · Sube tu comprobante</p>
+            <form data-subir novalidate>
+                <label class="zona-archivo" data-zona>
+                    <input type="file" name="archivo" accept="image/jpeg,image/png,image/webp,application/pdf" class="sr-only">
+                    <span data-vista-previa><i class="fa-solid fa-cloud-arrow-up"></i><b>Toca para elegir la captura o el PDF</b><small>JPG, PNG, WEBP o PDF · máximo 5 MB</small></span>
+                </label>
+                <label class="block mt-3"><span class="etiqueta">${cripto ? 'Hash de la transacción (TXID)' : 'Número de referencia (opcional)'}</span>
+                    <input class="campo font-mono" name="referencia" maxlength="120" autocomplete="off" spellcheck="false" placeholder="${cripto ? '0x… / hash' : 'Ej: M1234567'}"></label>
+                <p class="text-xs text-red-300 min-h-[1rem] mt-2" data-error></p>
+                <button type="submit" class="btn-p w-full mt-1" data-enviar disabled><i class="fa-solid fa-paper-plane"></i> Enviar comprobante</button>
+            </form>
+            <p class="text-[11px] text-neutral-500 text-center mt-3"><i class="fa-solid fa-lock"></i> El archivo va a un espacio privado: solo lo ve el equipo que valida tu pago.</p>`;
+        cuerpo.querySelectorAll('[data-copiar]').forEach((b) => b.addEventListener('click', () => copiarTexto(b.dataset.copiar)));
+        const form = cuerpo.querySelector('[data-subir]');
+        const error = cuerpo.querySelector('[data-error]');
+        const enviar = cuerpo.querySelector('[data-enviar]');
+        let archivo = null;
+        let vista = null;
+        form.archivo.addEventListener('change', () => {
+            const f = form.archivo.files?.[0];
+            error.textContent = '';
+            if (vista) URL.revokeObjectURL(vista);
+            archivo = null;
+            enviar.disabled = true;
+            if (!f) return;
+            if (!TIPOS_ARCHIVO[f.type]) { error.textContent = 'Sube una foto (JPG, PNG, WEBP) o un PDF.'; return; }
+            if (f.size > MAX_BYTES) { error.textContent = 'El archivo pesa más de 5 MB. Toma una captura más liviana.'; return; }
+            archivo = f;
+            enviar.disabled = false;
+            const zona = cuerpo.querySelector('[data-vista-previa]');
+            cuerpo.querySelector('[data-zona]').classList.add('con-archivo');
+            if (f.type === 'application/pdf') zona.innerHTML = `<i class="fa-solid fa-file-pdf"></i><b>${escaparHTML(f.name)}</b><small>Toca para cambiarlo</small>`;
+            else { vista = URL.createObjectURL(f); zona.innerHTML = `<img src="${vista}" alt="Vista previa del comprobante"><small>Toca para cambiarlo</small>`; }
+        });
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!archivo) return;
+            enviar.disabled = true;
+            enviar.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Subiendo…';
+            const r = await subirComprobante(orden, archivo, form.referencia.value.trim());
+            if (!r.ok) {
+                error.textContent = r.mensaje;
+                enviar.disabled = false;
+                enviar.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Enviar comprobante';
+                return;
+            }
+            if (vista) URL.revokeObjectURL(vista);
+            guardarOrden({ ...orden, estado: 'COMPROBANTE_RECIBIDO' });
+            ordenRecibida(orden);
+        });
+        abrirHoja('Paga tu pedido', cuerpo);
+    }
+
+    async function subirComprobante(orden, archivo, referencia) {
+        const sb = window.DC.sb;
+        const { data: a } = await sb.rpc('autorizar_subida', { p_codigo: orden.codigo, p_secreto: orden.secreto, p_extension: TIPOS_ARCHIVO[archivo.type] });
+        if (!a?.[0]?.ok) return { ok: false, mensaje: a?.[0]?.mensaje ?? 'No pudimos preparar la subida. Intenta de nuevo.' };
+        const ruta = a[0].ruta;
+        const { error } = await sb.storage.from('comprobantes').upload(ruta, archivo, { contentType: archivo.type, upsert: false });
+        if (error) return { ok: false, mensaje: 'No se pudo subir el archivo. Revisa tu conexión e intenta de nuevo.' };
+        const { data: c } = await sb.rpc('registrar_comprobante', { p_codigo: orden.codigo, p_secreto: orden.secreto, p_ruta: ruta, p_referencia: referencia || null });
+        return c?.[0] ?? { ok: false, mensaje: 'No pudimos registrar el comprobante. Intenta de nuevo.' };
+    }
+
+    function ordenRecibida(orden) {
+        const aviso = `Hola DC Technology, acabo de subir el comprobante de mi orden ${orden.codigo} (${precioCOP(orden.total)}).`;
+        abrirHoja('¡Comprobante recibido!', `
+            <div class="text-center py-4">
+                <div class="exito-check" aria-hidden="true"><i class="fa-solid fa-check"></i></div>
+                <p class="font-tech text-xl font-black mt-4">Orden ${escaparHTML(orden.codigo)}</p>
+                <p class="text-sm text-neutral-400 mt-2">Validamos tu pago y te avisamos por WhatsApp. Al validarlo, tu pedido sale en máximo ${WA.ENTREGA_MAX_MIN} minutos dentro del horario.</p>
+                <div class="grid gap-2 mt-5">
+                    <a href="#cuenta" class="btn-p" data-ir-pedidos><i class="fa-solid fa-receipt"></i> Seguir en Mis pedidos</a>
+                    <a class="btn-s" target="_blank" rel="noopener" href="${escaparHTML(WA.enlace(WA.NUMERO_TIENDA, aviso))}"><i class="fa-brands fa-whatsapp text-emerald-400"></i> Avisar por WhatsApp (opcional)</a>
+                </div>
+            </div>`);
+        document.querySelector('#hoja [data-ir-pedidos]')?.addEventListener('click', cerrarHoja);
+        mostrarToast('Comprobante enviado ✅', 'ok');
     }
 
     // Mensaje de pedido completo (mismo formato que entiende el bot) y WhatsApp
@@ -313,6 +459,6 @@
     document.addEventListener('dc:reglas-combo', () => pintarCombo());
     document.addEventListener('dc:vista', (e) => { if (e.detail === 'combos') pintarCombo(); });
 
-    window.Carrito = { agregar, abrir: abrirCarrito, lineas: () => lineas, combos, aPagar, pctCombo };
+    window.Carrito = { agregar, abrir: abrirCarrito, lineas: () => lineas, combos, aPagar, pctCombo, abrirOrden, ordenes: leerOrdenes };
     window.Combos = { iniciarCon };
 })();
