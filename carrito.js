@@ -132,11 +132,21 @@
             abrirCarrito();
             mostrarToast(`${data.mensaje ?? 'Cupón aplicado.'} Se confirma al validar tu pago.`, 'ok', 4000);
         });
-        zona.querySelector('[data-seguir]').addEventListener('click', () => irPaso(2));
+        zona.querySelector('[data-seguir]').addEventListener('click', () => irPaso(datosCliente() ? 3 : 2));
     }
 
-    function pasoDatos(zona) {
+    // Datos del cliente: se piden una sola vez. Primero lo guardado en este equipo; si no hay,
+    // el número con el que inició sesión en "Mis pedidos". null = hay que pedirlos.
+    function datosCliente() {
         const datos = leerLocal(CLAVE_DATOS, {});
+        if (WA.normalizarNumero(datos.whatsapp ?? '')) return datos;
+        const numero = window.Sesion?.numero?.();
+        return numero && WA.normalizarNumero(numero) ? { nombre: datos.nombre ?? '', whatsapp: numero } : null;
+    }
+    const enmascarar = (n) => `••• ${String(n).replace(/\D/g, '').slice(-4)}`;
+
+    function pasoDatos(zona) {
+        const datos = datosCliente() ?? leerLocal(CLAVE_DATOS, {});
         zona.innerHTML = `<p class="text-sm text-neutral-400">Compra como invitado: solo necesitamos tu WhatsApp para entregarte el pedido.</p>
             <form class="space-y-3 mt-4" data-form novalidate>
                 <label class="block"><span class="etiqueta">Tu nombre</span><input class="campo" name="nombre" autocomplete="name" maxlength="40" value="${escaparHTML(datos.nombre ?? '')}"></label>
@@ -163,7 +173,11 @@
         const lista = metodos.filter((m) => m.categoria === pago.categoria);
         if (!lista.some((m) => m.tipo === pago.metodo?.tipo && m.red === pago.metodo?.red)) pago.metodo = lista[0] ?? null;
 
+        const cliente = datosCliente();
         zona.innerHTML = `
+            ${cliente ? `<div class="flex items-center justify-between gap-3 mb-3 text-xs text-neutral-400" data-para>
+                <span><i class="fa-solid fa-user-check text-emerald-400 mr-1"></i> Pedido para <b class="text-neutral-200">${escaparHTML(cliente.nombre || 'ti')}</b> · WhatsApp ${escaparHTML(enmascarar(cliente.whatsapp))}</span>
+                <button type="button" class="underline min-h-[44px]" data-cambiar-datos>Cambiar</button></div>` : ''}
             ${cats.length > 1 ? `<div class="chips mb-3" role="tablist">${cats.map(([cat, titulo]) => `<button type="button" class="chip" role="tab" data-cat="${cat}" aria-selected="${cat === pago.categoria}"><i class="fa-solid ${cat === 'cripto' ? 'fa-coins' : 'fa-wallet'} mr-1"></i>${escaparHTML(cat === 'cripto' ? 'Cripto' : 'Pagos locales')}</button>`).join('')}</div>` : ''}
             <div class="space-y-2" data-metodos></div>
             ${!metodos.length ? '<p class="tarjeta text-sm text-neutral-400">Te enviamos las opciones de pago disponibles por WhatsApp.</p>' : ''}
@@ -186,7 +200,8 @@
             b.addEventListener('click', () => { pago.metodo = m; abrirCarrito(); });
             return b;
         }));
-        zona.querySelector('[data-atras]').addEventListener('click', () => irPaso(2));
+        zona.querySelector('[data-atras]').addEventListener('click', () => irPaso(datosCliente() ? 1 : 2));
+        zona.querySelector('[data-cambiar-datos]')?.addEventListener('click', () => irPaso(2));
         zona.querySelector('[data-confirmar]').addEventListener('click', confirmar);
         zona.querySelector('[data-pagar-web]')?.addEventListener('click', (e) => pagarWeb(e.currentTarget));
     }
@@ -198,7 +213,7 @@
     }
 
     async function pagarWeb(boton) {
-        const datos = leerLocal(CLAVE_DATOS, {});
+        const datos = datosCliente() ?? leerLocal(CLAVE_DATOS, {});
         const m = pago.metodo;
         boton.disabled = true;
         boton.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Creando tu orden…';
@@ -344,7 +359,7 @@
 
     // Mensaje de pedido completo (mismo formato que entiende el bot) y WhatsApp
     function confirmar() {
-        const datos = leerLocal(CLAVE_DATOS, {});
+        const datos = datosCliente() ?? leerLocal(CLAVE_DATOS, {});
         const m = pago.metodo;
         const metodo = !m ? 'Por definir' : m.categoria === 'cripto' ? `${m.moneda}${m.red && m.red !== 'BINANCE_PAY' ? ` (red ${m.red})` : ' (Binance Pay)'}` : (m.nombre || WA.tipoPago(m.tipo)?.nombre || m.tipo);
         const texto = [

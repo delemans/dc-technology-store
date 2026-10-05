@@ -538,7 +538,7 @@
 
     /* ==================== Arranque ==================== */
 
-    window.Sesion = { activa: () => Boolean(leerSesion()), token: () => leerSesion()?.token ?? null, cargarHistorial, cerrarSesion };
+    window.Sesion = { activa: () => Boolean(leerSesion()), token: () => leerSesion()?.token ?? null, numero: () => leerSesion()?.numero ?? null, cargarHistorial, cerrarSesion };
 
     document.addEventListener('DOMContentLoaded', () => {
         cargarHistorial();
