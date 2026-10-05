@@ -365,6 +365,8 @@ function evaluarCotizacion() {
             `Por ahora no tenemos disponible *${t.producto}* 😔 Escríbeme y te muestro otra opción.`);
     }
     const costo = precioDe(texto);
+    const vinculo = $('Vincular al panel').first().json ?? {};
+    const enPanel = vinculo.ok === true;
     const margen = costo !== null && t.precio_venta ? t.precio_venta - costo : null;
     return [{ json: { costo, texto_admin: [
         `💸 *Pagar al proveedor · #${t.referencia}*`,
@@ -376,6 +378,7 @@ function evaluarCotizacion() {
         '⚠️ Antes de pagar, confirma en el panel que el cliente YA pagó.',
         `Luego envíame aquí la FOTO o PDF del comprobante con el texto: *#pago ${t.referencia}*`,
         `Para cancelar: *#cancelar ${t.referencia}*`,
+        enPanel ? '📋 Ya está en el panel: valida ahí el pago del cliente.' : `⚠️ No quedó en el panel (${String(vinculo.mensaje ?? vinculo.error?.message ?? 'sin respuesta').slice(0, 160)}). Valida el pago del cliente a mano.`,
     ].join('\n') } }];
 }
 
@@ -476,7 +479,9 @@ function mensajeEntrega() {
         });
         return vacia ? null : r;
     }).filter((l) => l !== null).join('\n').replace(/\n{3,}/g, '\n\n').trim();
-    return [{ json: { numero: t.cliente, texto, clave_final: String(c.clave).slice(-4), confianza: c.confianza } }];
+    // clave_panel: lo que queda en compras_proveedor.clave_serial (lo que ve el panel para garantías)
+    const clavePanel = [c.usuario, c.clave].filter(Boolean).join(' / ') + (c.perfil ? ` · perfil ${c.perfil}` : '') + (c.pin ? ` · PIN ${c.pin}` : '');
+    return [{ json: { numero: t.cliente, texto, clave_final: String(c.clave).slice(-4), confianza: c.confianza, clave_panel: clavePanel } }];
 }
 
 // C9 · Aviso al administrador tras entregar
@@ -485,7 +490,12 @@ function avisoEntrega() {
     const cfg = $('Config bot').first().json;
     const aviso = soloDigitos(cfg.numero_aviso_admin);
     const e = $('Mensaje de entrega').first().json;
-    return aviso ? [{ json: { numero: aviso, texto: `✅ *Entregado #${t.referencia}* · ${t.producto}\nCliente: +${t.cliente} · clave terminada en …${e.clave_final}` } }] : [];
+    const panel = $('Marcar entregado en el panel').first().json ?? {};
+    return aviso ? [{ json: { numero: aviso, texto: [
+        `✅ *Entregado #${t.referencia}* · ${t.producto}`,
+        `Cliente: +${t.cliente} · clave terminada en …${e.clave_final}`,
+        panel.ok === true ? '🛡️ Registrado en el panel con garantía activa.' : `⚠️ No se registró en el panel (${String(panel.mensaje ?? 'sin respuesta').slice(0, 160)}): márcalo entregado a mano para activar la garantía.`,
+    ].join('\n') } }] : [];
 }
 
 // C10 · Cierre por vencimiento, cancelación, agotado o falla técnica
@@ -523,6 +533,10 @@ function enrutarEvento() {
         if (!t) return avisar(msg.numero, `No encuentro un pedido abierto *#${msg.referencia}*.`);
         if (msg.accion === 'pago' && t.esperando !== 'PAGO_ADMIN') return avisar(msg.numero, `*#${t.referencia}* no está esperando tu pago (estado: ${t.estado}).`);
         if (msg.accion === 'pago' && !msg.conMedia) return avisar(msg.numero, `Envía la FOTO o PDF del comprobante con el texto *#pago ${t.referencia}*.`);
+        // Nunca se le paga al proveedor un pedido que el cliente aún no ha pagado (estado de la compra en el panel)
+        if (msg.accion === 'pago' && t.estado_compra === 'PENDIENTE_PAGO') {
+            return avisar(msg.numero, `⚠️ El cliente de *#${t.referencia}* aún no ha pagado. Valida su pago en el panel (Pagos por verificar) y vuelve a enviarme la foto con *#pago ${t.referencia}*.`);
+        }
         if (msg.accion === 'aprobar' && t.esperando !== 'APROBACION') return avisar(msg.numero, `*#${t.referencia}* no está esperando aprobación (estado: ${t.estado}).`);
         if (!t.resume_url) return avisar(msg.numero, `*#${t.referencia}* no tiene una espera activa. Revísalo a mano.`);
         return [{ json: { accion: 'reanudar', url: t.resume_url, cuerpo: { tipo: msg.accion, texto: msg.texto, wamid: msg.wamid } } }];
@@ -659,6 +673,17 @@ nodo('Enviar respuesta', 'n8n-nodes-base.httpRequest', 4.2, [2000, 0], evolution
 
 /* ---------- C) Triangulación ---------- */
 const Y = 1300; // fila de la triangulación en el lienzo
+// RPC de supabase/wo-026-triangulacion-panel.sql (credencial de servidor)
+const rpcPanel = (rpc, cuerpo) => ({
+    method: 'POST',
+    url: `={{ $('Config bot').first().json.supabase_url }}/rest/v1/rpc/${rpc}`,
+    authentication: 'predefinedCredentialType',
+    nodeCredentialType: 'supabaseApi',
+    sendBody: true,
+    specifyBody: 'json',
+    jsonBody: cuerpo,
+    options: { timeout: 15000 },
+});
 const supabaseTabla = (metodo, filtro, cuerpo) => ({
     method: metodo,
     url: `={{ $('Config bot').first().json.supabase_url }}/rest/v1/triangulaciones${filtro}`,
@@ -688,6 +713,9 @@ const terminal = { onError: 'continueErrorOutput' };
 nodoCodigo('Crear triangulación', [2000, Y], crearTriangulacion, { conUtilidades: true });
 nodo('Registrar triangulación', 'n8n-nodes-base.httpRequest', 4.2, [2220, Y], supabaseTabla('POST', '',
     "={{ JSON.stringify({ referencia: $json.referencia, cliente: $json.cliente, cliente_nombre: $json.cliente_nombre, producto: $json.producto, variante: $json.variante, precio_venta: $json.precio_venta, estado: 'COTIZANDO', esperando: 'COTIZACION', resume_url: $execution.resumeUrl }) }}"));
+nodo('Vincular al panel', 'n8n-nodes-base.httpRequest', 4.2, [2330, Y - 160],
+    rpcPanel('vincular_triangulacion', `={{ JSON.stringify({ p_referencia: ${REF} }) }}`),
+    { onError: 'continueRegularOutput', alwaysOutputData: true });
 nodo('Cotizar al proveedor', 'n8n-nodes-base.httpRequest', 4.2, [2440, Y], enviarA(PROVEEDOR, "$('Crear triangulación').first().json.texto_proveedor"), terminal);
 nodo('Guardar cotización enviada', 'n8n-nodes-base.httpRequest', 4.2, [2660, Y], supabaseTabla('PATCH', porReferencia,
     '={{ JSON.stringify({ wamid_cotizacion: $json.key?.id ?? null }) }}'));
@@ -710,6 +738,9 @@ nodo('Reenviar pago al proveedor', 'n8n-nodes-base.httpRequest', 4.2, [4420, Y],
 }, terminal);
 nodo('Guardar pago enviado', 'n8n-nodes-base.httpRequest', 4.2, [4640, Y], supabaseTabla('PATCH', porReferencia,
     "={{ JSON.stringify({ wamid_pago: $json.key?.id ?? null, estado: 'ESPERANDO_CREDENCIALES', esperando: 'CREDENCIALES' }) }}"));
+nodo('Marcar pedido realizado', 'n8n-nodes-base.httpRequest', 4.2, [4750, Y - 160],
+    rpcPanel('avanzar_compra_triangulada', `={{ JSON.stringify({ p_referencia: ${REF}, p_estado: 'PEDIDO_REALIZADO', p_costo: $('Evaluar cotización').first().json.costo }) }}`),
+    { onError: 'continueRegularOutput', alwaysOutputData: true });
 nodo('Esperar credenciales', 'n8n-nodes-base.wait', 1.1, [4860, Y], esperar(HORAS_CREDENCIALES), { webhookId: uuid() });
 nodoCodigo('Preparar extracción', [5080, Y], prepararExtraccion, { conUtilidades: true }, terminal);
 nodo('Extraer credenciales', '@n8n/n8n-nodes-langchain.chainLlm', 1.5, [5300, Y], { promptType: 'define', text: '={{ $json.prompt }}' }, terminal);
@@ -733,6 +764,9 @@ nodo('Enviar accesos al cliente', 'n8n-nodes-base.httpRequest', 4.2, [7280, Y], 
 nodo('Guardar entrega', 'n8n-nodes-base.httpRequest', 4.2, [7500, Y], supabaseTabla('PATCH', porReferencia,
     "={{ JSON.stringify({ estado: 'ENTREGADO', esperando: null, resume_url: null, credencial_final: $('Mensaje de entrega').first().json.clave_final, confianza: $('Mensaje de entrega').first().json.confianza }) }}"),
 { onError: 'continueRegularOutput' });
+nodo('Marcar entregado en el panel', 'n8n-nodes-base.httpRequest', 4.2, [7610, Y - 160],
+    rpcPanel('avanzar_compra_triangulada', `={{ JSON.stringify({ p_referencia: ${REF}, p_estado: 'ENTREGADO', p_clave: $('Mensaje de entrega').first().json.clave_panel }) }}`),
+    { onError: 'continueRegularOutput', alwaysOutputData: true, executeOnce: true });
 nodoCodigo('Aviso de entrega', [7720, Y], avisoEntrega, { conUtilidades: true });
 nodoCodigo('Cerrar triangulación', [4200, Y + 500], cerrarTriangulacion, { conUtilidades: true });
 nodo('Guardar cierre', 'n8n-nodes-base.httpRequest', 4.2, [4420, Y + 500], supabaseTabla('PATCH', '?referencia=eq.{{ $json.referencia }}',
@@ -742,7 +776,7 @@ nodo('Enviar aviso triangulación', 'n8n-nodes-base.httpRequest', 4.2, [4860, Y 
 
 // Enrutador: mensajes del proveedor y comandos del admin → la espera del pedido correcto
 nodo('Pedidos abiertos', 'n8n-nodes-base.httpRequest', 4.2, [900, -520],
-    supabaseTabla('GET', '?estado=not.in.(ENTREGADO,CANCELADO,VENCIDO,AGOTADO)&select=referencia,estado,esperando,resume_url,wamid_cotizacion,wamid_pago&order=id.desc&limit=50'),
+    rpcPanel('triangulaciones_abiertas', '={{ JSON.stringify({}) }}'),
     { alwaysOutputData: true, executeOnce: true });
 nodoCodigo('Enrutar evento', [1120, -520], enrutarEvento, { conUtilidades: true });
 nodo('Acción', 'n8n-nodes-base.switch', 3.2, [1340, -520], {
@@ -800,7 +834,7 @@ nodo('Leeme', 'n8n-nodes-base.stickyNote', 1, [-420, -360], {
         '',
         '**3. Evolution API → Webhook:** URL de producción de "Webhook Evolution", evento `MESSAGES_UPSERT`.',
         '',
-        '**4. Requisitos:** supabase/wo-015.sql y wo-024-triangulacion.sql aplicados.',
+        '**4. Requisitos:** supabase/wo-015.sql, wo-024-triangulacion.sql, wo-026-triangulacion-panel.sql y wo-027-metodos-pago.sql aplicados.',
         '',
         '**Triangulación (productos digitales):** `numero_proveedor` en Config bot. Cotiza al proveedor → te pide pagar (envía la foto con `#pago DC-XXXXX`) → reenvía el comprobante → extrae los accesos y los entrega si aparecen TEXTUALES en el mensaje y la confianza es ≥ 0,9; si no, te pide `#aprobar DC-XXXXX`. `#cancelar DC-XXXXX` cierra el pedido.',
         '',
@@ -845,9 +879,9 @@ unir('Pedidos abiertos', 'Enrutar evento');
 unir('Enrutar evento', 'Acción');
 unir('Acción', 'Reanudar espera', 0);
 unir('Acción', 'Enviar respuesta', 1);
-const cadena = ['Crear triangulación', 'Registrar triangulación', 'Cotizar al proveedor', 'Guardar cotización enviada', 'Esperar cotización',
+const cadena = ['Crear triangulación', 'Registrar triangulación', 'Vincular al panel', 'Cotizar al proveedor', 'Guardar cotización enviada', 'Esperar cotización',
     'Evaluar cotización', 'Pedir pago al admin', 'Guardar costo', 'Esperar pago del admin', 'Evaluar pago', 'Descargar comprobante',
-    'Reenviar pago al proveedor', 'Guardar pago enviado', 'Esperar credenciales', 'Preparar extracción', 'Extraer credenciales', 'Validar credenciales', '¿Entregar?'];
+    'Reenviar pago al proveedor', 'Guardar pago enviado', 'Marcar pedido realizado', 'Esperar credenciales', 'Preparar extracción', 'Extraer credenciales', 'Validar credenciales', '¿Entregar?'];
 cadena.slice(0, -1).forEach((n, i) => unir(n, cadena[i + 1]));
 unir('SiliconFlow · Extractor', 'Extraer credenciales', 0, 'ai_languageModel');
 unir('¿Entregar?', 'Mensaje de entrega', 0);
@@ -856,7 +890,8 @@ unir('¿Entregar?', 'Pedir aprobación', 1);
     .forEach((n, i, a) => { if (a[i + 1]) unir(n, a[i + 1]); });
 unir('Mensaje de entrega', 'Enviar accesos al cliente');
 unir('Enviar accesos al cliente', 'Guardar entrega');
-unir('Guardar entrega', 'Aviso de entrega');
+unir('Guardar entrega', 'Marcar entregado en el panel');
+unir('Marcar entregado en el panel', 'Aviso de entrega');
 unir('Aviso de entrega', 'Enviar aviso triangulación');
 for (const n of nodos.filter((x) => x.onError === 'continueErrorOutput' && x.position[1] >= Y)) unir(n.name, 'Cerrar triangulación', 1);
 unir('Cerrar triangulación', 'Guardar cierre');
