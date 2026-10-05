@@ -108,19 +108,22 @@
         <!-- ============ MIS PEDIDOS / AUTOGESTIÓN ============ -->
         <section id="vista-cuenta" class="vista" data-vista="cuenta" hidden aria-labelledby="t-cuenta">
             <h1 id="t-cuenta" class="font-tech text-2xl sm:text-3xl font-black uppercase">Mis pedidos</h1>
-            <form id="form-rastreo" class="tarjeta mt-4 flex flex-col sm:flex-row gap-3">
-                <label class="flex-1">
-                    <span class="etiqueta">Código de tu pedido</span>
-                    <input id="rastreo-codigo" class="campo font-mono uppercase" required autocomplete="off" spellcheck="false" placeholder="Ej: DC-7K2Q9">
-                </label>
-                <button type="submit" class="btn-p sm:self-end"><i class="fa-solid fa-magnifying-glass"></i> Consultar</button>
-            </form>
-            <div id="cuenta-resultado" class="mt-4"></div>
-            <div id="cuenta-recientes" class="mt-6"></div>
-            <div class="tarjeta mt-6">
-                <p class="etiqueta"><i class="fa-solid fa-lock text-dcRed"></i> Acceso con tu WhatsApp</p>
-                <p class="text-sm text-neutral-400">Muy pronto podrás entrar con un código que te enviamos por WhatsApp (sin correos ni contraseñas) para ver todos tus pedidos y tus accesos aquí mismo.</p>
-            </div>
+            <!-- Acceso con WhatsApp (código de 6 dígitos) o, con sesión, el historial: sesion.js -->
+            <div id="cuenta-sesion" class="mt-4" aria-live="polite"></div>
+
+            <!-- Consulta como invitado: con el código del pedido, sin iniciar sesión -->
+            <details id="cuenta-invitado" class="tarjeta invitado mt-6">
+                <summary><span><i class="fa-solid fa-magnifying-glass text-dcRed"></i> ¿Compraste como invitado? Consulta con tu código</span><i class="fa-solid fa-chevron-down flecha"></i></summary>
+                <form id="form-rastreo" class="mt-4 flex flex-col sm:flex-row gap-3">
+                    <label class="flex-1">
+                        <span class="etiqueta">Código de tu pedido</span>
+                        <input id="rastreo-codigo" class="campo font-mono uppercase" required autocomplete="off" spellcheck="false" placeholder="Ej: DC-7K2Q9">
+                    </label>
+                    <button type="submit" class="btn-s sm:self-end"><i class="fa-solid fa-magnifying-glass"></i> Consultar</button>
+                </form>
+                <div id="cuenta-resultado" class="mt-4"></div>
+                <div id="cuenta-recientes" class="mt-4"></div>
+            </details>
         </section>
 
         <!-- ============ SOPORTE ============ -->
@@ -164,6 +167,7 @@
     <script src="plantillas-whatsapp.js"></script>
     <script src="ui.js"></script>
     <script src="cliente.js"></script>
+    <script src="sesion.js"></script>
     <script src="carrito.js"></script>
     <script src="soporte.js"></script>
 </body>

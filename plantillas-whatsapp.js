@@ -248,6 +248,20 @@
             '_Si prefieres no recibir estos mensajes, responde *NO*._',
         ].join('\n'),
 
+        // WO-028: código de acceso al portal de clientes (supabase/wo-028-portal.sql → solicitar_otp).
+        // La cola borra el código apenas se envía y lo cancela si no sale en 5 minutos.
+        codigoAcceso: ({ codigo }) => [
+            `🔐 *Tu código de acceso* · ${FIRMA}`,
+            '',
+            `*${codigo}*`,
+            '',
+            'Escríbelo en dctecnology.xyz para ver tus pedidos y accesos.',
+            '⏱️ Vence en *5 minutos*.',
+            '',
+            '⚠️ No lo compartas con nadie: ningún asesor de DC Technology te lo pedirá.',
+            '_Si no lo solicitaste, ignora este mensaje._',
+        ].join('\n'),
+
         // Entrega de accesos de un producto digital (triangulación con el proveedor, WO-024).
         // Las líneas con datos vacíos se omiten al rellenar (p. ej. sin PIN de perfil).
         entregaCredenciales: ({ pedido, producto, usuario, clave, perfil, pin, codigo }) => [

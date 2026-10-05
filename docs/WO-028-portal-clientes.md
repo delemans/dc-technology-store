@@ -1,6 +1,6 @@
 # WO-028 · Portal de Clientes propio — Arquitectura inicial
 
-Estado: **propuesta** (nada construido aún). Requiere decisiones del director (sección 7) antes de la fase 1.
+Estado: **fase 0 y fase 1 construidas** (portal `cliente.html`, acceso con código por WhatsApp, historial y accesos protegidos). Decisiones del director aprobadas (sección 7); los combos siguen sin definir.
 
 ## 1. Principios (heredados del proyecto)
 
@@ -94,7 +94,7 @@ El árbol es un JSON editable: agregar un caso no requiere tocar código. Las re
 
 | Fase | Entrega | Depende de |
 |---|---|---|
-| 1 | `wo-028-portal.sql` (sesiones, OTP, `mis_pedidos`) + `cuenta.html` (entrar y ver pedidos) | Decisiones 2 y 3 |
+| 1 ✅ | `wo-028-portal.sql` (sesiones, OTP, `mis_pedidos`, `ver_accesos`) + `sesion.js` en `cliente.html#cuenta` (entrar, historial, accesos con re-verificación cada 24 h) | Decisiones 2 y 3 |
 | 2 | `pagar.html` de un ítem: métodos, monto único, comprobante (Storage) | Decisión 1 |
 | 3 | Carrito multi-ítem (`ordenes`) | Fase 2 |
 | 4 | Ver accesos + soporte guiado + reportes en el panel | Fase 1 |

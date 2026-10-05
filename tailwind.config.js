@@ -14,7 +14,7 @@ const escala = (prefijo, tonos) => Object.fromEntries(tonos.map((t) => [t, varia
 module.exports = {
     // Solo las páginas y scripts que usan clases de Tailwind (las páginas p/ tienen su propio CSS)
     content: ['./index.html', './admin.html', './portal.html', './cliente.html', './app.js', './admin.js', './portal.js', './copiloto.js',
-        './ui.js', './tema.js', './cliente.js', './carrito.js', './soporte.js'],
+        './ui.js', './tema.js', './cliente.js', './carrito.js', './soporte.js', './sesion.js'],
     darkMode: 'class',
     theme: {
         extend: {

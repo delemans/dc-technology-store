@@ -15,6 +15,7 @@ compras_proveedor (cambio de estado)
 | `PAGO_RECIBIDO` | `ESPERANDO_PROVEEDOR` | `pago_recibido` | Inmediato (uno por pedido) |
 | `ENTREGA_CONFIRMADA` | `ENTREGADO` / `ENTREGADO_INMEDIATO` | `entrega_confirmada` | Inmediato |
 | `SOLICITUD_RESENA` | (24 h después de la entrega) | `solicitud_resena` | Lun–sáb, 9:00–19:59 (Bogotá) |
+| `OTP` (WO-028) | (el cliente pide entrar al portal) | `codigo_acceso` | Inmediato, prioridad máxima; se cancela si no sale en 5 min y el código se borra de la cola al enviarse |
 
 Los mensajes **nunca** llevan credenciales. Las cuentas y seriales los entrega un asesor por el chat (modo sombra).
 

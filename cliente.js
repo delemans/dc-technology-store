@@ -285,7 +285,7 @@ function pintarRecientes() {
 
 /* ==================== Arranque ==================== */
 
-window.DC = { estado, sb, WA, abrirHoja, cerrarHoja, tarjetaProducto, abrirProducto, precioCOP, desdeDe, leerLocal, guardarLocal, CATEGORIAS, COTIZABLES };
+window.DC = { estado, sb, WA, ESTADOS_TEXTO, abrirHoja, cerrarHoja, tarjetaProducto, abrirProducto, precioCOP, desdeDe, leerLocal, guardarLocal, CATEGORIAS, COTIZABLES };
 
 document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('[data-cerrar-hoja]').forEach((el) => el.addEventListener('click', cerrarHoja));
@@ -297,5 +297,5 @@ document.addEventListener('DOMContentLoaded', () => {
     pintarRecientes();
     cargarDatos();
     const codigo = new URLSearchParams(location.search).get('pedido');
-    if (codigo) { location.hash = '#cuenta'; $('rastreo-codigo').value = codigo; consultarPedido(codigo); }
+    if (codigo) { location.hash = '#cuenta'; $('cuenta-invitado').open = true; $('rastreo-codigo').value = codigo; consultarPedido(codigo); }
 });
