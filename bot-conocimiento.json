@@ -1,5 +1,5 @@
 {
-  "version": "2026-10-05T17:53:03.347Z",
+  "version": "2026-10-05T21:43:22.215Z",
   "instrucciones_agente": [
     "Responde solo con información de este archivo; si no sabes algo, escala a un asesor (ver \"escalamiento\").",
     "No envíes entradas con \"pendiente_configurar\": true.",
@@ -597,12 +597,12 @@
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2024-08-27t102440-663-92c3e993cc40c238fc17247722852386-640-0.webp",
       "variantes": [
         {
-          "nombre": "Pantalla Colombia (1 Dispositivo)",
+          "nombre": "Pantalla Colombia 26 días",
           "precio": 15000,
           "precio_anterior": 25000
         },
         {
-          "nombre": "Pantalla Internacional (1 Dispositivo)",
+          "nombre": "Pantalla Internacional 26 días",
           "precio": 17000,
           "precio_anterior": 27000
         }
@@ -655,22 +655,22 @@
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2024-08-27t101929-364-5d53c57354216ecd4417247719752817-640-0.webp",
       "variantes": [
         {
-          "nombre": "Pantalla 1 Mes",
+          "nombre": "Pantalla Estándar 1 Mes",
           "precio": 8000,
           "precio_anterior": 15500
         },
         {
-          "nombre": "Cuenta Completa 1 Mes",
+          "nombre": "Pantalla Platino 1 Mes",
           "precio": 12000,
           "precio_anterior": 20000
         },
         {
-          "nombre": "Cuenta Completa 3 Meses",
+          "nombre": "Cuenta Completa Estándar 1 Mes",
           "precio": 18000,
           "precio_anterior": 27000
         },
         {
-          "nombre": "Cuenta Completa 6 Meses",
+          "nombre": "Cuenta Completa Platino 1 Mes",
           "precio": 25000,
           "precio_anterior": 34000
         }
@@ -824,36 +824,36 @@
       "id": "iptv-smarters",
       "tipo": "streaming",
       "marca": "IPTV",
-      "nombre": "IPTV Smarters / Plex HD",
+      "nombre": "IPTV Smarters",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-81-f4fa3de76024ac6e3017247201256953-640-0.webp",
       "variantes": [
         {
-          "nombre": "1 Mes (1 Dispositivo)",
+          "nombre": "Pantalla 1 Mes",
           "precio": 13000,
           "precio_anterior": 22000
         },
         {
-          "nombre": "1 Mes (2 Dispositivos)",
+          "nombre": "Cuenta Completa 1 Mes",
           "precio": 23000,
           "precio_anterior": 32500
         },
         {
-          "nombre": "3 Meses (1 Dispositivo)",
+          "nombre": "Cuenta Completa 2 Meses",
           "precio": 35000,
           "precio_anterior": 60000
         },
         {
-          "nombre": "6 Meses (1 Dispositivo)",
+          "nombre": "Cuenta Completa 3 Meses",
           "precio": 55000,
           "precio_anterior": 80000
         },
         {
-          "nombre": "12 Meses (1 Dispositivo)",
+          "nombre": "Cuenta Completa 6 Meses",
           "precio": 80000,
           "precio_anterior": 120000
         },
         {
-          "nombre": "12 Meses (2 Dispositivos)",
+          "nombre": "Cuenta Completa 12 Meses",
           "precio": 150000,
           "precio_anterior": 220000
         }
@@ -943,12 +943,12 @@
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-93-7002d700dab00f352517247104847099-640-0.webp",
       "variantes": [
         {
-          "nombre": "Licencia 1 Año (5 Dispositivos)",
+          "nombre": "Licencia 1 Año (1 Equipo)",
           "precio": 45000,
           "precio_anterior": 90000
         },
         {
-          "nombre": "Licencia Vitalicia",
+          "nombre": "Licencia 1 Año (5 Equipos)",
           "precio": 80000,
           "precio_anterior": 150000
         }
@@ -964,22 +964,22 @@
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/1000062605-45b944d657592752c217680315104066-640-0.webp",
       "variantes": [
         {
-          "nombre": "Office 2019 Pro Plus",
+          "nombre": "Office 2016 Pro Plus",
           "precio": 70000,
           "precio_anterior": 110000
         },
         {
-          "nombre": "Office 2021 Pro Plus",
+          "nombre": "Office 2019 Pro Plus",
           "precio": 80000,
           "precio_anterior": 120000
         },
         {
-          "nombre": "Office 2024 Pro Plus",
+          "nombre": "Office 2021 Pro Plus",
           "precio": 90000,
           "precio_anterior": 130000
         },
         {
-          "nombre": "Office Pro Plus Multidispositivo",
+          "nombre": "Office 2024 Pro Plus",
           "precio": 100000,
           "precio_anterior": 150000
         }
