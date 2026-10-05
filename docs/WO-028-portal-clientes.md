@@ -1,6 +1,6 @@
 # WO-028 · Portal de Clientes propio — Arquitectura inicial
 
-Estado: **fase 0 y fase 1 construidas** (portal `cliente.html`, acceso con código por WhatsApp, historial y accesos protegidos). Decisiones del director aprobadas (sección 7); los combos siguen sin definir.
+Estado: **fase 0 y fase 1 construidas** (portal `cliente.html`, acceso con código por WhatsApp, historial y accesos protegidos). Decisiones del director aprobadas (sección 7). Combos: reglas configurables desde el panel (`supabase/wo-029-combos.sql`).
 
 ## 1. Principios (heredados del proyecto)
 
@@ -98,7 +98,7 @@ El árbol es un JSON editable: agregar un caso no requiere tocar código. Las re
 | 2 | `pagar.html` de un ítem: métodos, monto único, comprobante (Storage) | Decisión 1 |
 | 3 | Carrito multi-ítem (`ordenes`) | Fase 2 |
 | 4 | Ver accesos + soporte guiado + reportes en el panel | Fase 1 |
-| 5 | Combos (cuando el admin los defina) | Decisión 4 |
+| 5 ✅ | Descuento por combo: `wo-029-combos.sql` (reglas editables en el panel, inicio 2 = 10 % y 3+ = 15 %; el cupón no se acumula con el combo) | Decisión 4 |
 
 ## 7. Decisiones del director antes de empezar
 

@@ -136,7 +136,16 @@ html { -webkit-tap-highlight-color: transparent; scroll-behavior: smooth; }
 .alerta-red { padding: .8rem 1rem; border-radius: 1rem; font-size: 12px; color: #FCD34D; background: rgb(245 158 11 / .1); box-shadow: inset 0 0 0 1px rgb(245 158 11 / .35); }
 .tema-claro .alerta-red { color: #B45309; }
 
-.barra-combo { background: rgb(var(--tarjeta) / .96); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); box-shadow: inset 0 0 0 1px rgb(255 42 95 / .35), 0 12px 30px -12px rgb(0 0 0 / .5); }
+/* Descuento por combo (reglas de wo-029) */
+.reglas-combo { display: flex; flex-wrap: wrap; gap: .5rem; }
+.reglas-combo span { display: inline-flex; align-items: center; gap: .4rem; min-height: 36px; padding: 0 .85rem; border-radius: 999px; font-size: 12px; font-weight: 700; color: rgb(var(--tinta) / .65); background: rgb(var(--tinta) / .04); box-shadow: inset 0 0 0 1px rgb(var(--tinta) / .1); transition: all .3s cubic-bezier(.34, 1.56, .64, 1); }
+.reglas-combo span i { color: #FF2A5F; }
+.reglas-combo span b { color: rgb(var(--tinta)); }
+.reglas-combo span.alcanzada { color: #fff; background: linear-gradient(135deg, #FF2A5F, #E50914); box-shadow: 0 6px 18px -6px rgb(255 42 95 / .85); transform: scale(1.04); }
+.reglas-combo span.alcanzada i, .reglas-combo span.alcanzada b { color: #fff; }
+.sello-combo { display: inline-block; margin-left: .35rem; padding: .1rem .5rem; border-radius: 999px; font-size: 11px; font-weight: 900; color: #fff; background: linear-gradient(135deg, #FF2A5F, #E50914); animation: pop .35s cubic-bezier(.34, 1.56, .64, 1); }
+
+.barra-combo {background: rgb(var(--tarjeta) / .96); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); box-shadow: inset 0 0 0 1px rgb(255 42 95 / .35), 0 12px 30px -12px rgb(0 0 0 / .5); }
 
 /* ---------- Mis pedidos con sesión (sesion.js, WO-028 fase 1) ---------- */
 .entrando-suave { animation: entrar .4s cubic-bezier(.2, .8, .2, 1) both; }

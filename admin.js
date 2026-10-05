@@ -228,6 +228,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('form-metodo').addEventListener('submit', protegido(guardarMetodo, 'modal-metodo'));
     document.getElementById('btn-recargar-notif').addEventListener('click', cargarNotificaciones);
     document.getElementById('promo-buscar').addEventListener('input', pintarPromociones);
+    document.getElementById('combo-regla-nueva').addEventListener('click', () => { reglasCombo.nueva = true; pintarReglasCombo(); document.querySelector('#combo-reglas-lista form:last-child [name="min"]')?.focus(); });
     document.getElementById('bot-buscar').addEventListener('input', pintarCatalogoBot);
     document.getElementById('form-pago').addEventListener('submit', protegido(guardarPago, 'modal-pago'));
     document.querySelectorAll('[data-abrir-ajustes]').forEach((btn) => {
@@ -1167,7 +1168,7 @@ function mostrarVista(vista) {
     document.getElementById('vista-pedidos').hidden = vista !== 'pedidos';
     document.getElementById('vista-pagos-bot').hidden = vista !== 'pagos-bot';
     document.getElementById('vista-productos').hidden = vista !== 'productos';
-    if (vista === 'productos') cargarPromociones();
+    if (vista === 'productos') { cargarPromociones(); cargarReglasCombo(); }
     pintarNavegacion();
     window.scrollTo({ top: 0, behavior: 'smooth' });
     document.getElementById('zona-pedidos').scrollTo({ top: 0, behavior: 'smooth' });
@@ -1296,6 +1297,80 @@ async function alternarPromocion(p, activar, boton) {
     if (activar) promo.activas.set(p.id, data.vence_at);
     pintarPromociones();
     mostrarToast(activar ? `${p.nombre} está en la portada hasta la medianoche.` : `${p.nombre} salió de la portada.`, 'ok', 3500);
+}
+
+/* ==================== DESCUENTO POR COMBO (public.reglas_combo · wo-029) ==================== */
+
+const reglasCombo = { lista: [], error: null, nueva: false };
+
+async function cargarReglasCombo() {
+    const { data, error } = await supabaseClient.from('reglas_combo').select('min_plataformas, descuento_pct, activa').order('min_plataformas');
+    reglasCombo.error = error
+        ? (['42P01', 'PGRST205'].includes(error.code) ? 'Ejecuta supabase/wo-029-combos.sql para activar los descuentos por combo.' : `No se pudieron leer las reglas: ${error.message}`)
+        : null;
+    reglasCombo.lista = data ?? [];
+    pintarReglasCombo();
+}
+
+function pintarReglasCombo() {
+    const caja = document.getElementById('combo-reglas-lista');
+    if (!caja) return;
+    if (reglasCombo.error) { caja.innerHTML = filaVacia(reglasCombo.error, 'fa-triangle-exclamation'); return; }
+    const filas = reglasCombo.lista.map((r) => filaReglaCombo(r));
+    if (reglasCombo.nueva) filas.push(filaReglaCombo(null));
+    if (!filas.length) { caja.innerHTML = filaVacia('Sin reglas: los combos se venden sin descuento.', 'fa-layer-group'); return; }
+    caja.replaceChildren(...filas);
+}
+
+// Fila editable: mínimo de plataformas, % y activa. r = null → regla nueva
+function filaReglaCombo(r) {
+    const fila = document.createElement('form');
+    fila.className = `flex flex-wrap items-end gap-2 rounded-2xl bg-dcDarkBg/50 ring-1 ${r?.activa === false ? 'ring-white/5 opacity-70' : 'ring-white/10'} p-3`;
+    const campo = 'w-full min-h-[44px] bg-dcDarkBg/70 ring-1 ring-white/10 rounded-xl px-3 text-base sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-dcRed/60';
+    fila.innerHTML = `
+        <label class="flex-1 min-w-[6rem]"><span class="block text-[10px] font-bold uppercase tracking-wider text-neutral-500 mb-1">Desde (plataformas)</span>
+            <input name="min" type="number" min="2" max="10" step="1" required class="${campo}" value="${r ? r.min_plataformas : ''}" ${r ? 'readonly' : ''}></label>
+        <label class="flex-1 min-w-[6rem]"><span class="block text-[10px] font-bold uppercase tracking-wider text-neutral-500 mb-1">Descuento %</span>
+            <input name="pct" type="number" min="0.1" max="50" step="0.1" required class="${campo}" value="${r ? Number(r.descuento_pct) : ''}"></label>
+        <label class="flex items-center gap-2 min-h-[44px] text-xs font-bold text-neutral-300"><input name="activa" type="checkbox" class="w-5 h-5 accent-[#FF0033]" ${r?.activa === false ? '' : 'checked'}> Activa</label>
+        <div class="flex gap-2">
+            <button type="submit" class="min-h-[44px] px-4 rounded-xl bg-dcRed text-white text-xs font-bold" aria-label="Guardar regla"><i class="fa-solid fa-floppy-disk"></i></button>
+            <button type="button" data-borrar class="min-h-[44px] px-4 rounded-xl bg-white/5 ring-1 ring-white/10 text-neutral-400 hover:text-red-300 text-xs font-bold" aria-label="${r ? 'Eliminar regla' : 'Cancelar'}"><i class="fa-solid ${r ? 'fa-trash-can' : 'fa-xmark'}"></i></button>
+        </div>`;
+    fila.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const min = Number(fila.min.value);
+        const pct = Number(fila.pct.value);
+        if (!r && reglasCombo.lista.some((x) => x.min_plataformas === min)) { mostrarToast(`Ya existe la regla de ${min} plataformas: edítala.`, 'error'); return; }
+        const boton = fila.querySelector('[type="submit"]');
+        boton.disabled = true;
+        const { data, error } = await supabaseClient.rpc('guardar_regla_combo', { p_min: min, p_pct: pct, p_activa: fila.activa.checked }).maybeSingle();
+        boton.disabled = false;
+        if (error || !data?.ok) {
+            mostrarToast(data?.mensaje ?? (error?.code === 'PGRST202' ? 'Falta ejecutar supabase/wo-029-combos.sql.' : 'No se pudo guardar la regla.'), 'error', 5000);
+            Sonidos.error();
+            return;
+        }
+        reglasCombo.nueva = false;
+        mostrarToast(data.mensaje, 'ok');
+        cargarReglasCombo();
+    });
+    fila.querySelector('[data-borrar]').addEventListener('click', async () => {
+        if (!r) { reglasCombo.nueva = false; pintarReglasCombo(); return; }
+        const boton = fila.querySelector('[data-borrar]');
+        // Confirmación en dos toques (sin diálogos del navegador)
+        if (boton.dataset.confirmar !== 'si') {
+            boton.dataset.confirmar = 'si';
+            boton.innerHTML = '¿Eliminar?';
+            setTimeout(() => { if (boton.isConnected) { boton.dataset.confirmar = ''; boton.innerHTML = '<i class="fa-solid fa-trash-can"></i>'; } }, 3500);
+            return;
+        }
+        const { data, error } = await supabaseClient.rpc('eliminar_regla_combo', { p_min: r.min_plataformas }).maybeSingle();
+        if (error || !data?.ok) { mostrarToast(data?.mensaje ?? 'No se pudo eliminar la regla.', 'error'); return; }
+        mostrarToast(data.mensaje, 'ok');
+        cargarReglasCombo();
+    });
+    return fila;
 }
 
 function pintarNavegacion() {

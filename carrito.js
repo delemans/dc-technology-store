@@ -1,7 +1,7 @@
 // carrito.js — Carrito, armado de combos y pago paso a paso del portal (cliente.html).
 // El carrito vive en el dispositivo (sin datos sensibles). El pago se confirma hoy por WhatsApp con el
 // pedido completo ya escrito; el bot entrega los datos del método elegido y recibe el comprobante.
-// (Cuando se aplique supabase/wo-028-portal.sql: orden en la base, monto único y subida de comprobante.)
+// Descuento por combo: reglas de supabase/wo-029-combos.sql (el cupón no se acumula con el combo).
 
 (() => {
     const { WA, abrirHoja, cerrarHoja, precioCOP, leerLocal, guardarLocal } = window.DC;
@@ -13,9 +13,33 @@
     let cupon = null;                    // { codigo, porcentaje }
     const pago = { paso: 1, categoria: 'electronico', metodo: null };
 
+    /* ---------- Descuento por combo (reglas de public.reglas_combo, wo-029) ----------
+       Se aplica la regla activa con el mayor mínimo que el combo alcance (igual que descuento_combo()
+       en la base). Cuentan las plataformas DISTINTAS del combo; si quitas una, el descuento se recalcula. */
+    const reglas = () => window.DC.estado.reglasCombo ?? [];
+    const pctCombo = (n) => reglas().filter((r) => r.min <= n).sort((a, b) => b.min - a.min)[0]?.pct ?? 0;
+    const siguienteRegla = (n) => reglas().filter((r) => r.min > n && r.pct > pctCombo(n)).sort((a, b) => a.min - b.min)[0] ?? null;
+    const pctTexto = (pct) => `${String(pct).replace('.', ',')} %`;
+
     /* ---------- Estado del carrito ---------- */
-    const total = () => lineas.reduce((s, l) => s + Number(l.precio || 0), 0);
-    const descuento = () => (cupon ? Math.round((total() * cupon.porcentaje) / 100) : 0);
+    const sumar = (ls) => ls.reduce((s, l) => s + Number(l.precio || 0), 0);
+    const total = () => sumar(lineas);
+    // Un grupo por combo: { id, plataformas, subtotal, pct, descuento }
+    function combos() {
+        const grupos = new Map();
+        lineas.filter((l) => l.combo).forEach((l) => grupos.set(l.combo, [...(grupos.get(l.combo) ?? []), l]));
+        return [...grupos].map(([id, ls]) => {
+            const plataformas = new Set(ls.map((l) => l.id)).size;
+            const pct = pctCombo(plataformas);
+            const subtotal = sumar(ls);
+            return { id, plataformas, subtotal, pct, descuento: Math.round((subtotal * pct) / 100) };
+        });
+    }
+    const descuentoCombos = () => combos().reduce((s, c) => s + c.descuento, 0);
+    // El cupón no se acumula con el combo: aplica solo a lo que va fuera de combos
+    const baseCupon = () => sumar(lineas.filter((l) => !l.combo));
+    const descuento = () => (cupon ? Math.round((baseCupon() * cupon.porcentaje) / 100) : 0);
+    const aPagar = () => total() - descuentoCombos() - descuento();
     function guardar() {
         guardarLocal(CLAVE, lineas);
         document.querySelectorAll('[data-contador-carrito]').forEach((c) => {
@@ -60,8 +84,10 @@
     function totales() {
         return `<div class="space-y-1.5 mt-4 pt-4 border-t border-white/10">
             <div class="total-fila"><span>Subtotal (${lineas.length} ítem${lineas.length === 1 ? '' : 's'})</span><span>${precioCOP(total())}</span></div>
+            ${combos().filter((c) => c.descuento > 0).map((c) => `<div class="total-fila text-emerald-300"><span><i class="fa-solid fa-layer-group"></i> Combo · ${c.plataformas} plataformas (-${pctTexto(c.pct)})</span><span>-${precioCOP(c.descuento)}</span></div>`).join('')}
             ${cupon ? `<div class="total-fila text-emerald-300"><span>Cupón ${escaparHTML(cupon.codigo)} (-${cupon.porcentaje}%)</span><span>-${precioCOP(descuento())}</span></div>` : ''}
-            <div class="total-fila grande"><span>Total</span><span>${precioCOP(total() - descuento())}</span></div>
+            ${cupon && lineas.some((l) => l.combo) ? '<p class="text-[11px] text-neutral-500">El cupón no se acumula con el descuento del combo: aplica a los productos fuera del combo.</p>' : ''}
+            <div class="total-fila grande"><span>Total</span><span>${precioCOP(aPagar())}</span></div>
         </div>`;
     }
 
@@ -166,8 +192,9 @@
         const texto = [
             `Hola DC Technology, quiero hacer este pedido${datos.nombre ? ` (soy ${WA.limpiarVariable(datos.nombre, 40)})` : ''}:`,
             ...lineas.map((l) => `• ${WA.limpiarVariable(l.nombre)}${l.variante ? ` – ${WA.limpiarVariable(l.variante)}` : ''}: ${precioCOP(l.precio)}`),
-            cupon ? `• Cupón: ${cupon.codigo} (-${cupon.porcentaje}%)` : null,
-            `• Total: ${precioCOP(total() - descuento())}`,
+            ...combos().filter((c) => c.descuento > 0).map((c) => `• Descuento combo (${c.plataformas} plataformas, -${pctTexto(c.pct)}): -${precioCOP(c.descuento)}`),
+            cupon && descuento() > 0 ? `• Cupón: ${cupon.codigo} (-${cupon.porcentaje}%): -${precioCOP(descuento())}` : null,
+            `• Total: ${precioCOP(aPagar())}`,
             `• Pago con: ${metodo}`,
             'Acepto los términos de uso. ¿Me envían los datos para pagar?',
         ].filter(Boolean).join('\n');
@@ -199,11 +226,18 @@
         const productos = window.DC.estado.productos.filter((p) => DIGITALES.includes(p.tipo));
         const elegidos = productos.filter((p) => combo.elegidos.has(p.id));
         const suma = elegidos.reduce((s, p) => s + Number(combo.elegidos.get(p.id)?.precio || 0), 0);
+        const pct = pctCombo(elegidos.length);
+        const ahorro = Math.round((suma * pct) / 100);
+        const proxima = siguienteRegla(elegidos.length);
+        const falta = proxima ? proxima.min - elegidos.length : 0;
+        const pista = proxima ? `Agrega ${falta} plataforma${falta === 1 ? '' : 's'} más y ahorra ${pctTexto(proxima.pct)}` : pct ? '¡Tienes el mayor descuento!' : '';
+        pintarReglas(elegidos.length);
 
         if (combo.paso === 1) {
             caja.innerHTML = `<div class="rejilla" data-lista></div>
                 <div class="barra-combo tarjeta mt-4 flex items-center justify-between gap-3 sticky bottom-24 md:bottom-4 z-20">
-                    <span class="text-sm"><b>${elegidos.length}</b> elegida${elegidos.length === 1 ? '' : 's'}</span>
+                    <span class="text-sm min-w-0"><b>${elegidos.length}</b> elegida${elegidos.length === 1 ? '' : 's'}${pct ? ` <span class="sello-combo">-${pctTexto(pct)}</span>` : ''}
+                        ${pista ? `<small class="block text-[11px] leading-snug text-neutral-400">${escaparHTML(pista)}</small>` : ''}</span>
                     <button type="button" class="btn-p" data-seguir ${elegidos.length < 2 ? 'disabled' : ''}>Elegir planes <i class="fa-solid fa-arrow-right"></i></button>
                 </div>
                 ${elegidos.length < 2 ? '<p class="text-[11px] text-neutral-500 mt-2 text-center">Elige al menos 2 plataformas.</p>' : ''}`;
@@ -221,7 +255,11 @@
         }
         if (combo.paso === 2) {
             caja.innerHTML = `<div class="space-y-4" data-planes></div>
-                <div class="tarjeta mt-4 flex items-center justify-between gap-3"><span class="text-sm">Total del combo <b class="ml-1">${precioCOP(suma)}</b></span></div>
+                <div class="tarjeta mt-4 space-y-1.5">
+                    ${pct ? `<div class="total-fila"><span>Subtotal</span><span>${precioCOP(suma)}</span></div>
+                    <div class="total-fila text-emerald-300"><span>Descuento combo (-${pctTexto(pct)})</span><span>-${precioCOP(ahorro)}</span></div>` : ''}
+                    <div class="total-fila grande"><span>Total del combo</span><span>${precioCOP(suma - ahorro)}</span></div>
+                </div>
                 <div class="flex gap-2 mt-4"><button type="button" class="btn-s" data-atras><i class="fa-solid fa-arrow-left"></i></button>
                 <button type="button" class="btn-p flex-1" data-seguir>Agregar combo al carrito</button></div>`;
             caja.querySelector('[data-planes]').replaceChildren(...elegidos.map((p) => {
@@ -251,10 +289,20 @@
         caja.innerHTML = `<div class="tarjeta text-center py-8">
             <i class="fa-solid fa-circle-check text-4xl text-emerald-400"></i>
             <p class="mt-3 font-tech text-xl font-black">¡Combo en tu carrito!</p>
-            <p class="text-sm text-neutral-400 mt-1">${elegidos.length} plataformas · ${precioCOP(suma)} en un solo pago.</p>
+            <p class="text-sm text-neutral-400 mt-1">${elegidos.length} plataformas · ${precioCOP(suma - ahorro)} en un solo pago${ahorro ? ` · ahorras <b class="text-emerald-300">${precioCOP(ahorro)}</b>` : ''}.</p>
             <div class="flex flex-wrap justify-center gap-2 mt-5"><button type="button" class="btn-p" data-pagar>Ir a pagar</button><button type="button" class="btn-s" data-nuevo>Armar otro</button></div></div>`;
         caja.querySelector('[data-pagar]').addEventListener('click', () => { pago.paso = 1; abrirCarrito(); });
         caja.querySelector('[data-nuevo]').addEventListener('click', () => { combo.elegidos.clear(); iniciarCon(); });
+    }
+
+    // Fichas con los descuentos vigentes; se ilumina la que alcanza el combo actual
+    function pintarReglas(n = 0) {
+        const caja = document.getElementById('combo-reglas');
+        if (!caja) return;
+        const lista = reglas();
+        caja.hidden = !lista.length;
+        const actual = lista.filter((r) => r.min <= n).sort((a, b) => b.min - a.min)[0];
+        caja.innerHTML = lista.map((r, i) => `<span class="${r === actual ? 'alcanzada' : ''}"><i class="fa-solid fa-layer-group"></i> ${r.min}${i === lista.length - 1 ? ' o más' : ''} plataformas <b>-${pctTexto(r.pct)}</b></span>`).join('');
     }
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -262,8 +310,9 @@
         guardar();
     });
     document.addEventListener('dc:catalogo-listo', () => pintarCombo());
+    document.addEventListener('dc:reglas-combo', () => pintarCombo());
     document.addEventListener('dc:vista', (e) => { if (e.detail === 'combos') pintarCombo(); });
 
-    window.Carrito = { agregar, abrir: abrirCarrito, lineas: () => lineas };
+    window.Carrito = { agregar, abrir: abrirCarrito, lineas: () => lineas, combos, aPagar, pctCombo };
     window.Combos = { iniciarCon };
 })();

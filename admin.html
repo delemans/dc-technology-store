@@ -429,6 +429,15 @@
                     <span id="promo-resumen" class="inline-flex items-center gap-2 h-12 px-4 rounded-2xl bg-white/[0.04] ring-1 ring-white/10 text-xs font-bold text-neutral-300"></span>
                 </div>
                 <p class="text-xs text-neutral-500 mb-4 max-w-2xl">Activa el interruptor y el producto aparece en la portada de la tienda, en la sección <b class="text-neutral-300">Promociones del día</b>, hasta la medianoche (hora Colombia). Máximo 12 a la vez. Los precios y descuentos son los del catálogo.</p>
+                <!-- Descuento por combo (public.reglas_combo · wo-029): el portal de clientes los aplica al instante -->
+                <section id="combo-reglas-admin" class="mb-6 rounded-3xl bg-white/[0.03] ring-1 ring-white/10 p-4 sm:p-5" aria-labelledby="t-combo-reglas">
+                    <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
+                        <h3 id="t-combo-reglas" class="font-tech text-sm font-black uppercase tracking-[0.15em]"><i class="fa-solid fa-layer-group text-dcRed mr-1"></i> Descuento por combo</h3>
+                        <button type="button" id="combo-regla-nueva" class="min-h-[44px] px-4 rounded-xl bg-dcRed/15 ring-1 ring-dcRed/40 text-xs font-bold text-white hover:bg-dcRed/25"><i class="fa-solid fa-plus mr-1"></i> Nueva regla</button>
+                    </div>
+                    <p class="text-xs text-neutral-500 mb-3 max-w-2xl">Se aplica la regla con el mayor mínimo que alcance el combo (plataformas distintas en un mismo pedido). El cupón no se acumula con el combo.</p>
+                    <div id="combo-reglas-lista" class="grid gap-2 sm:grid-cols-2 xl:grid-cols-3"></div>
+                </section>
                 <div id="promo-aviso" class="mb-4"></div>
                 <div class="flex flex-col sm:flex-row gap-3 mb-4">
                     <label class="relative flex-1">

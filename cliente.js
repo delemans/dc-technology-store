@@ -21,7 +21,7 @@ const COTIZABLES = ['servicios', 'alquiler'];
 const VISTAS = ['inicio', 'catalogo', 'combos', 'cuenta', 'soporte'];
 const CLAVE_RECIENTES = 'dc_cliente_pedidos';
 
-const estado = { productos: [], promos: [], metodos: [], filtro: 'todas', busqueda: '', vista: null };
+const estado = { productos: [], promos: [], metodos: [], reglasCombo: [], filtro: 'todas', busqueda: '', vista: null };
 
 /* ==================== Utilidades ==================== */
 
@@ -218,6 +218,11 @@ async function cargarDatos() {
         $('inicio-promos-lista').replaceChildren(...estado.promos.map((p) => tarjetaProducto(p)));
     });
     sb.rpc('metodos_pago_publicos').then(({ data }) => { estado.metodos = data ?? []; });
+    // Descuentos por combo (wo-029): sin el SQL aplicado no hay descuento (nunca se inventa uno)
+    sb.rpc('reglas_combo_publicas').then(({ data }) => {
+        estado.reglasCombo = (data ?? []).map((r) => ({ min: Number(r.min_plataformas), pct: Number(r.descuento_pct) })).filter((r) => r.min >= 2 && r.pct > 0);
+        document.dispatchEvent(new CustomEvent('dc:reglas-combo'));
+    });
 }
 
 /* ==================== Mis pedidos (rastreo por código) ==================== */
