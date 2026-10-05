@@ -11,3 +11,6 @@ node_modules/
 
 # Videos de estados (pesados: se comparten por WhatsApp, no se publican en el sitio)
 docs/videos-estados/mp4/
+
+# Salidas de herramientas (catálogo del proveedor, comparaciones): se regeneran
+herramientas/salida/
