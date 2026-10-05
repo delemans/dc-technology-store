@@ -254,6 +254,7 @@ function armarContexto() {
         ...(base.flujo_digital ?? []).map((x) => `- ${x}`),
         'ESCALAMIENTO: si aplica cualquier disparador de escalamiento, responde EXACTAMENTE "[ESCALAR] <motivo breve>" y nada más.',
         'PEDIDO DIGITAL: cuando el cliente CONFIRME un producto digital del catálogo (streaming, licencias, pines o recargas) y su opción, agrega al FINAL de tu respuesta, en una línea aparte: [PEDIDO_DIGITAL] {"producto":"<nombre exacto del catálogo>","variante":"<opción exacta>"}. Una sola vez por pedido. El cliente no ve esa línea. Luego sigue con el pago normalmente.',
+        'PEDIDO COMBO: si lo que el cliente confirma es un COMBO (2 o más plataformas), en vez de [PEDIDO_DIGITAL] agrega al FINAL, en una línea aparte: [PEDIDO_COMBO] {"items":[{"producto":"<nombre exacto>","variante":"<opción exacta>"}]}. Una sola vez por combo.',
     ].join('\n');
 
     return [{ json: { numero: msg.numero, texto: msg.texto, sistema } }];
@@ -313,6 +314,31 @@ function revisarRespuesta() {
             ].join('\n');
         } catch { return '(el precio de ese combo te lo confirma un asesor)'; }
     });
+    // [PEDIDO_COMBO] {"items":[...]}: el cliente CONFIRMÓ el combo → compra automática al proveedor (WO-031).
+    // Mismas reglas que [COMBO]: productos del catálogo, plataformas distintas y descuento vigente de la base.
+    let combo = null;
+    const marcaCombo = r.match(/\[PEDIDO_COMBO\]\s*(\{[\s\S]*?\]\s*\})/);
+    if (marcaCombo) {
+        r = r.replace(marcaCombo[0], '').trim() || 'Perfecto, tomé tu combo ✅';
+        try {
+            const elegidos = [];
+            let valido = true;
+            for (const it of JSON.parse(marcaCombo[1]).items ?? []) {
+                const prod = kb.catalogo.find((x) => normalizar(x.nombre) === normalizar(it.producto)
+                    && ['streaming', 'licencias', 'pines', 'recargas'].includes(x.tipo));
+                const v = prod && (prod.variantes.find((x) => normalizar(x.nombre) === normalizar(it.variante))
+                    ?? (prod.variantes.length === 1 ? prod.variantes[0] : null));
+                if (!prod || !v || !(Number(v.precio) > 0)) { valido = false; break; }
+                if (!elegidos.some((e) => e.producto === prod.nombre)) elegidos.push({ producto: prod.nombre, variante: v.nombre, precio: Number(v.precio) });
+            }
+            if (valido && elegidos.length >= 2 && elegidos.length <= 9) {
+                const subtotal = elegidos.reduce((s2, e) => s2 + e.precio, 0);
+                const pct = pctCombo(elegidos.length);
+                combo = { items: elegidos, pct, total: subtotal - Math.round((subtotal * pct) / 100) };
+            }
+        } catch { combo = null; }
+    }
+    if (combo) digital = null; // un combo se compra como combo, nunca también como producto suelto
     const metodos = $('Metodos de pago').all().map((i) => i.json).filter((m) => m && m.categoria === 'cripto');
     r = r.replace(/\[MONTO_CRIPTO\s+cop=([\d.,]+|COMBO)\s+moneda=([A-Z0-9]+)\s+red=([A-Z0-9_]+)\s*\]/gi, (_, cop, moneda, red) => {
         const metodo = metodos.find((x) => String(x.moneda).toUpperCase() === moneda.toUpperCase() && String(x.red).toUpperCase() === red.toUpperCase());
@@ -326,7 +352,7 @@ function revisarRespuesta() {
         .replace(/\n{3,}/g, '\n\n')
         .trim()
         .slice(0, 1200);
-    return [{ json: { numero: msg.numero, texto: r, pedido: digital } }];
+    return [{ json: { numero: msg.numero, texto: r, pedido: digital, combo } }];
 }
 
 // B1 · Posventa: arma el texto de la notificación con la plantilla de su tipo
@@ -539,6 +565,227 @@ function avisoEntrega() {
     ].join('\n') } }] : [];
 }
 
+/* ---------- D) Compra al proveedor para COMBOS (WO-031) ----------
+   Un padre DC-XXXXX + una línea por plataforma (DC-XXXXX1…). Una cotización, un #pago y un mensaje de
+   accesos; cada línea se entrega o queda en revisión por separado. */
+
+// D1 · Crea el combo (padre + líneas) con el precio cobrado repartido por línea
+function crearCombo() {
+    const cfg = $('Config bot').first().json;
+    const item = $input.first().json;
+    const c = item.combo;
+    if (!c || !Array.isArray(c.items) || c.items.length < 2 || !soloDigitos(cfg.numero_proveedor) || !soloDigitos(cfg.numero_aviso_admin)) return [];
+    const memoria = $getWorkflowStaticData('global');
+    memoria.pedidos = memoria.pedidos || {};
+    const ahora = Date.now();
+    for (const [k, t] of Object.entries(memoria.pedidos)) if (ahora - t > 2 * 3600e3) delete memoria.pedidos[k];
+    const clave = `${item.numero}|combo|${c.items.map((x) => `${x.producto}/${x.variante}`).sort().join('|')}`;
+    if (memoria.pedidos[clave]) return [];
+    memoria.pedidos[clave] = ahora;
+
+    const alfabeto = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+    let referencia = 'DC-';
+    for (let i = 0; i < 5; i++) referencia += alfabeto[Math.floor(Math.random() * alfabeto.length)];
+    // Precio cobrado por línea: lista − descuento del combo; el redondeo se ajusta en la última
+    const lineas = c.items.map((x, i) => ({ referencia: `${referencia}${i + 1}`, producto: x.producto, variante: x.variante,
+        precio_venta: Math.round(x.precio * (1 - (Number(c.pct) || 0) / 100)) }));
+    lineas[lineas.length - 1].precio_venta += c.total - lineas.reduce((s2, l) => s2 + l.precio_venta, 0);
+    const msg = $('Normalizar mensaje').first().json;
+    const nombre = String(msg.nombre ?? '').slice(0, 60);
+    const filas = [
+        { referencia, cliente: item.numero, cliente_nombre: nombre, producto: `Combo · ${lineas.length} plataformas`,
+          variante: lineas.map((l) => l.producto).join(' + ').slice(0, 200), precio_venta: c.total, estado: 'COTIZANDO',
+          esperando: 'COTIZACION', es_combo: true, lineas },
+        ...lineas.map((l) => ({ referencia: l.referencia, cliente: item.numero, cliente_nombre: nombre, producto: l.producto,
+          variante: l.variante, precio_venta: l.precio_venta, estado: 'COTIZANDO', grupo: referencia })),
+    ];
+    return [{ json: {
+        referencia, cliente: item.numero, cliente_nombre: nombre, total: c.total, pct: c.pct, lineas, filas,
+        texto_proveedor: [
+            `Hola, cotización pedido *#${referencia}* (combo):`,
+            ...lineas.map((l, i) => `${i + 1}. ${l.producto}${l.variante ? ` – ${l.variante}` : ''}`),
+            'Por favor responde citando este mensaje con el precio de CADA línea (ej: "1. 12.000") y avísame si alguna no está disponible.',
+        ].join('\n'),
+    } }];
+}
+
+// D2 · Líneas del combo, una por item, para vincular cada una al panel
+function lineasCombo() {
+    return $('Crear combo').first().json.lineas.map((l) => ({ json: { referencia: l.referencia } }));
+}
+
+// D3 · Cotización del proveedor: costo y disponibilidad POR LÍNEA + control de margen
+function evaluarCotizacionCombo() {
+    const t = $('Crear combo').first().json;
+    const b = $input.first().json.body;
+    const demora = 'Tu combo está tomando más tiempo de lo normal; un asesor te escribe enseguida 🙏';
+    if (!b) terminar('VENCIDO', `⏰ El proveedor no respondió la cotización del combo *#${t.referencia}* en __HORAS_COTIZACION__ h. Atiéndelo a mano.`, demora);
+    if (b.tipo === 'cancelar') terminar('CANCELADO', `🛑 Combo *#${t.referencia}* cancelado.`, null);
+    const texto = String(b.texto ?? '');
+    const negativo = /(no hay|agotad|sin stock|no tengo|no disponible|no manejo)/;
+    const renglones = texto.split(/\n+/).map((x) => x.trim()).filter(Boolean);
+    const lineas = t.lineas.map((l, i) => {
+        const palabra = normalizar(l.producto).split(/\s+/)[0];
+        const renglon = renglones.find((x) => new RegExp(`^\\s*${i + 1}\\s*[.)\\-:]`).test(x)) || renglones.find((x) => normalizar(x).includes(palabra)) || null;
+        const agotada = renglon ? negativo.test(normalizar(renglon)) : false;
+        const costo = renglon && !agotada ? precioDe(renglon.replace(/^\s*\d+\s*[.)\-:]\s*/, '')) : null;
+        return { ...l, renglon, agotada, costo };
+    });
+    // Todo el mensaje negativo sin renglones identificables → nada disponible
+    if (lineas.every((l) => !l.renglon) && negativo.test(normalizar(texto))) lineas.forEach((l) => { l.agotada = true; });
+    const disponibles = lineas.filter((l) => !l.agotada);
+    if (!disponibles.length) {
+        terminar('AGOTADO', `❌ Proveedor sin disponibilidad para el combo *#${t.referencia}*. Dijo: «${texto.slice(0, 200)}»`,
+            'Por ahora no tenemos disponibles las plataformas de tu combo 😔 Escríbeme y te muestro otras opciones.');
+    }
+    const venta = disponibles.reduce((s2, l) => s2 + l.precio_venta, 0);
+    const lineaTotal = renglones.find((x) => /total/i.test(x));
+    let costoTotal = disponibles.every((l) => l.costo !== null) ? disponibles.reduce((s2, l) => s2 + l.costo, 0) : null;
+    if (costoTotal === null && lineaTotal) costoTotal = precioDe(lineaTotal);
+    if (costoTotal === null && disponibles.length === 1 && renglones.length === 1) costoTotal = precioDe(texto);
+    const perdida = costoTotal !== null && costoTotal > venta;
+    const pausado = perdida || costoTotal === null;
+    const agotadas = lineas.filter((l) => l.agotada);
+    const vinculos = $('Vincular combo al panel').all().map((i) => i.json);
+    const sinPanel = vinculos.filter((v) => v.ok !== true).length;
+    return [{ json: {
+        costo_total: costoTotal, venta, perdida, pausado,
+        hay_agotadas: agotadas.length ? 'si' : 'no',
+        lineas: lineas.map(({ renglon, ...l }) => l),
+        // Las agotadas quedan EN REVISIÓN (cambio o reembolso parcial); las demás siguen
+        actualizar: agotadas.map((l) => ({ referencia: l.referencia, estado: 'REVISION_MANUAL', notas: `Proveedor sin disponibilidad: ${String(l.renglon ?? texto).slice(0, 200)}` })),
+        texto_cliente: agotadas.length ? [
+            `⚠️ Sobre tu combo *#${t.referencia}*: ${agotadas.map((l) => `*${l.producto}*`).join(', ')} no ${agotadas.length === 1 ? 'está disponible' : 'están disponibles'} en este momento.`,
+            'Un asesor te escribe para ofrecerte un cambio o el reembolso de esa parte. Lo demás sigue en proceso ✅',
+        ].join('\n') : '',
+        texto_admin: [
+            `💸 *Pagar al proveedor · combo #${t.referencia}*`,
+            `Cliente: +${t.cliente}${t.cliente_nombre ? ` (${t.cliente_nombre})` : ''}`,
+            ...lineas.map((l) => `${l.agotada ? '❌' : '•'} ${l.referencia} · ${l.producto}${l.variante ? ` – ${l.variante}` : ''}: venta ${cop(l.precio_venta)} · ${l.agotada ? 'AGOTADA → en revisión' : `costo ${l.costo !== null ? cop(l.costo) : '¿?'}`}`),
+            `Total cobrado (disponibles): ${cop(venta)} · Costo: ${costoTotal !== null ? cop(costoTotal) : 'no lo pude leer'}${costoTotal !== null ? ` · Margen: ${cop(venta - costoTotal)}` : ''}`,
+            `Proveedor dijo: «${texto.slice(0, 300)}»`,
+            '',
+            pausado
+                ? `⛔ *PAGO PAUSADO*: ${perdida ? `el costo supera lo cobrado en ${cop(costoTotal - venta)}` : 'no pude leer el costo de todas las líneas'}. No reenviaré tu comprobante al proveedor. Si decides comprar igual: *#pago ${t.referencia} forzar* con la foto. Para cancelar: *#cancelar ${t.referencia}*.`
+                : `⚠️ Antes de pagar, confirma en el panel que el cliente YA pagó (${t.lineas.map((l) => l.referencia).join(', ')}). Luego envíame la FOTO o PDF con *#pago ${t.referencia}*. Para cancelar: *#cancelar ${t.referencia}*.`,
+            sinPanel ? `⚠️ ${sinPanel} línea(s) no quedaron en el panel: valida el pago del cliente a mano.` : '📋 Cada plataforma quedó como un pedido en el panel.',
+        ].join('\n'),
+    } }];
+}
+
+// D4 · Comprobante del administrador (o fin de la espera)
+function evaluarPagoCombo() {
+    const t = $('Crear combo').first().json;
+    const b = $input.first().json.body;
+    if (!b) terminar('VENCIDO', `⏰ No recibí el comprobante de pago al proveedor del combo *#${t.referencia}* en __HORAS_PAGO__ h. Cerrado: atiéndelo a mano.`,
+        'Tu combo está tomando más tiempo de lo normal; un asesor te escribe enseguida 🙏');
+    if (b.tipo === 'cancelar') terminar('CANCELADO', `🛑 Combo *#${t.referencia}* cancelado.`, null);
+    const c = $('Evaluar cotización combo').first().json;
+    const disponibles = c.lineas.filter((l) => !l.agotada);
+    return [{ json: { wamid: b.wamid, actualizar: disponibles.map((l) => ({ referencia: l.referencia, estado: 'ESPERANDO_CREDENCIALES', costo: l.costo, panel: 'PEDIDO_REALIZADO' })) } }];
+}
+
+// D5 · Accesos del proveedor: un JSON por línea
+function prepararExtraccionCombo() {
+    const t = $('Crear combo').first().json;
+    const b = $input.first().json.body;
+    if (!b) terminar('VENCIDO', `⏰ El proveedor no envió los accesos del combo *#${t.referencia}* en __HORAS_CREDENCIALES__ h. Revisa con él y entrega a mano.`,
+        'Tu combo está tomando más tiempo de lo normal; un asesor te escribe enseguida 🙏');
+    if (b.tipo === 'cancelar') terminar('CANCELADO', `🛑 Combo *#${t.referencia}* cancelado.`, null);
+    const texto = String(b.texto ?? '').slice(0, 3000);
+    const disponibles = $('Evaluar cotización combo').first().json.lineas.filter((l) => !l.agotada);
+    return [{ json: { texto_proveedor: texto, prompt: [
+        'Extrae los datos de acceso de CADA línea de este pedido combo, a partir del mensaje de un proveedor de cuentas digitales.',
+        'Líneas esperadas:',
+        ...disponibles.map((l) => `${t.lineas.findIndex((x) => x.referencia === l.referencia) + 1}. ${l.producto}${l.variante ? ` (${l.variante})` : ''}`),
+        'Responde SOLO con un JSON, sin texto adicional: {"lineas":[{"linea":1,"usuario":"","clave":"","perfil":"","pin":"","confianza":0.0}]}',
+        'Copia usuario y clave EXACTAMENTE como aparecen (mismas mayúsculas, números y símbolos). Si una línea no aparece, devuélvela con datos vacíos y confianza 0.',
+        '"confianza" (0 a 1): qué tan seguro estás de que son los accesos completos de ESA línea.',
+        'Mensaje:', '"""', texto, '"""',
+    ].join('\n') } }];
+}
+
+// D6 · Valida cada línea (todo TEXTUAL en el mensaje, confianza ≥ 0.9) y arma UNA entrega al cliente
+function entregarCombo() {
+    const t = $('Crear combo').first().json;
+    const fuente = $('Preparar extracción combo').first().json.texto_proveedor;
+    const disponibles = $('Evaluar cotización combo').first().json.lineas.filter((l) => !l.agotada);
+    let d = {};
+    try { d = JSON.parse(String($input.first().json.text ?? '').replace(/```(?:json)?/g, '').match(/\{[\s\S]*\}/)?.[0] ?? '{}'); } catch { d = {}; }
+    const extraidas = Array.isArray(d.lineas) ? d.lineas : [];
+    const limpio = (v) => String(v ?? '').trim();
+    const resultado = disponibles.map((l) => {
+        const n = t.lineas.findIndex((x) => x.referencia === l.referencia) + 1;
+        const e = extraidas.find((x) => Number(x.linea) === n) ?? {};
+        const c = { usuario: limpio(e.usuario), clave: limpio(e.clave), perfil: limpio(e.perfil), pin: limpio(e.pin) };
+        const confianza = Math.max(0, Math.min(1, Number(e.confianza) || 0));
+        const problemas = [];
+        if (!c.usuario) problemas.push('sin usuario');
+        if (!c.clave) problemas.push('sin clave');
+        if (c.usuario && !fuente.includes(c.usuario)) problemas.push('usuario no textual');
+        if (c.clave && !fuente.includes(c.clave)) problemas.push('clave no textual');
+        for (const k of ['perfil', 'pin']) if (c[k] && !fuente.includes(c[k])) c[k] = '';
+        if (confianza < 0.9) problemas.push(`confianza ${confianza.toFixed(2)}`);
+        return { ...l, ...c, confianza, problemas };
+    });
+    const ok = resultado.filter((r) => !r.problemas.length);
+    const revisar = resultado.filter((r) => r.problemas.length);
+    // Plantilla oficial por línea; usuario, clave, perfil y PIN van EXACTOS
+    const bloque = (r) => String(__KB__.plantillas.entrega_credenciales).split('\n').map((linea) => {
+        let vacia = false;
+        const exactos = { usuario: r.usuario, clave: r.clave, perfil: r.perfil, pin: r.pin };
+        const otros = { pedido: r.referencia, producto: `${r.producto}${r.variante ? ` – ${r.variante}` : ''}` };
+        const v = linea.replace(/\{(\w+)\}/g, (_, k) => {
+            const x = k in exactos ? String(exactos[k] ?? '').trim() : limpiar(otros[k]);
+            if (!x) vacia = true;
+            return x;
+        });
+        return vacia ? null : v;
+    }).filter((x) => x !== null).join('\n').replace(/\n{3,}/g, '\n\n').trim();
+    const texto = [
+        ...ok.map(bloque),
+        revisar.length ? `🛠️ ${revisar.map((r) => `*${r.producto}*`).join(', ')}: lo estamos revisando con nuestro equipo y te escribimos enseguida.` : '',
+    ].filter(Boolean).join('\n\n━━━━━━━━━━\n\n');
+    const clavePanel = (r) => [r.usuario, r.clave].filter(Boolean).join(' / ') + (r.perfil ? ` · perfil ${r.perfil}` : '') + (r.pin ? ` · PIN ${r.pin}` : '');
+    return [{ json: {
+        numero: t.cliente, texto, entregadas: ok.length, en_revision: revisar.length,
+        actualizar: [
+            ...ok.map((r) => ({ referencia: r.referencia, estado: 'ENTREGADO', panel: 'ENTREGADO', clave: clavePanel(r), credencial_final: String(r.clave).slice(-4), confianza: r.confianza })),
+            ...revisar.map((r) => ({ referencia: r.referencia, estado: 'REVISION_MANUAL', notas: `Accesos por revisar: ${r.problemas.join(', ')}`, confianza: r.confianza })),
+        ],
+        estado_padre: revisar.length || $('Evaluar cotización combo').first().json.hay_agotadas === 'si' ? 'REVISION_MANUAL' : 'ENTREGADO',
+        texto_admin: [
+            `${revisar.length ? '⚠️' : '✅'} *Combo #${t.referencia}* · entregadas ${ok.length} de ${t.lineas.length}`,
+            ...ok.map((r) => `✅ ${r.referencia} · ${r.producto} · clave …${String(r.clave).slice(-4)}`),
+            ...revisar.map((r) => `🛠️ ${r.referencia} · ${r.producto}: ${r.problemas.join(', ')} → en revisión, entrégalo a mano.`),
+            ...$('Evaluar cotización combo').first().json.lineas.filter((l) => l.agotada).map((l) => `❌ ${l.referencia} · ${l.producto}: agotada → ofrece cambio o reembolso parcial.`),
+            revisar.length ? `El proveedor escribió: «${fuente.slice(0, 400)}»` : '',
+        ].filter(Boolean).join('\n'),
+    } }];
+}
+
+// D7 · Cierre del combo por vencimiento, cancelación, agotado o falla técnica
+function cerrarCombo() {
+    const t = $('Crear combo').first().json;
+    const cfg = $('Config bot').first().json;
+    const e = $input.first().json;
+    const bruto = String(e.error?.message ?? e.error ?? e.message ?? '');
+    let datos = null;
+    const m = /TERMINAR (\{[\s\S]*\})/.exec(bruto);
+    if (m) { try { datos = JSON.parse(m[1]); } catch { datos = null; } }
+    if (!datos) datos = { estado: 'REVISION_MANUAL', avisoAdmin: `⚠️ Falla técnica en el combo *#${t.referencia}*: ${bruto.slice(0, 200) || 'sin detalle'}. Termínalo a mano.`, avisoCliente: null };
+    const mensajes = [];
+    if (datos.avisoCliente) mensajes.push({ numero: t.cliente, texto: datos.avisoCliente });
+    if (datos.avisoAdmin && soloDigitos(cfg.numero_aviso_admin)) mensajes.push({ numero: soloDigitos(cfg.numero_aviso_admin), texto: datos.avisoAdmin });
+    return [{ json: {
+        referencia: t.referencia,
+        patch: { estado: datos.estado, esperando: null, resume_url: null, notas: String(datos.avisoAdmin ?? '').slice(0, 500) },
+        // Las líneas siguen al padre (las ya entregadas no se tocan: actualizar_lineas_combo solo cambia lo que recibe)
+        actualizar: t.lineas.map((l) => ({ referencia: l.referencia, estado: datos.estado })),
+        mensajes,
+    } }];
+}
+
 // C10 · Cierre por vencimiento, cancelación, agotado o falla técnica
 function cerrarTriangulacion() {
     const t = $('Crear triangulación').first().json;
@@ -555,6 +802,10 @@ function cerrarTriangulacion() {
     if (datos.avisoCliente) mensajes.push({ numero: t.cliente, texto: datos.avisoCliente });
     if (datos.avisoAdmin && soloDigitos(cfg.numero_aviso_admin)) mensajes.push({ numero: soloDigitos(cfg.numero_aviso_admin), texto: datos.avisoAdmin });
     return [{ json: { referencia: t.referencia, patch: { estado: datos.estado, esperando: null, resume_url: null, notas: String(datos.avisoAdmin ?? '').slice(0, 500) }, mensajes } }];
+}
+
+function mensajesCierreCombo() {
+    return $('Cerrar combo').first().json.mensajes.map((m) => ({ json: m }));
 }
 
 function mensajesCierre() {
@@ -578,13 +829,26 @@ function enrutarEvento() {
         if (msg.accion === 'pago' && t.estado_compra === 'PENDIENTE_PAGO') {
             return avisar(msg.numero, `⚠️ El cliente de *#${t.referencia}* aún no ha pagado. Valida su pago en el panel (Pagos por verificar) y vuelve a enviarme la foto con *#pago ${t.referencia}*.`);
         }
+        // Combo: todas las líneas deben estar pagadas en el panel, y si el margen está en pérdida (o el costo
+        // no se pudo leer) el pago al proveedor queda PAUSADO hasta que lo fuerces explícitamente.
+        if (msg.accion === 'pago' && t.es_combo) {
+            const pendientes = abiertas.filter((h) => h.grupo === t.referencia && h.estado_compra === 'PENDIENTE_PAGO').map((h) => h.referencia);
+            if (pendientes.length) {
+                return avisar(msg.numero, `⚠️ El cliente del combo *#${t.referencia}* aún no figura como pagado en: ${pendientes.join(', ')}. Valida esos pedidos en el panel y vuelve a enviarme la foto con *#pago ${t.referencia}*.`);
+            }
+            if (t.pago_pausado && !/\bforzar\b/i.test(msg.texto)) {
+                return avisar(msg.numero, `⛔ *#${t.referencia}* tiene el pago al proveedor PAUSADO (costo mayor a lo cobrado o ilegible). No lo reenvío automáticamente. Si decides comprar igual, envía de nuevo la foto con *#pago ${t.referencia} forzar*; para cancelar: *#cancelar ${t.referencia}*.`);
+            }
+        }
         if (msg.accion === 'aprobar' && t.esperando !== 'APROBACION') return avisar(msg.numero, `*#${t.referencia}* no está esperando aprobación (estado: ${t.estado}).`);
         if (!t.resume_url) return avisar(msg.numero, `*#${t.referencia}* no tiene una espera activa. Revísalo a mano.`);
         return [{ json: { accion: 'reanudar', url: t.resume_url, cuerpo: { tipo: msg.accion, texto: msg.texto, wamid: msg.wamid } } }];
     }
 
     // Proveedor: 1) mensaje citado, 2) referencia en el texto, 3) único pedido esperándolo
-    const ref = /DC-[A-Z0-9]{4,8}/.exec(String(msg.texto).toUpperCase())?.[0];
+    const refTexto = /DC-[A-Z0-9]{4,8}/.exec(String(msg.texto).toUpperCase())?.[0];
+    // Si el proveedor nombra una línea del combo (DC-XXXXX2), la conversación es la del combo padre
+    const ref = abiertas.find((r) => r.referencia === refTexto)?.grupo || refTexto;
     const esperandoProveedor = abiertas.filter((r) => ['COTIZACION', 'CREDENCIALES'].includes(r.esperando));
     const t = (msg.citado && abiertas.find((r) => [r.wamid_cotizacion, r.wamid_pago].includes(msg.citado)))
         || (ref && abiertas.find((r) => r.referencia === ref))
@@ -820,6 +1084,72 @@ nodo('Guardar cierre', 'n8n-nodes-base.httpRequest', 4.2, [4420, Y + 500], supab
 nodoCodigo('Mensajes de cierre', [4640, Y + 500], mensajesCierre);
 nodo('Enviar aviso triangulación', 'n8n-nodes-base.httpRequest', 4.2, [4860, Y + 500], enviarA('$json.numero', '$json.texto'), { onError: 'continueRegularOutput' });
 
+/* ---------- D) Combos con el proveedor (WO-031) ---------- */
+const YC = Y + 1100; // fila de los combos en el lienzo
+const REFC = "$('Crear combo').first().json.referencia";
+const porReferenciaCombo = `?referencia=eq.{{ ${REFC} }}`;
+const lineasPanel = (expr) => rpcPanel('actualizar_lineas_combo', `={{ JSON.stringify({ p_grupo: ${REFC}, p_lineas: ${expr} }) }}`);
+nodoCodigo('Crear combo', [2000, YC], crearCombo, { conUtilidades: true });
+nodo('Registrar combo', 'n8n-nodes-base.httpRequest', 4.2, [2220, YC], supabaseTabla('POST', '',
+    "={{ JSON.stringify([Object.assign({}, $json.filas[0], { resume_url: $execution.resumeUrl })].concat($json.filas.slice(1))) }}"));
+nodoCodigo('Líneas del combo', [2330, YC - 160], lineasCombo);
+nodo('Vincular combo al panel', 'n8n-nodes-base.httpRequest', 4.2, [2440, YC - 160],
+    rpcPanel('vincular_triangulacion', '={{ JSON.stringify({ p_referencia: $json.referencia }) }}'),
+    { onError: 'continueRegularOutput', alwaysOutputData: true });
+nodo('Cotizar combo al proveedor', 'n8n-nodes-base.httpRequest', 4.2, [2660, YC], enviarA(PROVEEDOR, "$('Crear combo').first().json.texto_proveedor"), { ...terminal, executeOnce: true });
+nodo('Guardar cotización combo', 'n8n-nodes-base.httpRequest', 4.2, [2880, YC], supabaseTabla('PATCH', porReferenciaCombo,
+    '={{ JSON.stringify({ wamid_cotizacion: $json.key?.id ?? null }) }}'));
+nodo('Esperar cotización combo', 'n8n-nodes-base.wait', 1.1, [3100, YC], esperar(HORAS_COTIZACION), { webhookId: uuid() });
+nodoCodigo('Evaluar cotización combo', [3320, YC], evaluarCotizacionCombo, { conUtilidades: true }, terminal);
+nodo('Pedir pago combo al admin', 'n8n-nodes-base.httpRequest', 4.2, [3540, YC], enviarA(ADMIN, "$('Evaluar cotización combo').first().json.texto_admin"), terminal);
+nodo('Guardar costo combo', 'n8n-nodes-base.httpRequest', 4.2, [3760, YC], supabaseTabla('PATCH', porReferenciaCombo,
+    "={{ JSON.stringify({ costo_proveedor: $('Evaluar cotización combo').first().json.costo_total, pago_pausado: $('Evaluar cotización combo').first().json.pausado, estado: 'ESPERANDO_PAGO_ADMIN', esperando: 'PAGO_ADMIN' }) }}"));
+nodo('Líneas agotadas', 'n8n-nodes-base.httpRequest', 4.2, [3870, YC - 160],
+    lineasPanel("$('Evaluar cotización combo').first().json.actualizar"), { onError: 'continueRegularOutput', alwaysOutputData: true, executeOnce: true });
+nodo('¿Hay agotadas?', 'n8n-nodes-base.switch', 3.2, [3980, YC], {
+    rules: { values: [(() => { const r = regla('si', 'Avisar', 'hay_agotadas'); r.conditions.conditions[0].leftValue = "={{ $('Evaluar cotización combo').first().json.hay_agotadas }}"; return r; })()] },
+    options: { fallbackOutput: 'extra', renameFallbackOutput: 'Seguir' },
+}, { executeOnce: true });
+nodo('Avisar agotadas al cliente', 'n8n-nodes-base.httpRequest', 4.2, [4200, YC - 160],
+    enviarA("$('Crear combo').first().json.cliente", "$('Evaluar cotización combo').first().json.texto_cliente"), { onError: 'continueRegularOutput' });
+nodo('Esperar pago combo', 'n8n-nodes-base.wait', 1.1, [4420, YC], esperar(HORAS_PAGO), { webhookId: uuid() });
+nodoCodigo('Evaluar pago combo', [4640, YC], evaluarPagoCombo, { conUtilidades: true }, terminal);
+nodo('Descargar comprobante combo', 'n8n-nodes-base.httpRequest', 4.2, [4860, YC], {
+    ...evolutionEnviar('Config bot'),
+    url: "={{ $('Config bot').first().json.evolution_url }}/chat/getBase64FromMediaMessage/{{ $('Config bot').first().json.evolution_instancia }}",
+    jsonBody: '={{ JSON.stringify({ message: { key: { id: $json.wamid } }, convertToMp4: false }) }}',
+}, terminal);
+nodo('Reenviar pago combo', 'n8n-nodes-base.httpRequest', 4.2, [5080, YC], {
+    ...evolutionEnviar('Config bot'),
+    url: "={{ $('Config bot').first().json.evolution_url }}/message/sendMedia/{{ $('Config bot').first().json.evolution_instancia }}",
+    jsonBody: `={{ JSON.stringify({ number: ${PROVEEDOR}, mediatype: String($json.mimetype || '').includes('pdf') ? 'document' : 'image', mimetype: $json.mimetype || 'image/jpeg', media: $json.base64, fileName: 'comprobante-' + ${REFC} + (String($json.mimetype || '').includes('pdf') ? '.pdf' : '.jpg'), caption: 'Pago combo #' + ${REFC} + ': ' + $('Evaluar cotización combo').first().json.lineas.filter(l => !l.agotada).map(l => l.producto).join(', ') + '. Quedo atento a los accesos de cada línea (responde citando este mensaje).' }) }}`,
+}, terminal);
+nodo('Guardar pago combo', 'n8n-nodes-base.httpRequest', 4.2, [5300, YC], supabaseTabla('PATCH', porReferenciaCombo,
+    "={{ JSON.stringify({ wamid_pago: $json.key?.id ?? null, estado: 'ESPERANDO_CREDENCIALES', esperando: 'CREDENCIALES' }) }}"));
+nodo('Marcar combo realizado', 'n8n-nodes-base.httpRequest', 4.2, [5410, YC - 160],
+    lineasPanel("$('Evaluar pago combo').first().json.actualizar"), { onError: 'continueRegularOutput', alwaysOutputData: true, executeOnce: true });
+nodo('Esperar credenciales combo', 'n8n-nodes-base.wait', 1.1, [5520, YC], esperar(HORAS_CREDENCIALES), { webhookId: uuid(), executeOnce: true });
+nodoCodigo('Preparar extracción combo', [5740, YC], prepararExtraccionCombo, { conUtilidades: true }, terminal);
+nodo('Extraer credenciales combo', '@n8n/n8n-nodes-langchain.chainLlm', 1.5, [5960, YC], { promptType: 'define', text: '={{ $json.prompt }}' }, terminal);
+nodo('SiliconFlow · Extractor combo', '@n8n/n8n-nodes-langchain.lmChatOpenAi', 1.2, [5960, YC + 220], {
+    model: { __rl: true, value: MODELO, mode: 'id' },
+    options: { baseURL: SILICONFLOW_URL, temperature: 0, maxTokens: 900, timeout: 60000, maxRetries: 2 },
+});
+nodoCodigo('Entregar combo', [6180, YC], entregarCombo, { conUtilidades: true }, terminal);
+nodo('Enviar accesos combo', 'n8n-nodes-base.httpRequest', 4.2, [6400, YC], enviarA('$json.numero', '$json.texto'), terminal);
+nodo('Guardar entrega combo', 'n8n-nodes-base.httpRequest', 4.2, [6620, YC],
+    lineasPanel("$('Entregar combo').first().json.actualizar"), { onError: 'continueRegularOutput', alwaysOutputData: true, executeOnce: true });
+nodo('Cerrar combo entregado', 'n8n-nodes-base.httpRequest', 4.2, [6840, YC], supabaseTabla('PATCH', porReferenciaCombo,
+    "={{ JSON.stringify({ estado: $('Entregar combo').first().json.estado_padre, esperando: null, resume_url: null }) }}"),
+{ onError: 'continueRegularOutput', executeOnce: true });
+nodo('Aviso combo al admin', 'n8n-nodes-base.httpRequest', 4.2, [7060, YC], enviarA(ADMIN, "$('Entregar combo').first().json.texto_admin"), { onError: 'continueRegularOutput', executeOnce: true });
+nodoCodigo('Cerrar combo', [4860, YC + 500], cerrarCombo, { conUtilidades: true });
+nodo('Guardar cierre combo', 'n8n-nodes-base.httpRequest', 4.2, [5080, YC + 500], supabaseTabla('PATCH', '?referencia=eq.{{ $json.referencia }}',
+    '={{ JSON.stringify($json.patch) }}'), { onError: 'continueRegularOutput', executeOnce: true });
+nodo('Cerrar líneas combo', 'n8n-nodes-base.httpRequest', 4.2, [5300, YC + 500],
+    lineasPanel("$('Cerrar combo').first().json.actualizar"), { onError: 'continueRegularOutput', alwaysOutputData: true, executeOnce: true });
+nodoCodigo('Mensajes de cierre combo', [5520, YC + 500], mensajesCierreCombo);
+
 // Enrutador: mensajes del proveedor y comandos del admin → la espera del pedido correcto
 nodo('Pedidos abiertos', 'n8n-nodes-base.httpRequest', 4.2, [900, -520],
     rpcPanel('triangulaciones_abiertas', '={{ JSON.stringify({}) }}'),
@@ -919,6 +1249,7 @@ unir('Memoria por cliente', 'Agente IA', 0, 'ai_memory');
 unir('Agente IA', 'Revisar respuesta');
 unir('Revisar respuesta', 'Enviar respuesta');
 unir('Revisar respuesta', 'Crear triangulación');
+unir('Revisar respuesta', 'Crear combo');
 
 // C) Triangulación (salida 1 de los nodos con error = "terminar" → cierre)
 unir('Ruta', 'Pedidos abiertos', 4);
@@ -940,10 +1271,28 @@ unir('Enviar accesos al cliente', 'Guardar entrega');
 unir('Guardar entrega', 'Marcar entregado en el panel');
 unir('Marcar entregado en el panel', 'Aviso de entrega');
 unir('Aviso de entrega', 'Enviar aviso triangulación');
-for (const n of nodos.filter((x) => x.onError === 'continueErrorOutput' && x.position[1] >= Y)) unir(n.name, 'Cerrar triangulación', 1);
+for (const n of nodos.filter((x) => x.onError === 'continueErrorOutput' && x.position[1] >= Y && x.position[1] < YC)) unir(n.name, 'Cerrar triangulación', 1);
 unir('Cerrar triangulación', 'Guardar cierre');
 unir('Guardar cierre', 'Mensajes de cierre');
 unir('Mensajes de cierre', 'Enviar aviso triangulación');
+
+// D) Combos
+['Crear combo', 'Registrar combo', 'Líneas del combo', 'Vincular combo al panel', 'Cotizar combo al proveedor', 'Guardar cotización combo',
+    'Esperar cotización combo', 'Evaluar cotización combo', 'Pedir pago combo al admin', 'Guardar costo combo', 'Líneas agotadas', '¿Hay agotadas?']
+    .forEach((n, i, a) => { if (a[i + 1]) unir(n, a[i + 1]); });
+unir('¿Hay agotadas?', 'Avisar agotadas al cliente', 0);
+unir('¿Hay agotadas?', 'Esperar pago combo', 1);
+unir('Avisar agotadas al cliente', 'Esperar pago combo');
+['Esperar pago combo', 'Evaluar pago combo', 'Descargar comprobante combo', 'Reenviar pago combo', 'Guardar pago combo', 'Marcar combo realizado',
+    'Esperar credenciales combo', 'Preparar extracción combo', 'Extraer credenciales combo', 'Entregar combo', 'Enviar accesos combo',
+    'Guardar entrega combo', 'Cerrar combo entregado', 'Aviso combo al admin']
+    .forEach((n, i, a) => { if (a[i + 1]) unir(n, a[i + 1]); });
+unir('SiliconFlow · Extractor combo', 'Extraer credenciales combo', 0, 'ai_languageModel');
+for (const n of nodos.filter((x) => x.onError === 'continueErrorOutput' && x.position[1] >= YC)) unir(n.name, 'Cerrar combo', 1);
+unir('Cerrar combo', 'Guardar cierre combo');
+unir('Guardar cierre combo', 'Cerrar líneas combo');
+unir('Cerrar líneas combo', 'Mensajes de cierre combo');
+unir('Mensajes de cierre combo', 'Enviar aviso triangulación');
 
 unir('Cada minuto', 'Config posventa');
 unir('Config posventa', 'Plantillas posventa');
