@@ -103,6 +103,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     sessionStorage.removeItem('dc_admin_auth');
 
     async function mostrarDashboard() {
+        // El panel solo abre para cuentas en public.administradores (la base rechazaría todo lo demás)
+        const { data: esAdmin, error: errAdmin } = await supabaseClient.rpc('es_admin');
+        if (!errAdmin && esAdmin === false) {
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            await supabaseClient.auth.signOut();
+            mostrarLogin();
+            document.getElementById('login-error-texto').textContent =
+                `La cuenta ${user?.email ?? ''} no está registrada como administradora.`;
+            loginError.classList.remove('hidden');
+            return;
+        }
         vistaLogin.classList.add('hidden');
         vistaDashboard.classList.remove('hidden');
         vistaDashboard.animate(
