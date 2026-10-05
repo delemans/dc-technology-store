@@ -9,6 +9,8 @@
 --                                      panel ("Pagos por verificar"), y al validar el pago sigue el flujo normal.
 --   avanzar_compra_triangulada(...)  → PEDIDO_REALIZADO al pagarle al proveedor; ENTREGADO + clave al final
 --                                      (dispara la garantía, el portal y las notificaciones existentes).
+--   pedidos.estado sigue a la compra (ESPERANDO_PAGO → PAGADO → ESPERANDO_PROVEEDOR → ENTREGADO; cierres
+--                                      a CANCELADO / EXPIRADO / EN_REVISION), también si el admin actúa en el panel.
 --   triangulaciones_abiertas()       → lo que n8n usa para enrutar mensajes, con el estado de la compra
 --                                      (para no pagarle al proveedor si el cliente aún no pagó).
 --
@@ -160,7 +162,7 @@ begin
         end if;
 
         -- c) Pedido (canal WHATSAPP, pendiente de pago). El método se confirma al validar el pago en el panel.
-        v_estado_ped := public.valor_enum('pedidos', 'estado', array['PENDIENTE_PAGO', 'PENDIENTE', 'ESPERANDO_PAGO', 'CREADO', 'NUEVO']);
+        v_estado_ped := public.valor_enum('pedidos', 'estado', array['ESPERANDO_PAGO', 'PENDIENTE_PAGO', 'PENDIENTE', 'CREADO', 'NUEVO']);
         if v_estado_ped is null then
             raise exception 'No reconozco un estado "pendiente de pago" en pedidos.estado.';
         end if;
@@ -250,9 +252,7 @@ begin
         update public.compras_proveedor c
            set estado = 'ENTREGADO', clave_serial = p_clave, entregado_at = now(), recibido_at = coalesce(c.recibido_at, now())
          where c.id::text = t.compra_id and c.estado::text in ('ESPERANDO_PROVEEDOR', 'PEDIDO_REALIZADO', 'RECIBIDA');
-        if found then
-            update public.pedidos p set entregado_at = now() where p.id = t.pedido_id;
-        end if;
+        -- pedidos.estado y entregado_at los pone el trigger de sincronización (sección 2b)
     else
         return query select false, 'Estado no permitido.';
         return;
@@ -265,6 +265,121 @@ begin
     return query select true, format('Compra en %s.', p_estado);
 end;
 $$;
+
+-- 2b) ESTADO DEL PEDIDO (pedidos.estado) SINCRONIZADO CON LA COMPRA Y LA TRIANGULACIÓN -----
+-- Valores reales del enum: ESPERANDO_PAGO, EN_VALIDACION, PAGADO, PENDIENTE_COMPRA, ESPERANDO_PROVEEDOR,
+-- EN_REVISION, ENTREGADO, RECHAZADO, EXPIRADO, CANCELADO, REEMBOLSADO.
+--   compra ESPERANDO_PROVEEDOR (pago validado en el panel) → pedido PAGADO (+ pagado_at)
+--   compra PEDIDO_REALIZADO (#pago al proveedor)           → pedido ESPERANDO_PROVEEDOR
+--   compra ENTREGADO / ENTREGADO_INMEDIATO                 → pedido ENTREGADO (+ entregado_at)
+--   triangulación CANCELADO / AGOTADO / VENCIDO:
+--       sin pago → pedido CANCELADO / EXPIRADO y compra CANCELADA;  ya pagado → pedido EN_REVISION (reembolso o entrega manual)
+-- Solo avanza (nunca retrocede) y un estado final no se mueve. Solo aplica a pedidos de la triangulación.
+
+create or replace function public.cambiar_estado_pedido(p_pedido uuid, p_estado text)
+returns boolean
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+    v_orden   constant text[] := array['ESPERANDO_PAGO', 'EN_VALIDACION', 'PAGADO', 'PENDIENTE_COMPRA', 'ESPERANDO_PROVEEDOR', 'EN_REVISION', 'ENTREGADO'];
+    v_finales constant text[] := array['ENTREGADO', 'RECHAZADO', 'EXPIRADO', 'CANCELADO', 'REEMBOLSADO'];
+    v_actual  text;
+    v_tipo    text;
+begin
+    if p_pedido is null or public.valor_enum('pedidos', 'estado', array[p_estado]) is null then
+        return false;  -- valor que no existe en el enum de esta base: no se toca nada
+    end if;
+    select p.estado::text into v_actual from public.pedidos p where p.id = p_pedido for update;
+    if not found or v_actual = p_estado or v_actual = any (v_finales) then
+        return false;
+    end if;
+    if p_estado = any (v_orden) and array_position(v_orden, p_estado) < coalesce(array_position(v_orden, v_actual), 0) then
+        return false;  -- no retrocede
+    end if;
+    select format('%I.%I', c.udt_schema, c.udt_name) into v_tipo from information_schema.columns c
+    where c.table_schema = 'public' and c.table_name = 'pedidos' and c.column_name = 'estado';
+    execute format('update public.pedidos
+                       set estado = $1::%s,
+                           updated_at = now(),
+                           pagado_at = case when $1 = ''PAGADO'' then coalesce(pagado_at, now()) else pagado_at end,
+                           entregado_at = case when $1 = ''ENTREGADO'' then coalesce(entregado_at, now()) else entregado_at end
+                     where id = $2', v_tipo)
+        using p_estado, p_pedido;
+    return true;
+end;
+$$;
+revoke all on function public.cambiar_estado_pedido(uuid, text) from public, anon, authenticated;
+
+-- Compra → pedido (también cuando el admin valida o entrega desde el panel)
+create or replace function public.sincronizar_pedido_desde_compra()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+    if new.pedido_id is null or new.estado is not distinct from old.estado
+       or not exists (select 1 from public.triangulaciones t where t.compra_id = new.id::text) then
+        return new;
+    end if;
+    case new.estado::text
+        when 'ESPERANDO_PROVEEDOR' then
+            perform public.cambiar_estado_pedido(new.pedido_id, 'PAGADO');
+        when 'PEDIDO_REALIZADO' then
+            perform public.cambiar_estado_pedido(new.pedido_id, 'PAGADO');           -- por si se saltó el paso
+            perform public.cambiar_estado_pedido(new.pedido_id, 'ESPERANDO_PROVEEDOR');
+        when 'ENTREGADO', 'ENTREGADO_INMEDIATO' then
+            perform public.cambiar_estado_pedido(new.pedido_id, 'PAGADO');           -- entrega inmediata: también quedó pagado
+            perform public.cambiar_estado_pedido(new.pedido_id, 'ENTREGADO');
+        else
+            null;
+    end case;
+    return new;
+end;
+$$;
+
+drop trigger if exists trg_sincronizar_pedido_desde_compra on public.compras_proveedor;
+create trigger trg_sincronizar_pedido_desde_compra
+    after update of estado on public.compras_proveedor
+    for each row execute function public.sincronizar_pedido_desde_compra();
+
+-- Triangulación cerrada → pedido y compra
+create or replace function public.cerrar_pedido_triangulado()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+    v_pedido text;
+begin
+    if new.pedido_id is null or new.estado is not distinct from old.estado
+       or new.estado not in ('CANCELADO', 'AGOTADO', 'VENCIDO') then
+        return new;
+    end if;
+    select p.estado::text into v_pedido from public.pedidos p where p.id = new.pedido_id;
+    if v_pedido in ('ESPERANDO_PAGO', 'EN_VALIDACION') then
+        -- El cliente no pagó: se cierra todo (la compra CANCELADA también cancela sus avisos pendientes, wo-015)
+        perform public.cambiar_estado_pedido(new.pedido_id, case when new.estado = 'VENCIDO' then 'EXPIRADO' else 'CANCELADO' end);
+        update public.compras_proveedor c set estado = 'CANCELADA'
+         where c.id::text = new.compra_id and c.estado::text = 'PENDIENTE_PAGO';
+    else
+        -- Ya pagó: queda para que el administrador decida (reembolso o entrega manual)
+        perform public.cambiar_estado_pedido(new.pedido_id, 'EN_REVISION');
+    end if;
+    return new;
+end;
+$$;
+
+drop trigger if exists trg_cerrar_pedido_triangulado on public.triangulaciones;
+create trigger trg_cerrar_pedido_triangulado
+    after update of estado on public.triangulaciones
+    for each row execute function public.cerrar_pedido_triangulado();
+
+revoke all on function public.sincronizar_pedido_desde_compra() from public, anon, authenticated;
+revoke all on function public.cerrar_pedido_triangulado() from public, anon, authenticated;
 
 -- 3) PEDIDOS ABIERTOS PARA EL ENRUTADOR DE n8n (con el estado de la compra) --------
 drop function if exists public.triangulaciones_abiertas();
@@ -294,5 +409,5 @@ grant execute on function public.triangulaciones_abiertas() to service_role;
 
 -- Verificación: qué productos del catálogo ya encuentran su variante por nombre
 select to_regprocedure('public.vincular_triangulacion(text)') is not null as rpc_vincular,
-       public.valor_enum('pedidos', 'estado', array['PENDIENTE_PAGO', 'PENDIENTE', 'ESPERANDO_PAGO', 'CREADO', 'NUEVO']) as estado_pedido_usado,
+       public.valor_enum('pedidos', 'estado', array['ESPERANDO_PAGO', 'PENDIENTE_PAGO', 'PENDIENTE', 'CREADO', 'NUEVO']) as estado_pedido_usado,
        public.columna_existe('variantes', 'nombre') and public.columna_existe('variantes', 'producto_id') and public.columna_existe('productos', 'nombre') as cruce_por_nombre_posible;
