@@ -43,6 +43,21 @@ const kbEmbebida = {
     catalogo: kb.catalogo.map(({ nombre, tipo, variantes }) => ({ nombre, tipo, variantes: variantes.map(({ nombre: n, precio }) => ({ nombre: n, precio })) })),
 };
 
+// WO-035 · Compra en el portal del proveedor: nuestra variante → producto y plan en ANC (mismo precio).
+// Fuente: herramientas/equivalencias-ancpagos.json + nombres de productos.json.
+const ancMapa = (() => {
+    const { _nota, ...eq } = JSON.parse(fs.readFileSync(path.join(RAIZ, 'herramientas', 'equivalencias-ancpagos.json'), 'utf8'));
+    const productos = JSON.parse(fs.readFileSync(path.join(RAIZ, 'productos.json'), 'utf8'));
+    return Object.entries(eq).flatMap(([id, e]) => {
+        const p = productos.find((x) => x.id === id);
+        if (!p) throw new Error(`equivalencias-ancpagos.json: no existe el producto ${id}`);
+        return Object.entries(e.variantes).map(([variante, plan]) => {
+            if (!p.variantes.some((v) => v.nombre === variante)) throw new Error(`equivalencias-ancpagos.json: ${id} no tiene la variante "${variante}"`);
+            return { producto: p.nombre, variante, anc_producto: e.proveedor, anc_plan: plan };
+        });
+    });
+})();
+
 /* ==================== CÓDIGO DE LOS NODOS ==================== */
 // Globales de n8n que usan: $, $input, $getWorkflowStaticData. __KB__ y __HORAS_PAUSA__ se inyectan al generar.
 
@@ -396,8 +411,10 @@ function crearTriangulacion() {
     const cfg = $('Config bot').first().json;
     const item = $input.first().json;
     const p = item.pedido;
-    // Sin proveedor o sin tu número de aviso no hay a quién cotizar ni a quién pedir el pago
-    if (!p || !soloDigitos(cfg.numero_proveedor) || !soloDigitos(cfg.numero_aviso_admin)) return [];
+    // Canal de compra (WO-035): 'web' compra en el portal de ANC; 'whatsapp' le escribe al proveedor.
+    // Sin tu número de aviso no hay a quién pedir el pago; por WhatsApp además hace falta el del proveedor.
+    const canal = String(cfg.canal_compra || 'whatsapp').trim().toLowerCase() === 'web' ? 'web' : 'whatsapp';
+    if (!p || !soloDigitos(cfg.numero_aviso_admin) || (canal === 'whatsapp' && !soloDigitos(cfg.numero_proveedor))) return [];
     const memoria = $getWorkflowStaticData('global');
     memoria.pedidos = memoria.pedidos || {};
     const ahora = Date.now();
@@ -415,6 +432,7 @@ function crearTriangulacion() {
     const nombre = item.nombre ?? $('Normalizar mensaje').first().json.nombre;
     return [{ json: {
         referencia,
+        canal,
         cliente: item.numero,
         cliente_nombre: String(nombre ?? '').slice(0, 60),
         producto: p.producto,
@@ -435,6 +453,7 @@ function evaluarCotizacion() {
     const demora = 'Tu pedido está tomando más tiempo de lo normal; un asesor te escribe enseguida 🙏';
     if (!b) terminar('VENCIDO', `⏰ El proveedor no respondió la cotización de *#${t.referencia}* (${t.producto}) en __HORAS_COTIZACION__ h. Atiéndelo a mano.`, demora);
     if (b.tipo === 'cancelar') terminar('CANCELADO', `🛑 Pedido *#${t.referencia}* cancelado.`, null);
+    if (b.tipo === 'web') return cotizacionWeb(t, b, demora);
     const texto = String(b.texto ?? '');
     if (/(no hay|agotad|sin stock|no tengo|no disponible|no manejo)/.test(normalizar(texto))) {
         terminar('AGOTADO', `❌ Proveedor sin disponibilidad para *#${t.referencia}* (${t.producto}). Dijo: «${texto.slice(0, 200)}»`,
@@ -456,6 +475,41 @@ function evaluarCotizacion() {
         `Para cancelar: *#cancelar ${t.referencia}*`,
         enPanel ? '📋 Ya está en el panel: valida ahí el pago del cliente.' : `⚠️ No quedó en el panel (${String(vinculo.mensaje ?? vinculo.error?.message ?? 'sin respuesta').slice(0, 160)}). Valida el pago del cliente a mano.`,
     ].join('\n') } }];
+
+    // C2-web · Cotización leída del portal de ANC (WO-035): precio = costo, sin esperar al proveedor.
+    // Va DENTRO de evaluarCotizacion porque cada nodo Code se serializa solo con el cuerpo de su función.
+    function cotizacionWeb(t, b, demora) {
+    const cfg = $('Config bot').first().json;
+    const producto = `${t.producto}${t.variante ? ` – ${t.variante}` : ''}`;
+    if (!b.catalogo_ok) terminar('REVISION_MANUAL', `⚠️ No pude leer el catálogo de ancpagos.com para *#${t.referencia}* (${producto}). Cómpralo a mano.`, demora);
+    if (!b.eq) terminar('REVISION_MANUAL', `⚠️ *#${t.referencia}*: ${producto} no tiene equivalencia en ANC (herramientas/equivalencias-ancpagos.json). Cómpralo a mano.`, demora);
+    if (!b.existe) {
+        terminar('AGOTADO', `❌ ANC ya no ofrece *${b.eq.anc_producto} · ${b.eq.anc_plan}* (pedido *#${t.referencia}*).`,
+            `Por ahora no tenemos disponible *${t.producto}* 😔 Escríbeme y te muestro otra opción.`);
+    }
+    if (!b.medio?.numero) terminar('REVISION_MANUAL', `⚠️ ANC no publica el medio de pago "${cfg.anc_metodo}" (anc_metodo en Config bot). Revisa *#${t.referencia}* a mano.`, demora);
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(String(cfg.anc_correo ?? '').trim())) {
+        terminar('REVISION_MANUAL', `⚠️ Falta *anc_correo* en Config bot (ANC envía ahí los accesos). *#${t.referencia}* quedó sin comprar: hazlo a mano.`, demora);
+    }
+    const costo = b.costo;
+    const vinculo = $('Vincular al panel').first().json ?? {};
+    const margen = costo !== null && t.precio_venta ? t.precio_venta - costo : null;
+    return [{ json: { costo, texto_admin: [
+        `🛒 *Comprar en ANC · #${t.referencia}*`,
+        `Cliente: +${t.cliente}${t.cliente_nombre ? ` (${t.cliente_nombre})` : ''}`,
+        `Producto: ${producto}`,
+        `En ANC: ${b.eq.anc_producto} · ${b.eq.anc_plan}${b.stock !== null && b.stock !== undefined ? ` (stock ${b.stock})` : ' (bajo pedido)'}`,
+        `Venta: ${cop(t.precio_venta)} · Costo ANC: ${cop(costo)}${margen !== null ? ` · Margen: ${cop(margen)}` : ''}`,
+        margen !== null && margen <= 0 ? '⛔ Margen en cero o en pérdida: revísalo antes de pagar.' : null,
+        '',
+        '⚠️ Antes de pagar, confirma en el panel que el cliente YA pagó.',
+        `1) Paga *${cop(costo)}* por ${b.medio.nombre} a *${b.medio.numero}*${b.medio.titular ? ` (${b.medio.titular})` : ''}.`,
+        `2) Envíame aquí la FOTO (captura, no PDF) del comprobante con el texto: *#pago ${t.referencia}*`,
+        'Yo creo el pedido en ancpagos.com con esa foto y te aviso cuando lleguen los accesos.',
+        `Para cancelar: *#cancelar ${t.referencia}*`,
+        vinculo.ok === true ? '📋 Ya está en el panel: valida ahí el pago del cliente.' : `⚠️ No quedó en el panel (${String(vinculo.mensaje ?? vinculo.error?.message ?? 'sin respuesta').slice(0, 160)}). Valida el pago del cliente a mano.`,
+    ].filter((l) => l !== null).join('\n') } }];
+    }
 }
 
 // C3 · Comprobante del administrador (o fin de la espera)
@@ -572,6 +626,138 @@ function avisoEntrega() {
         `Cliente: +${t.cliente} · clave terminada en …${e.clave_final}`,
         panel.ok === true ? '🛡️ Registrado en el panel con garantía activa.' : `⚠️ No se registró en el panel (${String(panel.mensaje ?? 'sin respuesta').slice(0, 160)}): márcalo entregado a mano para activar la garantía.`,
     ].join('\n') } }] : [];
+}
+
+/* ---------- C-web) Compra en el portal del proveedor (WO-035) ----------
+   Mismo pedido, mismas esperas y misma extracción que por WhatsApp; cambian tres pasos:
+   cotizar (catálogo público de ancpagos.com), comprar (procesar_pago con tu comprobante) y leer los
+   accesos (página del pedido en ANC, que "Pedidos ANC cada minuto" revisa y entrega a "Esperar credenciales"). */
+
+// CW1 · Precio, existencia y medio de pago en el portal de ANC → mismo formato que una respuesta del proveedor
+function cotizacionAnc() {
+    const t = $('Crear triangulación').first().json;
+    const cfg = $('Config bot').first().json;
+    const html = String($('Catálogo ANC').first().json.data ?? '');
+    const medios = $('Medios de pago ANC').first().json ?? {};
+    const clave = (a, b) => `${normalizar(a).trim()}|${normalizar(b).trim()}`;
+    const eq = __ANC_MAPA__.find((m) => clave(m.producto, m.variante) === clave(t.producto, t.variante)) ?? null;
+    // Literal JSON asignado a `const NOMBRE = …` en la página (cuenta llaves y respeta cadenas)
+    const variable = (nombre) => {
+        const i = html.indexOf(`const ${nombre}`);
+        if (i < 0) return null;
+        const s = html.indexOf('=', i) + 1;
+        let prof = 0, cadena = null, j = s;
+        for (; j < html.length; j++) {
+            const c = html[j];
+            if (cadena) { if (c === '\\') j++; else if (c === cadena) cadena = null; continue; }
+            if (c === '"' || c === "'") cadena = c;
+            else if (c === '{' || c === '[') prof++;
+            else if (c === '}' || c === ']') { prof--; if (prof === 0) break; }
+        }
+        try { return JSON.parse(html.slice(s, j + 1).trim()); } catch { return null; }
+    };
+    const catalogo = variable('CATALOGO_INICIAL_IDX');
+    const v = eq && catalogo ? catalogo[eq.anc_producto]?.[eq.anc_plan] : null;
+    const claveMedio = String(cfg.anc_metodo || 'nequi').trim();
+    const medio = medios[claveMedio];
+    return [{ json: { body: {
+        tipo: 'web',
+        eq,
+        catalogo_ok: Boolean(catalogo),
+        existe: Boolean(v && Number(v.precio) > 0),
+        costo: v ? Number(v.precio) : null,
+        stock: eq ? ((variable('STOCK_INICIAL_IDX') ?? {})[eq.anc_producto]?.[eq.anc_plan] ?? null) : null,
+        medio: medio ? { key: claveMedio, nombre: medio.nombre, numero: medio.numero, titular: medio.titular } : null,
+    } } }];
+}
+
+// CW2 · Pedido para ancpagos.com/procesar_pago (los mismos campos que su checkout) + tu comprobante
+function prepararCompraAnc() {
+    const t = $('Crear triangulación').first().json;
+    const cfg = $('Config bot').first().json;
+    const c = $('Cotización ANC').first().json.body;
+    const d = $input.first().json; // getBase64FromMediaMessage → { base64, mimetype }
+    const tipo = String(d.mimetype || 'image/jpeg').split(';')[0].trim().toLowerCase();
+    const aMano = `Ya pagaste: crea el pedido a mano en ancpagos.com (${c.eq.anc_producto} · ${c.eq.anc_plan}) con esa misma foto.`;
+    if (!d.base64) terminar('REVISION_MANUAL', `⚠️ No pude descargar tu comprobante de *#${t.referencia}*. ${aMano}`, null);
+    if (!/^image\/(jpe?g|png|webp)$/.test(tipo)) terminar('REVISION_MANUAL', `⚠️ ANC solo recibe imágenes y el comprobante de *#${t.referencia}* es ${tipo}. ${aMano}`, null);
+    // Llave anti-duplicado fija por pedido (formato UUID): si se reintenta, ANC devuelve el mismo pedido
+    let h = 0x811c9dc5, hex = '';
+    for (let ronda = 0; hex.length < 32; ronda++) {
+        for (const ch of `DC|${t.referencia}|${c.medio.key}|${ronda}`) h = Math.imul(h ^ ch.charCodeAt(0), 0x01000193) >>> 0;
+        hex += h.toString(16).padStart(8, '0');
+    }
+    const llave = `${hex.slice(0, 8)}-${hex.slice(8, 12)}-4${hex.slice(13, 16)}-a${hex.slice(17, 20)}-${hex.slice(20, 32)}`;
+    const wa = soloDigitos(cfg.anc_whatsapp) || soloDigitos(cfg.numero_aviso_admin);
+    return [{
+        json: {
+            nombre_cliente: String(cfg.anc_nombre || 'DC').slice(0, 40),
+            apellido_cliente: String(cfg.anc_apellido || 'Technology').slice(0, 40),
+            whatsapp: wa.length === 10 ? `57${wa}` : wa,
+            correo: String(cfg.anc_correo).trim(),
+            resumen_pedido: `1x ${c.eq.anc_producto} (${c.eq.anc_plan})`,
+            total_pagado: new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(c.costo),
+            metodo: c.medio.nombre,
+            metodo_key: c.medio.key,
+            moneda_cripto: '',
+            llave_pedido: llave,
+        },
+        binary: { comprobante: { data: d.base64, mimeType: tipo, fileName: `comprobante-${t.referencia}.${tipo === 'image/png' ? 'png' : tipo === 'image/webp' ? 'webp' : 'jpg'}` } },
+    }];
+}
+
+// CW3 · Respuesta de ANC: "id|token" (lo mismo que usa su checkout para abrir la página del pedido)
+function pedidoAncCreado() {
+    const t = $('Crear triangulación').first().json;
+    const c = $('Cotización ANC').first().json.body;
+    const cfg = $('Config bot').first().json;
+    const r = $input.first().json;
+    const cuerpo = String(r.body ?? r.data ?? '').trim();
+    const m = /^(\d{1,12})\|([A-Za-z0-9_.~-]{8,200})$/.exec(cuerpo);
+    if (!m || Number(r.statusCode || 200) >= 400) {
+        terminar('REVISION_MANUAL', [
+            `⚠️ ANC no aceptó el pedido de *#${t.referencia}* (${c.eq.anc_producto} · ${c.eq.anc_plan}).`,
+            `Respuesta: «${(cuerpo.startsWith('<') ? 'página de error' : cuerpo).slice(0, 300) || String(r.error?.message ?? 'sin respuesta').slice(0, 300)}»`,
+            'Ya pagaste: crea el pedido a mano en ancpagos.com con la misma foto y entrega los accesos al cliente.',
+        ].join('\n'), 'Tu pedido está tomando más tiempo de lo normal; un asesor te escribe enseguida 🙏');
+    }
+    return [{ json: {
+        anc_pedido_id: m[1],
+        anc_token: m[2],
+        numero: soloDigitos(cfg.numero_aviso_admin),
+        texto: [
+            `🧾 *Pedido creado en ANC · #${t.referencia}*`,
+            `${c.eq.anc_producto} · ${c.eq.anc_plan} · ANC #${m[1]}`,
+            `Seguimiento: ${String(cfg.anc_url).replace(/\/$/, '')}/estado_pedido?id=${m[1]}&t=${encodeURIComponent(m[2])}`,
+            'Reviso esa página cada minuto y le entrego los accesos al cliente apenas aparezcan.',
+        ].join('\n'),
+    } }];
+}
+
+// CW4 · Página del pedido en ANC → si ya muestra los accesos, reanuda "Esperar credenciales" de ese pedido
+function accesosEnAnc() {
+    const pedidos = $('Pedidos ANC esperando').all().map((i) => i.json);
+    const salida = [];
+    $input.all().forEach((item, i) => {
+        const p = pedidos[i];
+        const r = item.json;
+        if (!p?.referencia || !p.resume_url || Number(r.statusCode) !== 200) return;
+        const texto = String(r.body ?? r.data ?? '')
+            .replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>|<!--[\s\S]*?-->/gi, ' ')
+            .replace(/<br\s*\/?>|<\/(p|div|li|tr|h\d|section|article)>/gi, '\n')
+            .replace(/<[^>]+>/g, ' ')
+            .replace(/&nbsp;/g, ' ').replace(/&quot;/g, '"').replace(/&#0?39;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&')
+            .replace(/[ \t]+/g, ' ').replace(/\n\s*(\n\s*)+/g, '\n').trim();
+        const n = normalizar(texto);
+        // Accesos visibles = un dato rotulado de usuario/correo Y uno de clave; nunca con el pago aún en verificación
+        const usuario = /(usuario|correo|email|e-mail|cuenta)\s*:\s*\S{3,}/.test(n);
+        const clave = /(contrasena|clave|password|pin)\s*:\s*\S{3,}/.test(n);
+        const pendiente = /(verificando|en verificacion|validando (tu|el) pago|pendiente de pago|esperando (tu|el) pago|en revision)/.test(n);
+        if (!usuario || !clave || pendiente) return;
+        const inicio = Math.max(0, texto.toLowerCase().search(/(usuario|correo|e-?mail|cuenta)\s*:/) - 300);
+        salida.push({ json: { url: p.resume_url, cuerpo: { tipo: 'credenciales', origen: 'anc_web', texto: texto.slice(inicio, inicio + 1900) } } });
+    });
+    return salida;
 }
 
 /* ---------- D) Compra al proveedor para COMBOS (WO-031) ----------
@@ -909,7 +1095,8 @@ const codigo = (fn, { conUtilidades = false } = {}) => ((conUtilidades ? `${UTIL
     .replace(/__HORARIO__/g, JSON.stringify(WA.HORARIO))
     .replace(/__HORAS_COTIZACION__/g, String(HORAS_COTIZACION))
     .replace(/__HORAS_PAGO__/g, String(HORAS_PAGO))
-    .replace(/__HORAS_CREDENCIALES__/g, String(HORAS_CREDENCIALES));
+    .replace(/__HORAS_CREDENCIALES__/g, String(HORAS_CREDENCIALES))
+    .replace(/__ANC_MAPA__/g, `(${JSON.stringify(ancMapa)})`);
 
 const uuid = () => crypto.randomUUID();
 const nodos = [];
@@ -962,7 +1149,15 @@ nodo('Marcar despacho', 'n8n-nodes-base.set', 3.4, [0, 220], set({ despacho: 'si
 nodo('Config bot', 'n8n-nodes-base.set', 3.4, [220, 0], set({
     ...configComun,
     numero_aviso_admin: '',
-    numero_proveedor: '', // WhatsApp de ALL NECESSARY COLOMBIA (vacío = triangulación desactivada)
+    numero_proveedor: '', // WhatsApp de ALL NECESSARY COLOMBIA (solo para canal_compra = whatsapp y combos)
+    // WO-035 · Compra al proveedor: 'web' = en ancpagos.com (cotiza solo, tú pagas con un toque); 'whatsapp' = por chat
+    canal_compra: 'web',
+    anc_url: 'https://ancpagos.com',
+    anc_metodo: 'nequi',   // clave del medio de pago de ANC con el que les pagas (nequi, daviplata, brebManual, bancolombia)
+    anc_correo: '',        // correo donde ANC envía los accesos (obligatorio para comprar por web)
+    anc_nombre: 'DC',
+    anc_apellido: 'Technology',
+    anc_whatsapp: '',      // vacío = tu número de aviso
     palabras_asesor: kb.escalamiento.palabras_clave.join(','),
 }, { incluirEntrada: true }));
 nodoCodigo('Normalizar mensaje', [440, 0], normalizarMensaje, { conUtilidades: true });
@@ -1066,17 +1261,42 @@ const terminal = { onError: 'continueErrorOutput' };
 
 // WO-033: entrada del despacho de órdenes web
 nodo('Origen', 'n8n-nodes-base.switch', 3.2, [330, 0], {
-    rules: { values: [regla('si', 'Despacho', 'despacho')] },
+    rules: { values: [regla('si', 'Despacho', 'despacho'), regla('si', 'ANC', 'revisar_anc')] },
     options: { fallbackOutput: 'extra', renameFallbackOutput: 'WhatsApp' },
 });
 nodo('Órdenes por despachar', 'n8n-nodes-base.httpRequest', 4.2, [1780, 440], rpcPanel('tomar_despachos', '={{ JSON.stringify({}) }}'), { onError: 'continueRegularOutput' });
 nodoCodigo('Preparar despacho', [1890, 600], prepararDespacho);
 nodoCodigo('Crear triangulación', [2000, Y], crearTriangulacion, { conUtilidades: true });
 nodo('Registrar triangulación', 'n8n-nodes-base.httpRequest', 4.2, [2220, Y], supabaseUpsert(
-    "={{ JSON.stringify({ referencia: $json.referencia, cliente: $json.cliente, cliente_nombre: $json.cliente_nombre, producto: $json.producto, variante: $json.variante, precio_venta: $json.precio_venta, estado: 'COTIZANDO', esperando: 'COTIZACION', resume_url: $execution.resumeUrl }) }}"));
+    "={{ JSON.stringify({ referencia: $json.referencia, cliente: $json.cliente, cliente_nombre: $json.cliente_nombre, producto: $json.producto, variante: $json.variante, precio_venta: $json.precio_venta, canal_compra: $json.canal, estado: 'COTIZANDO', esperando: 'COTIZACION', resume_url: $execution.resumeUrl }) }}"));
 nodo('Vincular al panel', 'n8n-nodes-base.httpRequest', 4.2, [2330, Y - 160],
     rpcPanel('vincular_triangulacion', `={{ JSON.stringify({ p_referencia: ${REF} }) }}`),
     { onError: 'continueRegularOutput', alwaysOutputData: true });
+// WO-035: canal de compra del pedido (lo fija "Crear triangulación")
+const porCanal = (salidaWeb) => ({
+    rules: { values: [{
+        conditions: {
+            options: { caseSensitive: true, leftValue: '', typeValidation: 'strict', version: 2 },
+            conditions: [{ id: uuid(), leftValue: "={{ $('Crear triangulación').first().json.canal }}", rightValue: 'web', operator: { type: 'string', operation: 'equals' } }],
+            combinator: 'and',
+        },
+        renameOutput: true,
+        outputKey: salidaWeb,
+    }] },
+    options: { fallbackOutput: 'extra', renameFallbackOutput: 'WhatsApp' },
+});
+const ANC = "$('Config bot').first().json.anc_url.replace(/\\/$/, '')";
+const navegador = { sendHeaders: true, headerParameters: { parameters: [{ name: 'User-Agent', value: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Safari/537.36' }] } };
+nodo('¿Compra web?', 'n8n-nodes-base.switch', 3.2, [2440, Y - 320], porCanal('Portal ANC'));
+nodo('Catálogo ANC', 'n8n-nodes-base.httpRequest', 4.2, [2660, Y - 420], {
+    url: `={{ ${ANC} }}/`, ...navegador,
+    options: { timeout: 20000, response: { response: { responseFormat: 'text', outputPropertyName: 'data' } } },
+}, { onError: 'continueRegularOutput', alwaysOutputData: true });
+nodo('Medios de pago ANC', 'n8n-nodes-base.httpRequest', 4.2, [2770, Y - 300], {
+    url: `={{ ${ANC} }}/api_portal?a=medios`, ...navegador,
+    options: { timeout: 15000, response: { response: { responseFormat: 'json' } } },
+}, { onError: 'continueRegularOutput', alwaysOutputData: true });
+nodoCodigo('Cotización ANC', [2880, Y - 420], cotizacionAnc, { conUtilidades: true }, terminal);
 nodo('Cotizar al proveedor', 'n8n-nodes-base.httpRequest', 4.2, [2440, Y], enviarA(PROVEEDOR, "$('Crear triangulación').first().json.texto_proveedor"), terminal);
 nodo('Guardar cotización enviada', 'n8n-nodes-base.httpRequest', 4.2, [2660, Y], supabaseTabla('PATCH', porReferencia,
     '={{ JSON.stringify({ wamid_cotizacion: $json.key?.id ?? null }) }}'));
@@ -1097,6 +1317,26 @@ nodo('Reenviar pago al proveedor', 'n8n-nodes-base.httpRequest', 4.2, [4420, Y],
     url: "={{ $('Config bot').first().json.evolution_url }}/message/sendMedia/{{ $('Config bot').first().json.evolution_instancia }}",
     jsonBody: `={{ JSON.stringify({ number: ${PROVEEDOR}, mediatype: String($json.mimetype || '').includes('pdf') ? 'document' : 'image', mimetype: $json.mimetype || 'image/jpeg', media: $json.base64, fileName: 'comprobante-' + ${REF} + (String($json.mimetype || '').includes('pdf') ? '.pdf' : '.jpg'), caption: 'Pago pedido #' + ${REF} + ' – ' + $('Crear triangulación').first().json.producto + '. Quedo atento a los accesos (responde citando este mensaje).' }) }}`,
 }, terminal);
+nodo('¿Pago web?', 'n8n-nodes-base.switch', 3.2, [4310, Y - 320], porCanal('Portal ANC'));
+nodoCodigo('Preparar compra ANC', [4420, Y - 420], prepararCompraAnc, { conUtilidades: true }, terminal);
+const campoAnc = (name) => ({ parameterType: 'formData', name, value: `={{ $json.${name} }}` });
+nodo('Comprar en ANC', 'n8n-nodes-base.httpRequest', 4.2, [4530, Y - 300], {
+    method: 'POST',
+    url: `={{ ${ANC} }}/procesar_pago`,
+    sendHeaders: true,
+    headerParameters: { parameters: [...navegador.headerParameters.parameters, { name: 'Referer', value: `={{ ${ANC} }}/checkout` }] },
+    sendBody: true,
+    contentType: 'multipart-form-data',
+    bodyParameters: { parameters: [
+        ...['nombre_cliente', 'apellido_cliente', 'whatsapp', 'correo', 'resumen_pedido', 'total_pagado', 'metodo', 'metodo_key', 'moneda_cripto', 'llave_pedido'].map(campoAnc),
+        { parameterType: 'formBinaryData', name: 'comprobante', inputDataFieldName: 'comprobante' },
+    ] },
+    options: { timeout: 45000, response: { response: { fullResponse: true, neverError: true, responseFormat: 'text' } } },
+}, { onError: 'continueRegularOutput', alwaysOutputData: true });
+nodoCodigo('Pedido ANC creado', [4640, Y - 420], pedidoAncCreado, { conUtilidades: true }, terminal);
+nodo('Guardar compra ANC', 'n8n-nodes-base.httpRequest', 4.2, [4750, Y - 300], supabaseTabla('PATCH', porReferencia,
+    "={{ JSON.stringify({ canal_compra: 'web', anc_pedido_id: $json.anc_pedido_id, anc_token: $json.anc_token, estado: 'ESPERANDO_CREDENCIALES', esperando: 'CREDENCIALES' }) }}"), terminal);
+nodo('Avisar pedido ANC', 'n8n-nodes-base.httpRequest', 4.2, [4860, Y - 420], enviarA("$('Pedido ANC creado').first().json.numero", "$('Pedido ANC creado').first().json.texto"), { onError: 'continueRegularOutput' });
 nodo('Guardar pago enviado', 'n8n-nodes-base.httpRequest', 4.2, [4640, Y], supabaseTabla('PATCH', porReferencia,
     "={{ JSON.stringify({ wamid_pago: $json.key?.id ?? null, estado: 'ESPERANDO_CREDENCIALES', esperando: 'CREDENCIALES' }) }}"));
 nodo('Marcar pedido realizado', 'n8n-nodes-base.httpRequest', 4.2, [4750, Y - 160],
@@ -1219,6 +1459,19 @@ nodo('Reanudar espera', 'n8n-nodes-base.httpRequest', 4.2, [1560, -620], {
     options: { timeout: 15000 },
 }, { onError: 'continueRegularOutput' });
 
+/* ---------- C-web) Revisión de pedidos en ANC (WO-035) ---------- */
+nodo('Pedidos ANC cada minuto', 'n8n-nodes-base.scheduleTrigger', 1.2, [-220, 380], { rule: { interval: [{ field: 'minutes', minutesInterval: 1 }] } });
+nodo('Marcar revisión ANC', 'n8n-nodes-base.set', 3.4, [0, 380], set({ revisar_anc: 'si' }));
+nodo('Pedidos ANC esperando', 'n8n-nodes-base.httpRequest', 4.2, [560, 380], rpcPanel('triangulaciones_anc_esperando', '={{ JSON.stringify({}) }}'), { onError: 'continueRegularOutput' });
+nodo('Leer pedido en ANC', 'n8n-nodes-base.httpRequest', 4.2, [780, 380], {
+    url: `={{ ${ANC} }}/estado_pedido?id={{ $json.anc_pedido_id }}&t={{ encodeURIComponent($json.anc_token) }}`, ...navegador,
+    options: { timeout: 20000, response: { response: { fullResponse: true, neverError: true, responseFormat: 'text' } } },
+}, { onError: 'continueRegularOutput', alwaysOutputData: true });
+nodoCodigo('Accesos en ANC', [1000, 380], accesosEnAnc, { conUtilidades: true });
+nodo('Reanudar con ANC', 'n8n-nodes-base.httpRequest', 4.2, [1220, 380], {
+    method: 'POST', url: '={{ $json.url }}', sendBody: true, specifyBody: 'json', jsonBody: '={{ JSON.stringify($json.cuerpo) }}', options: { timeout: 15000 },
+}, { onError: 'continueRegularOutput' });
+
 /* ---------- B) Posventa ---------- */
 nodo('Cada minuto', 'n8n-nodes-base.scheduleTrigger', 1.2, [0, 700], { rule: { interval: [{ field: 'minutes', minutesInterval: 1 }] } });
 nodo('Config posventa', 'n8n-nodes-base.set', 3.4, [220, 700], set({ ...configComun, lote: '5', numero_aviso_admin: '' }));
@@ -1259,6 +1512,8 @@ nodo('Leeme', 'n8n-nodes-base.stickyNote', 1, [-420, -360], {
         '',
         '**2. Nodos Config bot / Config posventa:** URL e instancia de Evolution. `numero_aviso_admin` = tu WhatsApp personal para avisos de escalamiento (vacío = sin aviso).',
         '',
+        '**Compra al proveedor (WO-035):** `canal_compra` = `web` compra en ancpagos.com (cotiza solo, tú pagas y envías la captura con #pago, el bot crea el pedido y lee los accesos de su página cada minuto); `whatsapp` = por chat con `numero_proveedor`. Para web llena `anc_correo` y `anc_metodo`, y aplica supabase/wo-035-compra-web-anc.sql.',
+        '',
         '**3. Evolution API → Webhook:** URL de producción de "Webhook Evolution", evento `MESSAGES_UPSERT`.',
         '',
         '**4. Requisitos:** supabase/wo-015.sql, wo-024-triangulacion.sql, wo-026-triangulacion-panel.sql y wo-027-metodos-pago.sql aplicados.',
@@ -1282,7 +1537,13 @@ const unir = (desde, hacia, salida = 0, tipo = 'main') => {
 unir('Webhook Evolution', 'Config bot');
 unir('Config bot', 'Origen');
 unir('Origen', 'Órdenes por despachar', 0);
-unir('Origen', 'Normalizar mensaje', 1);
+unir('Origen', 'Pedidos ANC esperando', 1);
+unir('Origen', 'Normalizar mensaje', 2);
+unir('Pedidos ANC cada minuto', 'Marcar revisión ANC');
+unir('Marcar revisión ANC', 'Config bot');
+unir('Pedidos ANC esperando', 'Leer pedido en ANC');
+unir('Leer pedido en ANC', 'Accesos en ANC');
+unir('Accesos en ANC', 'Reanudar con ANC');
 unir('Despacho web cada minuto', 'Marcar despacho');
 unir('Marcar despacho', 'Config bot');
 unir('Órdenes por despachar', 'Preparar despacho');
@@ -1315,10 +1576,20 @@ unir('Pedidos abiertos', 'Enrutar evento');
 unir('Enrutar evento', 'Acción');
 unir('Acción', 'Reanudar espera', 0);
 unir('Acción', 'Enviar respuesta', 1);
-const cadena = ['Crear triangulación', 'Registrar triangulación', 'Vincular al panel', 'Cotizar al proveedor', 'Guardar cotización enviada', 'Esperar cotización',
-    'Evaluar cotización', 'Pedir pago al admin', 'Guardar costo', 'Esperar pago del admin', 'Evaluar pago', 'Descargar comprobante',
-    'Reenviar pago al proveedor', 'Guardar pago enviado', 'Marcar pedido realizado', 'Esperar credenciales', 'Preparar extracción', 'Extraer credenciales', 'Validar credenciales', '¿Entregar?'];
-cadena.slice(0, -1).forEach((n, i) => unir(n, cadena[i + 1]));
+const enCadena = (lista) => lista.slice(0, -1).forEach((n, i) => unir(n, lista[i + 1]));
+enCadena(['Crear triangulación', 'Registrar triangulación', 'Vincular al panel', '¿Compra web?']);
+// Salida 0 = portal de ANC (WO-035) · salida 1 = WhatsApp del proveedor
+unir('¿Compra web?', 'Catálogo ANC', 0);
+enCadena(['Catálogo ANC', 'Medios de pago ANC', 'Cotización ANC', 'Evaluar cotización']);
+unir('¿Compra web?', 'Cotizar al proveedor', 1);
+enCadena(['Cotizar al proveedor', 'Guardar cotización enviada', 'Esperar cotización', 'Evaluar cotización']);
+enCadena(['Evaluar cotización', 'Pedir pago al admin', 'Guardar costo', 'Esperar pago del admin', 'Evaluar pago', 'Descargar comprobante', '¿Pago web?']);
+unir('¿Pago web?', 'Preparar compra ANC', 0);
+enCadena(['Preparar compra ANC', 'Comprar en ANC', 'Pedido ANC creado', 'Guardar compra ANC', 'Marcar pedido realizado']);
+unir('Guardar compra ANC', 'Avisar pedido ANC');
+unir('¿Pago web?', 'Reenviar pago al proveedor', 1);
+enCadena(['Reenviar pago al proveedor', 'Guardar pago enviado', 'Marcar pedido realizado']);
+enCadena(['Marcar pedido realizado', 'Esperar credenciales', 'Preparar extracción', 'Extraer credenciales', 'Validar credenciales', '¿Entregar?']);
 unir('SiliconFlow · Extractor', 'Extraer credenciales', 0, 'ai_languageModel');
 unir('¿Entregar?', 'Mensaje de entrega', 0);
 unir('¿Entregar?', 'Pedir aprobación', 1);
@@ -1330,6 +1601,8 @@ unir('Guardar entrega', 'Marcar entregado en el panel');
 unir('Marcar entregado en el panel', 'Aviso de entrega');
 unir('Aviso de entrega', 'Enviar aviso triangulación');
 for (const n of nodos.filter((x) => x.onError === 'continueErrorOutput' && x.position[1] >= Y && x.position[1] < YC)) unir(n.name, 'Cerrar triangulación', 1);
+// Compra en el portal de ANC (WO-035): sus nodos van sobre la fila, pero terminan igual que la triangulación
+for (const n of ['Cotización ANC', 'Preparar compra ANC', 'Pedido ANC creado', 'Guardar compra ANC']) unir(n, 'Cerrar triangulación', 1);
 unir('Cerrar triangulación', 'Guardar cierre');
 unir('Guardar cierre', 'Mensajes de cierre');
 unir('Mensajes de cierre', 'Enviar aviso triangulación');

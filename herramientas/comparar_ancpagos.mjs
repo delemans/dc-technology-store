@@ -9,28 +9,9 @@ const SUPABASE = 'https://vyqcizwfmjlflncdwzve.supabase.co';
 const CLAVE_PUBLICA = 'sb_publishable_GvQiv6M7iSrlwsA90lXsOQ_5OfSYBwy';
 
 // nuestro producto_id → { proveedor: nombre en ANC, variantes: { 'nuestra variante': 'variante ANC' } }
-export const EQUIVALENCIAS = {
-    'netflix': { proveedor: 'Netflix', variantes: { 'Pantalla Colombia 26 días': 'Pantalla 26 dias', 'Pantalla Internacional 26 días': 'Pantalla Internacional 26 dias' } },
-    'prime-video': { proveedor: 'Prime Video', variantes: { 'Pantalla (1 Dispositivo)': 'Pantalla', 'Cuenta Completa (6 Dispositivos)': 'Cuenta Completa' } },
-    'disney-plus': { proveedor: 'Disney Plus', variantes: { 'Pantalla Premium': 'Pantalla Premium' } },
-    'hbo-max': { proveedor: 'HBO Max', variantes: { 'Pantalla Estándar 1 Mes': 'Pantalla Estandar', 'Pantalla Platino 1 Mes': 'Pantalla Platino', 'Cuenta Completa Estándar 1 Mes': 'Completa Estandar', 'Cuenta Completa Platino 1 Mes': 'Completa Platino' } },
-    'crunchyroll': { proveedor: 'Crunchyroll', variantes: { 'Perfil Mega Fan 1 Mes': 'Pantalla', 'Cuenta Completa 1 Mes': 'Cuenta Completa' } },
-    'vix-premium': { proveedor: 'Vix Premium', variantes: { 'Pantalla 1 Mes': 'Pantalla', 'Cuenta Completa 1 Mes': 'Cuenta Completa' } },
-    'paramount-plus': { proveedor: 'Paramount Plus', variantes: { 'Pantalla 1 Mes': 'Pantalla', 'Cuenta Completa 1 Mes': 'Cuenta Completa' } },
-    'universal-plus': { proveedor: 'Universal Plus', variantes: { 'Pantalla 1 Mes': 'Pantalla', 'Cuenta Completa 1 Mes': 'Cuenta Completa' } },
-    'viki-rakuten': { proveedor: 'Viki Rakuten', variantes: { 'Pantalla 1 Mes': 'Pantalla' } },
-    'apple-tv': { proveedor: 'Apple TV', variantes: { 'Perfil 1 Mes': 'Pantalla', 'Cuenta Completa 1 Mes': 'Cuenta Completa' } },
-    'mubi': { proveedor: 'Mubi', variantes: { 'Perfil 1 Mes': 'Pantalla', 'Cuenta Completa 1 Mes': 'Cuenta Completa' } },
-    'iptv-smarters': { proveedor: 'IPTV', variantes: { 'Pantalla 1 Mes': 'Pantalla', 'Cuenta Completa 1 Mes': 'Cuenta Completa', 'Cuenta Completa 2 Meses': 'Completa 2 meses', 'Cuenta Completa 3 Meses': 'Completa 3 meses', 'Cuenta Completa 6 Meses': 'Completa 6 meses', 'Cuenta Completa 12 Meses': 'Completa 12 meses' } },
-    'capcut-pro': { proveedor: 'CapCut Pro', variantes: { 'Suscripción 1 Mes': '1 mes' } },
-    'canva-pro': { proveedor: 'Canva Pro', variantes: { 'Acceso 1 Mes': '1 mes', 'Acceso 1 Año Completo': '1 Año' } },
-    'duolingo-super': { proveedor: 'Duolingo Super', variantes: { 'Suscripción 1 Mes': '1 mes' } },
-    'mcafee-antivirus': { proveedor: 'McAfee', variantes: { 'Licencia 1 Año (1 PC)': '1 Año 1 Equipo', 'Licencia 1 Año (5 PCs)': '1 Año 5 Equipos' } },
-    'office-365': { proveedor: 'Office 365', variantes: { 'Licencia 1 Año (1 Equipo)': '1 Año 1 Equipo', 'Licencia 1 Año (5 Equipos)': '1 Año 5 Equipos' } },
-    'office-2016-2019-2021-2024-pro-plus': { proveedor: 'Office Pro Plus', variantes: { 'Office 2016 Pro Plus': '2016', 'Office 2019 Pro Plus': '2019', 'Office 2021 Pro Plus': '2021', 'Office 2024 Pro Plus': '2024' } },
-    'windows-10-y-11-pro-y-home': { proveedor: 'Windows', variantes: { 'Windows 10 Pro Licencia': '10 Pro', 'Windows 11 Pro Licencia': '11 Pro' } },
-    'gemini-ia-pro': { proveedor: 'Gemini IA Pro', variantes: { 'Suscripción 1 Mes': '1 Mes' } },
-};
+// (herramientas/equivalencias-ancpagos.json: la misma tabla la usa el flujo de n8n para comprar en el portal)
+const { _nota, ...equivalencias } = JSON.parse(fs.readFileSync(new URL('./equivalencias-ancpagos.json', import.meta.url), 'utf8'));
+export const EQUIVALENCIAS = equivalencias;
 
 // Lo que cambia lo que recibe el cliente. Si nuestro nombre promete otra cosa que la variante que se
 // compra, se avisa. El proveedor sin duración = 1 mes; sin dispositivos = no se compara.

@@ -47,7 +47,7 @@ export async function leerAnc() {
     return { leido_at: new Date().toISOString(), fuente: URL_ANC, combo, filas };
 }
 
-if (import.meta.url.endsWith(process.argv[1].replace(/\\/g, '/').split('/').pop())) {
+if (process.argv[1]?.replace(/\\/g, '/').endsWith('catalogo_ancpagos.mjs')) {
     const datos = await leerAnc();
     fs.mkdirSync(SALIDA.replace(/[/\\][^/\\]+$/, ''), { recursive: true });
     fs.writeFileSync(SALIDA, JSON.stringify(datos, null, 2));
