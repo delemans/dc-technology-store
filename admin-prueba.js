@@ -27,12 +27,22 @@
     /* ---------- 1) Revisión en vivo ---------- */
     async function revisarEnVivo() {
         const { data, error } = await supabaseClient.rpc('diagnostico_sistema');
+        const filas = error ? [] : (data ?? []);
         if (error) {
             const falta = error.code === 'PGRST202' || /diagnostico_sistema/.test(error.message ?? '');
-            return [{ grupo: 'Base de datos', chequeo: 'Diagnóstico en vivo', ok: false,
-                detalle: falta ? 'No encontrado' : error.message, arreglo: falta ? 'Ejecuta supabase/wo-036-diagnostico.sql' : 'Vuelve a iniciar sesión en el panel' }];
+            filas.push({ grupo: 'Base de datos', chequeo: 'Diagnóstico en vivo', ok: false,
+                detalle: falta ? 'No encontrado' : error.message, arreglo: falta ? 'Ejecuta supabase/wo-036-diagnostico.sql y wo-037-portal-alertas.sql' : 'Vuelve a iniciar sesión en el panel' });
         }
-        return data ?? [];
+        return [...filas, ...revisarNavegador()];
+    }
+
+    // Lo que solo sabe este navegador: el tiempo real del panel (indicador "En vivo")
+    function revisarNavegador() {
+        const rt = window.EstadoTiempoReal;
+        const ok = rt?.estado === 'SUBSCRIBED';
+        return [{ grupo: 'Este navegador', chequeo: 'Panel en tiempo real', ok,
+            detalle: !rt ? 'Aún conectando' : ok ? 'En vivo' : `Sin conexión (${rt.motivo ?? rt.estado})`,
+            arreglo: ok ? null : 'Se reintenta sola. Si sigue así, tu red (VPN, antivirus o red de oficina) bloquea WebSockets hacia supabase.co: prueba con datos del celular. Los pedidos igual se ven con "Actualizar".' }];
     }
 
     function pintarVivo(filas) {

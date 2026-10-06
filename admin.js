@@ -536,15 +536,26 @@ function iniciarRealtime() {
         })
         .subscribe((estado, err) => {
             const enVivo = estado === 'SUBSCRIBED';
+            // Lo último que respondió el servidor de tiempo real (lo muestra el indicador y "Prueba del sistema")
+            window.EstadoTiempoReal = { estado, motivo: err?.message ?? (enVivo ? null : estado), at: new Date() };
             indicadorEnVivo(enVivo);
             if (err) console.error('Realtime:', estado, err);
             // Tras una reconexión se pudieron perder eventos: resincronizar
             if (enVivo && yaConectado) cargarPedidos();
-            if (enVivo) yaConectado = true;
+            if (enVivo) { yaConectado = true; intentosRealtime = 0; }
+            // Falló la suscripción (red que bloquea WebSockets, sesión vencida…): se reintenta sola, cada vez más espaciado
+            if (['CHANNEL_ERROR', 'TIMED_OUT'].includes(estado)) {
+                clearTimeout(reintentoRealtime);
+                const espera = Math.min(60, 15 * 2 ** intentosRealtime++) * 1000;
+                reintentoRealtime = setTimeout(async () => { await detenerRealtime(); iniciarRealtime(); }, espera);
+            }
         });
 }
+let intentosRealtime = 0;
+let reintentoRealtime = null;
 
 async function detenerRealtime() {
+    clearTimeout(reintentoRealtime); // al cerrar sesión no debe reconectarse sola
     if (!canalPedidos) return;
     await supabaseClient.removeChannel(canalPedidos);
     canalPedidos = null;
@@ -594,7 +605,9 @@ function indicadorEnVivo(activo) {
         const visibleEnEscritorio = indicador.classList.contains('md:inline-flex');
         indicador.className = `${visibleEnEscritorio ? 'hidden md:inline-flex' : 'inline-flex'} items-center gap-2 px-3 py-2 rounded-xl ring-1 text-[10px] font-black uppercase tracking-widest ${
             activo ? 'bg-emerald-500/10 text-emerald-300 ring-emerald-500/30' : 'bg-white/[0.04] text-neutral-500 ring-white/10'}`;
-        indicador.title = activo ? 'Los cambios llegan automáticamente' : 'Sin conexión en tiempo real: usa el botón de actualizar';
+        const motivo = window.EstadoTiempoReal?.motivo;
+        indicador.title = activo ? 'Los cambios llegan automáticamente'
+            : `Sin conexión en tiempo real${motivo ? ` (${motivo})` : ''}: se reintenta sola; mientras tanto usa el botón de actualizar`;
         indicador.innerHTML = `
             <span class="relative flex h-2 w-2">
                 ${activo ? '<span class="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 animate-ping"></span>' : ''}

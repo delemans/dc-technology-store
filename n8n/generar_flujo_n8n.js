@@ -1261,7 +1261,7 @@ const terminal = { onError: 'continueErrorOutput' };
 
 // WO-033: entrada del despacho de órdenes web
 nodo('Origen', 'n8n-nodes-base.switch', 3.2, [330, 0], {
-    rules: { values: [regla('si', 'Despacho', 'despacho'), regla('si', 'ANC', 'revisar_anc')] },
+    rules: { values: [regla('si', 'Despacho', 'despacho'), regla('si', 'ANC', 'revisar_anc'), regla('si', 'Posventa', 'posventa')] },
     options: { fallbackOutput: 'extra', renameFallbackOutput: 'WhatsApp' },
 });
 nodo('Órdenes por despachar', 'n8n-nodes-base.httpRequest', 4.2, [1780, 440], rpcPanel('tomar_despachos', '={{ JSON.stringify({}) }}'), { onError: 'continueRegularOutput' });
@@ -1473,12 +1473,36 @@ nodo('Reanudar con ANC', 'n8n-nodes-base.httpRequest', 4.2, [1220, 380], {
 }, { onError: 'continueRegularOutput' });
 
 /* ---------- Latidos (WO-036): cada rama programada avisa que está viva → Panel → Prueba del sistema ---------- */
-nodo('Latido despacho', 'n8n-nodes-base.httpRequest', 4.2, [440, 300], rpcPanel('registrar_latido', '={{ JSON.stringify({ p_rama: "despacho" }) }}'), { onError: 'continueRegularOutput', alwaysOutputData: true });
+// WO-037: con el latido de despacho, Config bot se reporta (últimos 4 dígitos, correo enmascarado, canal) → Prueba del sistema
+const reporteConfig = `{
+    aviso_admin: String($('Config bot').first().json.numero_aviso_admin || '').replace(/\\D/g, '').slice(-4),
+    canal_compra: String($('Config bot').first().json.canal_compra || 'whatsapp'),
+    anc_correo: String($('Config bot').first().json.anc_correo || '').trim().replace(/^(.{2})[^@]*(@.+)$/, '$1***$2'),
+    anc_metodo: String($('Config bot').first().json.anc_metodo || ''),
+    proveedor: String($('Config bot').first().json.numero_proveedor || '').replace(/\\D/g, '').length > 0,
+    instancia: String($('Config bot').first().json.evolution_instancia || '')
+}`;
+nodo('Latido despacho', 'n8n-nodes-base.httpRequest', 4.2, [440, 300], rpcPanel('registrar_latido', `={{ JSON.stringify({ p_rama: "despacho", p_detalle: ${reporteConfig} }) }}`), { onError: 'continueRegularOutput', alwaysOutputData: true });
+// Cada evento que llega de Evolution marca que el bot recibe chats (y con qué número está conectado)
+nodo('Latido bot', 'n8n-nodes-base.httpRequest', 4.2, [440, -160], rpcPanel('registrar_latido',
+    "={{ JSON.stringify({ p_rama: 'bot', p_detalle: { instancia: String($json.body?.instance ?? $('Config bot').first().json.evolution_instancia ?? ''), bot: String($json.body?.sender ?? '').replace(/\\D/g, '').slice(-4), evento: String($json.body?.event ?? '') } }) }}"),
+{ onError: 'continueRegularOutput' });
 nodo('Latido ANC', 'n8n-nodes-base.httpRequest', 4.2, [440, 460], rpcPanel('registrar_latido', '={{ JSON.stringify({ p_rama: "anc" }) }}'), { onError: 'continueRegularOutput', alwaysOutputData: true });
 
 /* ---------- B) Posventa ---------- */
-nodo('Cada minuto', 'n8n-nodes-base.scheduleTrigger', 1.2, [0, 700], { rule: { interval: [{ field: 'minutes', minutesInterval: 1 }] } });
-nodo('Config posventa', 'n8n-nodes-base.set', 3.4, [220, 700], set({ ...configComun, lote: '5', numero_aviso_admin: '' }));
+nodo('Cada minuto', 'n8n-nodes-base.scheduleTrigger', 1.2, [-220, 540], { rule: { interval: [{ field: 'minutes', minutesInterval: 1 }] } });
+nodo('Marcar posventa', 'n8n-nodes-base.set', 3.4, [0, 540], set({ posventa: 'si' }));
+// WO-037: una sola configuración. Posventa pasa por Config bot y copia de ahí sus valores (antes tenía los suyos
+// y, si numero_aviso_admin quedaba vacío aquí, las alertas para ti fallaban sin que lo notaras)
+const desdeConfigBot = (campo) => `={{ $('Config bot').first().json.${campo} }}`;
+nodo('Config posventa', 'n8n-nodes-base.set', 3.4, [220, 700], set({
+    supabase_url: desdeConfigBot('supabase_url'),
+    evolution_url: desdeConfigBot('evolution_url'),
+    evolution_instancia: desdeConfigBot('evolution_instancia'),
+    url_conocimiento: desdeConfigBot('url_conocimiento'),
+    numero_aviso_admin: desdeConfigBot('numero_aviso_admin'),
+    lote: '5',
+}));
 nodo('Latido posventa', 'n8n-nodes-base.httpRequest', 4.2, [330, 860], supabaseRpc('registrar_latido', {
     config: 'Config posventa',
     body: '={{ JSON.stringify({ p_rama: "posventa" }) }}',
@@ -1520,6 +1544,8 @@ nodo('Leeme', 'n8n-nodes-base.stickyNote', 1, [-420, -360], {
         '',
         '**2. Nodos Config bot / Config posventa:** URL e instancia de Evolution. `numero_aviso_admin` = tu WhatsApp personal para avisos de escalamiento (vacío = sin aviso).',
         '',
+        '**Una sola configuración (WO-037):** todo se configura en *Config bot*; *Config posventa* copia de ahí sus valores.',
+        '',
         '**Latidos (WO-036):** cada rama programada marca un latido; Panel → Prueba del sistema muestra si n8n está vivo (aplica supabase/wo-036-diagnostico.sql).',
         '',
         '**Compra al proveedor (WO-035):** `canal_compra` = `web` compra en ancpagos.com (cotiza solo, tú pagas y envías la captura con #pago, el bot crea el pedido y lee los accesos de su página cada minuto); `whatsapp` = por chat con `numero_proveedor`. Para web llena `anc_correo` y `anc_metodo`, y aplica supabase/wo-035-compra-web-anc.sql.',
@@ -1550,7 +1576,10 @@ unir('Origen', 'Latido despacho', 0);
 unir('Latido despacho', 'Órdenes por despachar');
 unir('Origen', 'Latido ANC', 1);
 unir('Latido ANC', 'Pedidos ANC esperando');
-unir('Origen', 'Normalizar mensaje', 2);
+unir('Origen', 'Config posventa', 2);
+unir('Origen', 'Normalizar mensaje', 3);
+unir('Origen', 'Latido bot', 3);
+unir('Marcar posventa', 'Config bot');
 unir('Pedidos ANC cada minuto', 'Marcar revisión ANC');
 unir('Marcar revisión ANC', 'Config bot');
 unir('Pedidos ANC esperando', 'Leer pedido en ANC');
@@ -1637,7 +1666,7 @@ unir('Guardar cierre combo', 'Cerrar líneas combo');
 unir('Cerrar líneas combo', 'Mensajes de cierre combo');
 unir('Mensajes de cierre combo', 'Enviar aviso triangulación');
 
-unir('Cada minuto', 'Config posventa');
+unir('Cada minuto', 'Marcar posventa');
 unir('Config posventa', 'Latido posventa');
 unir('Latido posventa', 'Plantillas posventa');
 unir('Plantillas posventa', 'Tomar notificaciones');
