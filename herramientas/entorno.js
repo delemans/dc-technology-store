@@ -15,7 +15,7 @@ function cargarEntorno() {
             valores[m[1]] = m[2].replace(/^(['"])(.*)\1$/, '$2');
         }
     }
-    return { ...valores, ...Object.fromEntries(Object.entries(process.env).filter(([k]) => k in valores || /^(N8N|SUPABASE|EVOLUTION|SILICONFLOW|NUMERO)_/.test(k))) };
+    return { ...valores, ...Object.fromEntries(Object.entries(process.env).filter(([k]) => k in valores || /^(N8N|SUPABASE|EVOLUTION|SILICONFLOW|NUMERO|ANC|CANAL)_/.test(k))) };
 }
 
 // Exige variables; si falta alguna, explica cuál y termina sin hacer nada

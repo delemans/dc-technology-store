@@ -8,7 +8,8 @@
 // Qué hace, por la API pública de n8n (N8N_URL + N8N_API_KEY):
 //   1. Crea 3 credenciales: Supabase (service_role), Header Auth de Evolution y OpenAI (SiliconFlow).
 //      Sus IDs se guardan en herramientas/.n8n-credenciales.json (ignorado por git) para no duplicarlas.
-//   2. Las asigna a los 8 nodos que las necesitan y llena los nodos "Config bot" / "Config posventa".
+//   2. Las asigna a TODOS los nodos que las necesitan (Supabase, Evolution, SiliconFlow; incluidos los de
+//      compra en ANC y latidos) y llena "Config bot" / "Config posventa" (Evolution, números, compra en ANC).
 //   3. Crea el flujo o, si ya existe con el mismo nombre, lo actualiza (con respaldo en n8n/respaldos/).
 // Los valores salen de .env (ver .env.ejemplo). Ningún secreto se escribe en el repositorio.
 
@@ -110,7 +111,14 @@ function prepararFlujo(flujo, ids) {
                 numero_aviso_admin: (env.NUMERO_AVISO_ADMIN || '').replace(/\D/g, '').replace(/^(3\d{9})$/, '57$1'),
                 // WhatsApp del proveedor (ALL NECESSARY COLOMBIA): activa la triangulación de productos digitales
                 numero_proveedor: (env.NUMERO_PROVEEDOR || '').replace(/\D/g, '').replace(/^(3\d{9})$/, '57$1'),
+                // Compra al proveedor (WO-035): web = ancpagos.com · whatsapp = por chat con NUMERO_PROVEEDOR
+                canal_compra: (env.CANAL_COMPRA || 'web').trim().toLowerCase() === 'whatsapp' ? 'whatsapp' : 'web',
+                anc_correo: (env.ANC_CORREO || '').trim(),
+                anc_metodo: (env.ANC_METODO || 'nequi').trim(),
+                anc_whatsapp: (env.ANC_WHATSAPP || '').replace(/\D/g, '').replace(/^(3\d{9})$/, '57$1'),
             };
+            // Vacío en .env = se deja lo que trae el flujo (p. ej. anc_whatsapp vacío usa tu número de aviso)
+            for (const k of Object.keys(valores)) if (valores[k] === '' && !['numero_proveedor', 'numero_aviso_admin'].includes(k)) delete valores[k];
             for (const a of p.assignments?.assignments ?? []) if (a.name in valores) a.value = valores[a.name];
         }
     }
@@ -129,6 +137,8 @@ const SETTINGS_PERMITIDOS = ['saveExecutionProgress', 'saveManualExecutions', 's
     const necesitan = flujo.nodes.filter((n) => n.parameters?.nodeCredentialType === 'supabaseApi'
         || n.parameters?.genericAuthType === 'httpHeaderAuth' || n.type === '@n8n/n8n-nodes-langchain.lmChatOpenAi').length;
     console.log(`  nodos con credencial: ${APLICAR ? asignadas : necesitan} de ${necesitan}`);
+    if (APLICAR && asignadas !== necesitan) throw new Error(`Quedaron ${necesitan - asignadas} nodo(s) sin credencial: no se sube un flujo a medias.`);
+    if (!env.ANC_CORREO && (env.CANAL_COMPRA || 'web') !== 'whatsapp') console.log('  ⚠ ANC_CORREO vacío en .env: el bot no comprará en ANC hasta que lo llenes (o lo pongas a mano en Config bot).');
 
     // ¿Ya existe el flujo? (por nombre)
     const existentes = [];
