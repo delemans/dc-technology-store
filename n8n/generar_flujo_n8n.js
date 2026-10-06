@@ -1472,9 +1472,17 @@ nodo('Reanudar con ANC', 'n8n-nodes-base.httpRequest', 4.2, [1220, 380], {
     method: 'POST', url: '={{ $json.url }}', sendBody: true, specifyBody: 'json', jsonBody: '={{ JSON.stringify($json.cuerpo) }}', options: { timeout: 15000 },
 }, { onError: 'continueRegularOutput' });
 
+/* ---------- Latidos (WO-036): cada rama programada avisa que está viva → Panel → Prueba del sistema ---------- */
+nodo('Latido despacho', 'n8n-nodes-base.httpRequest', 4.2, [440, 300], rpcPanel('registrar_latido', '={{ JSON.stringify({ p_rama: "despacho" }) }}'), { onError: 'continueRegularOutput', alwaysOutputData: true });
+nodo('Latido ANC', 'n8n-nodes-base.httpRequest', 4.2, [440, 460], rpcPanel('registrar_latido', '={{ JSON.stringify({ p_rama: "anc" }) }}'), { onError: 'continueRegularOutput', alwaysOutputData: true });
+
 /* ---------- B) Posventa ---------- */
 nodo('Cada minuto', 'n8n-nodes-base.scheduleTrigger', 1.2, [0, 700], { rule: { interval: [{ field: 'minutes', minutesInterval: 1 }] } });
 nodo('Config posventa', 'n8n-nodes-base.set', 3.4, [220, 700], set({ ...configComun, lote: '5', numero_aviso_admin: '' }));
+nodo('Latido posventa', 'n8n-nodes-base.httpRequest', 4.2, [330, 860], supabaseRpc('registrar_latido', {
+    config: 'Config posventa',
+    body: '={{ JSON.stringify({ p_rama: "posventa" }) }}',
+}), { onError: 'continueRegularOutput', alwaysOutputData: true });
 nodo('Plantillas posventa', 'n8n-nodes-base.httpRequest', 4.2, [440, 700], {
     url: "={{ $('Config posventa').first().json.url_conocimiento }}",
     options: { timeout: 8000, response: { response: { responseFormat: 'json' } } },
@@ -1512,6 +1520,8 @@ nodo('Leeme', 'n8n-nodes-base.stickyNote', 1, [-420, -360], {
         '',
         '**2. Nodos Config bot / Config posventa:** URL e instancia de Evolution. `numero_aviso_admin` = tu WhatsApp personal para avisos de escalamiento (vacío = sin aviso).',
         '',
+        '**Latidos (WO-036):** cada rama programada marca un latido; Panel → Prueba del sistema muestra si n8n está vivo (aplica supabase/wo-036-diagnostico.sql).',
+        '',
         '**Compra al proveedor (WO-035):** `canal_compra` = `web` compra en ancpagos.com (cotiza solo, tú pagas y envías la captura con #pago, el bot crea el pedido y lee los accesos de su página cada minuto); `whatsapp` = por chat con `numero_proveedor`. Para web llena `anc_correo` y `anc_metodo`, y aplica supabase/wo-035-compra-web-anc.sql.',
         '',
         '**3. Evolution API → Webhook:** URL de producción de "Webhook Evolution", evento `MESSAGES_UPSERT`.',
@@ -1536,8 +1546,10 @@ const unir = (desde, hacia, salida = 0, tipo = 'main') => {
 };
 unir('Webhook Evolution', 'Config bot');
 unir('Config bot', 'Origen');
-unir('Origen', 'Órdenes por despachar', 0);
-unir('Origen', 'Pedidos ANC esperando', 1);
+unir('Origen', 'Latido despacho', 0);
+unir('Latido despacho', 'Órdenes por despachar');
+unir('Origen', 'Latido ANC', 1);
+unir('Latido ANC', 'Pedidos ANC esperando');
 unir('Origen', 'Normalizar mensaje', 2);
 unir('Pedidos ANC cada minuto', 'Marcar revisión ANC');
 unir('Marcar revisión ANC', 'Config bot');
@@ -1626,7 +1638,8 @@ unir('Cerrar líneas combo', 'Mensajes de cierre combo');
 unir('Mensajes de cierre combo', 'Enviar aviso triangulación');
 
 unir('Cada minuto', 'Config posventa');
-unir('Config posventa', 'Plantillas posventa');
+unir('Config posventa', 'Latido posventa');
+unir('Latido posventa', 'Plantillas posventa');
 unir('Plantillas posventa', 'Tomar notificaciones');
 unir('Tomar notificaciones', 'Recorrer cola');
 unir('Recorrer cola', 'Armar mensaje', 1);           // salida 0 = terminado, 1 = siguiente elemento
@@ -1661,6 +1674,24 @@ const flujo = {
     tags: [],
 };
 fs.writeFileSync(SALIDA, JSON.stringify(flujo, null, 2) + '\n', 'utf8');
+
+// Panel → Prueba del sistema: el mismo código de cada nodo Code, como funciones normales, para simular el
+// recorrido completo en el navegador sin enviar mensajes, sin cobrar y sin escribir en la base.
+const NODOS_SIMULADOS = ['Normalizar mensaje', 'Revisar respuesta', 'Crear triangulación', 'Cotización ANC', 'Evaluar cotización', 'Enrutar evento',
+    'Evaluar pago', 'Preparar compra ANC', 'Pedido ANC creado', 'Accesos en ANC', 'Preparar extracción', 'Validar credenciales', 'Mensaje de entrega'];
+const configBot = nodos.find((n) => n.name === 'Config bot').parameters.assignments.assignments.reduce((a, x) => ({ ...a, [x.name]: x.value }), {});
+fs.writeFileSync(path.join(__dirname, 'simulador-nodos.js'), [
+    '// n8n/simulador-nodos.js — GENERADO por n8n/generar_flujo_n8n.js (no editar a mano).',
+    '// Código real de los nodos del bot para el simulador del panel (Prueba del sistema). No envía nada.',
+    `window.SimuladorFlujo = { version: ${JSON.stringify(kb.version)}, config: ${JSON.stringify(configBot)}, nodos: {`,
+    ...NODOS_SIMULADOS.map((nombre) => {
+        const n = nodos.find((x) => x.name === nombre);
+        if (!n) throw new Error(`Simulador: no existe el nodo ${nombre}`);
+        return `${JSON.stringify(nombre)}: function ($, $input, $getWorkflowStaticData) {\n${n.parameters.jsCode}\n},`;
+    }),
+    '} };',
+    '',
+].join('\n'), 'utf8');
 console.log(`Flujo generado: ${path.relative(RAIZ, SALIDA)} · ${nodos.length} nodos · modelo ${MODELO}`);
 
 module.exports = { comprobanteRecibido, normalizarMensaje, rutaAsesor, respuestaFija, armarContexto, revisarRespuesta, armarNotificacion, recordarResena, utilidades, kbEmbebida };

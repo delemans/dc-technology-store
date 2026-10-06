@@ -301,6 +301,22 @@
                     </div>
                 </div>
 
+                <!-- Prueba del sistema (wo-036): revisión en vivo + simulación de una venta con el código real del bot -->
+                <section id="prueba-sistema" class="mb-6 rounded-3xl bg-white/[0.03] ring-1 ring-dcRed/30 p-4 sm:p-5" aria-labelledby="t-prueba-sistema">
+                    <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
+                        <h3 id="t-prueba-sistema" class="font-tech text-sm font-black uppercase tracking-[0.15em]"><i class="fa-solid fa-stethoscope text-dcRed mr-1"></i> Prueba del sistema</h3>
+                        <button type="button" id="prueba-sistema-correr" class="min-h-[44px] px-4 rounded-xl bg-dcRed text-white text-xs font-bold shadow-lg shadow-red-600/30"><i class="fa-solid fa-play mr-1"></i> Probar todo el sistema</button>
+                    </div>
+                    <p class="text-xs text-neutral-500 max-w-3xl">Revisa en vivo la base, los métodos de pago, las colas y si n8n está encendido (solo lectura), y simula una venta completa por WhatsApp con el código real del bot: cliente → agente → compra en ANC → tu #pago → accesos → entrega. La simulación no envía mensajes, no cobra y no escribe en la base.</p>
+                    <div id="prueba-sistema-resultado" class="mt-4" hidden aria-live="polite">
+                        <div id="prueba-sistema-resumen" class="mb-3"></div>
+                        <div class="grid gap-4 xl:grid-cols-2">
+                            <div id="prueba-sistema-vivo"></div>
+                            <div id="prueba-sistema-simulacion"></div>
+                        </div>
+                    </div>
+                </section>
+
                 <!-- Comprobantes subidos desde el portal (public.ordenes_web · wo-030) -->
                 <section id="comprobantes-web" class="mb-6 rounded-3xl bg-white/[0.03] ring-1 ring-white/10 p-4 sm:p-5" aria-labelledby="t-comprobantes-web">
                     <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
@@ -783,5 +799,6 @@
     <script src="plantillas-whatsapp.js"></script>
     <script src="ui.js"></script>
     <script src="admin.js"></script>
+    <script src="admin-prueba.js"></script>
 </body>
 </html>
