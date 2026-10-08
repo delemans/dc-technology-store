@@ -760,6 +760,39 @@ function accesosEnAnc() {
     return salida;
 }
 
+/* ---------- E) Configurar Evolution desde n8n (WO-038) ----------
+   Un clic en "Configurar Evolution" registra el webhook del bot en tu instancia de Evolution con la
+   credencial que n8n ya tiene (nadie tiene que ver ni copiar la API key). Prueba el formato v2 y el v1. */
+function resultadoEvolution() {
+    const cfg = $('Config bot').first().json;
+    const v2 = $('Webhook Evolution v2').first().json;
+    const v1 = $('Webhook Evolution v1').first().json;
+    const leido = $input.first().json;
+    const w = leido.body?.webhook ?? leido.body ?? {};
+    const url = String(cfg.webhook_publico || '').trim();
+    const guardado = w.url === url && (w.events ?? []).includes('MESSAGES_UPSERT') && (w.enabled ?? w.enable ?? true) !== false;
+    const local = (h) => ['localhost', '127.0.0.1', '::1'].includes(h);
+    let aviso = null;
+    try {
+        const evo = new URL(cfg.evolution_url);
+        const hook = new URL(url);
+        if (local(hook.hostname) && !local(evo.hostname)) aviso = `Evolution está en ${evo.hostname}: desde allí "localhost" no es tu PC. Pon en Config bot → webhook_publico la URL de tu túnel (…/webhook/dc-whatsapp) y vuelve a pulsar.`;
+        else if (local(hook.hostname)) aviso = 'El webhook usa localhost: sirve si Evolution corre en este PC fuera de Docker. Si corre en Docker, pon en webhook_publico http://host.docker.internal:5678/webhook/dc-whatsapp y vuelve a pulsar.';
+    } catch { aviso = 'Revisa evolution_url y webhook_publico en Config bot: alguna no es una URL válida.'; }
+    const estado = (r) => (r?.statusCode ? `HTTP ${r.statusCode}` : 'sin respuesta');
+    return [{ json: {
+        resultado: guardado ? '✅ Webhook registrado en Evolution' : '⚠️ Evolution no confirmó el webhook',
+        instancia: cfg.evolution_instancia,
+        webhook_pedido: url,
+        webhook_en_evolution: { url: w.url ?? null, eventos: w.events ?? null, activo: w.enabled ?? w.enable ?? null },
+        intentos: `formato v2: ${estado(v2)} · formato v1: ${estado(v1)} · lectura: ${estado(leido)}`,
+        aviso,
+        siguiente: guardado ? 'Escríbele al bot desde otro WhatsApp y pulsa en el panel "Probar todo el sistema" (fila "Recibe los chats").'
+            : Number(leido.statusCode) === 401 || Number(v2.statusCode) === 401 ? 'Evolution rechazó la API key: revisa la credencial "Evolution API" en n8n (Header apikey).'
+            : 'Revisa evolution_url y evolution_instancia en Config bot y la credencial "Evolution API".',
+    } }];
+}
+
 /* ---------- D) Compra al proveedor para COMBOS (WO-031) ----------
    Un padre DC-XXXXX + una línea por plataforma (DC-XXXXX1…). Una cotización, un #pago y un mensaje de
    accesos; cada línea se entrega o queda en revisión por separado. */
@@ -1151,6 +1184,8 @@ nodo('Config bot', 'n8n-nodes-base.set', 3.4, [220, 0], set({
     numero_aviso_admin: '',
     numero_proveedor: '', // WhatsApp de ALL NECESSARY COLOMBIA (solo para canal_compra = whatsapp y combos)
     // WO-035 · Compra al proveedor: 'web' = en ancpagos.com (cotiza solo, tú pagas con un toque); 'whatsapp' = por chat
+    // WO-038: URL donde Evolution le avisa al bot (localhost solo si Evolution corre en este PC fuera de Docker)
+    webhook_publico: 'http://localhost:5678/webhook/dc-whatsapp',
     canal_compra: 'web',
     anc_url: 'https://ancpagos.com',
     anc_metodo: 'nequi',   // clave del medio de pago de ANC con el que les pagas (nequi, daviplata, brebManual, bancolombia)
@@ -1261,7 +1296,7 @@ const terminal = { onError: 'continueErrorOutput' };
 
 // WO-033: entrada del despacho de órdenes web
 nodo('Origen', 'n8n-nodes-base.switch', 3.2, [330, 0], {
-    rules: { values: [regla('si', 'Despacho', 'despacho'), regla('si', 'ANC', 'revisar_anc'), regla('si', 'Posventa', 'posventa')] },
+    rules: { values: [regla('si', 'Despacho', 'despacho'), regla('si', 'ANC', 'revisar_anc'), regla('si', 'Posventa', 'posventa'), regla('si', 'Evolution', 'configurar_evolution')] },
     options: { fallbackOutput: 'extra', renameFallbackOutput: 'WhatsApp' },
 });
 nodo('Órdenes por despachar', 'n8n-nodes-base.httpRequest', 4.2, [1780, 440], rpcPanel('tomar_despachos', '={{ JSON.stringify({}) }}'), { onError: 'continueRegularOutput' });
@@ -1489,6 +1524,25 @@ nodo('Latido bot', 'n8n-nodes-base.httpRequest', 4.2, [440, -160], rpcPanel('reg
 { onError: 'continueRegularOutput' });
 nodo('Latido ANC', 'n8n-nodes-base.httpRequest', 4.2, [440, 460], rpcPanel('registrar_latido', '={{ JSON.stringify({ p_rama: "anc" }) }}'), { onError: 'continueRegularOutput', alwaysOutputData: true });
 
+/* ---------- E) Configurar Evolution (WO-038): botón manual ---------- */
+nodo('Configurar Evolution', 'n8n-nodes-base.manualTrigger', 1, [-220, -480], {});
+nodo('Marcar configuración Evolution', 'n8n-nodes-base.set', 3.4, [0, -480], set({ configurar_evolution: 'si' }));
+const evolutionApi = (metodo, ruta, cuerpo) => ({
+    ...evolutionEnviar('Config bot'),
+    method: metodo,
+    url: `={{ $('Config bot').first().json.evolution_url.replace(/\\/+$/, '') }}/webhook/${ruta}/{{ $('Config bot').first().json.evolution_instancia }}`,
+    ...(cuerpo ? { jsonBody: cuerpo } : { sendBody: false, jsonBody: undefined, specifyBody: undefined }),
+    options: { timeout: 20000, response: { response: { fullResponse: true, neverError: true } } },
+});
+nodo('Webhook Evolution v2', 'n8n-nodes-base.httpRequest', 4.2, [660, -560], evolutionApi('POST', 'set',
+    "={{ JSON.stringify({ webhook: { enabled: true, url: $('Config bot').first().json.webhook_publico, byEvents: false, base64: false, events: ['MESSAGES_UPSERT'] } }) }}"),
+{ onError: 'continueRegularOutput', alwaysOutputData: true });
+nodo('Webhook Evolution v1', 'n8n-nodes-base.httpRequest', 4.2, [880, -560], evolutionApi('POST', 'set',
+    "={{ JSON.stringify({ enabled: true, url: $('Config bot').first().json.webhook_publico, webhook_by_events: false, webhook_base64: false, events: ['MESSAGES_UPSERT'] }) }}"),
+{ onError: 'continueRegularOutput', alwaysOutputData: true });
+nodo('Leer webhook de Evolution', 'n8n-nodes-base.httpRequest', 4.2, [1100, -560], evolutionApi('GET', 'find', null), { onError: 'continueRegularOutput', alwaysOutputData: true });
+nodoCodigo('Resultado Evolution', [1320, -560], resultadoEvolution);
+
 /* ---------- B) Posventa ---------- */
 nodo('Cada minuto', 'n8n-nodes-base.scheduleTrigger', 1.2, [-220, 540], { rule: { interval: [{ field: 'minutes', minutesInterval: 1 }] } });
 nodo('Marcar posventa', 'n8n-nodes-base.set', 3.4, [0, 540], set({ posventa: 'si' }));
@@ -1550,7 +1604,7 @@ nodo('Leeme', 'n8n-nodes-base.stickyNote', 1, [-420, -360], {
         '',
         '**Compra al proveedor (WO-035):** `canal_compra` = `web` compra en ancpagos.com (cotiza solo, tú pagas y envías la captura con #pago, el bot crea el pedido y lee los accesos de su página cada minuto); `whatsapp` = por chat con `numero_proveedor`. Para web llena `anc_correo` y `anc_metodo`, y aplica supabase/wo-035-compra-web-anc.sql.',
         '',
-        '**3. Evolution API → Webhook:** URL de producción de "Webhook Evolution", evento `MESSAGES_UPSERT`.',
+        '**3. Evolution API → Webhook:** pulsa el nodo **Configurar Evolution** (Execute) y n8n lo registra solo con su credencial (URL en Config bot → `webhook_publico`, evento `MESSAGES_UPSERT`). Mira el resultado en "Resultado Evolution".',
         '',
         '**4. Requisitos:** supabase/wo-015.sql, wo-024-triangulacion.sql, wo-026-triangulacion-panel.sql y wo-027-metodos-pago.sql aplicados.',
         '',
@@ -1577,8 +1631,14 @@ unir('Latido despacho', 'Órdenes por despachar');
 unir('Origen', 'Latido ANC', 1);
 unir('Latido ANC', 'Pedidos ANC esperando');
 unir('Origen', 'Config posventa', 2);
-unir('Origen', 'Normalizar mensaje', 3);
-unir('Origen', 'Latido bot', 3);
+unir('Origen', 'Webhook Evolution v2', 3);
+unir('Origen', 'Normalizar mensaje', 4);
+unir('Origen', 'Latido bot', 4);
+unir('Configurar Evolution', 'Marcar configuración Evolution');
+unir('Marcar configuración Evolution', 'Config bot');
+unir('Webhook Evolution v2', 'Webhook Evolution v1');
+unir('Webhook Evolution v1', 'Leer webhook de Evolution');
+unir('Leer webhook de Evolution', 'Resultado Evolution');
 unir('Marcar posventa', 'Config bot');
 unir('Pedidos ANC cada minuto', 'Marcar revisión ANC');
 unir('Marcar revisión ANC', 'Config bot');
