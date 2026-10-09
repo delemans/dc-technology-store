@@ -11,7 +11,7 @@
     const DESCUENTO_RENOVACION = 10; // % prometido en el recordatorio de renovación
     const ENTREGA_MAX_MIN = 15;      // minutos máximos de entrega tras validar el pago (en horario)
     const HORARIO = 'lunes a sábado, 8:00 a.m. a 8:00 p.m.';
-    const FIRMA = '⚡ *DC Technology*';
+    const FIRMA = '⚡ *DC TECHNOLOGY*';
 
     // Números colombianos: 3001234567 → 573001234567. Devuelve null si no parece un número válido.
     function normalizarNumero(numero) {
@@ -195,7 +195,7 @@
             (cupon ? ` Usa el código: ${cupon}` : ''),
 
         cuponFidelidad: ({ producto, cupon }) =>
-            `¡Gracias por confiar en DC Technology! Por tu compra de ${producto}, aquí tienes un cupón para tu próxima compra: ${cupon}. Escríbenos cuando quieras usarlo.`,
+            `¡Gracias por confiar en DC TECHNOLOGY! Por tu compra de ${producto}, aquí tienes un cupón para tu próxima compra: ${cupon}. Escríbenos cuando quieras usarlo.`,
 
         /* ---- Posventa automática (n8n lee notificaciones_whatsapp y usa estos textos) ----
            Formato WhatsApp: *negrita*, _cursiva_. Nunca incluyen credenciales: esas las entrega
@@ -299,7 +299,7 @@
             'Escríbelo en dctecnology.xyz para ver tus pedidos y accesos.',
             '⏱️ Vence en *5 minutos*.',
             '',
-            '⚠️ No lo compartas con nadie: ningún asesor de DC Technology te lo pedirá.',
+            '⚠️ No lo compartas con nadie: ningún asesor de DC TECHNOLOGY te lo pedirá.',
             '_Si no lo solicitaste, ignora este mensaje._',
         ].join('\n'),
 
