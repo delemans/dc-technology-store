@@ -56,8 +56,12 @@ const b = evento.body ?? evento;
 if (String(b.event ?? '').toLowerCase().replace(/_/g, '.') !== 'messages.upsert') return [];
 const d = Array.isArray(b.data) ? b.data[0] : b.data;
 const key = d?.key ?? {};
-const jid = String(key.remoteJid ?? '');
-if (!jid.endsWith('@s.whatsapp.net')) return []; // grupos, estados y canales: el bot no responde
+// WhatsApp ya identifica muchos chats con un ID oculto (…@lid): el número real llega aparte
+// (remoteJidAlt en Evolution 2.3+, senderPn en versiones anteriores). Sin número real no se puede responder.
+const original = String(key.remoteJid ?? '');
+const alterno = String(key.remoteJidAlt ?? key.senderPn ?? d?.senderPn ?? '');
+const jid = original.endsWith('@lid') && alterno.endsWith('@s.whatsapp.net') ? alterno : original;
+if (!jid.endsWith('@s.whatsapp.net')) return []; // grupos, estados, canales y @lid sin número: el bot no responde
 const numero = jid.split('@')[0];
 const m = d.message ?? {};
 const texto = String(m.conversation ?? m.extendedTextMessage?.text ?? m.imageMessage?.caption ?? m.documentMessage?.caption ?? m.videoMessage?.caption ?? '').trim();
