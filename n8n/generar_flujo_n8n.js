@@ -256,7 +256,7 @@ function armarContexto() {
         ...(base.promociones ?? []).filter((p) => p.activa && !p.pendiente_configurar).map((p) => `- ${p.descripcion}`),
         '',
         'PREGUNTAS FRECUENTES (usa estas respuestas):',
-        ...(base.faq ?? []).filter((f) => !f.pendiente_configurar && f.respuesta).map((f) => `- ${f.pregunta} → ${f.respuesta}`),
+        ...(base.faq ?? []).filter((f) => !f.pendiente_configurar && f.respuesta).map((f) => `- ${f.pregunta} → ${f.respuesta}${f.accion ? ` (Después: ${f.accion})` : ''}`),
         '',
         'REGLAS DE USO DE LAS CUENTAS:',
         ...(base.reglas_uso ?? []).map((r) => `- ${r}`),

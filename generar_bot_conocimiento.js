@@ -160,7 +160,8 @@ const flujoDigital = [
     'COMBOS: cuando el cliente quiera 2 o más plataformas, cotiza con la marca [COMBO] {"items":[{"producto":"<nombre exacto>","variante":"<opción exacta>"}, ...]} en una línea aparte: el sistema la reemplaza por el desglose exacto (precios del catálogo y descuento vigente). Vuelve a usarla cada vez que menciones el total del combo. Si pide 1 sola plataforma y hay regla de combo, puedes contarle cuánto ahorraría agregando otra (sin presionar).',
     'PAGO DE UN COMBO EN CRIPTO: escribe [MONTO_CRIPTO cop=COMBO moneda=<MONEDA> red=<RED>] en la MISMA respuesta que la marca [COMBO]; el sistema usa el total del combo. En un combo NO uses la marca [PEDIDO_DIGITAL].',
     'PEDIDO COMBO: cuando el cliente CONFIRME el combo, agrega al FINAL de tu respuesta, en una línea aparte: [PEDIDO_COMBO] {"items":[{"producto":"<nombre exacto>","variante":"<opción exacta>"}, ...]} con las mismas plataformas que cotizaste. Una sola vez por combo; el cliente no ve esa línea. Si una plataforma no está disponible, el equipo le ofrece cambio o reembolso de esa parte: no prometas nada distinto.',
-    'SOPORTE DIGITAL: si algo no funciona, primero da los pasos de las FAQ de soporte (inicio de sesión, límite de pantallas, activación). Escala solo si después de esos pasos el problema sigue.',
+    'SOPORTE DIGITAL: si algo no funciona, primero da los pasos de las FAQ de soporte (inicio de sesión, límite de pantallas, hogar de Netflix, perfil con PIN, activación) y termina con una pregunta de seguimiento. Escala solo si después de esos pasos el problema sigue, o cuando la FAQ lo indique en "accion".',
+    'HOGAR DE NETFLIX y PERFIL OCUPADO: tú no tienes el correo de la cuenta ni puedes cambiar perfiles. Cuando el cliente confirme que ya envió la solicitud de hogar, o que siguen ocupando su perfil, escala a un asesor de inmediato con el producto y su número de pedido si lo tiene.',
 ];
 
 // FAQ ligadas a reglas de negocio: se sobrescriben siempre con estos textos
@@ -209,9 +210,26 @@ const faqObligatorias = (horario) => [
     },
     {
         id: 'soporte_pantallas',
-        pregunta: 'Me dice que hay demasiadas pantallas en uso',
-        palabras_clave: ['demasiadas pantallas', 'limite', 'otro dispositivo', 'muchas personas', 'en uso'],
-        respuesta: 'Tu plan permite los dispositivos que elegiste al comprar. Cierra la sesión en los dispositivos que no estés usando y vuelve a intentarlo en unos minutos. Si persiste, envíanos una captura y lo revisamos.',
+        pregunta: 'Me dice "Demasiados dispositivos" o "Pantalla en uso"',
+        palabras_clave: ['demasiadas pantallas', 'demasiados dispositivos', 'pantalla en uso', 'limite', 'otro dispositivo', 'muchas personas', 'en uso'],
+        respuesta: 'Esto ocurre cuando alguien dejó una película en pausa o hay mucha demanda en la cuenta. Espera unos 10 a 15 minutos e intenta ingresar de nuevo. Recuerda que tu pantalla es para usar en un solo dispositivo a la vez. ¿Me avisas si te deja entrar después de la espera? 📺',
+        pendiente_configurar: false,
+    },
+    // WO-039: soporte de posventa (textos del director). El código de hogar y el perfil los resuelve el equipo con el proveedor.
+    {
+        id: 'soporte_hogar_netflix',
+        pregunta: 'Netflix me pide "Actualizar hogar" o me bloqueó (hogar / IP)',
+        palabras_clave: ['actualizar hogar', 'hogar', 'hogar de netflix', 'no es parte del hogar', 'codigo temporal', 'enviar correo', 'bloqueo', 'ip', 'dispositivo no forma parte'],
+        respuesta: 'Para quitar el bloqueo, selecciona "Actualizar hogar" o "Enviar correo" directamente en tu pantalla. Apenas lo hagas, escríbeme por aquí para generarte el código o aprobar el enlace de inmediato. ¿Me confirmas cuando ya hayas enviado la solicitud en el TV? 🏠🔒',
+        accion: 'Cuando el cliente confirme que ya envió la solicitud, escala a un asesor: el código o el enlace llega al correo de la cuenta y lo aprueba el equipo con el proveedor (tú no lo tienes).',
+        pendiente_configurar: false,
+    },
+    {
+        id: 'soporte_perfil_pin',
+        pregunta: 'Alguien cambió el nombre de mi perfil o le puso PIN',
+        palabras_clave: ['cambiaron el nombre', 'cambio el nombre', 'le pusieron pin', 'pin', 'perfil ocupado', 'mi perfil', 'otro perfil', 'nombre del perfil', 'bloquearon el perfil'],
+        respuesta: `Qué molestia, lo reviso de inmediato. Como son cuentas compartidas, tenemos prohibido modificar nombres o poner PIN. Puedes verificar tu perfil asignado entrando a tu portal de accesos: ${URL_MIS_PEDIDOS}. Si siguen ocupando el tuyo, avísame y lo restauro. ¿Pudiste confirmar tu número de perfil en la web? 🔐`,
+        accion: 'Si el cliente confirma que siguen ocupando su perfil o tiene PIN, escala a un asesor: el perfil lo restaura el equipo con el proveedor (tú no puedes cambiarlo).',
         pendiente_configurar: false,
     },
     {
