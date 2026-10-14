@@ -1411,19 +1411,41 @@ const faltaSql = (error, archivo) => (['42P01', 'PGRST205', 'PGRST202'].includes
 const precios = { lista: [], error: null };
 
 async function cargarPrecios() {
-    const { data, error } = await supabaseClient.from('catalogo_precios')
-        .select('producto_id, variante, producto, tipo, precio, precio_anterior, activo, updated_at').order('producto').order('precio');
+    const columnas = 'producto_id, variante, producto, tipo, precio, precio_anterior, activo, updated_at';
+    // Con wo-038 cada variante trae el costo del proveedor (ANC) para ver el margen; sin él, igual funciona
+    let { data, error } = await supabaseClient.from('catalogo_precios')
+        .select(`${columnas}, costo_proveedor, plan_proveedor, costo_proveedor_at`).order('producto').order('precio');
+    precios.sinCostos = error?.code === '42703';
+    if (precios.sinCostos) ({ data, error } = await supabaseClient.from('catalogo_precios').select(columnas).order('producto').order('precio'));
     precios.error = error ? faltaSql(error, 'wo-032-fase3.sql') : null;
     precios.lista = data ?? [];
     pintarPrecios();
 }
+
+// Margen de una variante frente al costo del proveedor (null si no hay costo cargado)
+function margenDe(precio, costo) {
+    if (costo === null || costo === undefined || !(Number(precio) > 0)) return null;
+    const ganancia = Number(precio) - Number(costo);
+    return { ganancia, pct: Math.round((ganancia / Number(precio)) * 100) };
+}
+function textoMargen(v, precio) {
+    if (v.costo_proveedor === null || v.costo_proveedor === undefined) return '';
+    const m = margenDe(precio, v.costo_proveedor);
+    const color = !m || m.ganancia <= 0 ? 'text-red-300' : m.pct < 15 ? 'text-amber-300' : 'text-emerald-300';
+    return `<span class="${color}"><i class="fa-solid fa-truck-field mr-1"></i>${escaparHTML(v.plan_proveedor ?? 'Proveedor')} · costo ${formatoCOP(v.costo_proveedor)} · `
+        + `${m ? `${m.ganancia > 0 ? 'ganas' : m.ganancia < 0 ? 'pierdes' : 'margen'} ${formatoCOP(Math.abs(m.ganancia))} (${m.pct}%)` : 'sin precio'}</span>`;
+}
+const formatoCOP = (n) => `$${Number(n || 0).toLocaleString('es-CO')}`;
 
 function pintarPrecios() {
     const caja = document.getElementById('precios-lista');
     if (!caja) return;
     if (precios.error) { caja.innerHTML = filaVacia(precios.error, 'fa-triangle-exclamation'); return; }
     const pausadas = precios.lista.filter((x) => !x.activo).length;
-    document.getElementById('precios-resumen').textContent = `${precios.lista.length} variantes · ${pausadas} pausada${pausadas === 1 ? '' : 's'}`;
+    const sinMargen = precios.lista.filter((x) => x.activo && x.costo_proveedor != null && Number(x.precio) <= Number(x.costo_proveedor)).length;
+    document.getElementById('precios-resumen').textContent = `${precios.lista.length} variantes · ${pausadas} pausada${pausadas === 1 ? '' : 's'}`
+        + (precios.sinCostos ? ' · ejecuta supabase/wo-038-costos-ancpagos.sql para ver costos y margen'
+            : sinMargen ? ` · ⚠ ${sinMargen} activa${sinMargen === 1 ? '' : 's'} sin margen` : '');
     const termino = document.getElementById('precios-buscar').value.trim().toLowerCase();
     const lista = precios.lista.filter((x) => !termino || `${x.producto} ${x.variante} ${x.tipo}`.toLowerCase().includes(termino));
     if (!lista.length) { caja.innerHTML = filaVacia('Ningún precio coincide.', 'fa-tags'); return; }
@@ -1449,7 +1471,10 @@ function filaPrecio(v) {
         <label class="w-28"><span class="block text-[10px] font-bold uppercase tracking-wider text-neutral-500 mb-1">Antes</span>
             <input name="anterior" type="number" min="0" step="100" class="${campoPanel} w-full" value="${v.precio_anterior ?? ''}" placeholder="—"></label>
         <label class="flex items-center gap-1.5 min-h-[44px] text-[11px] font-bold text-neutral-300"><input name="activo" type="checkbox" class="w-5 h-5 accent-[#FF0033]" ${v.activo ? 'checked' : ''}> Activa</label>
-        <button type="submit" class="min-h-[44px] px-3 rounded-xl bg-dcRed text-white text-xs font-bold" aria-label="Guardar precio de ${escaparHTML(v.variante)}"><i class="fa-solid fa-floppy-disk"></i></button>`;
+        <button type="submit" class="min-h-[44px] px-3 rounded-xl bg-dcRed text-white text-xs font-bold" aria-label="Guardar precio de ${escaparHTML(v.variante)}"><i class="fa-solid fa-floppy-disk"></i></button>
+        <p class="basis-full text-[11px] leading-snug -mt-1" data-margen>${textoMargen(v, v.precio)}</p>`;
+    // El margen se recalcula mientras escribes el precio (antes de guardar)
+    f.precio.addEventListener('input', () => { f.querySelector('[data-margen]').innerHTML = textoMargen(v, f.precio.value); });
     f.addEventListener('submit', async (e) => {
         e.preventDefault();
         const boton = f.querySelector('[type="submit"]');
