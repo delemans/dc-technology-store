@@ -25,6 +25,13 @@ async function probar(base) {
         const r = await fetch(`${base}/user/info`, { headers: { Authorization: `Bearer ${CLAVE}` } });
         const j = await r.json().catch(() => ({}));
         if (r.ok) return { ok: true, saldo: j.data?.totalBalance ?? j.data?.balance ?? null, moneda: base.endsWith('.cn/v1') ? 'CNY' : 'USD' };
+        // Algunos servidores ya no exponen el saldo (404/410): la clave se valida con la lista de modelos
+        if ([404, 410].includes(r.status)) {
+            const m = await fetch(`${base}/models`, { headers: { Authorization: `Bearer ${CLAVE}` } });
+            const jm = await m.json().catch(() => ({}));
+            if (m.ok) return { ok: true, saldo: null, moneda: '' };
+            return { ok: false, motivo: `HTTP ${m.status} ${String(jm.message ?? jm.error?.message ?? '').slice(0, 80)}` };
+        }
         return { ok: false, motivo: `HTTP ${r.status} ${String(j.message ?? '').slice(0, 80)}` };
     } catch (e) {
         return { ok: false, motivo: /certificate|SELF_SIGNED/i.test(String(e.cause ?? e)) ? 'certificado (Kaspersky): ejecuta con NODE_EXTRA_CA_CERTS' : String(e.cause?.code ?? e.message) };
@@ -35,14 +42,14 @@ console.log(`\n${APLICAR ? 'APLICAR' : 'PRUEBA (usa --aplicar para conectarla al
 let servidor = null;
 for (const base of SERVIDORES) {
     const r = await probar(base);
-    console.log(`  ${r.ok ? '✔' : '✘'} ${base}: ${r.ok ? `clave válida · saldo ${r.saldo ?? '?'} ${r.moneda}` : r.motivo}`);
+    console.log(`  ${r.ok ? '✔' : '✘'} ${base}: ${r.ok ? `clave válida${r.saldo !== null ? ` · saldo ${r.saldo} ${r.moneda}` : ""}` : r.motivo}`);
     if (r.ok && !servidor) servidor = { base, ...r };
 }
 if (!servidor) {
     console.log('\n✘ La clave no sirve en ningún servidor. Crea una nueva en el sitio donde tienes la cuenta (API Keys) y pégala en .env.');
     process.exit(1);
 }
-if (Number(servidor.saldo) <= 0) console.log('  ⚠ El saldo es 0: recarga la cuenta o la IA dejará de responder.');
+if (servidor.saldo !== null && Number(servidor.saldo) <= 0) console.log('  ⚠ El saldo es 0: recarga la cuenta o la IA dejará de responder.');
 // Prueba real: una respuesta corta del mismo modelo que usa el bot
 const prueba = await fetch(`${servidor.base}/chat/completions`, {
     method: 'POST', headers: { Authorization: `Bearer ${CLAVE}`, 'Content-Type': 'application/json' },
