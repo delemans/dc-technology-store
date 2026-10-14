@@ -27,7 +27,7 @@ const CACHE = path.join(__dirname, '.n8n-credenciales.json');
 const env = cargarEntorno();
 requerir(env, ['N8N_URL', 'N8N_API_KEY', 'SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY',
     'EVOLUTION_URL', 'EVOLUTION_INSTANCIA', 'EVOLUTION_API_KEY', 'SILICONFLOW_API_KEY']);
-const BASE_LLM = env.SILICONFLOW_BASE_URL || 'https://api.siliconflow.cn/v1';
+const BASE_LLM = env.SILICONFLOW_BASE_URL || 'https://api.siliconflow.com/v1'; // cuenta internacional (.cn solo para cuentas de China)
 const N8N = env.N8N_URL.replace(/\/+$/, '');
 
 async function api(ruta, opciones = {}) {

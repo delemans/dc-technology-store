@@ -187,15 +187,33 @@
             'Describo la falla a continuación:',
         ].filter(Boolean).join('\n'),
 
-        satisfaccion24h: ({ producto }) =>
-            `¡Hola! ¿Cómo vas con tu cuenta de ${producto}? Queremos asegurar que todo funcione al 100%.`,
+        // Formato común (WO-040): primera línea = emoji + *título* + firma (es lo que se ve en la notificación),
+        // datos con emoji, y al final el siguiente paso. Cada dato opcional va en su propia línea: si llega vacío,
+        // rellenar() quita solo esa línea y el resto del mensaje se conserva.
+        satisfaccion24h: ({ producto }) => [
+            `👋 *¿Cómo vas con ${producto}?* · ${FIRMA}`,
+            '',
+            'Queremos que todo funcione al 100 %.',
+            '¿Algo no va bien? Responde *SOPORTE* y lo resolvemos.',
+        ].join('\n'),
 
-        renovacion3d: ({ producto, cupon }) =>
-            `Tu suscripción a ${producto} vence pronto. Renueva hoy con un ${DESCUENTO_RENOVACION}% de descuento.` +
-            (cupon ? ` Usa el código: ${cupon}` : ''),
+        renovacion3d: ({ producto, cupon }) => [
+            `⏰ *Tu ${producto} vence pronto* · ${FIRMA}`,
+            '',
+            `Renuévalo hoy con *${DESCUENTO_RENOVACION}% de descuento* y sigue sin interrupciones.`,
+            cupon ? `🎟️ Tu cupón: *${cupon}*` : null,
+            '',
+            'Responde *RENOVAR* y te ayudo en un minuto.',
+        ].filter((l) => l !== null).join('\n'),
 
-        cuponFidelidad: ({ producto, cupon }) =>
-            `¡Gracias por confiar en DC TECHNOLOGY! Por tu compra de ${producto}, aquí tienes un cupón para tu próxima compra: ${cupon}. Escríbenos cuando quieras usarlo.`,
+        cuponFidelidad: ({ producto, cupon }) => [
+            `🎁 *Un regalo por tu compra* · ${FIRMA}`,
+            '',
+            `Gracias por confiar en nosotros con ${producto}.`,
+            `🎟️ Tu cupón para la próxima compra: *${cupon}*`,
+            '',
+            'Escríbenos cuando quieras usarlo.',
+        ].join('\n'),
 
         /* ---- Posventa automática (n8n lee notificaciones_whatsapp y usa estos textos) ----
            Formato WhatsApp: *negrita*, _cursiva_. Nunca incluyen credenciales: esas las entrega
@@ -203,87 +221,85 @@
 
         // ESPERANDO_PROVEEDOR: el pago fue validado y el pedido entra a proceso
         pagoRecibido: ({ pedido, producto, metodo, codigo }) => [
-            `✅ *¡Pago confirmado!* · ${FIRMA}`,
+            `✅ *Pago confirmado* · ${FIRMA}`,
             '',
-            `Recibimos tu pago${metodo ? ` por *${metodo}*` : ''} y ya estamos procesando tu pedido.`,
+            'Recibimos tu pago y ya estamos preparando tu pedido.',
             '',
             `📦 Pedido: *#${pedido}*`,
             `🛒 Producto: ${producto}`,
-            `⏱️ Entrega: máximo *${ENTREGA_MAX_MIN} minutos* (${HORARIO}).`,
+            metodo ? `💳 Pagaste con: ${metodo}` : null,
+            `⏱️ Entrega: máximo *${ENTREGA_MAX_MIN} minutos* (${HORARIO})`,
             '',
-            '🔎 Sigue tu pedido en tiempo real:',
-            `${URL_PORTAL}?codigo=${codigo}`,
+            `🔎 Síguelo aquí: ${URL_PORTAL}?codigo=${codigo}`,
             '',
-            'Gracias por confiar en nosotros 🙌',
-        ].join('\n'),
+            'Gracias por comprar con nosotros 🙌',
+        ].filter((l) => l !== null).join('\n'),
 
         // ENTREGADO / ENTREGADO_INMEDIATO: confirma la entrega y activa la garantía
         entregaConfirmada: ({ pedido, producto, garantiaDias, garantiaHasta, codigo }) => [
-            `🎉 *¡Tu pedido fue entregado!* · ${FIRMA}`,
+            `🎉 *¡Pedido entregado!* · ${FIRMA}`,
             '',
             `📦 Pedido: *#${pedido}*`,
             `🛒 Producto: ${producto}`,
-            `🛡️ Garantía activa: *${garantiaDias} días* (hasta el ${garantiaHasta}).`,
+            `🛡️ Garantía: *${garantiaDias} días*, hasta el ${garantiaHasta}`,
             '',
-            '🔐 Tus datos de acceso se entregan *solo por este chat oficial*. Si no los ves arriba, responde *ACCESOS* y te los reenviamos.',
-            '📌 Para conservar tu garantía: no cambies correo ni contraseña y usa solo tu perfil asignado.',
+            '🔐 Tus accesos llegan *solo por este chat oficial* y quedan guardados en Mis pedidos.',
+            '📌 Para no perder la garantía: no cambies correo ni contraseña y usa solo tu perfil.',
             '',
-            '🔎 Tu pedido y garantía:',
-            `${URL_PORTAL}?codigo=${codigo}`,
-            '',
-            '¿Necesitas ayuda? Responde *SOPORTE* 🛠️',
+            `🔎 Tu pedido y garantía: ${URL_PORTAL}?codigo=${codigo}`,
+            '¿Algo no funciona? Responde *SOPORTE* 🛠️',
         ].join('\n'),
 
         // 24 h después de la entrega (solo en horario y si aún no dejó reseña)
         solicitudResena: ({ producto, codigo }) => [
             `⭐ *¿Cómo te fue con ${producto}?* · ${FIRMA}`,
             '',
-            'Ya pasó un día desde tu entrega y queremos confirmar que todo funciona al 100%.',
+            'Ya pasó un día desde tu entrega y queremos saber si todo funciona al 100 %.',
             '',
             '👉 Califícanos en 30 segundos (reseña de compra verificada):',
             `${URL_PORTAL}?codigo=${codigo}#resena`,
-            '_Solo necesitas los últimos 4 dígitos de tu WhatsApp._',
+            '_Solo te pide los últimos 4 dígitos de tu WhatsApp._',
             '',
-            '¿Algo no va bien? Responde *SOPORTE* y lo resolvemos de inmediato.',
-            '_Si prefieres no recibir estos mensajes, responde *NO*._',
+            '¿Algo no va bien? Responde *SOPORTE* y lo resolvemos.',
+            '_Si no quieres recibir estos mensajes, responde *NO*._',
         ].join('\n'),
 
         // WO-028: código de acceso al portal de clientes (supabase/wo-028-portal.sql → solicitar_otp).
         // La cola borra el código apenas se envía y lo cancela si no sale en 5 minutos.
         // WO-032: órdenes web (portal) y reportes de falla
         ordenValidada: ({ codigo, total }) => [
-            `✅ *¡Pago validado!* · ${FIRMA}`,
+            `✅ *Pago validado* · ${FIRMA}`,
             '',
-            `Tu orden *${codigo}* por *$${total}* ya está confirmada y entra a proceso.`,
-            `⏱️ Entrega: máximo *${ENTREGA_MAX_MIN} minutos* (${HORARIO}).`,
+            `Tu orden *${codigo}* por *$${total}* quedó confirmada y ya está en proceso.`,
+            `⏱️ Entrega: máximo *${ENTREGA_MAX_MIN} minutos* (${HORARIO})`,
             '',
             '🔎 Síguela en Mis pedidos: dctecnology.xyz/cliente.html#cuenta',
         ].join('\n'),
         ordenRechazada: ({ codigo, motivo }) => [
-            `⚠️ *Revisamos tu comprobante* · ${FIRMA}`,
+            `⚠️ *No pudimos validar tu pago* · ${FIRMA}`,
             '',
-            `No pudimos validar el pago de tu orden *${codigo}*.`,
-            `Motivo: ${motivo}`,
+            `📦 Orden: *${codigo}*`,
+            `📝 Motivo: ${motivo}`,
             '',
-            'Puedes subir otro comprobante en Mis pedidos (dctecnology.xyz/cliente.html#cuenta) o responder aquí y te ayudamos.',
+            'Sube otro comprobante en Mis pedidos (dctecnology.xyz/cliente.html#cuenta) o respóndeme por aquí y te ayudo.',
         ].join('\n'),
         reporteResuelto: ({ producto, nota }) => [
             `🛠️ *Tu reporte fue atendido* · ${FIRMA}`,
             '',
-            `Producto: ${producto}`,
-            `Solución: ${nota}`,
+            `🛒 Producto: ${producto}`,
+            `✅ Solución: ${nota}`,
             '',
             '¿Sigue fallando? Responde *SOPORTE* y lo revisamos de nuevo.',
         ].join('\n'),
         adminComprobante: ({ codigo, cliente, metodo, total, referencia }) => [
-            '🧾 *Comprobante nuevo en el portal*',
+            '🧾 *Comprobante nuevo en la web*',
             `Orden: *${codigo}* · $${total} · ${metodo}`,
             `Cliente: +${cliente}`,
             `Referencia: ${referencia}`,
             'Valídalo en el panel → Pagos & Agente Bot → Comprobantes web.',
         ].join('\n'),
         adminFalla: ({ reporte, cliente, producto, problema, garantia }) => [
-            '🛠️ *Falla reportada en el portal*',
+            '🛠️ *Falla reportada en Mis pedidos*',
             `Reporte #${reporte} · Cliente: +${cliente}`,
             `Producto: ${producto}`,
             `Problema: ${problema}`,
@@ -299,8 +315,8 @@
             'Escríbelo en dctecnology.xyz para ver tus pedidos y accesos.',
             '⏱️ Vence en *5 minutos*.',
             '',
-            '⚠️ No lo compartas con nadie: ningún asesor de DC TECHNOLOGY te lo pedirá.',
-            '_Si no lo solicitaste, ignora este mensaje._',
+            '⚠️ No lo compartas: nadie de DC TECHNOLOGY te lo va a pedir.',
+            '_Si no lo pediste, ignora este mensaje._',
         ].join('\n'),
 
         // Entrega de accesos de un producto digital (triangulación con el proveedor, WO-024).
@@ -318,7 +334,7 @@
             perfil !== undefined ? `🙋 Perfil: \`\`\`${perfil}\`\`\`` : null,
             pin !== undefined ? `🔢 PIN: \`\`\`${pin}\`\`\`` : null,
             '',
-            '📌 Para conservar tu garantía: no cambies correo ni contraseña, usa solo tu perfil y no compartas el acceso.',
+            '📌 Para no perder la garantía: no cambies correo ni contraseña, usa solo tu perfil y no compartas el acceso.',
             codigo !== undefined ? `🛡️ Garantía y soporte: ${URL_PORTAL}?codigo=${codigo}` : null,
             '',
             '¿Algo no funciona? Responde *SOPORTE* 🛠️',
@@ -326,9 +342,9 @@
 
         // Respuesta del bot al pasar la conversación a una persona
         escalarAsesor: ({ pedido } = {}) => [
-            `🙋 *Te paso con un asesor humano* · ${FIRMA}`,
+            `🙋 *Te comunico con un asesor* · ${FIRMA}`,
             '',
-            `Nuestro equipo te responde por este chat en horario de atención (${HORARIO}).`,
+            `Una persona del equipo te responde por este mismo chat en horario de atención (${HORARIO}).`,
             pedido ? `Ya tenemos tu pedido *#${pedido}* a la mano.` : 'Para agilizar, envíanos tu número de pedido y una captura del problema.',
         ].join('\n'),
 

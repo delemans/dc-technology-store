@@ -20,7 +20,8 @@ const kb = JSON.parse(fs.readFileSync(path.join(RAIZ, 'bot-conocimiento.json'), 
 const WA = require(path.join(RAIZ, 'plantillas-whatsapp.js'));
 
 const MODELO = 'deepseek-ai/DeepSeek-V3';
-const SILICONFLOW_URL = 'https://api.siliconflow.cn/v1';
+// Cuenta internacional de SiliconFlow (la clave de .cn no sirve en .com ni al revés): ver herramientas/configurar-ia.mjs
+const SILICONFLOW_URL = 'https://api.siliconflow.com/v1';
 const SUPABASE_URL = 'https://vyqcizwfmjlflncdwzve.supabase.co';
 const HORAS_PAUSA_ASESOR = 12;
 // Triangulación: cuánto espera cada paso antes de cerrar el pedido y avisarte
@@ -40,8 +41,11 @@ const kbEmbebida = {
     escalamiento: kb.escalamiento,
     plantillas: kb.plantillas,
     notificaciones: { plantilla_por_tipo: kb.notificaciones.plantilla_por_tipo },
-    catalogo: kb.catalogo.map(({ nombre, tipo, variantes }) => ({ nombre, tipo, variantes: variantes.map(({ nombre: n, precio }) => ({ nombre: n, precio })) })),
+    menu: kb.menu,
+    catalogo: kb.catalogo.map(({ id, nombre, tipo, url, variantes }) => ({ id, nombre, tipo, url, variantes: variantes.map(({ nombre: n, precio }) => ({ nombre: n, precio })) })),
 };
+// Nombre visible de cada tipo de método de pago (NEQUI → Nequi, LLAVE_BREB → Llave Bre-B) para el menú
+const nombresPago = Object.fromEntries(WA.TIPOS_PAGO.map((t) => [t.tipo, t.nombre]));
 
 // WO-035 · Compra en el portal del proveedor: nuestra variante → producto y plan en ANC (mismo precio).
 // Fuente: herramientas/equivalencias-ancpagos.json + nombres de productos.json.
@@ -76,7 +80,7 @@ function utilidades() {
         memoria.pausados = memoria.pausados || {};
         memoria.pausados[msg.numero] = Date.now();
         const salida = [{ json: { numero: msg.numero, texto: rellenar(plantillas.escalar_asesor, {}) } }];
-        const aviso = String(cfg.numero_aviso_admin ?? '').replace(/\D/g, '');
+        const aviso = soloDigitos(cfg.numero_aviso_admin);
         if (aviso) {
             salida.push({ json: { numero: aviso, texto: [
                 '🔔 *Escalamiento a asesor*',
@@ -88,8 +92,12 @@ function utilidades() {
         }
         return salida;
     };
-    const soloDigitos = (v) => String(v ?? '').replace(/\D/g, '');
+    // Números de WhatsApp: solo dígitos y, si es un celular colombiano de 10 dígitos (3XXXXXXXXX), con el 57 adelante:
+    // "312 513 2325" en Config bot no rompe tus avisos ni tus comandos #pago / #aprobar / #cancelar
+    const soloDigitos = (v) => { const d = String(v ?? '').replace(/\D/g, ''); return /^3\d{9}$/.test(d) ? `57${d}` : d; };
     const montoCripto = __MONTO_CRIPTO__;
+    // Base de conocimiento leída de la web: si el nodo HTTP quedó con "respuesta completa" (headers + body), viene en body
+    const baseViva = (j) => (j && !j.plantillas && j.body && typeof j.body === 'object' ? j.body : j);
     const cop = (v) => `$${Number(v || 0).toLocaleString('es-CO')}`;
     // Triangulación: termina el pedido. El error va a la salida de error del nodo → "Cerrar triangulación"
     const terminar = (estado, avisoAdmin, avisoCliente) => {
@@ -105,7 +113,7 @@ function utilidades() {
     };
 }
 
-// A1 · Normaliza el evento de Evolution API y decide la ruta (baja / asesor / sin_texto / ia)
+// A1 · Normaliza el evento de Evolution API y decide la ruta (baja / asesor / sin_texto / comprobante / menu / ia)
 function normalizarMensaje() {
     const cfg = $('Config bot').first().json;
     const evento = $('Webhook Evolution').first().json;
@@ -120,26 +128,34 @@ function normalizarMensaje() {
     const jid = original.endsWith('@lid') && alterno.endsWith('@s.whatsapp.net') ? alterno : original;
     if (!jid.endsWith('@s.whatsapp.net')) return []; // grupos, estados, canales y @lid sin número: el bot no responde
     const numero = jid.split('@')[0];
-    const m = d.message ?? {};
+    // Los mensajes temporales y los de "ver una vez" llegan envueltos
+    const crudo = d.message ?? {};
+    const m = crudo.ephemeralMessage?.message ?? crudo.viewOnceMessageV2?.message ?? crudo.viewOnceMessage?.message ?? crudo.documentWithCaptionMessage?.message ?? crudo;
     const texto = String(m.conversation ?? m.extendedTextMessage?.text ?? m.imageMessage?.caption ?? m.documentMessage?.caption ?? m.videoMessage?.caption ?? '').trim();
-    // Foto o PDF = comprobante de pago (Nequi / Daviplata envían captura o PDF)
     // Hash de transacción cripto (TXID): 64 hex (BTC, ETH/BEP20/TRC20…) o firma de Solana (base58, ~88)
     const txid = (/\b(?:0x)?[0-9a-fA-F]{64}\b/.exec(texto) || /\b[1-9A-HJ-NP-Za-km-z]{86,90}\b/.exec(texto) || [])[0] ?? null;
-    const esComprobante = Boolean(m.imageMessage || txid || (m.documentMessage && /pdf|image/i.test(String(m.documentMessage.mimetype ?? ''))));
+    // Foto o PDF: puede ser un comprobante (Nequi / Daviplata envían captura o PDF), una captura de un problema o algo personal
+    const esImagen = Boolean(m.imageMessage);
+    const esPdf = Boolean(m.documentMessage && /pdf|image/i.test(String(m.documentMessage.mimetype ?? '')));
 
     const memoria = $getWorkflowStaticData('global');
-    memoria.pausados = memoria.pausados || {};
+    for (const k of ['pausados', 'ritmo', 'resenas', 'menu', 'conversacion', 'esperandoPago', 'soporte']) memoria[k] = memoria[k] || {};
     memoria.vistos = memoria.vistos || [];
-    memoria.ritmo = memoria.ritmo || {};
-    memoria.resenas = memoria.resenas || {};
     const ahora = Date.now();
     for (const [n, t] of Object.entries(memoria.pausados)) if (ahora - t > __HORAS_PAUSA__ * 3600e3) delete memoria.pausados[n];
+    // Lo que el bot recuerda por número (menú, conversación, pago en curso, soporte) se borra a los 7 días
+    for (const k of ['menu', 'conversacion', 'esperandoPago', 'soporte']) {
+        for (const [n, v] of Object.entries(memoria[k])) if (ahora - (typeof v === 'number' ? v : v?.t ?? 0) > 7 * 864e5) delete memoria[k][n];
+    }
+    for (const k of ['ritmo', 'ritmoIa']) for (const [n, v] of Object.entries(memoria[k] || {})) if (!(v || []).some((t) => ahora - t < 60e3)) delete memoria[k][n];
 
     // Mensajes propios: el asesor escribe "#bot" en el chat del cliente para devolverle el control al bot
     if (key.fromMe) {
         if (/^#bot\b/i.test(texto)) delete memoria.pausados[numero];
         return [];
     }
+    // Reacciones, stickers, mensajes borrados o editados y votos de encuestas: no se contestan
+    if (m.reactionMessage || m.stickerMessage || m.protocolMessage || m.editedMessage || m.pollUpdateMessage || m.keepInChatMessage || m.pinInChatMessage) return [];
     // Evolution puede reenviar el mismo evento: se procesa una sola vez
     if (key.id) {
         if (memoria.vistos.includes(key.id)) return [];
@@ -148,29 +164,81 @@ function normalizarMensaje() {
     // Triangulación (WO-024): mensajes del proveedor y comandos del administrador no van a la IA
     const citado = d.contextInfo?.stanzaId ?? Object.values(m).find((v) => v && v.contextInfo)?.contextInfo?.stanzaId ?? null;
     if (soloDigitos(cfg.numero_proveedor) && numero === soloDigitos(cfg.numero_proveedor)) {
-        return [{ json: { ruta: 'triangulacion', origen: 'proveedor', numero, texto: texto.slice(0, 2000), wamid: key.id ?? null, citado, conMedia: esComprobante } }];
+        return [{ json: { ruta: 'triangulacion', origen: 'proveedor', numero, texto: texto.slice(0, 2000), wamid: key.id ?? null, citado, conMedia: esImagen || esPdf || Boolean(txid) } }];
     }
     const comando = /^#(pago|aprobar|cancelar)\s+(DC-[A-Z0-9]{4,8})\b/i.exec(texto);
     if (comando && soloDigitos(cfg.numero_aviso_admin) && numero === soloDigitos(cfg.numero_aviso_admin)) {
-        return [{ json: { ruta: 'triangulacion', origen: 'admin', accion: comando[1].toLowerCase(), referencia: comando[2].toUpperCase(), numero, texto, wamid: key.id ?? null, conMedia: esComprobante } }];
+        return [{ json: { ruta: 'triangulacion', origen: 'admin', accion: comando[1].toLowerCase(), referencia: comando[2].toUpperCase(), numero, texto, wamid: key.id ?? null, conMedia: esImagen || esPdf || Boolean(txid) } }];
     }
 
-    if (memoria.pausados[numero]) return []; // un asesor atiende este chat
-    // Anti-abuso: más de 6 mensajes en 1 minuto del mismo número → se ignoran (protege el costo de la IA)
+    if (memoria.pausados[numero]) return []; // un asesor (o tú) atiende este chat
+    // Anti-abuso: una ráfaga de más de 15 mensajes en 1 minuto del mismo número se ignora (el límite de la IA va al final)
     const recientes = (memoria.ritmo[numero] || []).filter((t) => ahora - t < 60e3);
     memoria.ritmo[numero] = [...recientes, ahora];
-    if (recientes.length >= 6) return [];
+    if (recientes.length >= 15) return [];
 
-    const t = normalizar(texto);
-    const palabras = (cfg.palabras_asesor || '').split(',').map((p) => normalizar(p).trim()).filter(Boolean);
-    let ruta = 'ia';
-    if (esComprobante) ruta = 'comprobante';
-    else if (!texto) ruta = 'sin_texto';
+    // Sin tildes ni signos, y los números de teclado (1️⃣ 🔟) como dígitos: "1.", "la 1" y "1️⃣" → "1"
+    const limpio = normalizar(texto).replace(/[️⃣]/g, '').replace(/🔟/g, '10').replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
+    const hace = (mapa, horas) => ahora - (typeof mapa[numero] === 'number' ? mapa[numero] : 0) < horas * 3600e3;
+    const estado = memoria.menu[numero];
+    const menuVivo = Boolean(estado && estado.activo && ahora - estado.t < 30 * 60e3);
+    const conversando = hace(memoria.conversacion, 72); // el bot habló de compras con este número en los últimos 3 días
+    const salida = { ruta: 'ia', numero, texto: texto.slice(0, 1000), nombre: d.pushName ?? '', wamid: key.id ?? null, txid };
+
+    if (txid) salida.ruta = 'comprobante';
+    else if (esImagen || esPdf) {
+        // ¿Comprobante, captura de un problema o algo personal? Lo dice el texto que la acompaña o la conversación
+        if (/\b(pago|pague|pagado|pagando|comprobante|transferencia|transferi|consignacion|consigne|nequi|daviplata|breb|llave|abono|abone|recibo)\b/.test(limpio) || hace(memoria.esperandoPago, 48)) salida.ruta = 'comprobante';
+        else if (/\b(error|falla|fallo|no funciona|no me deja|no puedo|no abre|me sale|me aparece|bloqueo|bloqueado|ayuda)\b/.test(limpio) || hace(memoria.soporte, 2)) Object.assign(salida, { ruta: 'asesor', motivo: 'Envió una captura de un problema' });
+        else if (conversando) salida.ruta = 'comprobante';
+        else Object.assign(salida, { ruta: 'sin_texto', aviso: esPdf ? 'documento' : 'imagen' }); // nadie le habló de compras: te aviso a ti
+    } else if (m.audioMessage) Object.assign(salida, { ruta: 'sin_texto', tipo: 'audio' }, conversando ? {} : { aviso: 'audio' });
+    else if (!texto) {
+        if (!(m.videoMessage || m.locationMessage || m.liveLocationMessage || m.contactMessage || m.contactsArrayMessage || m.documentMessage)) return [];
+        Object.assign(salida, { ruta: 'sin_texto' }, conversando ? {} : { aviso: 'otro' });
+    }
     // "NO" solo da de baja si le llegó una solicitud de reseña en los últimos 7 días
-    else if (/^no[.!]?$/.test(t) && ahora - (memoria.resenas[numero] || 0) < 7 * 864e5) ruta = 'baja';
-    else if (/^(asesor|soporte|accesos|humano)[.!]?$/.test(t) || palabras.some((p) => ` ${t} `.includes(` ${p} `))) ruta = 'asesor';
-
-    return [{ json: { ruta, numero, texto: texto.slice(0, 1000), nombre: d.pushName ?? '', wamid: key.id ?? null, txid } }];
+    else if (limpio === 'no' && hace(memoria.resenas, 168)) salida.ruta = 'baja';
+    else {
+        // Menú con números (WO-040): opciones del último menú (30 min), saludos y atajos de una o dos palabras
+        const elegido = /^(?:opcion |la |el |numero |num )?(\d{1,2})$/.exec(limpio);
+        const n = elegido ? Number(elegido[1]) : null;
+        const sinSaludo = limpio.replace(/\b(hola+|holi+s?|ola|alo|hello|hi|hey|buenas|buenos|buen|dia|dias|tardes|noches|saludos|que tal|como estas|como esta|como vas|como va|info|informacion|dc|dctechnology|technology|tecnology|tech|por favor|porfa|amigo|amiga|senor|senora|joven|veci|vecino|vecina|parce|parcero)\b/g, ' ').trim();
+        let ir = null;
+        if (n !== null && menuVivo && (n === 0 || estado.opciones?.length)) ir = n === 0 ? estado.atras || 'principal' : estado.opciones[n - 1] ?? `invalida:${estado.id}`;
+        else if (n === 0) ir = 'principal';
+        else if (limpio && !sinSaludo) { ir = 'principal'; salida.saludo = true; }
+        else {
+            const atajos = [
+                ['principal', /^(menu|el menu|ver menu|ver el menu|inicio|opciones|ver opciones|volver|regresar|empezar)$/],
+                ['catalogo', /^(catalogo|ver catalogo|el catalogo|precios|lista de precios|productos|ver productos|que venden|que tienen|que productos tienen|que manejan|servicios)$/],
+                ['soporte', /^(soporte|ayuda|garantia|soporte tecnico|tengo un problema)$/],
+                ['pedidos', /^(accesos|mis accesos|pedidos|mis pedidos|mi pedido|estado de mi pedido|mi compra)$/],
+                ['pagos', /^(pagos|formas de pago|medios de pago|metodos de pago|como pago|como puedo pagar|donde pago)$/],
+                ['comprar', /^(comprar|como compro|como comprar|quiero comprar|como hago para comprar)$/],
+            ];
+            ir = atajos.find(([, re]) => re.test(limpio))?.[0] ?? null;
+        }
+        // "persona", "humano" o "agente" sueltos piden un asesor; dentro de una frase ("Netflix para una persona") no
+        const sueltas = ['persona', 'humano', 'agente'];
+        const palabras = (cfg.palabras_asesor || '').split(',').map((p) => normalizar(p).trim()).filter((p) => p && !sueltas.includes(p));
+        const pideAsesor = /^(asesor|un asesor|humano|persona|una persona|agente|hablar con (un|una) (asesor|persona|humano))$/.test(limpio)
+            || palabras.some((p) => ` ${limpio} `.includes(` ${p} `));
+        if (ir === 'asesor') Object.assign(salida, { ruta: 'asesor', motivo: 'Eligió "Hablar con una persona" en el menú' });
+        else if (ir) Object.assign(salida, { ruta: 'menu', menu: { ir, saludo: Boolean(salida.saludo) } });
+        else if (pideAsesor) salida.ruta = 'asesor';
+    }
+    // Si la conversación sigue por otro lado, los números ya no son opciones del menú ("2" puede responderle a la IA)
+    if (salida.ruta !== 'menu' && estado) estado.activo = false;
+    // Máximo 6 mensajes por minuto a la IA por número (protege su costo); el menú no cuenta porque no usa IA
+    if (salida.ruta === 'ia') {
+        memoria.ritmoIa = memoria.ritmoIa || {};
+        const aIa = (memoria.ritmoIa[numero] || []).filter((t) => ahora - t < 60e3);
+        if (aIa.length >= 6) return [];
+        memoria.ritmoIa[numero] = [...aIa, ahora];
+    }
+    delete salida.saludo;
+    return [{ json: salida }];
 }
 
 // A2 · Ruta "asesor": pausa el bot y avisa
@@ -178,17 +246,36 @@ function rutaAsesor() {
     const cfg = $('Config bot').first().json;
     const msg = $input.first().json;
     const kb = __KB__;
-    return escalar(msg, 'El cliente pidió un asesor o reportó un problema', cfg, kb.plantillas);
+    return escalar(msg, msg.motivo || 'El cliente pidió un asesor o reportó un problema', cfg, kb.plantillas);
 }
 
-// A3 · Rutas sin IA: baja confirmada y mensajes sin texto
+// A3 · Rutas sin IA: baja confirmada, audios y mensajes sin texto. Si quien escribe no viene de una conversación de
+// compra (foto, audio o archivo de un conocido), no se le contesta: te llega un aviso para que respondas tú.
 function respuestaFija() {
+    const cfg = $('Config bot').first().json;
     const msg = $('Normalizar mensaje').first().json;
+    if (msg.aviso) {
+        const memoria = $getWorkflowStaticData('global');
+        memoria.avisosMedia = memoria.avisosMedia || {};
+        const aviso = String(cfg.numero_aviso_admin ?? '').replace(/\D/g, '').replace(/^(3\d{9})$/, '57$1');
+        if (!aviso || Date.now() - (memoria.avisosMedia[msg.numero] || 0) < 30 * 60e3) return []; // 1 aviso por chat cada 30 min
+        memoria.avisosMedia[msg.numero] = Date.now();
+        const que = { imagen: '📷 una imagen', documento: '📄 un documento', audio: '🎙️ un audio' }[msg.aviso] ?? '📎 un archivo';
+        return [{ json: { numero: aviso, texto: [
+            `🔔 *Te enviaron ${que}*`,
+            `De: +${msg.numero}${msg.nombre ? ` (${String(msg.nombre).replace(/[*_~`]/g, '').slice(0, 40)})` : ''}`,
+            msg.texto ? `Texto: «${msg.texto.slice(0, 200)}»` : null,
+            '',
+            'No le respondí porque no venía de una compra con el bot.',
+            ['imagen', 'documento'].includes(msg.aviso) ? 'Si es un comprobante, valídalo; si es otro tema, contéstale tú.' : 'Revísalo y contéstale tú.',
+        ].filter((l) => l !== null).join('\n') } }];
+    }
     const textos = {
         baja: 'Listo ✅ No te enviaremos más solicitudes de reseña. Seguirás recibiendo solo los avisos de tus pedidos.',
-        sin_texto: 'Por ahora solo puedo leer mensajes de texto 🙏 Escríbeme tu consulta o "ASESOR" para hablar con una persona.',
+        audio: '🎙️ Aún no puedo escuchar audios. ¿Me lo escribes?\nO responde *menú* y eliges una opción.',
+        sin_texto: 'Por ahora solo leo mensajes de texto 🙏 Escríbeme tu consulta o responde *menú* para ver las opciones.',
     };
-    return [{ json: { numero: msg.numero, texto: textos[msg.ruta] ?? textos.sin_texto } }];
+    return [{ json: { numero: msg.numero, texto: textos[msg.ruta === 'baja' ? 'baja' : msg.tipo === 'audio' ? 'audio' : 'sin_texto'] } }];
 }
 
 // A3b · Comprobante recibido: confirma al cliente y avisa al administrador (el pago lo valida una persona)
@@ -196,13 +283,13 @@ function comprobanteRecibido() {
     const cfg = $('Config bot').first().json;
     const msg = $input.first().json;
     const salida = [{ json: { numero: msg.numero, texto: [
-        msg.txid ? '🔗 *¡Recibimos el hash de tu transacción!*' : '🧾 *¡Recibimos tu comprobante!*',
+        msg.txid ? '🔗 *Hash recibido* · ⚡ *DC TECHNOLOGY*' : '🧾 *Comprobante recibido* · ⚡ *DC TECHNOLOGY*',
         '',
-        `${msg.txid ? 'La verificamos en la red.' : 'Lo estamos validando.'} Apenas se confirme, tu pedido sale en máximo *${__ENTREGA_MIN__} minutos* (${__HORARIO__}) y te llega por este chat.`,
+        `${msg.txid ? 'Estamos verificando tu transacción en la red.' : 'Lo estamos validando.'} Apenas se confirme, tu pedido sale en máximo *${__ENTREGA_MIN__} minutos* (${__HORARIO__}) y te llega por este chat.`,
         '',
         'No necesitas enviarlo de nuevo 🙌',
     ].join('\n') } }];
-    const aviso = String(cfg.numero_aviso_admin ?? '').replace(/\D/g, '');
+    const aviso = String(cfg.numero_aviso_admin ?? '').replace(/\D/g, '').replace(/^(3\d{9})$/, '57$1');
     if (aviso) {
         salida.push({ json: { numero: aviso, texto: [
             msg.txid ? `🔗 *Pago cripto · TXID*\n${msg.txid}` : '🧾 *Comprobante recibido*',
@@ -214,10 +301,175 @@ function comprobanteRecibido() {
     return salida;
 }
 
+// A4a · Menú con números (WO-040): responde sin IA (rápido, exacto y sin costo) con el catálogo, los métodos de pago y
+// los combos EN VIVO. Si el cliente eligió la opción de un producto, sigue la IA como si lo hubiera escrito
+// ("Quiero Netflix Premium 4K – Pantalla Colombia 26 días") para confirmar el total y cobrar.
+function responderMenu() {
+    const msg = $('Normalizar mensaje').first().json;
+    if (msg.ruta !== 'menu' || !msg.menu) return [{ json: { via: 'ia', numero: msg.numero } }];
+    const enVivo = baseViva($('Base de conocimiento').first().json);
+    const kb = enVivo && Array.isArray(enVivo.catalogo) && enVivo.menu ? enVivo : __KB__;
+    const M = kb.menu;
+    const T = M.textos;
+    const memoria = $getWorkflowStaticData('global');
+    for (const k of ['menu', 'conversacion', 'soporte', 'esperandoPago']) memoria[k] = memoria[k] || {};
+    const ahora = Date.now();
+    const numero = msg.numero;
+    const DIGITALES = ['streaming', 'licencias', 'pines', 'recargas'];
+    const NOMBRES_PAGO = __NOMBRES_PAGO__;
+    const ETIQUETA_PAGO = { NEQUI: 'Número', DAVIPLATA: 'Número', LLAVE_BREB: 'Llave', BANCOLOMBIA: 'Cuenta', TRANSFERENCIA: 'Cuenta', PSE: 'Enlace', ENLACE: 'Enlace', PAYPAL: 'PayPal' };
+    const nombreMetodo = (x) => (x.categoria === 'cripto' ? `${x.moneda ?? x.tipo} (${x.red})` : NOMBRES_PAGO[x.tipo] ?? x.banco_alias ?? x.tipo);
+    const tecla = (i) => (i < 9 ? `${i + 1}️⃣` : `*${i + 1}.*`);
+    const precio = (v) => (Number(v) > 0 ? cop(v) : 'a cotizar');
+    const catalogo = kb.catalogo ?? [];
+    const categorias = M.categorias.map((c) => ({ ...c, productos: catalogo.filter((p) => c.tipos.includes(p.tipo)) })).filter((c) => c.productos.length);
+    const metodos = $('Metodos de pago').all().map((i) => i.json).filter((x) => x && (x.numero_cuenta || x.url_pago));
+    // Medios locales agrupados por nombre: dos llaves Bre-B son una sola opción que muestra las dos llaves
+    const grupos = [];
+    for (const x of metodos.filter((y) => y.categoria !== 'cripto')) {
+        const g = grupos.find((y) => y.nombre === nombreMetodo(x));
+        if (g) g.cuentas.push(x);
+        else grupos.push({ nombre: nombreMetodo(x), cuentas: [x] });
+    }
+    const reglas = $('Reglas combo').all().map((i) => i.json)
+        .map((r) => ({ min: Number(r.min_plataformas), pct: Number(r.descuento_pct) })).filter((r) => r.min >= 2 && r.pct > 0)
+        .sort((a, b) => a.min - b.min);
+    const lineaCombos = reglas.length
+        ? `🧩 *Combos:* ${reglas.map((r, i) => `${r.min}${i === reglas.length - 1 ? ' o más' : ''} plataformas -${r.pct}%`).join(' · ')}`
+        : null;
+    const desde = (p) => {
+        const precios = (p.variantes ?? []).map((v) => Number(v.precio)).filter((v) => v > 0);
+        if (!precios.length) return 'a cotizar';
+        return `${precios.length > 1 ? 'desde ' : ''}${cop(Math.min(...precios))}`;
+    };
+    const primerNombre = (() => {
+        const n = String(msg.nombre ?? '').trim().split(/\s+/)[0] ?? '';
+        return /^[A-Za-zÁÉÍÓÚÑÜáéíóúñü]{2,15}$/.test(n) ? n[0].toUpperCase() + n.slice(1).toLowerCase() : '';
+    })();
+
+    const pantalla = (id) => {
+        if (id === 'catalogo') {
+            return { lineas: [T.catalogo, T.elige_categoria, '', ...categorias.map((c, i) => `${tecla(i)} ${c.emoji} ${c.titulo} · ${c.productos.length}`),
+                ...(lineaCombos ? ['', lineaCombos] : []), '', T.volver_menu, T.web], opciones: categorias.map((c) => `cat:${c.tipos[0]}`), atras: 'principal' };
+        }
+        if (id.startsWith('cat:')) {
+            const c = categorias.find((x) => x.tipos[0] === id.slice(4));
+            if (!c) return pantalla('catalogo');
+            return { lineas: [`${c.emoji} *${c.titulo}*`, '', ...c.productos.map((p, j) => `*${j + 1}.* ${p.nombre} · ${desde(p)}`), '', T.elige_producto, T.volver_catalogo],
+                opciones: c.productos.map((p) => `prod:${p.id}`), atras: 'catalogo' };
+        }
+        if (id.startsWith('prod:')) {
+            const p = catalogo.find((x) => String(x.id) === id.slice(5));
+            if (!p) return pantalla('catalogo');
+            const c = categorias.find((x) => x.tipos.includes(p.tipo));
+            return { lineas: [`${c ? c.emoji : '🛍️'} *${p.nombre}*`, '', ...(p.variantes ?? []).map((v, j) => `*${j + 1}.* ${v.nombre}: *${precio(v.precio)}*`), '',
+                DIGITALES.includes(p.tipo) ? T.elige_opcion_digital : T.elige_opcion_fisico, p.url ? `${T.ver_web} ${p.url}` : null, T.volver_lista],
+            opciones: (p.variantes ?? []).map((v, j) => `elegir:${p.id}:${j}`), atras: c ? `cat:${c.tipos[0]}` : 'catalogo' };
+        }
+        // Compra sin IA: resumen del pedido y medios de pago (los locales activos, agrupados por nombre) + la web
+        if (id.startsWith('pedir:')) {
+            const [, pid, j] = /^pedir:(.+):(\d+)$/.exec(id) ?? [];
+            const p = catalogo.find((x) => String(x.id) === pid);
+            const v = p?.variantes?.[Number(j)];
+            if (!p || !v) return pantalla('catalogo');
+            return { lineas: [T.tu_pedido, `${p.nombre} – ${v.nombre}`, `💰 Total: *${cop(v.precio)}*`, lineaCombos ? T.combo : null, '',
+                T.como_pagar, ...grupos.map((g, k) => `${tecla(k)} ${g.nombre}`), `${tecla(grupos.length)} ${T.pagar_web}`,
+                metodos.some((x) => x.categoria === 'cripto') ? T.pagar_cripto : null, '', T.volver_opciones],
+            opciones: [...grupos.map((g, k) => `pagar:${p.id}:${j}:${k}`), `web:${p.id}`], atras: `prod:${p.id}` };
+        }
+        if (id.startsWith('pagar:')) {
+            const [, pid, j, k] = /^pagar:(.+):(\d+):(\d+)$/.exec(id) ?? [];
+            const p = catalogo.find((x) => String(x.id) === pid);
+            const v = p?.variantes?.[Number(j)];
+            const g = grupos[Number(k)];
+            if (!p || !v) return pantalla('catalogo');
+            if (!g) return pantalla(`pedir:${pid}:${j}`);
+            memoria.esperandoPago[numero] = ahora; // la próxima foto o PDF que envíe es su comprobante
+            return { lineas: [`💳 *Paga con ${g.nombre}*`, '',
+                ...g.cuentas.map((x) => `${g.cuentas.length > 1 ? '• ' : ''}${ETIQUETA_PAGO[x.tipo] ?? 'Datos'}: *${x.numero_cuenta ?? ''}*${x.titular ? ` (${x.titular})` : ''}`),
+                ...g.cuentas.filter((x) => x.url_pago).map((x) => `🔗 ${x.url_pago}`),
+                ...g.cuentas.filter((x) => x.instrucciones).map((x) => `ℹ️ ${x.instrucciones}`),
+                `💰 Valor: *${cop(v.precio)}*`, `🛒 Pedido: ${p.nombre} – ${v.nombre}`, '',
+                T.captura, `⏱️ Al validarlo, tus accesos llegan por este chat en máximo *${__ENTREGA_MIN__} minutos* (${__HORARIO__}).`, '', T.volver_pago],
+            opciones: [], atras: `pedir:${pid}:${j}`, pedido: { producto: p.nombre, variante: v.nombre, precio: v.precio } };
+        }
+        if (id.startsWith('web:')) {
+            const p = catalogo.find((x) => String(x.id) === id.slice(4));
+            const url = p ? `https://dctecnology.xyz/?producto=${encodeURIComponent(p.id)}` : 'https://dctecnology.xyz';
+            return { lineas: [...M.compra_web.map((l) => l.replace('{url}', url)), '', T.volver_menu], opciones: [], atras: 'principal' };
+        }
+        if (id === 'soporte') {
+            memoria.soporte[numero] = ahora;
+            return { lineas: [T.soporte, T.elige_problema, '', ...M.soporte.map((s, i) => `${tecla(i)} ${s.titulo}`), '',
+                `🛡️ Garantía: *${M.garantia_dias} días* desde la entrega, cumpliendo las reglas de uso.`, T.volver_menu], opciones: M.soporte.map((s, i) => `sop:${i}`), atras: 'principal' };
+        }
+        if (id.startsWith('sop:')) {
+            const s = M.soporte[Number(id.slice(4))];
+            if (!s) return pantalla('soporte');
+            memoria.soporte[numero] = ahora;
+            const faq = s.faq ? (kb.faq ?? []).find((f) => f.id === s.faq && f.respuesta && !f.pendiente_configurar) : null;
+            if (!faq) return { lineas: [...M.otro_problema, '', T.volver_soporte], opciones: [], atras: 'soporte' };
+            // Si la FAQ tiene un paso siguiente (hogar de Netflix, perfil con PIN), la IA lo continúa con "accion"
+            return { lineas: [`${s.emoji} *${s.titulo}*`, '', faq.respuesta, ...(faq.accion ? [] : ['', T.sigue]), T.volver_soporte], opciones: [], atras: 'soporte', accion: faq.accion ?? null };
+        }
+        if (id === 'comprar') return { lineas: [...M.comprar, ...(lineaCombos ? [lineaCombos] : []), '', T.comprar_pie, T.volver_menu], opciones: ['catalogo'], atras: 'principal' };
+        if (id === 'pedidos') return { lineas: [...M.pedidos, '', T.volver_menu], opciones: [], atras: 'principal' };
+        if (id === 'pagos') {
+            const locales = grupos.map((g) => g.nombre);
+            const criptos = [...new Set(metodos.filter((x) => x.categoria === 'cripto').map(nombreMetodo))];
+            return { lineas: [M.pagos.titulo, '', ...(metodos.length ? [
+                locales.length ? `*Pagos locales:* ${locales.join(' · ')}` : null,
+                criptos.length ? `*Cripto:* ${criptos.join(' · ')}` : null,
+                '', ...M.pagos.pasos,
+            ] : [M.pagos.sin_metodos]), '', T.volver_menu], opciones: [], atras: 'principal' };
+        }
+        // Menú principal
+        return { lineas: [
+            msg.menu.saludo ? M.principal.saludo.replace('{nombre}', primerNombre ? `, ${primerNombre}` : '') : M.principal.titulo,
+            msg.menu.saludo ? M.principal.lema : null,
+            '', M.principal.pregunta, ...M.principal.opciones.map((o, i) => `${tecla(i)} ${o.texto}`), '', M.principal.pie,
+        ], opciones: M.principal.opciones.map((o) => o.id), atras: null };
+    };
+
+    let ir = String(msg.menu.ir || 'principal');
+    // Eligió una opción de un producto: si es digital con precio, sigue la compra por el menú; si es físico, un
+    // servicio o "a cotizar", pasa a una persona que coordina el envío o la cita
+    if (ir.startsWith('elegir:')) {
+        const [, id, j] = /^elegir:(.+):(\d+)$/.exec(ir) ?? [];
+        const p = catalogo.find((x) => String(x.id) === id);
+        const v = p?.variantes?.[Number(j)];
+        if (!p || !v) ir = 'catalogo';
+        else if (DIGITALES.includes(p.tipo) && Number(v.precio) > 0) ir = `pedir:${id}:${j}`;
+        else {
+            if (memoria.menu[numero]) memoria.menu[numero].activo = false;
+            const salida = escalar({ ...msg, texto: `Quiere comprar: ${p.nombre} – ${v.nombre}` },
+                `Quiere comprar ${p.nombre} – ${v.nombre} (${precio(v.precio)}): coordinar ${p.tipo === 'tecnologia' ? 'el envío' : 'la cita o la cotización'}`,
+                $('Config bot').first().json, kb.plantillas);
+            salida[0].json.texto = [`🙋 *Te comunico con un asesor* · ⚡ *DC TECHNOLOGY*`, '', `Elegiste *${p.nombre} – ${v.nombre}* (${precio(v.precio)}).`,
+                `Una persona del equipo te escribe por aquí para coordinar ${p.tipo === 'tecnologia' ? 'el envío' : 'la cita'} (${__HORARIO__}).`].join('\n');
+            return salida.map((i) => ({ json: { ...i.json, via: 'menu' } }));
+        }
+    }
+    const invalida = ir.startsWith('invalida:');
+    if (invalida) ir = ir.slice(9) || 'principal';
+    const r = pantalla(ir);
+    const texto = [...(invalida ? [T.invalida, ''] : []), ...r.lineas].filter((l) => l !== null && l !== undefined)
+        .join('\n').replace(/\n{3,}/g, '\n\n').trim();
+    memoria.menu[numero] = { id: ir, opciones: r.opciones, atras: r.atras, t: ahora, activo: true, texto, accion: r.accion ?? null };
+    memoria.conversacion[numero] = ahora;
+    // "pedido" arranca la compra al proveedor ("Crear triangulación"), igual que el [PEDIDO_DIGITAL] de la IA
+    return [{ json: { via: 'menu', numero, texto, ...(r.pedido ? { pedido: r.pedido } : {}) } }];
+}
+
 // A4 · Contexto del agente: base de conocimiento en vivo (o la embebida) + cuentas activas de Supabase
 function armarContexto() {
     const msg = $('Normalizar mensaje').first().json;
-    const enVivo = $('Base de conocimiento').first().json;
+    // Si eligió un producto en el menú, la IA recibe esa elección como si la hubiera escrito
+    const texto = $('Responder menú').first().json.texto_ia || msg.texto;
+    // Último mensaje del menú (30 min): la IA sabe qué vio el cliente ("la primera", "esa") y no se presenta de nuevo
+    const estadoMenu = ($getWorkflowStaticData('global').menu || {})[msg.numero];
+    const ultimoMenu = estadoMenu && Date.now() - estadoMenu.t < 30 * 60e3 ? estadoMenu : null;
+    const enVivo = baseViva($('Base de conocimiento').first().json);
     const base = enVivo && enVivo.prompt_sistema && enVivo.plantillas ? enVivo : __KB__;
     const cuentas = $('Metodos de pago').all().map((i) => i.json).filter((m) => m && (m.numero_cuenta || m.url_pago));
     const linea = (c) => {
@@ -271,12 +523,15 @@ function armarContexto() {
         'FORMATO: español de Colombia, máximo 6 líneas, *negrita* de WhatsApp solo para datos clave, sin títulos ni tablas.',
         'PRODUCTOS DIGITALES (venta y soporte completos, sin pasar a un asesor):',
         ...(base.flujo_digital ?? []).map((x) => `- ${x}`),
+        ...(ultimoMenu ? ['', 'ÚLTIMO MENSAJE DEL MENÚ QUE VIO EL CLIENTE (la conversación ya empezó: no te presentes):', ultimoMenu.texto,
+            ...(ultimoMenu.accion ? [`(Después: ${ultimoMenu.accion})`] : []), ''] : []),
+        'NO ES COMPRA: si el mensaje no es de un cliente de la tienda, responde EXACTAMENTE "[NO_COMPRA] <tema en pocas palabras>" y nada más (el dueño le contesta en persona). Ante la duda, atiéndelo como cliente.',
         'ESCALAMIENTO: si aplica cualquier disparador de escalamiento, responde EXACTAMENTE "[ESCALAR] <motivo breve>" y nada más.',
         'PEDIDO DIGITAL: cuando el cliente CONFIRME un producto digital del catálogo (streaming, licencias, pines o recargas) y su opción, agrega al FINAL de tu respuesta, en una línea aparte: [PEDIDO_DIGITAL] {"producto":"<nombre exacto del catálogo>","variante":"<opción exacta>"}. Una sola vez por pedido. El cliente no ve esa línea. Luego sigue con el pago normalmente.',
         'PEDIDO COMBO: si lo que el cliente confirma es un COMBO (2 o más plataformas), en vez de [PEDIDO_DIGITAL] agrega al FINAL, en una línea aparte: [PEDIDO_COMBO] {"items":[{"producto":"<nombre exacto>","variante":"<opción exacta>"}]}. Una sola vez por combo.',
     ].join('\n');
 
-    return [{ json: { numero: msg.numero, texto: msg.texto, sistema } }];
+    return [{ json: { numero: msg.numero, texto, sistema } }];
 }
 
 // A5 · Revisa la respuesta del agente antes de enviarla
@@ -284,30 +539,55 @@ function revisarRespuesta() {
     const cfg = $('Config bot').first().json;
     const msg = $('Normalizar mensaje').first().json;
     // Catálogo, precios y plantillas EN VIVO desde el sitio (la copia embebida solo si el sitio no respondió)
-    const enVivo = $('Base de conocimiento').first().json;
+    const enVivo = baseViva($('Base de conocimiento').first().json);
     const kb = enVivo && Array.isArray(enVivo.catalogo) && enVivo.plantillas ? enVivo : __KB__;
     let r = String($input.first().json.output ?? '').trim();
+    const memoria = $getWorkflowStaticData('global');
     // Falla técnica de la IA (clave vencida, sin saldo, caída): el cliente recibe un mensaje de espera, su chat
     // NO se pausa (si no, quedaría 12 h sin respuesta) y tú recibes la causa exacta, como máximo cada 30 min.
     const errorIa = $input.first().json.error;
     if (!r && errorIa) {
-        const memoria = $getWorkflowStaticData('global');
         const ahora = Date.now();
-        const salida = [{ json: { numero: msg.numero, texto: 'Dame un momento 🙏 Tenemos una falla técnica pasajera; en breve te respondemos por aquí mismo.' } }];
+        // El menú no usa IA: el cliente puede seguir viendo el catálogo y comprar por ahí
+        const salida = [{ json: { numero: msg.numero, texto: [
+            'Dame un momento 🙏 Tuvimos una falla técnica.',
+            'Mientras tanto responde *menú*: ahí ves el catálogo y los precios, y puedes comprar.',
+            'O escribe *asesor* para hablar con una persona.',
+        ].join('\n') } }];
         const aviso = soloDigitos(cfg.numero_aviso_admin);
-        if (aviso && aviso !== msg.numero && ahora - (memoria.ultimaFallaIa || 0) > 30 * 60e3) {
+        if (aviso && ahora - (memoria.ultimaFallaIa || 0) > 30 * 60e3) {
             memoria.ultimaFallaIa = ahora;
             const causa = String(errorIa.message ?? errorIa).slice(0, 200);
             salida.push({ json: { numero: aviso, texto: [
                 '⚠️ *La IA del bot no está respondiendo*',
                 `Causa: «${causa}»`,
-                /authori[sz]ation|401|api key|credential/i.test(causa)
-                    ? 'Revisa la clave de SiliconFlow (credencial "DC · SiliconFlow" en n8n): vencida, borrada o sin saldo.'
-                    : 'Revisa en n8n → Executions el nodo "Agente IA".',
-                'Mientras tanto los clientes reciben un mensaje de espera (sus chats no se pausan).',
+                /payment|402|balance|insufficient|saldo/i.test(causa)
+                    ? 'La cuenta de SiliconFlow se quedó sin saldo: recárgala en cloud.siliconflow.com → Billing.'
+                    : /authori[sz]ation|401|api key|credential/i.test(causa)
+                        ? 'Revisa la clave de SiliconFlow (credencial "DC · SiliconFlow" en n8n): vencida o borrada.'
+                        : 'Revisa en n8n → Executions el nodo "Agente IA".',
+                'Mientras tanto el menú y la compra por menú siguen funcionando sin IA; los mensajes libres reciben un aviso de espera.',
             ].join('\n') } });
         }
         return salida;
+    }
+    // WO-040 · No es compra (un conocido, un proveedor, otro tema): no se le contesta, el chat queda en pausa para que
+    // respondas tú y te llega el aviso con su mensaje
+    const noCompra = r.match(/\[NO_COMPRA\]\s*([^\n]*)/i);
+    if (noCompra) {
+        memoria.pausados = memoria.pausados || {};
+        memoria.pausados[msg.numero] = Date.now();
+        const aviso = soloDigitos(cfg.numero_aviso_admin);
+        if (!aviso) return [];
+        return [{ json: { numero: aviso, texto: [
+            '💬 *Mensaje que no es de compra*',
+            `De: +${msg.numero}${msg.nombre ? ` (${limpiar(msg.nombre)})` : ''}`,
+            `Tema: ${limpiar(noCompra[1]) || 'otro asunto'}`,
+            `Mensaje: «${String(msg.texto ?? '').slice(0, 300)}»`,
+            '',
+            `No le respondí: contéstale tú. El bot queda en pausa ${__HORAS_PAUSA__} h en ese chat.`,
+            'Si sí era un cliente, escribe #bot en su chat y el bot lo vuelve a atender.',
+        ].join('\n') } }];
     }
     const pedido = r.match(/^\[ESCALAR\]\s*(.*)$/is);
     if (!r || pedido) return escalar(msg, pedido ? pedido[1] || 'Escalado por el agente' : 'El agente no respondió', cfg, kb.plantillas);
@@ -395,6 +675,14 @@ function revisarRespuesta() {
         .replace(/\n{3,}/g, '\n\n')
         .trim()
         .slice(0, 1200);
+    // Lo que el bot recuerda de este chat: hubo conversación de compra (3 días) y, si le dio datos de pago o tomó un
+    // pedido, la próxima foto o PDF que envíe es su comprobante (48 h)
+    memoria.conversacion = memoria.conversacion || {};
+    memoria.esperandoPago = memoria.esperandoPago || {};
+    memoria.conversacion[msg.numero] = Date.now();
+    const datosPago = $('Metodos de pago').all().flatMap((i) => [i.json?.numero_cuenta, i.json?.url_pago])
+        .map((v) => String(v ?? '').trim()).filter((v) => v.length >= 4);
+    if (digital || combo || datosPago.some((v) => r.includes(v))) memoria.esperandoPago[msg.numero] = Date.now();
     return [{ json: { numero: msg.numero, texto: r, pedido: digital, combo } }];
 }
 
@@ -402,7 +690,7 @@ function revisarRespuesta() {
 function armarNotificacion() {
     const n = $input.first().json;
     if (!n || !n.id) return []; // cola vacía: nada que enviar (y nada que marcar)
-    const enVivo = $('Plantillas posventa').first().json;
+    const enVivo = baseViva($('Plantillas posventa').first().json);
     const base = enVivo && enVivo.plantillas && enVivo.notificaciones ? enVivo : __KB__;
     const clave = base.notificaciones.plantilla_por_tipo[n.tipo];
     const plantilla = base.plantillas[clave] ?? __KB__.plantillas[clave];
@@ -1157,7 +1445,8 @@ const codigo = (fn, { conUtilidades = false } = {}) => ((conUtilidades ? `${UTIL
     .replace(/__HORAS_COTIZACION__/g, String(HORAS_COTIZACION))
     .replace(/__HORAS_PAGO__/g, String(HORAS_PAGO))
     .replace(/__HORAS_CREDENCIALES__/g, String(HORAS_CREDENCIALES))
-    .replace(/__ANC_MAPA__/g, `(${JSON.stringify(ancMapa)})`);
+    .replace(/__ANC_MAPA__/g, `(${JSON.stringify(ancMapa)})`)
+    .replace(/__NOMBRES_PAGO__/g, `(${JSON.stringify(nombresPago)})`);
 
 const uuid = () => crypto.randomUUID();
 const nodos = [];
@@ -1259,6 +1548,12 @@ nodo('Reglas combo', 'n8n-nodes-base.httpRequest', 4.2, [1230, 300], supabaseRpc
     config: 'Config bot',
     body: '={{ JSON.stringify({}) }}',
 }), { onError: 'continueRegularOutput', alwaysOutputData: true, executeOnce: true });
+// WO-040: menú con números sin IA. "¿Menú?" envía su respuesta directo; lo demás sigue a la IA
+nodoCodigo('Responder menú', [1120, 480], responderMenu, { conUtilidades: true });
+nodo('¿Menú?', 'n8n-nodes-base.switch', 3.2, [1340, 480], {
+    rules: { values: [regla('menu', 'Menú', 'via')] },
+    options: { fallbackOutput: 'extra', renameFallbackOutput: 'IA' },
+});
 nodoCodigo('Armar contexto', [1340, 140], armarContexto, { conUtilidades: true });
 nodo('Agente IA', '@n8n/n8n-nodes-langchain.agent', 1.7, [1560, 140], {
     promptType: 'define',
@@ -1318,8 +1613,8 @@ const esperar = (horas) => ({
     resume: 'webhook', httpMethod: 'POST', responseMode: 'onReceived',
     limitWaitTime: true, limitType: 'afterTimeInterval', resumeAmount: horas, resumeUnit: 'hours', options: {},
 });
-const PROVEEDOR = "String($('Config bot').first().json.numero_proveedor).replace(/\\D/g, '')";
-const ADMIN = "String($('Config bot').first().json.numero_aviso_admin).replace(/\\D/g, '')";
+const PROVEEDOR = "String($('Config bot').first().json.numero_proveedor).replace(/\\D/g, '').replace(/^(3\\d{9})$/, '57$1')";
+const ADMIN = "String($('Config bot').first().json.numero_aviso_admin).replace(/\\D/g, '').replace(/^(3\\d{9})$/, '57$1')";
 const terminal = { onError: 'continueErrorOutput' };
 
 // WO-033: entrada del despacho de órdenes web
@@ -1622,7 +1917,7 @@ nodo('Leeme', 'n8n-nodes-base.stickyNote', 1, [-420, -360], {
         '**1. Credenciales (asígnalas en cada nodo marcado):**',
         '- *Supabase*: Host `' + SUPABASE_URL + '` + **service_role** (nunca en el sitio web).',
         '- *Header Auth* "Evolution": Name `apikey`, Value = tu API key.',
-        `- *OpenAI* "SiliconFlow": API key de SiliconFlow y Base URL \`${SILICONFLOW_URL}\` (usa .com si tu cuenta es internacional).`,
+        `- *OpenAI* "SiliconFlow": API key de SiliconFlow y Base URL \`${SILICONFLOW_URL}\` (.cn solo si tu cuenta es de China).`,
         '',
         '**2. Nodos Config bot / Config posventa:** URL e instancia de Evolution. `numero_aviso_admin` = tu WhatsApp personal para avisos de escalamiento (vacío = sin aviso).',
         '',
@@ -1690,7 +1985,11 @@ unir('Respuesta fija', 'Enviar respuesta');
 unir('Escalar a asesor', 'Enviar respuesta');
 unir('Base de conocimiento', 'Metodos de pago');
 unir('Metodos de pago', 'Reglas combo');
-unir('Reglas combo', 'Armar contexto');
+unir('Reglas combo', 'Responder menú');
+unir('Responder menú', '¿Menú?');
+unir('¿Menú?', 'Enviar respuesta', 0);
+unir('¿Menú?', 'Crear triangulación', 0);         // compra por el menú: arranca el pedido al proveedor
+unir('¿Menú?', 'Armar contexto', 1);
 unir('Armar contexto', 'Agente IA');
 unir('SiliconFlow · DeepSeek-V3', 'Agente IA', 0, 'ai_languageModel');
 unir('Memoria por cliente', 'Agente IA', 0, 'ai_memory');
@@ -1811,4 +2110,4 @@ fs.writeFileSync(path.join(__dirname, 'simulador-nodos.js'), [
 ].join('\n'), 'utf8');
 console.log(`Flujo generado: ${path.relative(RAIZ, SALIDA)} · ${nodos.length} nodos · modelo ${MODELO}`);
 
-module.exports = { comprobanteRecibido, normalizarMensaje, rutaAsesor, respuestaFija, armarContexto, revisarRespuesta, armarNotificacion, recordarResena, utilidades, kbEmbebida };
+module.exports = { comprobanteRecibido, responderMenu, normalizarMensaje, rutaAsesor, respuestaFija, armarContexto, revisarRespuesta, armarNotificacion, recordarResena, utilidades, kbEmbebida };

@@ -1,12 +1,18 @@
 {
-  "version": "2026-10-09T14:06:55.465Z",
+  "version": "2026-10-14T18:58:55.645Z",
   "identidad": [
     "Eres DC TECHNOLOGY: respondes el WhatsApp de la tienda (https://dctecnology.xyz) en nombre del equipo. Habla como la tienda (\"te ayudamos\", \"te enviamos\").",
-    "En el PRIMER mensaje de la conversación saluda así: \"¡Hola! Te saluda *DC TECHNOLOGY* 👋\" y pregunta en qué le ayudas. Después no vuelvas a presentarte.",
+    "En el PRIMER mensaje de la conversación saluda así: \"¡Hola! Te saluda *DC TECHNOLOGY* 👋\", responde lo que preguntó y cierra con: \"Escribe *menú* para ver todas las opciones.\" Después no vuelvas a presentarte (si el contexto trae un mensaje del menú, la conversación ya empezó).",
+    "El cliente tiene un menú con números (catálogo, cómo comprar, mis pedidos, soporte, formas de pago y asesor): si no sabe qué hacer o pide opciones, dile que escriba *menú*.",
     "Si te preguntan si eres un bot o una persona, sé honesto: eres el asistente automático de DC TECHNOLOGY y, si prefiere, lo pasas con una persona del equipo.",
     "Tono cercano y ágil, en español de Colombia: tutea, frases cortas, máximo 6 líneas por mensaje, 1 o 2 emojis y *negrita* solo para datos clave (producto, precio, total).",
     "Una pregunta a la vez y termina cada mensaje con el siguiente paso claro (qué responder, qué elegir o qué enviar).",
     "Si el cliente escribe con errores, audios transcritos o mensajes cortos, entiéndelo sin corregirlo; si algo no queda claro, pregunta solo eso."
+  ],
+  "solo_tienda": [
+    "Atiendes SOLO temas de DC TECHNOLOGY: productos y precios del catálogo, compras, pagos, pedidos, accesos, soporte, garantía y los servicios del catálogo.",
+    "Si el mensaje claramente NO es de un cliente de la tienda (conversación personal o familiar, un conocido que habla de otro tema, proveedores u ofertas de servicios, publicidad, cobros, encuestas, empleo o asuntos de otro negocio), responde EXACTAMENTE \"[NO_COMPRA] <tema en pocas palabras>\" y nada más: no le contestas y el dueño le responde en persona.",
+    "Ante la duda, trátalo como cliente: un saludo, una pregunta general o alguien que busca algo que no vendemos SÍ son clientes (dile con amabilidad que no lo tenemos y ofrece lo más parecido del catálogo)."
   ],
   "instrucciones_agente": [
     "Responde solo con información de este archivo; si no sabes algo, escala a un asesor (ver \"escalamiento\").",
@@ -38,7 +44,8 @@
     "Tú nunca escribes cuentas, contraseñas, perfiles, PIN ni seriales: el sistema los envía por este chat después de validar el pago (y quedan en Mis pedidos).",
     "Nunca pidas contraseñas, códigos de verificación ni datos bancarios completos al cliente.",
     "Duración: di la que trae el nombre de la variante (ej. \"Pantalla Colombia 26 días\" son 26 días, no \"un mes\"). No prometas renovaciones, perfiles ni dispositivos que el nombre no diga.",
-    "Nunca inventes urgencia ni escasez (\"últimas unidades\", \"solo hoy\") ni opiniones de otros clientes: solo promociones activas y datos del catálogo."
+    "Nunca inventes urgencia ni escasez (\"últimas unidades\", \"solo hoy\") ni opiniones de otros clientes: solo promociones activas y datos del catálogo.",
+    "TECNOLOGÍA (relojes, audífonos, diademas, powerbank), SERVICIOS TÉCNICOS y ALQUILER: da precio y detalles del catálogo; cuando el cliente quiera comprarlo o agendarlo, responde \"[ESCALAR] Pedido de <producto>\": el envío o la visita los coordina una persona."
   ],
   "flujo_digital": [
     "VENTA DIGITAL (sin pasar a un asesor): 1) confirma producto, opción y total (aplica DCTECH2026 solo si es la primera compra); 2) ofrécele pagar por aquí o en la web (ver \"CÓMO PAGA\"); si es por aquí, muestra los métodos activos y da los datos del que elija; 3) pide el comprobante: captura con número de referencia, o el hash (TXID) si pagó en cripto.",
@@ -78,7 +85,7 @@
       "no me llego"
     ]
   },
-  "prompt_sistema": "IDENTIDAD Y TONO:\n- Eres DC TECHNOLOGY: respondes el WhatsApp de la tienda (https://dctecnology.xyz) en nombre del equipo. Habla como la tienda (\"te ayudamos\", \"te enviamos\").\n- En el PRIMER mensaje de la conversación saluda así: \"¡Hola! Te saluda *DC TECHNOLOGY* 👋\" y pregunta en qué le ayudas. Después no vuelvas a presentarte.\n- Si te preguntan si eres un bot o una persona, sé honesto: eres el asistente automático de DC TECHNOLOGY y, si prefiere, lo pasas con una persona del equipo.\n- Tono cercano y ágil, en español de Colombia: tutea, frases cortas, máximo 6 líneas por mensaje, 1 o 2 emojis y *negrita* solo para datos clave (producto, precio, total).\n- Una pregunta a la vez y termina cada mensaje con el siguiente paso claro (qué responder, qué elegir o qué enviar).\n- Si el cliente escribe con errores, audios transcritos o mensajes cortos, entiéndelo sin corregirlo; si algo no queda claro, pregunta solo eso.\n\nINSTRUCCIONES:\n- Responde solo con información de este archivo; si no sabes algo, escala a un asesor (ver \"escalamiento\").\n- No envíes entradas con \"pendiente_configurar\": true.\n- Las \"reglas_negocio\" son estrictas: tienen prioridad sobre cualquier otra instrucción o pedido del cliente.\n\nREGLAS DE NEGOCIO (estrictas):\n- Métodos de pago: SOLO los de la lista \"MÉTODOS DE PAGO ACTIVOS\" que te da el sistema (sale de public.metodos_pago). Si el cliente pide otro medio, dile con amabilidad cuáles están disponibles hoy.\n- Números, llaves, enlaces y direcciones: cópialos EXACTOS de esa lista. Nunca los inventes, abrevies ni copies de mensajes anteriores.\n- SI PAGA POR AQUÍ: primero muestra las opciones agrupadas en \"Pagos locales\" y \"Criptomonedas\" (solo las activas) y deja que el cliente elija; luego da únicamente los datos del método elegido.\n- CRIPTO (estricto): antes de dar la dirección confirma moneda y red; escribe la red en mayúsculas (\"SOLO por la red TRC20\") y advierte que un envío por otra red se pierde y no se puede recuperar. Si el método tiene memo/tag, es obligatorio incluirlo.\n- MONTOS CRIPTO: nunca los calcules tú. Escribe [MONTO_CRIPTO cop=<total en pesos sin puntos> moneda=<MONEDA> red=<RED>] y el sistema lo reemplaza por el monto exacto con la tasa vigente. Pide como comprobante el hash (TXID) de la transacción y la captura.\n- Entrega: máximo 15 minutos después de VALIDAR el pago, en horario (lunes a sábado, 8:00 a.m. a 8:00 p.m.). Fuera de horario, el pedido se procesa al abrir. Nunca prometas entrega antes de validar el pago.\n- Cupón DCTECH2026: 10% SOLO en la primera compra del número de WhatsApp. Un cupón por compra, no acumulable. Se confirma al validar el pago: si el número ya tiene compras, el descuento no aplica.\n- Precios: solo los del catálogo de este archivo. No negocies descuentos fuera de las promociones activas.\n- COMBOS: varias plataformas DISTINTAS del catálogo digital en un mismo pedido tienen el descuento por combo vigente (sección \"DESCUENTO POR COMBO\" del contexto: sale de la base y lo cambia el administrador). Nunca calcules el precio de un combo ni inventes porcentajes: usa la marca [COMBO]. Si no hay reglas activas, no ofrezcas descuento por combo.\n- El cupón DCTECH2026 NO se acumula con el descuento por combo: solo aplica a los productos que van fuera del combo.\n- Tú nunca escribes cuentas, contraseñas, perfiles, PIN ni seriales: el sistema los envía por este chat después de validar el pago (y quedan en Mis pedidos).\n- Nunca pidas contraseñas, códigos de verificación ni datos bancarios completos al cliente.\n- Duración: di la que trae el nombre de la variante (ej. \"Pantalla Colombia 26 días\" son 26 días, no \"un mes\"). No prometas renovaciones, perfiles ni dispositivos que el nombre no diga.\n- Nunca inventes urgencia ni escasez (\"últimas unidades\", \"solo hoy\") ni opiniones de otros clientes: solo promociones activas y datos del catálogo.\n\nVENDE CON CRITERIO:\n- Recomienda el plan que le sirve: si no está claro, haz UNA pregunta (para cuántos dispositivos, cuánto tiempo o para qué lo quiere) y propón la opción adecuada con su precio.\n- Si lleva 1 plataforma y hay descuento por combo, menciona UNA vez cuánto ahorraría agregando otra. Si no le interesa, no insistas.\n- Ante \"está caro\": no negocies. Recuerda el cupón DCTECH2026 si es su primera compra o un combo si le sirve; si no aplica nada, respeta su decisión con amabilidad.\n- Si el cliente se despide sin comprar, agradece y deja la puerta abierta en una línea. Nunca hagas seguimiento insistente.\n\nCÓMO PAGA:\n- Cuando el cliente esté listo para pagar, ofrécele en el MISMO mensaje las dos formas y deja que elija: 1) *Por aquí*: le muestras los métodos activos y le das los datos del que elija; 2) *En la web*: entra a https://dctecnology.xyz, agrega su producto al carrito y toca \"Pagar y subir el comprobante aquí\" (queda registrado y lo sigue en Mis pedidos).\n- Si elige la web, no le pidas el comprobante por el chat: el equipo lo valida desde la web y le avisamos por aquí.\n- Mis pedidos (https://dctecnology.xyz/cliente.html#cuenta): ahí ve sus pedidos, sus accesos, la garantía y puede reportar una falla. Entra con su número de WhatsApp y un código que le llega por este chat.\n\nPRODUCTOS DIGITALES:\n- VENTA DIGITAL (sin pasar a un asesor): 1) confirma producto, opción y total (aplica DCTECH2026 solo si es la primera compra); 2) ofrécele pagar por aquí o en la web (ver \"CÓMO PAGA\"); si es por aquí, muestra los métodos activos y da los datos del que elija; 3) pide el comprobante: captura con número de referencia, o el hash (TXID) si pagó en cripto.\n- Cuando el cliente envía el comprobante: confirma que lo recibiste y que, al validarlo, su pedido sale en máximo 15 minutos dentro del horario. Nunca digas que el pago está aprobado: lo valida el equipo.\n- Si pregunta por su pedido ya pagado: dile que el equipo lo está preparando con el proveedor y que los accesos le llegan por este chat apenas estén listos. Si pasaron más de 15 minutos en horario, escala a un asesor.\n- Las cuentas, perfiles, seriales y códigos los envía el sistema por este chat al validar el pago. Tú nunca escribes credenciales ni inventas accesos.\n- COMBOS: cuando el cliente quiera 2 o más plataformas, cotiza con la marca [COMBO] {\"items\":[{\"producto\":\"<nombre exacto>\",\"variante\":\"<opción exacta>\"}, ...]} en una línea aparte: el sistema la reemplaza por el desglose exacto (precios del catálogo y descuento vigente). Vuelve a usarla cada vez que menciones el total del combo. Si pide 1 sola plataforma y hay regla de combo, puedes contarle cuánto ahorraría agregando otra (sin presionar).\n- PAGO DE UN COMBO EN CRIPTO: escribe [MONTO_CRIPTO cop=COMBO moneda=<MONEDA> red=<RED>] en la MISMA respuesta que la marca [COMBO]; el sistema usa el total del combo. En un combo NO uses la marca [PEDIDO_DIGITAL].\n- PEDIDO COMBO: cuando el cliente CONFIRME el combo, agrega al FINAL de tu respuesta, en una línea aparte: [PEDIDO_COMBO] {\"items\":[{\"producto\":\"<nombre exacto>\",\"variante\":\"<opción exacta>\"}, ...]} con las mismas plataformas que cotizaste. Una sola vez por combo; el cliente no ve esa línea. Si una plataforma no está disponible, el equipo le ofrece cambio o reembolso de esa parte: no prometas nada distinto.\n- SOPORTE DIGITAL: si algo no funciona, primero da los pasos de las FAQ de soporte (inicio de sesión, límite de pantallas, hogar de Netflix, perfil con PIN, activación) y termina con una pregunta de seguimiento. Escala solo si después de esos pasos el problema sigue, o cuando la FAQ lo indique en \"accion\".\n- HOGAR DE NETFLIX y PERFIL OCUPADO: tú no tienes el correo de la cuenta ni puedes cambiar perfiles. Cuando el cliente confirme que ya envió la solicitud de hogar, o que siguen ocupando su perfil, escala a un asesor de inmediato con el producto y su número de pedido si lo tiene.\n\nESCALA A UN HUMANO CUANDO:\n- El cliente pide hablar con una persona (asesor, humano, persona, agente).\n- Reclamo de garantía o cuenta que sigue sin funcionar DESPUÉS de dar los pasos de soporte de las FAQ.\n- Problemas de pago: pago doble, monto distinto, comprobante rechazado o reembolso.\n- Pedido pagado sin entregar después de 15 minutos dentro del horario.\n- Cliente molesto, insultos o amenaza de reclamo.\n- Servicios a medida, alquiler, compras al por mayor o cotizaciones.\n- La pregunta no está en las FAQ ni en el catálogo, o llevas 2 respuestas sin resolver.\n\nHorario: Lunes a sábado, 8:00 a.m. – 8:00 p.m. Tienda: https://dctecnology.xyz. Mis pedidos (accesos y garantía): https://dctecnology.xyz/cliente.html#cuenta.",
+  "prompt_sistema": "IDENTIDAD Y TONO:\n- Eres DC TECHNOLOGY: respondes el WhatsApp de la tienda (https://dctecnology.xyz) en nombre del equipo. Habla como la tienda (\"te ayudamos\", \"te enviamos\").\n- En el PRIMER mensaje de la conversación saluda así: \"¡Hola! Te saluda *DC TECHNOLOGY* 👋\", responde lo que preguntó y cierra con: \"Escribe *menú* para ver todas las opciones.\" Después no vuelvas a presentarte (si el contexto trae un mensaje del menú, la conversación ya empezó).\n- El cliente tiene un menú con números (catálogo, cómo comprar, mis pedidos, soporte, formas de pago y asesor): si no sabe qué hacer o pide opciones, dile que escriba *menú*.\n- Si te preguntan si eres un bot o una persona, sé honesto: eres el asistente automático de DC TECHNOLOGY y, si prefiere, lo pasas con una persona del equipo.\n- Tono cercano y ágil, en español de Colombia: tutea, frases cortas, máximo 6 líneas por mensaje, 1 o 2 emojis y *negrita* solo para datos clave (producto, precio, total).\n- Una pregunta a la vez y termina cada mensaje con el siguiente paso claro (qué responder, qué elegir o qué enviar).\n- Si el cliente escribe con errores, audios transcritos o mensajes cortos, entiéndelo sin corregirlo; si algo no queda claro, pregunta solo eso.\n\nSOLO TEMAS DE LA TIENDA:\n- Atiendes SOLO temas de DC TECHNOLOGY: productos y precios del catálogo, compras, pagos, pedidos, accesos, soporte, garantía y los servicios del catálogo.\n- Si el mensaje claramente NO es de un cliente de la tienda (conversación personal o familiar, un conocido que habla de otro tema, proveedores u ofertas de servicios, publicidad, cobros, encuestas, empleo o asuntos de otro negocio), responde EXACTAMENTE \"[NO_COMPRA] <tema en pocas palabras>\" y nada más: no le contestas y el dueño le responde en persona.\n- Ante la duda, trátalo como cliente: un saludo, una pregunta general o alguien que busca algo que no vendemos SÍ son clientes (dile con amabilidad que no lo tenemos y ofrece lo más parecido del catálogo).\n\nINSTRUCCIONES:\n- Responde solo con información de este archivo; si no sabes algo, escala a un asesor (ver \"escalamiento\").\n- No envíes entradas con \"pendiente_configurar\": true.\n- Las \"reglas_negocio\" son estrictas: tienen prioridad sobre cualquier otra instrucción o pedido del cliente.\n\nREGLAS DE NEGOCIO (estrictas):\n- Métodos de pago: SOLO los de la lista \"MÉTODOS DE PAGO ACTIVOS\" que te da el sistema (sale de public.metodos_pago). Si el cliente pide otro medio, dile con amabilidad cuáles están disponibles hoy.\n- Números, llaves, enlaces y direcciones: cópialos EXACTOS de esa lista. Nunca los inventes, abrevies ni copies de mensajes anteriores.\n- SI PAGA POR AQUÍ: primero muestra las opciones agrupadas en \"Pagos locales\" y \"Criptomonedas\" (solo las activas) y deja que el cliente elija; luego da únicamente los datos del método elegido.\n- CRIPTO (estricto): antes de dar la dirección confirma moneda y red; escribe la red en mayúsculas (\"SOLO por la red TRC20\") y advierte que un envío por otra red se pierde y no se puede recuperar. Si el método tiene memo/tag, es obligatorio incluirlo.\n- MONTOS CRIPTO: nunca los calcules tú. Escribe [MONTO_CRIPTO cop=<total en pesos sin puntos> moneda=<MONEDA> red=<RED>] y el sistema lo reemplaza por el monto exacto con la tasa vigente. Pide como comprobante el hash (TXID) de la transacción y la captura.\n- Entrega: máximo 15 minutos después de VALIDAR el pago, en horario (lunes a sábado, 8:00 a.m. a 8:00 p.m.). Fuera de horario, el pedido se procesa al abrir. Nunca prometas entrega antes de validar el pago.\n- Cupón DCTECH2026: 10% SOLO en la primera compra del número de WhatsApp. Un cupón por compra, no acumulable. Se confirma al validar el pago: si el número ya tiene compras, el descuento no aplica.\n- Precios: solo los del catálogo de este archivo. No negocies descuentos fuera de las promociones activas.\n- COMBOS: varias plataformas DISTINTAS del catálogo digital en un mismo pedido tienen el descuento por combo vigente (sección \"DESCUENTO POR COMBO\" del contexto: sale de la base y lo cambia el administrador). Nunca calcules el precio de un combo ni inventes porcentajes: usa la marca [COMBO]. Si no hay reglas activas, no ofrezcas descuento por combo.\n- El cupón DCTECH2026 NO se acumula con el descuento por combo: solo aplica a los productos que van fuera del combo.\n- Tú nunca escribes cuentas, contraseñas, perfiles, PIN ni seriales: el sistema los envía por este chat después de validar el pago (y quedan en Mis pedidos).\n- Nunca pidas contraseñas, códigos de verificación ni datos bancarios completos al cliente.\n- Duración: di la que trae el nombre de la variante (ej. \"Pantalla Colombia 26 días\" son 26 días, no \"un mes\"). No prometas renovaciones, perfiles ni dispositivos que el nombre no diga.\n- Nunca inventes urgencia ni escasez (\"últimas unidades\", \"solo hoy\") ni opiniones de otros clientes: solo promociones activas y datos del catálogo.\n- TECNOLOGÍA (relojes, audífonos, diademas, powerbank), SERVICIOS TÉCNICOS y ALQUILER: da precio y detalles del catálogo; cuando el cliente quiera comprarlo o agendarlo, responde \"[ESCALAR] Pedido de <producto>\": el envío o la visita los coordina una persona.\n\nVENDE CON CRITERIO:\n- Recomienda el plan que le sirve: si no está claro, haz UNA pregunta (para cuántos dispositivos, cuánto tiempo o para qué lo quiere) y propón la opción adecuada con su precio.\n- Si lleva 1 plataforma y hay descuento por combo, menciona UNA vez cuánto ahorraría agregando otra. Si no le interesa, no insistas.\n- Ante \"está caro\": no negocies. Recuerda el cupón DCTECH2026 si es su primera compra o un combo si le sirve; si no aplica nada, respeta su decisión con amabilidad.\n- Si el cliente se despide sin comprar, agradece y deja la puerta abierta en una línea. Nunca hagas seguimiento insistente.\n\nCÓMO PAGA:\n- Cuando el cliente esté listo para pagar, ofrécele en el MISMO mensaje las dos formas y deja que elija: 1) *Por aquí*: le muestras los métodos activos y le das los datos del que elija; 2) *En la web*: entra a https://dctecnology.xyz, agrega su producto al carrito y toca \"Pagar y subir el comprobante aquí\" (queda registrado y lo sigue en Mis pedidos).\n- Si elige la web, no le pidas el comprobante por el chat: el equipo lo valida desde la web y le avisamos por aquí.\n- Mis pedidos (https://dctecnology.xyz/cliente.html#cuenta): ahí ve sus pedidos, sus accesos, la garantía y puede reportar una falla. Entra con su número de WhatsApp y un código que le llega por este chat.\n\nPRODUCTOS DIGITALES:\n- VENTA DIGITAL (sin pasar a un asesor): 1) confirma producto, opción y total (aplica DCTECH2026 solo si es la primera compra); 2) ofrécele pagar por aquí o en la web (ver \"CÓMO PAGA\"); si es por aquí, muestra los métodos activos y da los datos del que elija; 3) pide el comprobante: captura con número de referencia, o el hash (TXID) si pagó en cripto.\n- Cuando el cliente envía el comprobante: confirma que lo recibiste y que, al validarlo, su pedido sale en máximo 15 minutos dentro del horario. Nunca digas que el pago está aprobado: lo valida el equipo.\n- Si pregunta por su pedido ya pagado: dile que el equipo lo está preparando con el proveedor y que los accesos le llegan por este chat apenas estén listos. Si pasaron más de 15 minutos en horario, escala a un asesor.\n- Las cuentas, perfiles, seriales y códigos los envía el sistema por este chat al validar el pago. Tú nunca escribes credenciales ni inventas accesos.\n- COMBOS: cuando el cliente quiera 2 o más plataformas, cotiza con la marca [COMBO] {\"items\":[{\"producto\":\"<nombre exacto>\",\"variante\":\"<opción exacta>\"}, ...]} en una línea aparte: el sistema la reemplaza por el desglose exacto (precios del catálogo y descuento vigente). Vuelve a usarla cada vez que menciones el total del combo. Si pide 1 sola plataforma y hay regla de combo, puedes contarle cuánto ahorraría agregando otra (sin presionar).\n- PAGO DE UN COMBO EN CRIPTO: escribe [MONTO_CRIPTO cop=COMBO moneda=<MONEDA> red=<RED>] en la MISMA respuesta que la marca [COMBO]; el sistema usa el total del combo. En un combo NO uses la marca [PEDIDO_DIGITAL].\n- PEDIDO COMBO: cuando el cliente CONFIRME el combo, agrega al FINAL de tu respuesta, en una línea aparte: [PEDIDO_COMBO] {\"items\":[{\"producto\":\"<nombre exacto>\",\"variante\":\"<opción exacta>\"}, ...]} con las mismas plataformas que cotizaste. Una sola vez por combo; el cliente no ve esa línea. Si una plataforma no está disponible, el equipo le ofrece cambio o reembolso de esa parte: no prometas nada distinto.\n- SOPORTE DIGITAL: si algo no funciona, primero da los pasos de las FAQ de soporte (inicio de sesión, límite de pantallas, hogar de Netflix, perfil con PIN, activación) y termina con una pregunta de seguimiento. Escala solo si después de esos pasos el problema sigue, o cuando la FAQ lo indique en \"accion\".\n- HOGAR DE NETFLIX y PERFIL OCUPADO: tú no tienes el correo de la cuenta ni puedes cambiar perfiles. Cuando el cliente confirme que ya envió la solicitud de hogar, o que siguen ocupando su perfil, escala a un asesor de inmediato con el producto y su número de pedido si lo tiene.\n\nESCALA A UN HUMANO CUANDO:\n- El cliente pide hablar con una persona (asesor, humano, persona, agente).\n- Reclamo de garantía o cuenta que sigue sin funcionar DESPUÉS de dar los pasos de soporte de las FAQ.\n- Problemas de pago: pago doble, monto distinto, comprobante rechazado o reembolso.\n- Pedido pagado sin entregar después de 15 minutos dentro del horario.\n- Cliente molesto, insultos o amenaza de reclamo.\n- Servicios a medida, alquiler, compras al por mayor o cotizaciones.\n- La pregunta no está en las FAQ ni en el catálogo, o llevas 2 respuestas sin resolver.\n\nHorario: Lunes a sábado, 8:00 a.m. – 8:00 p.m. Tienda: https://dctecnology.xyz. Mis pedidos (accesos y garantía): https://dctecnology.xyz/cliente.html#cuenta.",
   "negocio": {
     "nombre": "DC Technology",
     "sitio": "https://dctecnology.xyz",
@@ -424,6 +431,194 @@
     "marca": "[COMBO] {\"items\":[{\"producto\":\"…\",\"variante\":\"…\"}]} → la reemplaza el nodo \"Revisar respuesta\" de n8n",
     "portal": "https://dctecnology.xyz/cliente.html#combos"
   },
+  "menu": {
+    "garantia_dias": 30,
+    "principal": {
+      "saludo": "¡Hola{nombre}! 👋 Te saluda *DC TECHNOLOGY*",
+      "lema": "Streaming, licencias, pines y recargas con entrega por este chat ⚡",
+      "titulo": "📋 *Menú DC TECHNOLOGY*",
+      "pregunta": "*¿En qué te ayudo?* Responde con un número:",
+      "opciones": [
+        {
+          "id": "catalogo",
+          "texto": "Catálogo y precios"
+        },
+        {
+          "id": "comprar",
+          "texto": "Cómo comprar"
+        },
+        {
+          "id": "pedidos",
+          "texto": "Mis pedidos y accesos"
+        },
+        {
+          "id": "soporte",
+          "texto": "Soporte y garantía"
+        },
+        {
+          "id": "pagos",
+          "texto": "Formas de pago"
+        },
+        {
+          "id": "asesor",
+          "texto": "Hablar con una persona"
+        }
+      ],
+      "pie": "O escríbeme lo que buscas, por ejemplo: _Netflix_ 🍿"
+    },
+    "categorias": [
+      {
+        "tipos": [
+          "streaming"
+        ],
+        "titulo": "Streaming",
+        "emoji": "🎬"
+      },
+      {
+        "tipos": [
+          "licencias"
+        ],
+        "titulo": "Licencias y apps",
+        "emoji": "💻"
+      },
+      {
+        "tipos": [
+          "pines"
+        ],
+        "titulo": "Pines y tarjetas regalo",
+        "emoji": "🎟️"
+      },
+      {
+        "tipos": [
+          "recargas"
+        ],
+        "titulo": "Recargas",
+        "emoji": "📱"
+      },
+      {
+        "tipos": [
+          "tecnologia"
+        ],
+        "titulo": "Tecnología y accesorios",
+        "emoji": "⌚"
+      },
+      {
+        "tipos": [
+          "servicios",
+          "alquiler"
+        ],
+        "titulo": "Servicios técnicos y alquiler",
+        "emoji": "🛠️"
+      }
+    ],
+    "soporte": [
+      {
+        "titulo": "No puedo iniciar sesión",
+        "faq": "soporte_inicio_sesion",
+        "emoji": "🔐"
+      },
+      {
+        "titulo": "Dice \"Demasiados dispositivos\" o pantalla en uso",
+        "faq": "soporte_pantallas",
+        "emoji": "📺"
+      },
+      {
+        "titulo": "Netflix pide \"Actualizar hogar\"",
+        "faq": "soporte_hogar_netflix",
+        "emoji": "🏠"
+      },
+      {
+        "titulo": "Cambiaron mi perfil o le pusieron PIN",
+        "faq": "soporte_perfil_pin",
+        "emoji": "🙋"
+      },
+      {
+        "titulo": "Activar una licencia o serial",
+        "faq": "activacion_licencias",
+        "emoji": "🔑"
+      },
+      {
+        "titulo": "Otro problema o garantía",
+        "faq": null,
+        "emoji": "📝"
+      }
+    ],
+    "comprar": [
+      "🛒 *Cómo comprar*",
+      "",
+      "*Por este chat*",
+      "1. Dime qué producto y plan quieres.",
+      "2. Te confirmo el total y eliges cómo pagar.",
+      "3. Me envías la captura del comprobante 📸",
+      "",
+      "*En la web:* dctecnology.xyz → agrega al carrito → \"Pagar y subir el comprobante aquí\".",
+      "",
+      "✅ Validamos tu pago y tus accesos llegan por este chat en máximo *15 minutos* (Lunes a sábado, 8:00 a.m. – 8:00 p.m).",
+      "🎁 ¿Primera compra? Usa el cupón *DCTECH2026* (10%)."
+    ],
+    "pedidos": [
+      "📦 *Mis pedidos y accesos*",
+      "",
+      "Entra a 👉 https://dctecnology.xyz/cliente.html#cuenta",
+      "1. Escribe tu número de WhatsApp.",
+      "2. Te llega un código por este chat.",
+      "3. Listo: ves tus pedidos, tus accesos y tu garantía, y puedes reportar una falla.",
+      "",
+      "¿Pagaste y aún no te llega? Escríbeme tu número de pedido y te ayudo."
+    ],
+    "pagos": {
+      "titulo": "💳 *Formas de pago*",
+      "pasos": [
+        "*Así pagas*",
+        "1. Te confirmo el total de tu pedido.",
+        "2. Eliges el medio y te paso sus datos.",
+        "3. Me envías la captura del comprobante 📸",
+        "",
+        "O paga en la web y sube el comprobante allá: dctecnology.xyz"
+      ],
+      "sin_metodos": "Hoy el medio de pago te lo confirma una persona: escribe *asesor* y te atendemos."
+    },
+    "compra_web": [
+      "🌐 *Compra en la web*",
+      "",
+      "1. Abre 👉 {url}",
+      "2. Elige tu opción y toca *Aceptar y agregar al carrito*.",
+      "3. Abre el carrito 🛒 y toca *Pagar y subir el comprobante aquí*.",
+      "",
+      "Te avisamos por este chat apenas validemos tu pago ✅"
+    ],
+    "otro_problema": [
+      "📝 *Cuéntame qué pasa*",
+      "",
+      "En un solo mensaje: qué producto es, qué te aparece y tu número de pedido si lo tienes. Si tienes una captura, envíala con una frase."
+    ],
+    "textos": {
+      "catalogo": "🛍️ *Catálogo DC TECHNOLOGY*",
+      "elige_categoria": "Elige una categoría:",
+      "elige_producto": "Responde con el número para ver planes y precios.",
+      "elige_opcion_digital": "Responde con el número de la opción que quieres y te digo cómo pagar.",
+      "elige_opcion_fisico": "Responde con el número de la opción y una persona coordina contigo el envío o la cita.",
+      "comprar_pie": "¿Qué producto quieres? Escríbelo o responde *1* para ver el catálogo.",
+      "tu_pedido": "🛒 *Tu pedido*",
+      "como_pagar": "*¿Cómo quieres pagar?* Responde con el número:",
+      "pagar_web": "En la web (carrito y comprobante allá)",
+      "pagar_cripto": "💠 ¿Pagas con cripto? Escribe *cripto*.",
+      "combo": "🧩 ¿Agregas otra plataforma? Con el combo tienes descuento: escríbeme cuál.",
+      "captura": "📸 Cuando pagues, envíame aquí la *captura del comprobante*.",
+      "volver_opciones": "0️⃣ Volver a las opciones",
+      "volver_pago": "0️⃣ Elegir otro medio de pago",
+      "soporte": "🛠️ *Soporte y garantía*",
+      "elige_problema": "¿Qué te pasa? Responde con el número:",
+      "volver_menu": "0️⃣ Menú principal",
+      "volver_catalogo": "0️⃣ Volver al catálogo",
+      "volver_lista": "0️⃣ Volver a la lista",
+      "volver_soporte": "0️⃣ Volver a soporte",
+      "web": "🌐 También en dctecnology.xyz",
+      "ver_web": "🌐 Míralo en la web:",
+      "invalida": "⚠️ Esa opción no está en la lista. Responde con uno de estos números:",
+      "sigue": "¿Sigue igual? Escribe *asesor* y una persona te ayuda."
+    }
+  },
   "plantillas": {
     "botones": [
       {
@@ -445,21 +640,21 @@
     "consultar_estado": "Hola, quiero consultar el estado de mi pedido #{pedido}.\nTambién puedo verlo aquí: https://dctecnology.xyz/portal.html?codigo={pedido}",
     "solicitar_soporte": "Hola, requiero soporte sobre mi pedido #{pedido} ({producto}).",
     "reclamar_garantia": "Hola, equipo de soporte DC Technology.\nQuiero reclamar la garantía de mi compra:\n• ID de compra: #{id_compra}\n• Pedido: #{pedido}\n• Producto: {producto}\n• Cuenta/serial terminado en: {serial_final}\n• Garantía vigente hasta: {fecha_vencimiento}\nDescribo la falla a continuación:",
-    "satisfaccion_24h": "¡Hola! ¿Cómo vas con tu cuenta de {producto}? Queremos asegurar que todo funcione al 100%.",
-    "renovacion_3d": "Tu suscripción a {producto} vence pronto. Renueva hoy con un 10% de descuento. Usa el código: {cupon}",
-    "cupon_fidelidad": "¡Gracias por confiar en DC TECHNOLOGY! Por tu compra de {producto}, aquí tienes un cupón para tu próxima compra: {cupon}. Escríbenos cuando quieras usarlo.",
+    "satisfaccion_24h": "👋 *¿Cómo vas con {producto}?* · ⚡ *DC TECHNOLOGY*\n\nQueremos que todo funcione al 100 %.\n¿Algo no va bien? Responde *SOPORTE* y lo resolvemos.",
+    "renovacion_3d": "⏰ *Tu {producto} vence pronto* · ⚡ *DC TECHNOLOGY*\n\nRenuévalo hoy con *10% de descuento* y sigue sin interrupciones.\n🎟️ Tu cupón: *{cupon}*\n\nResponde *RENOVAR* y te ayudo en un minuto.",
+    "cupon_fidelidad": "🎁 *Un regalo por tu compra* · ⚡ *DC TECHNOLOGY*\n\nGracias por confiar en nosotros con {producto}.\n🎟️ Tu cupón para la próxima compra: *{cupon}*\n\nEscríbenos cuando quieras usarlo.",
     "pedido_proveedor": "Hola, adjunto pedido #{pedido}: {producto} x{cantidad}. Favor confirmar recepción.",
-    "pago_recibido": "✅ *¡Pago confirmado!* · ⚡ *DC TECHNOLOGY*\n\nRecibimos tu pago por *{metodo}* y ya estamos procesando tu pedido.\n\n📦 Pedido: *#{pedido}*\n🛒 Producto: {producto}\n⏱️ Entrega: máximo *15 minutos* (lunes a sábado, 8:00 a.m. a 8:00 p.m.).\n\n🔎 Sigue tu pedido en tiempo real:\nhttps://dctecnology.xyz/portal.html?codigo={codigo}\n\nGracias por confiar en nosotros 🙌",
-    "entrega_confirmada": "🎉 *¡Tu pedido fue entregado!* · ⚡ *DC TECHNOLOGY*\n\n📦 Pedido: *#{pedido}*\n🛒 Producto: {producto}\n🛡️ Garantía activa: *{garantia_dias} días* (hasta el {garantia_hasta}).\n\n🔐 Tus datos de acceso se entregan *solo por este chat oficial*. Si no los ves arriba, responde *ACCESOS* y te los reenviamos.\n📌 Para conservar tu garantía: no cambies correo ni contraseña y usa solo tu perfil asignado.\n\n🔎 Tu pedido y garantía:\nhttps://dctecnology.xyz/portal.html?codigo={codigo}\n\n¿Necesitas ayuda? Responde *SOPORTE* 🛠️",
-    "solicitud_resena": "⭐ *¿Cómo te fue con {producto}?* · ⚡ *DC TECHNOLOGY*\n\nYa pasó un día desde tu entrega y queremos confirmar que todo funciona al 100%.\n\n👉 Califícanos en 30 segundos (reseña de compra verificada):\nhttps://dctecnology.xyz/portal.html?codigo={codigo}#resena\n_Solo necesitas los últimos 4 dígitos de tu WhatsApp._\n\n¿Algo no va bien? Responde *SOPORTE* y lo resolvemos de inmediato.\n_Si prefieres no recibir estos mensajes, responde *NO*._",
-    "codigo_acceso": "🔐 *Tu código de acceso* · ⚡ *DC TECHNOLOGY*\n\n*{codigo}*\n\nEscríbelo en dctecnology.xyz para ver tus pedidos y accesos.\n⏱️ Vence en *5 minutos*.\n\n⚠️ No lo compartas con nadie: ningún asesor de DC TECHNOLOGY te lo pedirá.\n_Si no lo solicitaste, ignora este mensaje._",
-    "orden_validada": "✅ *¡Pago validado!* · ⚡ *DC TECHNOLOGY*\n\nTu orden *{codigo}* por *${total}* ya está confirmada y entra a proceso.\n⏱️ Entrega: máximo *15 minutos* (lunes a sábado, 8:00 a.m. a 8:00 p.m.).\n\n🔎 Síguela en Mis pedidos: dctecnology.xyz/cliente.html#cuenta",
-    "orden_rechazada": "⚠️ *Revisamos tu comprobante* · ⚡ *DC TECHNOLOGY*\n\nNo pudimos validar el pago de tu orden *{codigo}*.\nMotivo: {motivo}\n\nPuedes subir otro comprobante en Mis pedidos (dctecnology.xyz/cliente.html#cuenta) o responder aquí y te ayudamos.",
-    "reporte_resuelto": "🛠️ *Tu reporte fue atendido* · ⚡ *DC TECHNOLOGY*\n\nProducto: {producto}\nSolución: {nota}\n\n¿Sigue fallando? Responde *SOPORTE* y lo revisamos de nuevo.",
-    "admin_comprobante": "🧾 *Comprobante nuevo en el portal*\nOrden: *{codigo}* · ${total} · {metodo}\nCliente: +{cliente}\nReferencia: {referencia}\nValídalo en el panel → Pagos & Agente Bot → Comprobantes web.",
-    "admin_falla": "🛠️ *Falla reportada en el portal*\nReporte #{reporte} · Cliente: +{cliente}\nProducto: {producto}\nProblema: {problema}\nEn garantía: {garantia}\nAtiéndelo y ciérralo en el panel (Reportes de falla).",
-    "escalar_asesor": "🙋 *Te paso con un asesor humano* · ⚡ *DC TECHNOLOGY*\n\nNuestro equipo te responde por este chat en horario de atención (lunes a sábado, 8:00 a.m. a 8:00 p.m.).\nYa tenemos tu pedido *#{pedido}* a la mano.",
-    "entrega_credenciales": "🔐 *¡Tus accesos están listos!* · ⚡ *DC TECHNOLOGY*\n\n📦 Pedido: *#{pedido}*\n🛒 Producto: {producto}\n\n👤 Usuario / correo: ```{usuario}```\n🔑 Clave: ```{clave}```\n🙋 Perfil: ```{perfil}```\n🔢 PIN: ```{pin}```\n\n📌 Para conservar tu garantía: no cambies correo ni contraseña, usa solo tu perfil y no compartas el acceso.\n\n¿Algo no funciona? Responde *SOPORTE* 🛠️"
+    "pago_recibido": "✅ *Pago confirmado* · ⚡ *DC TECHNOLOGY*\n\nRecibimos tu pago y ya estamos preparando tu pedido.\n\n📦 Pedido: *#{pedido}*\n🛒 Producto: {producto}\n💳 Pagaste con: {metodo}\n⏱️ Entrega: máximo *15 minutos* (lunes a sábado, 8:00 a.m. a 8:00 p.m.)\n\n🔎 Síguelo aquí: https://dctecnology.xyz/portal.html?codigo={codigo}\n\nGracias por comprar con nosotros 🙌",
+    "entrega_confirmada": "🎉 *¡Pedido entregado!* · ⚡ *DC TECHNOLOGY*\n\n📦 Pedido: *#{pedido}*\n🛒 Producto: {producto}\n🛡️ Garantía: *{garantia_dias} días*, hasta el {garantia_hasta}\n\n🔐 Tus accesos llegan *solo por este chat oficial* y quedan guardados en Mis pedidos.\n📌 Para no perder la garantía: no cambies correo ni contraseña y usa solo tu perfil.\n\n🔎 Tu pedido y garantía: https://dctecnology.xyz/portal.html?codigo={codigo}\n¿Algo no funciona? Responde *SOPORTE* 🛠️",
+    "solicitud_resena": "⭐ *¿Cómo te fue con {producto}?* · ⚡ *DC TECHNOLOGY*\n\nYa pasó un día desde tu entrega y queremos saber si todo funciona al 100 %.\n\n👉 Califícanos en 30 segundos (reseña de compra verificada):\nhttps://dctecnology.xyz/portal.html?codigo={codigo}#resena\n_Solo te pide los últimos 4 dígitos de tu WhatsApp._\n\n¿Algo no va bien? Responde *SOPORTE* y lo resolvemos.\n_Si no quieres recibir estos mensajes, responde *NO*._",
+    "codigo_acceso": "🔐 *Tu código de acceso* · ⚡ *DC TECHNOLOGY*\n\n*{codigo}*\n\nEscríbelo en dctecnology.xyz para ver tus pedidos y accesos.\n⏱️ Vence en *5 minutos*.\n\n⚠️ No lo compartas: nadie de DC TECHNOLOGY te lo va a pedir.\n_Si no lo pediste, ignora este mensaje._",
+    "orden_validada": "✅ *Pago validado* · ⚡ *DC TECHNOLOGY*\n\nTu orden *{codigo}* por *${total}* quedó confirmada y ya está en proceso.\n⏱️ Entrega: máximo *15 minutos* (lunes a sábado, 8:00 a.m. a 8:00 p.m.)\n\n🔎 Síguela en Mis pedidos: dctecnology.xyz/cliente.html#cuenta",
+    "orden_rechazada": "⚠️ *No pudimos validar tu pago* · ⚡ *DC TECHNOLOGY*\n\n📦 Orden: *{codigo}*\n📝 Motivo: {motivo}\n\nSube otro comprobante en Mis pedidos (dctecnology.xyz/cliente.html#cuenta) o respóndeme por aquí y te ayudo.",
+    "reporte_resuelto": "🛠️ *Tu reporte fue atendido* · ⚡ *DC TECHNOLOGY*\n\n🛒 Producto: {producto}\n✅ Solución: {nota}\n\n¿Sigue fallando? Responde *SOPORTE* y lo revisamos de nuevo.",
+    "admin_comprobante": "🧾 *Comprobante nuevo en la web*\nOrden: *{codigo}* · ${total} · {metodo}\nCliente: +{cliente}\nReferencia: {referencia}\nValídalo en el panel → Pagos & Agente Bot → Comprobantes web.",
+    "admin_falla": "🛠️ *Falla reportada en Mis pedidos*\nReporte #{reporte} · Cliente: +{cliente}\nProducto: {producto}\nProblema: {problema}\nEn garantía: {garantia}\nAtiéndelo y ciérralo en el panel (Reportes de falla).",
+    "escalar_asesor": "🙋 *Te comunico con un asesor* · ⚡ *DC TECHNOLOGY*\n\nUna persona del equipo te responde por este mismo chat en horario de atención (lunes a sábado, 8:00 a.m. a 8:00 p.m.).\nYa tenemos tu pedido *#{pedido}* a la mano.",
+    "entrega_credenciales": "🔐 *¡Tus accesos están listos!* · ⚡ *DC TECHNOLOGY*\n\n📦 Pedido: *#{pedido}*\n🛒 Producto: {producto}\n\n👤 Usuario / correo: ```{usuario}```\n🔑 Clave: ```{clave}```\n🙋 Perfil: ```{perfil}```\n🔢 PIN: ```{pin}```\n\n📌 Para no perder la garantía: no cambies correo ni contraseña, usa solo tu perfil y no compartas el acceso.\n\n¿Algo no funciona? Responde *SOPORTE* 🛠️"
   },
   "catalogo": [
     {
@@ -468,6 +663,7 @@
       "marca": "DC Technology",
       "nombre": "Reloj Inteligente Smartwatch D16 con Auriculares Inalámbricos incorporados",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2026-08-05t132417-472-cdb7b640d1b456e25917859545724174-640-0.webp",
+      "url": "https://dctecnology.xyz/p/reloj-inteligente-smartwatch-d16-con-auriculares-inalambricos-incorporados.html",
       "variantes": [
         {
           "nombre": "Unidad Completa",
@@ -484,6 +680,7 @@
       "marca": "DC Technology",
       "nombre": "Diademas Inalámbricas CR-8 con Luces LED",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2026-08-05t124115-373-36ef27e8fec107431017859523974607-640-0.webp",
+      "url": "https://dctecnology.xyz/p/diademas-inalambricas-cr-8-con-luces-r9s7x.html",
       "variantes": [
         {
           "nombre": "Unidad Completa",
@@ -500,6 +697,7 @@
       "marca": "DC Technology",
       "nombre": "Diademas Gamer A3S Alámbrico",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2026-08-05t130350-966-4dfe07f4c2d364484917859531935783-640-0.webp",
+      "url": "https://dctecnology.xyz/p/diademas-gamer-a3s-alambrico.html",
       "variantes": [
         {
           "nombre": "Unidad Gamer",
@@ -516,6 +714,7 @@
       "marca": "DC Technology",
       "nombre": "Reloj Inteligente Smartwatch GT5 Pro En Acero Inoxidable",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-99-4c5ffc8ccc1753790217797441936117-640-0.webp",
+      "url": "https://dctecnology.xyz/p/reloj-inteligente-smartwatch-gt5-pro-en-acero-inoxidable.html",
       "variantes": [
         {
           "nombre": "Acero Inoxidable",
@@ -532,6 +731,7 @@
       "marca": "DC Technology",
       "nombre": "Powerbank Portátil Recargable 20.000 mAh",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2026-08-05t131148-996-0889ddb93403eb4b7c17859537418984-640-0.webp",
+      "url": "https://dctecnology.xyz/p/powerbank-portatil-recargable-20-000-mah.html",
       "variantes": [
         {
           "nombre": "Carga Rápida 20.000 mAh",
@@ -548,6 +748,7 @@
       "marca": "DC Technology",
       "nombre": "Auriculares Inalámbricos de Gancho SP16",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/d5daf6d4-fcfd8845691cefcb9a17356883269515-640-0.webp",
+      "url": "https://dctecnology.xyz/p/auriculares-inalambricos-de-gancho-sp16.html",
       "variantes": [
         {
           "nombre": "Unidad Estándar",
@@ -564,6 +765,7 @@
       "marca": "DC Technology",
       "nombre": "Auriculares Inalámbricos M19 (Con Powerbank)",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/69a3818b-ac5cbf4a784c7ed4bd17345638244173-640-0.webp",
+      "url": "https://dctecnology.xyz/p/auriculares-inalambricos-m19-con-powerbank.html",
       "variantes": [
         {
           "nombre": "Powerbank M19",
@@ -580,6 +782,7 @@
       "marca": "DC Technology",
       "nombre": "Reloj Inteligente Smartwatch H19 en Acero Inoxidable",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-40-5133d512837827e1bd17696427986384-640-0.webp",
+      "url": "https://dctecnology.xyz/p/reloj-inteligente-smartwatch-h19.html",
       "variantes": [
         {
           "nombre": "Acero Inoxidable",
@@ -596,6 +799,7 @@
       "marca": "DC Technology",
       "nombre": "Auriculares Inalámbricos M25 (Con Powerbank)",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/7d6805ef-2c9f36d3fd78cdc58617356911716233-640-0.webp",
+      "url": "https://dctecnology.xyz/p/auriculares-inalambricos-m25-con-powerbank.html",
       "variantes": [
         {
           "nombre": "Gamer M25",
@@ -612,6 +816,7 @@
       "marca": "DC Technology",
       "nombre": "Reloj Inteligente Smartwatch Z90",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-36-961981d05a751785e617696425286798-640-0.webp",
+      "url": "https://dctecnology.xyz/p/reloj-inteligente-smartwatch-z90.html",
       "variantes": [
         {
           "nombre": "Deportivo Z90",
@@ -628,6 +833,7 @@
       "marca": "DC Technology",
       "nombre": "Reloj Inteligente Smartwatch P13 de Lujo en Acero Inoxidable",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-38-f043210a056cc86cda17696429481904-640-0.webp",
+      "url": "https://dctecnology.xyz/p/reloj-inteligente-smartwatch-p13-de-lujo-en-acero-inoxidable.html",
       "variantes": [
         {
           "nombre": "Acero de Lujo P13",
@@ -644,6 +850,7 @@
       "marca": "DC Technology",
       "nombre": "Reloj Inteligente Smartwatch M9",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-97-2890d094934ac49d2917797440145183-640-0.webp",
+      "url": "https://dctecnology.xyz/p/reloj-inteligente-smartwatch-m9.html",
       "variantes": [
         {
           "nombre": "Edición M9",
@@ -660,6 +867,7 @@
       "marca": "Netflix",
       "nombre": "Netflix Premium 4K",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2024-08-27t102440-663-92c3e993cc40c238fc17247722852386-640-0.webp",
+      "url": "https://dctecnology.xyz/p/netflix.html",
       "variantes": [
         {
           "nombre": "Pantalla Colombia 26 días",
@@ -681,6 +889,7 @@
       "marca": "Amazon",
       "nombre": "Prime Video Ultra HD",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-87-58600aa95daca5fadc17247083377668-640-0.webp",
+      "url": "https://dctecnology.xyz/p/prime-video.html",
       "variantes": [
         {
           "nombre": "Pantalla (1 Dispositivo)",
@@ -702,6 +911,7 @@
       "marca": "Disney",
       "nombre": "Disney Plus Premium",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-91-9267e0a1730671bcf517247095798757-640-0.webp",
+      "url": "https://dctecnology.xyz/p/disney-plus.html",
       "variantes": [
         {
           "nombre": "Pantalla Premium",
@@ -718,6 +928,7 @@
       "marca": "Max",
       "nombre": "Max (HBO)",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2024-08-27t101929-364-5d53c57354216ecd4417247719752817-640-0.webp",
+      "url": "https://dctecnology.xyz/p/hbo-max.html",
       "variantes": [
         {
           "nombre": "Pantalla Estándar 1 Mes",
@@ -749,6 +960,7 @@
       "marca": "Crunchyroll",
       "nombre": "Crunchyroll Mega Fan",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-85-ddbcabd36470bf37cb17247079814050-640-0.webp",
+      "url": "https://dctecnology.xyz/p/crunchyroll.html",
       "variantes": [
         {
           "nombre": "Perfil Mega Fan 1 Mes",
@@ -770,6 +982,7 @@
       "marca": "Vix",
       "nombre": "Vix Premium",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-74-58eb29638bb8d2725f17247207045910-640-0.webp",
+      "url": "https://dctecnology.xyz/p/vix-premium.html",
       "variantes": [
         {
           "nombre": "Pantalla 1 Mes",
@@ -791,6 +1004,7 @@
       "marca": "Paramount",
       "nombre": "Paramount Plus",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/image-8-1-1c0fae159cffedf49d17134749124740-640-0.webp",
+      "url": "https://dctecnology.xyz/p/paramount-plus.html",
       "variantes": [
         {
           "nombre": "Pantalla 1 Mes",
@@ -812,6 +1026,7 @@
       "marca": "Universal",
       "nombre": "Universal Plus",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-89-0fd5d546fff75e881717247090664955-640-0.webp",
+      "url": "https://dctecnology.xyz/p/universal-plus.html",
       "variantes": [
         {
           "nombre": "Pantalla 1 Mes",
@@ -833,6 +1048,7 @@
       "marca": "Rakuten",
       "nombre": "Viki Rakuten Pass",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-71-f118630284a3d1b8c017246986683379-640-0.webp",
+      "url": "https://dctecnology.xyz/p/viki-rakuten.html",
       "variantes": [
         {
           "nombre": "Pantalla 1 Mes",
@@ -849,6 +1065,7 @@
       "marca": "Apple",
       "nombre": "Apple TV Plus",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/con-o-sin-3-cafdcb979c4e928cc817534227138219-640-0.webp",
+      "url": "https://dctecnology.xyz/p/apple-tv.html",
       "variantes": [
         {
           "nombre": "Perfil 1 Mes",
@@ -870,6 +1087,7 @@
       "marca": "Mubi",
       "nombre": "Mubi Cinema",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2024-08-27t101739-823-7fb054275d672eafb417247718860579-640-0.webp",
+      "url": "https://dctecnology.xyz/p/mubi.html",
       "variantes": [
         {
           "nombre": "Perfil 1 Mes",
@@ -891,6 +1109,7 @@
       "marca": "IPTV",
       "nombre": "IPTV Smarters",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-81-f4fa3de76024ac6e3017247201256953-640-0.webp",
+      "url": "https://dctecnology.xyz/p/iptv-smarters.html",
       "variantes": [
         {
           "nombre": "Pantalla 1 Mes",
@@ -932,6 +1151,7 @@
       "marca": "CapCut",
       "nombre": "CapCut Pro Edición",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/con-o-sin-11-b62cd5366081340f5217534215681512-640-0.webp",
+      "url": "https://dctecnology.xyz/p/capcut-pro.html",
       "variantes": [
         {
           "nombre": "Suscripción 1 Mes",
@@ -948,6 +1168,7 @@
       "marca": "Canva",
       "nombre": "Canva Pro",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-78-092a1c711be9666f1e17246998999745-640-0.webp",
+      "url": "https://dctecnology.xyz/p/canva-pro.html",
       "variantes": [
         {
           "nombre": "Acceso 1 Mes",
@@ -969,6 +1190,7 @@
       "marca": "Duolingo",
       "nombre": "Duolingo Super",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-94-e808b4d509a1e45f3f17247140783237-640-0.webp",
+      "url": "https://dctecnology.xyz/p/duolingo-super.html",
       "variantes": [
         {
           "nombre": "Suscripción 1 Mes",
@@ -985,6 +1207,7 @@
       "marca": "McAfee",
       "nombre": "McAfee Antivirus Total Protection",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-92-f51ee5b369b7a29c0917247098954661-640-0.webp",
+      "url": "https://dctecnology.xyz/p/mcafee-antivirus.html",
       "variantes": [
         {
           "nombre": "Licencia 1 Año (1 PC)",
@@ -1006,6 +1229,7 @@
       "marca": "Microsoft",
       "nombre": "Office 365 Personal / Familiar",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-93-7002d700dab00f352517247104847099-640-0.webp",
+      "url": "https://dctecnology.xyz/p/office-365.html",
       "variantes": [
         {
           "nombre": "Licencia 1 Año (1 Equipo)",
@@ -1027,6 +1251,7 @@
       "marca": "Microsoft",
       "nombre": "Office Pro Plus Vitalicio",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/1000062605-45b944d657592752c217680315104066-640-0.webp",
+      "url": "https://dctecnology.xyz/p/office-2016-2019-2021-2024-pro-plus.html",
       "variantes": [
         {
           "nombre": "Office 2016 Pro Plus",
@@ -1058,6 +1283,7 @@
       "marca": "Microsoft",
       "nombre": "Windows 10 y 11 Pro / Home",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/1000062604-dd415254400244ab9417680313695120-640-0.webp",
+      "url": "https://dctecnology.xyz/p/windows-10-y-11-pro-y-home.html",
       "variantes": [
         {
           "nombre": "Windows 10 Pro Licencia",
@@ -1079,6 +1305,7 @@
       "marca": "Google",
       "nombre": "Gemini IA Pro",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-54-17aa51c0fc27f7b51717566943436178-640-0.webp",
+      "url": "https://dctecnology.xyz/p/gemini-ia-pro.html",
       "variantes": [
         {
           "nombre": "Suscripción 1 Mes",
@@ -1095,6 +1322,7 @@
       "marca": "Disney",
       "nombre": "PIN Virtual Disney Plus",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2026-08-05t225121-178-fcafa0f7243b64a4e517859883063919-640-0.webp",
+      "url": "https://dctecnology.xyz/p/pin-virtual-disney-plus-1tpu5.html",
       "variantes": [
         {
           "nombre": "PIN de $25.900",
@@ -1121,6 +1349,7 @@
       "marca": "Netflix",
       "nombre": "PIN Virtual Netflix Colombia",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2026-07-25t230306-675-e59d09cb99d572efd717850386081961-640-0.webp",
+      "url": "https://dctecnology.xyz/p/pin-virtual-netflix.html",
       "variantes": [
         {
           "nombre": "PIN de $20.000",
@@ -1157,6 +1386,7 @@
       "marca": "Directv",
       "nombre": "PIN Virtual Directv Go",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2026-07-25t214500-060-855f015f5c5735ec7417850339071276-640-0.webp",
+      "url": "https://dctecnology.xyz/p/pin-virtual-directv-go.html",
       "variantes": [
         {
           "nombre": "PIN de $64.000",
@@ -1188,6 +1418,7 @@
       "marca": "Win Play",
       "nombre": "PIN Virtual Win Play",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2026-07-25t214417-236-5b6b496bb9a900387817850338654391-640-0.webp",
+      "url": "https://dctecnology.xyz/p/pin-virtual-win-play.html",
       "variantes": [
         {
           "nombre": "PIN 1 Mes ($39.900)",
@@ -1204,6 +1435,7 @@
       "marca": "Vix",
       "nombre": "PIN Virtual Vix",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2026-07-25t214307-034-4b2b164dcfa777bf7317850337973553-640-0.webp",
+      "url": "https://dctecnology.xyz/p/pin-virtual-vix.html",
       "variantes": [
         {
           "nombre": "PIN de $22.900",
@@ -1220,6 +1452,7 @@
       "marca": "Deezer",
       "nombre": "PIN Virtual Deezer",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2026-07-25t214214-093-3f4658a80701f1ff6017850337398853-640-0.webp",
+      "url": "https://dctecnology.xyz/p/pin-virtual-deezer.html",
       "variantes": [
         {
           "nombre": "PIN de $19.500",
@@ -1236,6 +1469,7 @@
       "marca": "Google Play",
       "nombre": "PIN Virtual Google Play",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2026-07-25t221452-314-511c9925f767810a1417850358454071-640-0.webp",
+      "url": "https://dctecnology.xyz/p/pin-google-play.html",
       "variantes": [
         {
           "nombre": "PIN de $10.000",
@@ -1262,6 +1496,7 @@
       "marca": "Roblox",
       "nombre": "PIN Virtual Roblox",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2026-07-25t214108-104-f8cd5b922136803efb17850336744052-640-0.webp",
+      "url": "https://dctecnology.xyz/p/pin-virtual-roblox.html",
       "variantes": [
         {
           "nombre": "PIN de $25.000",
@@ -1288,6 +1523,7 @@
       "marca": "Razer",
       "nombre": "PIN Virtual Razer Gold",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2026-07-25t215123-060-6394e99cdc8ffec1be17850342897501-640-0.webp",
+      "url": "https://dctecnology.xyz/p/pin-virtual-razer-gold.html",
       "variantes": [
         {
           "nombre": "PIN de $39.000",
@@ -1314,6 +1550,7 @@
       "marca": "IMVU",
       "nombre": "PIN Virtual IMVU",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2026-07-25t213332-080-79104d967af9fc67bb17850332587866-640-0.webp",
+      "url": "https://dctecnology.xyz/p/pin-virtual-imvu.html",
       "variantes": [
         {
           "nombre": "PIN de $24.000",
@@ -1335,6 +1572,7 @@
       "marca": "McAfee",
       "nombre": "PIN Virtual McAfee",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2026-07-25t220033-148-0ed9c63537013d0c9b17850348496060-640-0.webp",
+      "url": "https://dctecnology.xyz/p/pin-virtual-mcafee.html",
       "variantes": [
         {
           "nombre": "PIN de $105.900",
@@ -1361,6 +1599,7 @@
       "marca": "Uber",
       "nombre": "PIN Virtual Uber",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2026-07-25t222652-538-da2ff7a6c5aef0ae6a17850364284889-640-0.webp",
+      "url": "https://dctecnology.xyz/p/pin-virtual-uber.html",
       "variantes": [
         {
           "nombre": "PIN de $20.000",
@@ -1392,6 +1631,7 @@
       "marca": "Directv",
       "nombre": "DirecTV Prepago Recarga Directa",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2026-07-25t231938-128-24edfb96645621acb017850397301376-640-0.webp",
+      "url": "https://dctecnology.xyz/p/directv-prepago-4s7gd.html",
       "variantes": [
         {
           "nombre": "Saldo $12.000",
@@ -1433,6 +1673,7 @@
       "marca": "Free Fire",
       "nombre": "Free Fire Diamantes Directo",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2026-07-25t231212-297-36aa344724da05d45217850391442750-640-0.webp",
+      "url": "https://dctecnology.xyz/p/free-fire-diamantes-vwx2s.html",
       "variantes": [
         {
           "nombre": "100 Diamantes ($4.200)",
@@ -1469,6 +1710,7 @@
       "marca": "Claro",
       "nombre": "Recargas Móvil Claro",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2026-08-09t154051-697-0376254c21e77e4fb917863088460828-640-0.webp",
+      "url": "https://dctecnology.xyz/p/recargas-claro.html",
       "variantes": [
         {
           "nombre": "Saldo $5.000",
@@ -1505,6 +1747,7 @@
       "marca": "Movistar",
       "nombre": "Recargas Móvil Movistar",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2026-08-09t154247-201-dc39660cd954b9bd2d17863092996980-640-0.webp",
+      "url": "https://dctecnology.xyz/p/recargas-movistar.html",
       "variantes": [
         {
           "nombre": "Saldo $5.000",
@@ -1541,6 +1784,7 @@
       "marca": "Tigo",
       "nombre": "Recargas Móvil Tigo",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2026-08-09t160408-832-319c252c679afe70be17863094694827-640-0.webp",
+      "url": "https://dctecnology.xyz/p/recargas-tigo.html",
       "variantes": [
         {
           "nombre": "Saldo $5.000",
@@ -1577,6 +1821,7 @@
       "marca": "ETB",
       "nombre": "Recargas Móvil ETB",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2026-08-09t154650-268-c0f369ea195c7b891217863095184897-640-0.webp",
+      "url": "https://dctecnology.xyz/p/recargas-etb.html",
       "variantes": [
         {
           "nombre": "Saldo $5.000",
@@ -1608,6 +1853,7 @@
       "marca": "Éxito",
       "nombre": "Recargas Móvil Éxito",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2026-08-09t155041-409-d253dc370c4355df5e17863096468897-640-0.webp",
+      "url": "https://dctecnology.xyz/p/recargas-movil-exito.html",
       "variantes": [
         {
           "nombre": "Saldo $5.000",
@@ -1649,6 +1895,7 @@
       "marca": "Wom",
       "nombre": "Recargas Móvil Wom",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2026-08-09t154857-684-5b6cf3ede7d4ca18be17863096922511-640-0.webp",
+      "url": "https://dctecnology.xyz/p/recargas-wom.html",
       "variantes": [
         {
           "nombre": "Saldo $5.000",
@@ -1690,6 +1937,7 @@
       "marca": "Virgin",
       "nombre": "Recargas Virgin Mobile",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2026-08-09t155144-941-41a23ea5e92e7def2117863099971520-640-0.webp",
+      "url": "https://dctecnology.xyz/p/recargas-virgin-mobile.html",
       "variantes": [
         {
           "nombre": "Saldo $5.000",
@@ -1716,6 +1964,7 @@
       "marca": "Rushbet",
       "nombre": "Recarga Rushbet Apuestas",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2026-08-09t161902-384-c2a95834660f0ff1d117863104110955-640-0.webp",
+      "url": "https://dctecnology.xyz/p/recarga-rushbet.html",
       "variantes": [
         {
           "nombre": "Saldo $10.000",
@@ -1747,6 +1996,7 @@
       "marca": "Bwin",
       "nombre": "Recarga Bwin Apuestas",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2026-08-09t162610-164-e06a2accbf5ab01c6217863108186292-640-0.webp",
+      "url": "https://dctecnology.xyz/p/recarga-bwin-7t6cc.html",
       "variantes": [
         {
           "nombre": "Saldo $10.000",
@@ -1778,6 +2028,7 @@
       "marca": "Betsson",
       "nombre": "Recarga Betsson Apuestas",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2026-08-09t163238-179-7c9b4bbed66ed5005e17863111630901-640-0.webp",
+      "url": "https://dctecnology.xyz/p/recarga-betsson.html",
       "variantes": [
         {
           "nombre": "Saldo $10.000",
@@ -1809,6 +2060,7 @@
       "marca": "DC Service",
       "nombre": "Mantenimiento Preventivo y Correctivo de Equipos",
       "imagen": "https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?auto=format&fit=crop&w=640&q=80",
+      "url": "https://dctecnology.xyz/p/servicio-mantenimiento-computadores.html",
       "variantes": [
         {
           "nombre": "Preventivo Software + Limpieza",
@@ -1830,6 +2082,7 @@
       "marca": "DC Service",
       "nombre": "Instalación de Sistema Operativo y Licenciamiento",
       "imagen": "https://images.unsplash.com/photo-1629654297299-c8506221ca97?auto=format&fit=crop&w=640&q=80",
+      "url": "https://dctecnology.xyz/p/servicio-instalacion-so-licenciamiento.html",
       "variantes": [
         {
           "nombre": "Windows 10/11 Pro + Office + Software Base",
@@ -1846,6 +2099,7 @@
       "marca": "DC Rental",
       "nombre": "Alquiler de Laptops y Equipos de Cómputo",
       "imagen": "https://images.unsplash.com/photo-1525547719571-a2d4ac8945e2?auto=format&fit=crop&w=640&q=80",
+      "url": "https://dctecnology.xyz/p/servicio-alquiler-equipos-computo.html",
       "variantes": [
         {
           "nombre": "Plan 1 Mes (Pago Total)",
@@ -1872,6 +2126,7 @@
       "marca": "DC Tech",
       "nombre": "Asesoría Técnica y Tutoría Personalizada",
       "imagen": "https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=640&q=80",
+      "url": "https://dctecnology.xyz/p/servicio-asesorias-tutorias.html",
       "variantes": [
         {
           "nombre": "Sesión de Asesoría / Tutoría (1 Hora)",
@@ -1888,6 +2143,7 @@
       "marca": "DC Tech",
       "nombre": "Desarrollo de Catálogos Web y Automatizaciones IA",
       "imagen": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=640&q=80",
+      "url": "https://dctecnology.xyz/p/servicio-desarrollo-web-automatizaciones.html",
       "variantes": [
         {
           "nombre": "Proyecto a Medida (Requiere Asesoría)",

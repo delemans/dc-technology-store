@@ -33,6 +33,7 @@ const catalogo = productos.map((p) => ({
     marca: p.marca,
     nombre: p.nombre,
     imagen: p.imagen,
+    url: `${URL_TIENDA}/p/${p.id}.html`,
     variantes: (p.variantes ?? []).map((v) => ({ nombre: v.nombre, precio: v.precio, precio_anterior: v.precio_anterior ?? null })),
     desde: Math.min(...(p.variantes ?? []).map((v) => v.precio).filter(Number.isFinite)),
     descripcion: textoPlano(p.descripcion).slice(0, 600) || null,
@@ -106,12 +107,21 @@ const reglasNegocio = [
     'Nunca pidas contraseñas, códigos de verificación ni datos bancarios completos al cliente.',
     'Duración: di la que trae el nombre de la variante (ej. "Pantalla Colombia 26 días" son 26 días, no "un mes"). No prometas renovaciones, perfiles ni dispositivos que el nombre no diga.',
     'Nunca inventes urgencia ni escasez ("últimas unidades", "solo hoy") ni opiniones de otros clientes: solo promociones activas y datos del catálogo.',
+    'TECNOLOGÍA (relojes, audífonos, diademas, powerbank), SERVICIOS TÉCNICOS y ALQUILER: da precio y detalles del catálogo; cuando el cliente quiera comprarlo o agendarlo, responde "[ESCALAR] Pedido de <producto>": el envío o la visita los coordina una persona.',
+];
+
+// Solo temas de la tienda (WO-040): lo que no es compra lo responde el dueño en persona
+const soloTienda = [
+    'Atiendes SOLO temas de DC TECHNOLOGY: productos y precios del catálogo, compras, pagos, pedidos, accesos, soporte, garantía y los servicios del catálogo.',
+    'Si el mensaje claramente NO es de un cliente de la tienda (conversación personal o familiar, un conocido que habla de otro tema, proveedores u ofertas de servicios, publicidad, cobros, encuestas, empleo o asuntos de otro negocio), responde EXACTAMENTE "[NO_COMPRA] <tema en pocas palabras>" y nada más: no le contestas y el dueño le responde en persona.',
+    'Ante la duda, trátalo como cliente: un saludo, una pregunta general o alguien que busca algo que no vendemos SÍ son clientes (dile con amabilidad que no lo tenemos y ofrece lo más parecido del catálogo).',
 ];
 
 // Identidad y estilo (WO-039): el bot habla como la tienda, cercano y ágil, y vende con criterio
 const identidad = [
     `Eres DC TECHNOLOGY: respondes el WhatsApp de la tienda (${URL_TIENDA}) en nombre del equipo. Habla como la tienda ("te ayudamos", "te enviamos").`,
-    'En el PRIMER mensaje de la conversación saluda así: "¡Hola! Te saluda *DC TECHNOLOGY* 👋" y pregunta en qué le ayudas. Después no vuelvas a presentarte.',
+    'En el PRIMER mensaje de la conversación saluda así: "¡Hola! Te saluda *DC TECHNOLOGY* 👋", responde lo que preguntó y cierra con: "Escribe *menú* para ver todas las opciones." Después no vuelvas a presentarte (si el contexto trae un mensaje del menú, la conversación ya empezó).',
+    'El cliente tiene un menú con números (catálogo, cómo comprar, mis pedidos, soporte, formas de pago y asesor): si no sabe qué hacer o pide opciones, dile que escriba *menú*.',
     'Si te preguntan si eres un bot o una persona, sé honesto: eres el asistente automático de DC TECHNOLOGY y, si prefiere, lo pasas con una persona del equipo.',
     'Tono cercano y ágil, en español de Colombia: tutea, frases cortas, máximo 6 líneas por mensaje, 1 o 2 emojis y *negrita* solo para datos clave (producto, precio, total).',
     'Una pregunta a la vez y termina cada mensaje con el siguiente paso claro (qué responder, qué elegir o qué enviar).',
@@ -379,6 +389,123 @@ const faq = [
     ...faqPorDefecto.filter((f) => !idsObligatorias.has(f.id) && !faqBase.some((x) => x.id === f.id)),
 ];
 
+// Menú con números (WO-040): lo arma el nodo "Responder menú" de n8n con el catálogo, los métodos de pago y los
+// combos EN VIVO. Aquí van los textos y el orden; los precios nunca se escriben aquí.
+const TIENDA_CORTA = URL_TIENDA.replace(/^https?:\/\//, '');
+const menu = {
+    garantia_dias: negocio.garantia_dias_por_defecto ?? negocioPorDefecto.garantia_dias_por_defecto,
+    principal: {
+        saludo: '¡Hola{nombre}! 👋 Te saluda *DC TECHNOLOGY*',
+        lema: 'Streaming, licencias, pines y recargas con entrega por este chat ⚡',
+        titulo: '📋 *Menú DC TECHNOLOGY*',
+        pregunta: '*¿En qué te ayudo?* Responde con un número:',
+        opciones: [
+            { id: 'catalogo', texto: 'Catálogo y precios' },
+            { id: 'comprar', texto: 'Cómo comprar' },
+            { id: 'pedidos', texto: 'Mis pedidos y accesos' },
+            { id: 'soporte', texto: 'Soporte y garantía' },
+            { id: 'pagos', texto: 'Formas de pago' },
+            { id: 'asesor', texto: 'Hablar con una persona' },
+        ],
+        pie: 'O escríbeme lo que buscas, por ejemplo: _Netflix_ 🍿',
+    },
+    // Orden de las categorías del catálogo (tipo de productos.json → título del menú)
+    categorias: [
+        { tipos: ['streaming'], titulo: 'Streaming', emoji: '🎬' },
+        { tipos: ['licencias'], titulo: 'Licencias y apps', emoji: '💻' },
+        { tipos: ['pines'], titulo: 'Pines y tarjetas regalo', emoji: '🎟️' },
+        { tipos: ['recargas'], titulo: 'Recargas', emoji: '📱' },
+        { tipos: ['tecnologia'], titulo: 'Tecnología y accesorios', emoji: '⌚' },
+        { tipos: ['servicios', 'alquiler'], titulo: 'Servicios técnicos y alquiler', emoji: '🛠️' },
+    ],
+    // Soporte guiado: cada opción responde con su FAQ (misma respuesta que da la IA)
+    soporte: [
+        { titulo: 'No puedo iniciar sesión', faq: 'soporte_inicio_sesion', emoji: '🔐' },
+        { titulo: 'Dice "Demasiados dispositivos" o pantalla en uso', faq: 'soporte_pantallas', emoji: '📺' },
+        { titulo: 'Netflix pide "Actualizar hogar"', faq: 'soporte_hogar_netflix', emoji: '🏠' },
+        { titulo: 'Cambiaron mi perfil o le pusieron PIN', faq: 'soporte_perfil_pin', emoji: '🙋' },
+        { titulo: 'Activar una licencia o serial', faq: 'activacion_licencias', emoji: '🔑' },
+        { titulo: 'Otro problema o garantía', faq: null, emoji: '📝' },
+    ],
+    comprar: [
+        '🛒 *Cómo comprar*',
+        '',
+        '*Por este chat*',
+        '1. Dime qué producto y plan quieres.',
+        '2. Te confirmo el total y eliges cómo pagar.',
+        '3. Me envías la captura del comprobante 📸',
+        '',
+        `*En la web:* ${TIENDA_CORTA} → agrega al carrito → "Pagar y subir el comprobante aquí".`,
+        '',
+        `✅ Validamos tu pago y tus accesos llegan por este chat en máximo *${WA.ENTREGA_MAX_MIN} minutos* (${horario.replace(/\.$/, '')}).`,
+        '🎁 ¿Primera compra? Usa el cupón *DCTECH2026* (10%).',
+    ],
+    pedidos: [
+        '📦 *Mis pedidos y accesos*',
+        '',
+        `Entra a 👉 ${URL_MIS_PEDIDOS}`,
+        '1. Escribe tu número de WhatsApp.',
+        '2. Te llega un código por este chat.',
+        '3. Listo: ves tus pedidos, tus accesos y tu garantía, y puedes reportar una falla.',
+        '',
+        '¿Pagaste y aún no te llega? Escríbeme tu número de pedido y te ayudo.',
+    ],
+    pagos: {
+        titulo: '💳 *Formas de pago*',
+        pasos: [
+            '*Así pagas*',
+            '1. Te confirmo el total de tu pedido.',
+            '2. Eliges el medio y te paso sus datos.',
+            '3. Me envías la captura del comprobante 📸',
+            '',
+            `O paga en la web y sube el comprobante allá: ${TIENDA_CORTA}`,
+        ],
+        sin_metodos: 'Hoy el medio de pago te lo confirma una persona: escribe *asesor* y te atendemos.',
+    },
+    // Compra por el menú sin IA (WO-040): plan → medio de pago → datos → comprobante. Al elegir el medio, arranca
+    // la compra al proveedor igual que cuando la IA toma el pedido ([PEDIDO_DIGITAL])
+    compra_web: [
+        '🌐 *Compra en la web*',
+        '',
+        '1. Abre 👉 {url}',
+        '2. Elige tu opción y toca *Aceptar y agregar al carrito*.',
+        '3. Abre el carrito 🛒 y toca *Pagar y subir el comprobante aquí*.',
+        '',
+        'Te avisamos por este chat apenas validemos tu pago ✅',
+    ],
+    otro_problema: [
+        '📝 *Cuéntame qué pasa*',
+        '',
+        'En un solo mensaje: qué producto es, qué te aparece y tu número de pedido si lo tienes. Si tienes una captura, envíala con una frase.',
+    ],
+    textos: {
+        catalogo: '🛍️ *Catálogo DC TECHNOLOGY*',
+        elige_categoria: 'Elige una categoría:',
+        elige_producto: 'Responde con el número para ver planes y precios.',
+        elige_opcion_digital: 'Responde con el número de la opción que quieres y te digo cómo pagar.',
+        elige_opcion_fisico: 'Responde con el número de la opción y una persona coordina contigo el envío o la cita.',
+        comprar_pie: '¿Qué producto quieres? Escríbelo o responde *1* para ver el catálogo.',
+        tu_pedido: '🛒 *Tu pedido*',
+        como_pagar: '*¿Cómo quieres pagar?* Responde con el número:',
+        pagar_web: 'En la web (carrito y comprobante allá)',
+        pagar_cripto: '💠 ¿Pagas con cripto? Escribe *cripto*.',
+        combo: '🧩 ¿Agregas otra plataforma? Con el combo tienes descuento: escríbeme cuál.',
+        captura: '📸 Cuando pagues, envíame aquí la *captura del comprobante*.',
+        volver_opciones: '0️⃣ Volver a las opciones',
+        volver_pago: '0️⃣ Elegir otro medio de pago',
+        soporte: '🛠️ *Soporte y garantía*',
+        elige_problema: '¿Qué te pasa? Responde con el número:',
+        volver_menu: '0️⃣ Menú principal',
+        volver_catalogo: '0️⃣ Volver al catálogo',
+        volver_lista: '0️⃣ Volver a la lista',
+        volver_soporte: '0️⃣ Volver a soporte',
+        web: `🌐 También en ${TIENDA_CORTA}`,
+        ver_web: '🌐 Míralo en la web:',
+        invalida: '⚠️ Esa opción no está en la lista. Responde con uno de estos números:',
+        sigue: '¿Sigue igual? Escribe *asesor* y una persona te ayuda.',
+    },
+};
+
 const instruccionesAgente = [
     'Responde solo con información de este archivo; si no sabes algo, escala a un asesor (ver "escalamiento").',
     'No envíes entradas con "pendiente_configurar": true.',
@@ -388,6 +515,7 @@ const instruccionesAgente = [
 // Prompt listo para pegar en el nodo de IA de n8n (mismo contenido, en texto plano)
 const promptSistema = [
     'IDENTIDAD Y TONO:', ...identidad.map((x) => `- ${x}`),
+    '', 'SOLO TEMAS DE LA TIENDA:', ...soloTienda.map((x) => `- ${x}`),
     '', 'INSTRUCCIONES:', ...instruccionesAgente.map((x) => `- ${x}`),
     '', 'REGLAS DE NEGOCIO (estrictas):', ...reglasNegocio.map((x) => `- ${x}`),
     '', 'VENDE CON CRITERIO:', ...ventaConCriterio.map((x) => `- ${x}`),
@@ -400,6 +528,7 @@ const promptSistema = [
 const resultado = {
     version: new Date().toISOString(),
     identidad,
+    solo_tienda: soloTienda,
     instrucciones_agente: instruccionesAgente,
     venta_con_criterio: ventaConCriterio,
     formas_de_pagar: formasDePagar,
@@ -421,6 +550,7 @@ const resultado = {
         marca: '[COMBO] {"items":[{"producto":"…","variante":"…"}]} → la reemplaza el nodo "Revisar respuesta" de n8n',
         portal: 'https://dctecnology.xyz/cliente.html#combos',
     },
+    menu,
     plantillas,
     catalogo,
 };
