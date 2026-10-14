@@ -8,6 +8,16 @@
 # - Evolution guarda la sesión de WhatsApp en su base (Neon): al encender, dc-bot se reconecta sin QR.
 
 $ErrorActionPreference = 'Stop'
+
+# n8n guarda flujos y credenciales en la carpeta .n8n de la cuenta que lo ejecuta. Los tuyos están en la cuenta
+# "Administrador": si este script corre con otra cuenta, se vuelve a abrir como administrador (Windows pide permiso).
+$esAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+if (-not $esAdmin) {
+    Write-Host 'Pidiendo permiso de administrador para abrir TU n8n (el que tiene el flujo y las credenciales)…' -ForegroundColor Yellow
+    Start-Process powershell -Verb RunAs -ArgumentList '-NoProfile', '-ExecutionPolicy', 'Bypass', '-NoExit', '-File', "`"$PSCommandPath`""
+    exit
+}
+Write-Host "Cuenta: $([Security.Principal.WindowsIdentity]::GetCurrent().Name)"
 $certificado = 'C:\evolution-api\kaspersky-ca.pem'
 $carpetaEvolution = 'C:\evolution-api\evolution-api-main'
 # La clave de Evolution sale de .env (EVOLUTION_API_KEY): nunca se escribe en el repositorio
