@@ -81,7 +81,7 @@ function tarjetaProducto(p, { alElegir, elegido = false, icono = 'fa-plus' } = {
             <button type="button" class="agregar" aria-label="${elegido ? 'Quitar' : 'Elegir'} ${escaparHTML(p.nombre)}"><i class="fa-solid ${icono}"></i></button>
         </div>`;
     const img = t.querySelector('img');
-    img.addEventListener('error', () => { img.src = 'https://i.ibb.co/LDN4xyW0/Mesa-de-trabajo-1.png'; }, { once: true });
+    img.addEventListener('error', () => { img.src = 'img/logo-dc-192.png'; }, { once: true });
     const accion = (e) => { e.stopPropagation(); (alElegir ?? abrirProducto)(p, t); };
     t.querySelector('.agregar').addEventListener('click', accion);
     t.addEventListener('click', accion);

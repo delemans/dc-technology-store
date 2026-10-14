@@ -6,6 +6,8 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src 'self' data: https://cdnjs.cloudflare.com https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://vyqcizwfmjlflncdwzve.supabase.co wss://vyqcizwfmjlflncdwzve.supabase.co https://cdn.jsdelivr.net; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#0B0F19">
+    <link rel="icon" type="image/png" href="img/logo-dc-192.png">
+    <link rel="apple-touch-icon" href="img/logo-dc-512.png">
     <title>DC TECHNOLOGY | Estado de Pedido</title>
     <!-- Estilos compilados con Tailwind (npm run css): sin CDN de desarrollo -->
     <link rel="stylesheet" href="estilos/tailwind.css">
@@ -84,12 +86,7 @@
     <header class="sticky top-0 z-20 bg-dcDarkBg/70 backdrop-blur-xl border-b border-white/10">
         <div class="max-w-2xl mx-auto px-4 py-3 flex justify-between items-center gap-3">
             <a href="index.html" class="group flex items-center gap-3 min-h-[48px]">
-                <svg viewBox="0 0 48 48" class="dc-logo w-10 h-10" role="img" aria-label="DC Technology">
-                    <path d="M24 3 42 13.5v21L24 45 6 34.5v-21Z" fill="#0F111A" stroke="#FF0033" stroke-width="2.5" stroke-linejoin="round"/>
-                    <path d="M24 9.5 36.5 16.75v14.5L24 38.5 11.5 31.25v-14.5Z" fill="#FF0033" opacity=".12"/>
-                    <circle cx="24" cy="3" r="1.6" fill="#FF0033"/><circle cx="24" cy="45" r="1.6" fill="#FF0033"/>
-                    <text x="24" y="29.5" text-anchor="middle" font-family="Outfit, Inter, sans-serif" font-weight="900" font-size="15" fill="#fff" letter-spacing="-.5">DC</text>
-                </svg>
+                <img src="img/logo-dc-192.png" alt="DC Technology" class="dc-logo w-10 h-10 rounded-xl object-cover shrink-0" width="40" height="40">
                 <span class="leading-none">
                     <span class="block font-tech font-black text-base tracking-[0.16em] uppercase">DC <span class="text-dcRed dc-text-glow">Technology</span></span>
                     <span class="block mt-1 text-[9px] font-bold uppercase tracking-[0.3em] text-neutral-500">Rastreo de pedidos</span>

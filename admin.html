@@ -8,6 +8,8 @@
     <meta name="theme-color" content="#0B0F19">
     <!-- El panel nunca debe aparecer en buscadores -->
     <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" type="image/png" href="img/logo-dc-192.png">
+    <link rel="apple-touch-icon" href="img/logo-dc-512.png">
     <title>DC TECHNOLOGY | Panel Admin</title>
     <!-- Estilos compilados con Tailwind (npm run css): sin CDN de desarrollo -->
     <link rel="stylesheet" href="estilos/tailwind.css">
@@ -99,21 +101,11 @@
     <div class="mesh" aria-hidden="true"><span></span><span></span><span></span></div>
     <div class="bg-grid fixed inset-0 pointer-events-none" aria-hidden="true"></div>
 
-    <!-- Isotipo reutilizable -->
-    <svg width="0" height="0" class="absolute" aria-hidden="true">
-        <symbol id="dc-isotipo" viewBox="0 0 48 48">
-            <path d="M24 3 42 13.5v21L24 45 6 34.5v-21Z" fill="#0F111A" stroke="#FF0033" stroke-width="2.5" stroke-linejoin="round"/>
-            <path d="M24 9.5 36.5 16.75v14.5L24 38.5 11.5 31.25v-14.5Z" fill="#FF0033" opacity=".12"/>
-            <circle cx="24" cy="3" r="1.6" fill="#FF0033"/><circle cx="24" cy="45" r="1.6" fill="#FF0033"/>
-            <text x="24" y="29.5" text-anchor="middle" font-family="Outfit, Inter, sans-serif" font-weight="900" font-size="15" fill="#fff" letter-spacing="-.5">DC</text>
-        </symbol>
-    </svg>
-
     <!-- ============ LOGIN ============ -->
     <div id="vista-login" class="vista-entrada relative z-10 flex min-h-screen items-center justify-center p-4">
         <div class="w-full max-w-md rounded-3xl bg-white/[0.03] backdrop-blur-xl ring-1 ring-white/10 shadow-2xl shadow-black/60 p-7 sm:p-10">
             <div class="flex flex-col items-center text-center mb-8">
-                <svg class="dc-logo w-20 h-20 mb-4" role="img" aria-label="DC Technology"><use href="#dc-isotipo"/></svg>
+                <img src="img/logo-dc-192.png" alt="DC Technology" class="dc-logo w-20 h-20 mb-4 rounded-2xl object-cover shrink-0" width="80" height="80">
                 <h1 class="font-tech font-black text-2xl tracking-[0.18em] uppercase">DC <span class="text-dcRed dc-text-glow">Technology</span></h1>
                 <p class="mt-2 inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.3em] text-neutral-400">
                     <i class="fa-solid fa-shield-halved text-dcRed"></i> Acceso restringido
@@ -162,7 +154,7 @@
         <aside class="hidden md:flex w-72 shrink-0 flex-col justify-between bg-black/30 backdrop-blur-xl border-r border-white/10 sticky top-0 h-screen">
             <div>
                 <div class="flex items-center gap-3 p-6 border-b border-white/10">
-                    <svg class="dc-logo w-11 h-11 shrink-0" role="img" aria-label="DC Technology"><use href="#dc-isotipo"/></svg>
+                    <img src="img/logo-dc-192.png" alt="DC Technology" class="dc-logo w-11 h-11 rounded-xl object-cover shrink-0" width="44" height="44">
                     <div class="leading-none">
                         <span class="block font-tech font-black text-sm tracking-[0.16em] uppercase">DC <span class="text-dcRed dc-text-glow">Technology</span></span>
                         <span class="block mt-1.5 text-[9px] font-bold uppercase tracking-[0.3em] text-neutral-500">Administración</span>
@@ -203,7 +195,7 @@
             <!-- Barra superior (móvil) -->
             <header class="md:hidden sticky top-0 z-20 flex items-center justify-between gap-3 px-4 pt-[max(.75rem,env(safe-area-inset-top))] pb-3 bg-dcDarkBg/75 backdrop-blur-xl border-b border-white/10">
                 <div class="flex items-center gap-2.5">
-                    <svg class="dc-logo w-9 h-9" role="img" aria-label="DC Technology"><use href="#dc-isotipo"/></svg>
+                    <img src="img/logo-dc-192.png" alt="DC Technology" class="dc-logo w-9 h-9 rounded-lg object-cover shrink-0" width="36" height="36">
                     <span class="font-tech font-black text-xs tracking-[0.16em] uppercase">DC <span class="text-dcRed dc-text-glow">Technology</span></span>
                 </div>
                 <span data-indicador-vivo></span>

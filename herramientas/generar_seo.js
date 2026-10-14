@@ -14,7 +14,7 @@ const WA = require('../plantillas-whatsapp.js');
 
 const RAIZ = path.resolve(__dirname, '..');
 const SITIO = 'https://dctecnology.xyz';
-const LOGO = 'https://i.ibb.co/LDN4xyW0/Mesa-de-trabajo-1.png';
+const LOGO = 'https://dctecnology.xyz/img/logo-dc-192.png';
 const GARANTIA_DIAS = 30;
 const productos = JSON.parse(fs.readFileSync(path.join(RAIZ, 'productos.json'), 'utf8'));
 const SUPABASE_URL = 'https://vyqcizwfmjlflncdwzve.supabase.co';
@@ -31,12 +31,13 @@ async function cargarFormasDePago() {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         const metodos = await r.json();
         if (!metodos.length) return;
-        const locales = [...new Set(metodos.filter((m) => m.categoria !== 'cripto').map((m) => m.nombre || m.tipo))];
+        // Nombre del tipo (Nequi, Daviplata, Llave Bre-B), no el alias interno del panel ("Nequi DC")
+        const locales = [...new Set(metodos.filter((m) => m.categoria !== 'cripto').map((m) => WA.tipoPago(m.tipo)?.nombre || m.nombre || m.tipo))];
         const cripto = [...new Set(metodos.filter((m) => m.categoria === 'cripto').map((m) => (m.red && m.red !== 'BINANCE_PAY' ? `${m.moneda} ${m.red}` : m.nombre || m.tipo)))];
         const partes = [...locales.slice(0, 3), ...(cripto.length ? [`cripto (${cripto.slice(0, 3).join(', ')})`] : [])];
         PAGO = {
             texto: partes.length > 1 ? `${partes.slice(0, -1).join(', ')} o ${partes.at(-1)}` : partes[0],
-            chip: `💳 ${[...locales.slice(0, 2), ...(cripto.length ? ['Cripto'] : [])].join(' · ')}`,
+            chip: `💳 ${[...locales.slice(0, 3), ...(cripto.length ? ['Cripto'] : [])].join(' · ')}`,
         };
     } catch (error) {
         console.warn(`Formas de pago: se usa el texto genérico (${error.message}).`);
