@@ -283,8 +283,32 @@ function armarContexto() {
 function revisarRespuesta() {
     const cfg = $('Config bot').first().json;
     const msg = $('Normalizar mensaje').first().json;
-    const kb = __KB__;
+    // Catálogo, precios y plantillas EN VIVO desde el sitio (la copia embebida solo si el sitio no respondió)
+    const enVivo = $('Base de conocimiento').first().json;
+    const kb = enVivo && Array.isArray(enVivo.catalogo) && enVivo.plantillas ? enVivo : __KB__;
     let r = String($input.first().json.output ?? '').trim();
+    // Falla técnica de la IA (clave vencida, sin saldo, caída): el cliente recibe un mensaje de espera, su chat
+    // NO se pausa (si no, quedaría 12 h sin respuesta) y tú recibes la causa exacta, como máximo cada 30 min.
+    const errorIa = $input.first().json.error;
+    if (!r && errorIa) {
+        const memoria = $getWorkflowStaticData('global');
+        const ahora = Date.now();
+        const salida = [{ json: { numero: msg.numero, texto: 'Dame un momento 🙏 Tenemos una falla técnica pasajera; en breve te respondemos por aquí mismo.' } }];
+        const aviso = soloDigitos(cfg.numero_aviso_admin);
+        if (aviso && aviso !== msg.numero && ahora - (memoria.ultimaFallaIa || 0) > 30 * 60e3) {
+            memoria.ultimaFallaIa = ahora;
+            const causa = String(errorIa.message ?? errorIa).slice(0, 200);
+            salida.push({ json: { numero: aviso, texto: [
+                '⚠️ *La IA del bot no está respondiendo*',
+                `Causa: «${causa}»`,
+                /authori[sz]ation|401|api key|credential/i.test(causa)
+                    ? 'Revisa la clave de SiliconFlow (credencial "DC · SiliconFlow" en n8n): vencida, borrada o sin saldo.'
+                    : 'Revisa en n8n → Executions el nodo "Agente IA".',
+                'Mientras tanto los clientes reciben un mensaje de espera (sus chats no se pausan).',
+            ].join('\n') } });
+        }
+        return salida;
+    }
     const pedido = r.match(/^\[ESCALAR\]\s*(.*)$/is);
     if (!r || pedido) return escalar(msg, pedido ? pedido[1] || 'Escalado por el agente' : 'El agente no respondió', cfg, kb.plantillas);
 
