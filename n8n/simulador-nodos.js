@@ -95,12 +95,12 @@ const esImagen = Boolean(m.imageMessage);
 const esPdf = Boolean(m.documentMessage && /pdf|image/i.test(String(m.documentMessage.mimetype ?? '')));
 
 const memoria = $getWorkflowStaticData('global');
-for (const k of ['pausados', 'ritmo', 'resenas', 'menu', 'conversacion', 'esperandoPago', 'soporte']) memoria[k] = memoria[k] || {};
+for (const k of ['pausados', 'ritmo', 'resenas', 'menu', 'conversacion', 'esperandoPago', 'soporte', 'ia']) memoria[k] = memoria[k] || {};
 memoria.vistos = memoria.vistos || [];
 const ahora = Date.now();
 for (const [n, t] of Object.entries(memoria.pausados)) if (ahora - t > 12 * 3600e3) delete memoria.pausados[n];
 // Lo que el bot recuerda por número (menú, conversación, pago en curso, soporte) se borra a los 7 días
-for (const k of ['menu', 'conversacion', 'esperandoPago', 'soporte']) {
+for (const k of ['menu', 'conversacion', 'esperandoPago', 'soporte', 'ia']) {
     for (const [n, v] of Object.entries(memoria[k])) if (ahora - (typeof v === 'number' ? v : v?.t ?? 0) > 7 * 864e5) delete memoria[k][n];
 }
 for (const k of ['ritmo', 'ritmoIa']) for (const [n, v] of Object.entries(memoria[k] || {})) if (!(v || []).some((t) => ahora - t < 60e3)) delete memoria[k][n];
@@ -287,7 +287,7 @@ if (!r && errorIa) {
         'O escribe *asesor* para hablar con una persona.',
     ].join('\n') } }];
     const aviso = soloDigitos(cfg.numero_aviso_admin);
-    if (aviso && ahora - (memoria.ultimaFallaIa || 0) > 30 * 60e3) {
+    if (aviso && aviso !== msg.numero && ahora - (memoria.ultimaFallaIa || 0) > 30 * 60e3) {
         memoria.ultimaFallaIa = ahora;
         const causa = String(errorIa.message ?? errorIa).slice(0, 200);
         salida.push({ json: { numero: aviso, texto: [
@@ -412,6 +412,8 @@ r = r
 memoria.conversacion = memoria.conversacion || {};
 memoria.esperandoPago = memoria.esperandoPago || {};
 memoria.conversacion[msg.numero] = Date.now();
+memoria.ia = memoria.ia || {};
+memoria.ia[msg.numero] = Date.now();
 const datosPago = $('Metodos de pago').all().flatMap((i) => [i.json?.numero_cuenta, i.json?.url_pago])
     .map((v) => String(v ?? '').trim()).filter((v) => v.length >= 4);
 if (digital || combo || datosPago.some((v) => r.includes(v))) memoria.esperandoPago[msg.numero] = Date.now();

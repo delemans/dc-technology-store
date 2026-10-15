@@ -156,12 +156,12 @@ function normalizarMensaje() {
     const esPdf = Boolean(m.documentMessage && /pdf|image/i.test(String(m.documentMessage.mimetype ?? '')));
 
     const memoria = $getWorkflowStaticData('global');
-    for (const k of ['pausados', 'ritmo', 'resenas', 'menu', 'conversacion', 'esperandoPago', 'soporte']) memoria[k] = memoria[k] || {};
+    for (const k of ['pausados', 'ritmo', 'resenas', 'menu', 'conversacion', 'esperandoPago', 'soporte', 'ia']) memoria[k] = memoria[k] || {};
     memoria.vistos = memoria.vistos || [];
     const ahora = Date.now();
     for (const [n, t] of Object.entries(memoria.pausados)) if (ahora - t > __HORAS_PAUSA__ * 3600e3) delete memoria.pausados[n];
     // Lo que el bot recuerda por número (menú, conversación, pago en curso, soporte) se borra a los 7 días
-    for (const k of ['menu', 'conversacion', 'esperandoPago', 'soporte']) {
+    for (const k of ['menu', 'conversacion', 'esperandoPago', 'soporte', 'ia']) {
         for (const [n, v] of Object.entries(memoria[k])) if (ahora - (typeof v === 'number' ? v : v?.t ?? 0) > 7 * 864e5) delete memoria[k][n];
     }
     for (const k of ['ritmo', 'ritmoIa']) for (const [n, v] of Object.entries(memoria[k] || {})) if (!(v || []).some((t) => ahora - t < 60e3)) delete memoria[k][n];
@@ -323,7 +323,9 @@ function comprobanteRecibido() {
 // ("Quiero Netflix Premium 4K – Pantalla Colombia 26 días") para confirmar el total y cobrar.
 function responderMenu() {
     const msg = $('Normalizar mensaje').first().json;
-    if (msg.ruta !== 'menu' || !msg.menu) return [{ json: { via: 'ia', numero: msg.numero } }];
+    // Texto corto que no es del menú ("netflix", "mouse gamer"): se busca en el catálogo sin IA (ver más abajo)
+    const buscable = msg.ruta === 'ia' && msg.texto && String(msg.texto).trim().split(/\s+/).length <= 5;
+    if ((msg.ruta !== 'menu' || !msg.menu) && !buscable) return [{ json: { via: 'ia', numero: msg.numero } }];
     const enVivo = baseViva($('Base de conocimiento').first().json);
     const kbBase = enVivo && Array.isArray(enVivo.catalogo) && enVivo.menu ? enVivo : __KB__;
     const kb = { ...kbBase, catalogo: aplicarPrecios(kbBase.catalogo, preciosVivos()) }; // precios de la base, sin agotados
@@ -366,6 +368,7 @@ function responderMenu() {
         return /^[A-Za-zÁÉÍÓÚÑÜáéíóúñü]{2,15}$/.test(n) ? n[0].toUpperCase() + n.slice(1).toLowerCase() : '';
     })();
 
+    let pantallaBusqueda = null;
     const pantalla = (id) => {
         if (id === 'catalogo') {
             return { lineas: [T.catalogo, T.elige_categoria, '', ...categorias.map((c, i) => `${tecla(i)} ${c.emoji} ${c.titulo} · ${c.productos.length}`),
@@ -454,15 +457,40 @@ function responderMenu() {
                 '', ...M.pagos.pasos,
             ] : [M.pagos.sin_metodos]), '', T.volver_menu], opciones: [], atras: 'principal' };
         }
+        if (id === 'buscar' && pantallaBusqueda) return pantallaBusqueda;
         // Menú principal
         return { lineas: [
-            msg.menu.saludo ? M.principal.saludo.replace('{nombre}', primerNombre ? `, ${primerNombre}` : '') : M.principal.titulo,
-            msg.menu.saludo ? M.principal.lema : null,
+            msg.menu?.saludo ? M.principal.saludo.replace('{nombre}', primerNombre ? `, ${primerNombre}` : '') : M.principal.titulo,
+            msg.menu?.saludo ? M.principal.lema : null,
             '', M.principal.pregunta, ...M.principal.opciones.map((o, i) => `${tecla(i)} ${o.texto}`), '', M.principal.pie,
         ], opciones: M.principal.opciones.map((o) => o.id), atras: null };
     };
 
-    let ir = String(msg.menu.ir || 'principal');
+    // Búsqueda sin IA (WO-042): todas las palabras útiles del cliente deben estar en el nombre del producto. Si hubo
+    // charla con la IA hace menos de 10 min, el texto es parte de esa charla ("disney" en medio de un combo) y no se busca.
+    let destinoBusqueda = null;
+    if (msg.ruta !== 'menu') {
+        const VACIAS = new Set(['quiero', 'precio', 'precios', 'cuanto', 'cuesta', 'vale', 'valor', 'tienen', 'tiene', 'hay', 'venden',
+            'busco', 'necesito', 'comprar', 'para', 'una', 'uno', 'unos', 'unas', 'los', 'las', 'del', 'con', 'por', 'favor', 'info',
+            'informacion', 'sobre', 'hola', 'buenas', 'buenos', 'dias', 'tardes', 'noches', 'que', 'como', 'cual', 'disponible', 'producto']);
+        const palabras = normalizar(msg.texto).replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter((w) => w.length >= 3 && !VACIAS.has(w));
+        const iaReciente = ahora - ((memoria.ia || {})[numero] || 0) < 10 * 60e3;
+        const encontrados = palabras.length && !iaReciente ? catalogo.filter((p) => {
+            const n = normalizar(`${p.nombre} ${p.marca ?? ''}`);
+            return palabras.every((w) => n.includes(w) || (w.length > 4 && n.includes(w.replace(/(es|s)$/, ''))));
+        }) : [];
+        if (!encontrados.length) return [{ json: { via: 'ia', numero } }];
+        if (encontrados.length === 1) destinoBusqueda = `prod:${encontrados[0].id}`;
+        else {
+            destinoBusqueda = 'buscar';
+            const lista = encontrados.slice(0, 10);
+            pantallaBusqueda = { lineas: [`🔎 *Encontré ${encontrados.length} opciones para «${String(msg.texto).trim().slice(0, 40)}»*`, '',
+                ...lista.map((p, j) => `*${j + 1}.* ${p.nombre} · ${desde(p)}`), '',
+                encontrados.length > 10 ? `Te muestro 10 de ${encontrados.length}: escribe más detalle para afinar.` : T.elige_producto,
+                T.volver_menu], opciones: lista.map((p) => `prod:${p.id}`), atras: 'principal' };
+        }
+    }
+    let ir = String(destinoBusqueda ?? msg.menu?.ir ?? 'principal');
     // Eligió una opción de un producto: si es digital con precio, sigue la compra por el menú; si es físico, un
     // servicio o "a cotizar", pasa a una persona que coordina el envío o la cita
     if (ir.startsWith('elegir:')) {
@@ -588,7 +616,7 @@ function revisarRespuesta() {
             'O escribe *asesor* para hablar con una persona.',
         ].join('\n') } }];
         const aviso = soloDigitos(cfg.numero_aviso_admin);
-        if (aviso && ahora - (memoria.ultimaFallaIa || 0) > 30 * 60e3) {
+        if (aviso && aviso !== msg.numero && ahora - (memoria.ultimaFallaIa || 0) > 30 * 60e3) {
             memoria.ultimaFallaIa = ahora;
             const causa = String(errorIa.message ?? errorIa).slice(0, 200);
             salida.push({ json: { numero: aviso, texto: [
@@ -713,6 +741,8 @@ function revisarRespuesta() {
     memoria.conversacion = memoria.conversacion || {};
     memoria.esperandoPago = memoria.esperandoPago || {};
     memoria.conversacion[msg.numero] = Date.now();
+    memoria.ia = memoria.ia || {};
+    memoria.ia[msg.numero] = Date.now();
     const datosPago = $('Metodos de pago').all().flatMap((i) => [i.json?.numero_cuenta, i.json?.url_pago])
         .map((v) => String(v ?? '').trim()).filter((v) => v.length >= 4);
     if (digital || combo || datosPago.some((v) => r.includes(v))) memoria.esperandoPago[msg.numero] = Date.now();
