@@ -585,6 +585,7 @@ function armarContexto() {
         ...(base.flujo_digital ?? []).map((x) => `- ${x}`),
         ...(ultimoMenu ? ['', 'ÚLTIMO MENSAJE DEL MENÚ QUE VIO EL CLIENTE (la conversación ya empezó: no te presentes):', ultimoMenu.texto,
             ...(ultimoMenu.accion ? [`(Después: ${ultimoMenu.accion})`] : []), ''] : []),
+        'DATOS QUE NO TIENES: si el cliente pregunta algo que no está escrito en el catálogo, las FAQ o las reglas (diferencias técnicas entre planes, región, compatibilidad, calidad, dispositivos), NO lo supongas ni lo deduzcas del nombre. Di solo lo que dice el nombre del plan y ofrece confirmarlo con un asesor (escribe *asesor*).',
         'NO ES COMPRA: si el mensaje no es de un cliente de la tienda, responde EXACTAMENTE "[NO_COMPRA] <tema en pocas palabras>" y nada más (el dueño le contesta en persona). Ante la duda, atiéndelo como cliente.',
         'ESCALAMIENTO: si aplica cualquier disparador de escalamiento, responde EXACTAMENTE "[ESCALAR] <motivo breve>" y nada más.',
         'PEDIDO DIGITAL: cuando el cliente CONFIRME un producto digital del catálogo (streaming, licencias, pines o recargas) y su opción, agrega al FINAL de tu respuesta, en una línea aparte: [PEDIDO_DIGITAL] {"producto":"<nombre exacto del catálogo>","variante":"<opción exacta>"}. Una sola vez por pedido. El cliente no ve esa línea. Luego sigue con el pago normalmente.',

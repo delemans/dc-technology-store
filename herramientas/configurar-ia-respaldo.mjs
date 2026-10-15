@@ -26,28 +26,41 @@ const H = { Authorization: `Bearer ${CLAVE}`, 'Content-Type': 'application/json'
 const pista = (e) => (/CERT|SELF_SIGNED/i.test(String(e.cause?.code ?? e.cause ?? e)) ? 'certificado (Kaspersky): ejecuta con NODE_EXTRA_CA_CERTS' : String(e.cause?.code ?? e.message));
 
 console.log(`\n${APLICAR ? 'APLICAR' : 'PRUEBA (usa --aplicar para conectarla al bot)'} · ${URL_IA} · clave ${ocultar(CLAVE)}`);
+// Prueba un modelo con una respuesta corta: sirve si responde texto (algunos "piensan" y devuelven vacío)
+async function probarModelo(modelo) {
+    const t = Date.now();
+    const r = await fetch(`${URL_IA}/chat/completions`, { method: 'POST', headers: H, body: JSON.stringify({
+        model: modelo, max_tokens: 40, messages: [{ role: 'system', content: 'Eres el asistente de DC TECHNOLOGY.' }, { role: 'user', content: 'Responde solo: listo' }],
+    }) }).catch((e) => ({ ok: false, status: pista(e), json: async () => ({}) }));
+    const j = await r.json().catch(() => ({}));
+    const texto = String(j.choices?.[0]?.message?.content ?? '').trim();
+    return { ok: r.ok && Boolean(texto), ms: Date.now() - t, texto, motivo: r.ok ? 'respuesta vacía' : `HTTP ${r.status} ${String(j.error?.message ?? j[0]?.error?.message ?? j.message ?? '').slice(0, 120)}` };
+}
 let modelo = env.IA_RESPALDO_MODELO?.trim();
+let candidatos = modelo ? [modelo] : [];
 if (!modelo) {
     try {
         const r = await fetch(`${URL_IA}/models`, { headers: H });
         const j = await r.json().catch(() => ({}));
         if (!r.ok) throw new Error(`HTTP ${r.status} ${String(j.error?.message ?? j.message ?? '').slice(0, 120)}`);
         const ids = (j.data ?? []).map((m) => String(m.id).replace(/^models\//, ''));
-        // El "flash" más nuevo (rápido y con nivel gratuito), sin variantes de imagen, audio o vista previa
-        modelo = ids.filter((i) => /flash/i.test(i) && !/lite|image|tts|audio|live|exp|preview|thinking/i.test(i)).sort().reverse()[0] ?? ids[0];
-        console.log(`  ✔ clave válida · ${ids.length} modelos · elegido: ${modelo}`);
+        // Rápidos y con nivel gratuito: primero los "flash-lite" estables más nuevos, luego los "flash"; sin imagen, audio ni vista previa
+        const util = ids.filter((i) => /flash/i.test(i) && !/image|tts|audio|live|embed|omni|exp|thinking/i.test(i));
+        const peso = (i) => (/lite/i.test(i) ? 0 : 1) + (/preview|latest/i.test(i) ? 2 : 0);
+        candidatos = util.sort((a, b) => peso(a) - peso(b) || b.localeCompare(a, 'en', { numeric: true }));
+        console.log(`  ✔ clave válida · ${ids.length} modelos · pruebo: ${candidatos.slice(0, 6).join(', ')}`);
     } catch (e) {
         console.log(`  ✘ no pude listar modelos: ${e.message ?? pista(e)}. Escribe IA_RESPALDO_MODELO en .env.`);
         process.exit(1);
     }
 }
-const t = Date.now();
-const prueba = await fetch(`${URL_IA}/chat/completions`, { method: 'POST', headers: H, body: JSON.stringify({
-    model: modelo, max_tokens: 20, messages: [{ role: 'system', content: 'Eres el asistente de DC TECHNOLOGY.' }, { role: 'user', content: 'Responde solo: listo' }],
-}) }).catch((e) => ({ ok: false, status: pista(e), json: async () => ({}) }));
-const rj = await prueba.json().catch(() => ({}));
-console.log(`  ${prueba.ok ? '✔' : '✘'} ${modelo}: ${prueba.ok ? `responde «${String(rj.choices?.[0]?.message?.content ?? '').trim().slice(0, 40)}» en ${Date.now() - t} ms` : `HTTP ${prueba.status} ${String(rj.error?.message ?? rj.message ?? '').slice(0, 160)}`}`);
-if (!prueba.ok || !APLICAR) process.exit(prueba.ok ? 0 : 1);
+modelo = null;
+for (const c of candidatos.slice(0, 8)) {
+    const p = await probarModelo(c);
+    console.log(`  ${p.ok ? '✔' : '✘'} ${c}: ${p.ok ? `responde «${p.texto.slice(0, 30)}» en ${p.ms} ms` : p.motivo}`);
+    if (p.ok) { modelo = c; break; }
+}
+if (!modelo || !APLICAR) process.exit(modelo ? 0 : 1);
 
 requerir(env, ['N8N_URL', 'N8N_API_KEY']);
 const N8N = env.N8N_URL.replace(/\/+$/, '');
