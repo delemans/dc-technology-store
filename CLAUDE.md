@@ -33,7 +33,7 @@ wo-011 → 012 → 014 → 015 (o 015b) → 015a → 027 → 028 → 029 → 030
 - n8n en `localhost:5678` y Evolution API 2.3.7 en `localhost:8080` (`C:\evolution-api\evolution-api-main`), instancia `dc-bot`.
 - Kaspersky intercepta HTTPS: Node necesita `NODE_EXTRA_CA_CERTS=C:\evolution-api\kaspersky-ca.pem` (variable de máquina).
 - WhatsApp manda chats con `@lid`: el número real viene en `key.remoteJidAlt` / `senderPn`.
-- IA: SiliconFlow internacional (`api.siliconflow.com`). HTTP 402 = cuenta sin saldo (el menú sigue funcionando sin IA).
+- IA en cadena: SiliconFlow internacional (`api.siliconflow.com`; HTTP 402 = sin saldo) → "IA de respaldo" (Gemini u otra compatible con OpenAI; `herramientas/configurar-ia-respaldo.mjs` con `IA_RESPALDO_KEY` en .env; sube el Agente IA a v2.2 con needsFallback) → menú sin IA. `sincronizar-n8n` no toca ese nodo.
 - "Config posventa" copia todo de "Config bot" (antes tenía un túnel viejo y los avisos no salían).
 - Secretos solo en `.env` (ignorado por git). Nunca pedir ni usar la service_role de Supabase.
 

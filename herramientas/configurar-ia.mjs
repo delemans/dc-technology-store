@@ -86,7 +86,8 @@ const credencial = await api('/credentials', { method: 'POST', body: JSON.string
 const carpeta = path.join(RAIZ, 'n8n', 'respaldos');
 fs.mkdirSync(carpeta, { recursive: true });
 fs.writeFileSync(path.join(carpeta, `${vivo.id}-ia-${new Date().toISOString().replace(/[:.]/g, '-')}.json`), JSON.stringify(vivo, null, 2));
-const nodosIa = vivo.nodes.filter((n) => n.type === '@n8n/n8n-nodes-langchain.lmChatOpenAi');
+// El respaldo (configurar-ia-respaldo.mjs) tiene su propia clave y servidor: no se toca
+const nodosIa = vivo.nodes.filter((n) => n.type === '@n8n/n8n-nodes-langchain.lmChatOpenAi' && n.name !== 'IA de respaldo');
 for (const n of nodosIa) {
     n.credentials = { openAiApi: { id: String(credencial.id), name: credencial.name ?? nombre } };
     n.parameters.options = { ...(n.parameters.options ?? {}), baseURL: servidor.base };

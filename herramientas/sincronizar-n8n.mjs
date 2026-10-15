@@ -54,12 +54,16 @@ const sinIds = (v) => JSON.stringify(v, (k, x) => (k === 'id' ? undefined : x));
 const aristas = (conexiones) => Object.entries(conexiones ?? {}).flatMap(([desde, tipos]) => Object.entries(tipos ?? {})
     .flatMap(([tipo, salidas]) => (salidas ?? []).flatMap((s, i) => (s ?? []).map((c) => `${desde} [${tipo} ${i}] → ${c.node}`))));
 
+// Nodos que maneja otra herramienta (configurar-ia-respaldo.mjs): ni se agregan, ni se quitan, ni se reconectan
+const AJENOS = ['IA de respaldo'];
+generado.nodes = generado.nodes.filter((n) => !AJENOS.includes(n.name));
+for (const n of AJENOS) delete generado.connections[n];
 const porNombre = new Map(vivo.nodes.map((n) => [n.name, n]));
 const cambios = generado.nodes.filter((n) => n.type === 'n8n-nodes-base.code' && porNombre.has(n.name) && porNombre.get(n.name).parameters?.jsCode !== n.parameters.jsCode).map((n) => n.name);
 const faltan = generado.nodes.filter((n) => !porNombre.has(n.name));
 const agregables = faltan.filter((n) => SIN_CREDENCIALES.includes(n.type) && !n.credentials && (!tipoCredencial(n) || credencialViva(tipoCredencial(n))));
 const conCredenciales = faltan.filter((n) => !agregables.includes(n));
-const sobran = vivo.nodes.filter((n) => !generado.nodes.some((g) => g.name === n.name)).map((n) => n.name);
+const sobran = vivo.nodes.filter((n) => !AJENOS.includes(n.name) && !generado.nodes.some((g) => g.name === n.name)).map((n) => n.name);
 // Los nodos Set también se sincronizan (Config posventa copia de Config bot, los "Marcar …"), salvo Config bot: tus valores
 const NO_TOCAR = ['Config bot'];
 const sincronizable = (n) => CON_REGLAS.includes(n.type) || (n.type === 'n8n-nodes-base.set' && !NO_TOCAR.includes(n.name));
@@ -68,7 +72,7 @@ const reglas = generado.nodes.filter((n) => sincronizable(n) && porNombre.has(n.
 const configBot = porNombre.get('Config bot');
 const sin57 = (configBot?.parameters?.assignments?.assignments ?? [])
     .filter((a) => ['numero_aviso_admin', 'numero_proveedor', 'anc_whatsapp'].includes(a.name) && /^3\d{9}$/.test(String(a.value ?? '').replace(/\D/g, '')));
-const aristasVivo = new Set(aristas(vivo.connections));
+const aristasVivo = new Set(aristas(Object.fromEntries(Object.entries(vivo.connections ?? {}).filter(([k]) => !AJENOS.includes(k)))));
 const aristasGen = new Set(aristas(generado.connections));
 const nuevas = [...aristasGen].filter((a) => !aristasVivo.has(a));
 const quitadas = [...aristasVivo].filter((a) => !aristasGen.has(a));
@@ -104,7 +108,7 @@ if (estructura && puedeEstructura) {
         ...(tipoCredencial(n) ? { credentials: { [tipoCredencial(n)]: credencialViva(tipoCredencial(n)) } } : {}) }))];
     for (const nombre of reglas) porNombre.get(nombre).parameters = delGenerado(nombre).parameters;
     // Conexiones del flujo generado + las que salen de nodos propios de tu n8n (no hay: si las hubiera, no se llega aquí)
-    conexiones = generado.connections;
+    conexiones = { ...generado.connections, ...Object.fromEntries(Object.entries(vivo.connections ?? {}).filter(([k]) => AJENOS.includes(k))) };
 }
 const PERMITIDOS = ['saveExecutionProgress', 'saveManualExecutions', 'saveDataErrorExecution', 'saveDataSuccessExecution', 'executionTimeout', 'errorWorkflow', 'timezone', 'executionOrder'];
 await api(`/workflows/${vivo.id}`, { method: 'PUT', body: JSON.stringify({
