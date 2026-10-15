@@ -29,6 +29,7 @@ wo-011 → 012 → 014 → 015 (o 015b) → 015a → 027 → 028 → 029 → 030
 - `node generar_bot_conocimiento.js && node n8n/generar_flujo_n8n.js` tras cambiar prompt, FAQ o flujo; luego
   `node herramientas/sincronizar-n8n.mjs` (revisar) y `--aplicar` (código, nodos sin credenciales, conexiones, Set salvo Config bot, 57 en los números).
 - `node herramientas/comparar_ancpagos.mjs [--local]` compara precios con el proveedor.
+- `node herramientas/versionar.js` antes de cada push que cambie la web: pone ?v=<fecha> a estilos y scripts (si no, los navegadores muestran el diseño viejo hasta 10 min o más).
 
 ## Infraestructura local (PC de oficina)
 - n8n en `localhost:5678` y Evolution API 2.3.7 en `localhost:8080` (`C:\evolution-api\evolution-api-main`), instancia `dc-bot`.
