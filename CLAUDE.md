@@ -39,6 +39,7 @@ wo-011 → 012 → 014 → 015 (o 015b) → 015a → 027 → 028 → 029 → 030
 - Secretos solo en `.env` (ignorado por git). Nunca pedir ni usar la service_role de Supabase.
 
 ## Reglas de trabajo
-- Commits en local; `git push` solo cuando el director lo autoriza.
+- `git push` autorizado de forma permanente (15/10/2026) SIEMPRE que esté probado: pruebas en verde y diff revisado sin claves.
+  Si algo no se pudo probar, se deja en local y se avisa. Después del push, verificar que dctecnology.xyz quedó publicado.
 - Cero datos inventados (descuentos, reseñas, disponibilidad). Pagos validados por un humano.
 - Probar antes de entregar: PGlite para SQL, nodos Code del flujo con arnés, Chrome headless para la web.
