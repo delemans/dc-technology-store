@@ -293,7 +293,8 @@ async function aplicarPreciosBase(productos) {
     data.forEach((x) => porProducto.set(x.producto_id, [...(porProducto.get(x.producto_id) ?? []), x]));
     return productos.map((p) => {
         const base = porProducto.get(p.id);
-        if (!base) return p;
+        // Productos del proveedor (sincronizado): sin precio activo en la base = agotados o sin confirmar → no se muestran
+        if (!base) return p.sincronizado ? null : p;
         const variantes = (p.variantes ?? []).map((v) => {
             const b = base.find((x) => x.variante === v.nombre);
             return b ? { ...v, precio: Number(b.precio), precio_anterior: b.precio_anterior === null ? null : Number(b.precio_anterior) } : null;

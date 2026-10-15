@@ -62,8 +62,8 @@ export function normalizar(p, categorias) {
         slug: p.url ?? null,
         categoria_id: p.category_id ?? null,
         categoria: categorias.get(p.category_id) ?? null,
-        costo: Number(p.price_buy) || 0,
-        precio_sugerido: Number(p.price_sale) || 0,
+        costo: Math.round(Number(p.price_buy) || 0), // vienen con centavos (39899.99)
+        precio_sugerido: Math.round(Number(p.price_sale) || 0),
         precio_antes: Number(p.price_before) || null,
         stock: Number.isFinite(Number(p.quantity_available)) ? Number(p.quantity_available)
             : stockFilas.reduce((s, x) => s + (Number(x.quantity) || 0), 0),
@@ -228,8 +228,160 @@ export async function enriquecer(datos, { env, limite = Infinity, concurrencia =
     return { ...cuenta, pendientes: pendientes.length, fatal: fatal?.message ?? null };
 }
 
+/* ==================== Paso 3 · Precios y tienda ====================
+   Decisión del director (15/10/2026): solo TECNOLOGIA, precio = costo + 40 % (redondeado hacia arriba a $100),
+   réplicas excluidas. Sin precio "antes" (cero descuentos inventados).
+   - productos.json: los productos del proveedor van al final con id "er-<slug>" y "sincronizado": true (la tienda
+     los oculta si la base no les da un precio activo, p. ej. agotados). Los demás productos no se tocan (texto intacto).
+   - supabase/wo-041-emprendered.sql: crea sincronizar_proveedor() (solo service_role, la usa n8n en el paso 4) y la
+     ejecuta con este catálogo: precio, costo, stock y activo (stock > 0) por producto. Nunca usa la service_role desde aquí. */
+export const CATEGORIAS_IMPORTAR = ['TECNOLOGIA'];
+export const MARGEN_PCT = 40;
+export const REDONDEO = 100;
+export const precioVenta = (costo) => Math.ceil((Number(costo) * (1 + MARGEN_PCT / 100)) / REDONDEO) * REDONDEO;
+
+const SIGLAS = new Set(['usb', 'led', 'hd', 'tv', 'anc', 'bt', 'rgb', 'otg', 'sd', 'aux', 'ac', 'dc', 'ipx4', 'ipx5', 'ipx7', 'ip67', 'ip68', 'pd', 'qc', 'gb', 'tws', 'fm', 'lcd', 'uv']);
+// "CARGADOR CON CABLE ORIGINAL YOOKIE 20W RAPIDO" → "Cargador con Cable Original Yookie 20W Rapido"
+// Réplicas declaradas en el nombre ("1.1", "réplica"…): no se importan, aunque estén en TECNOLOGIA
+export const NOMBRE_REPLICA = /\b1[.:]1\b|r[eé]plica|\bclon|\bcopia\b|\baaa\b|tipo original/i;
+export function nombreBonito(nombre) {
+    const menores = new Set(['de', 'del', 'la', 'el', 'y', 'con', 'para', 'en', 'a', 'por', 'sin', 'o', 'x']);
+    let base = String(nombre).replace(/\s+/g, ' ').trim();
+    // "AirPods" es marca de Apple: los audífonos genéricos se nombran por lo que son (y sin "original")
+    if (/air\s?pods?/i.test(base)) base = base.replace(/\boriginal(es)?\b/gi, ' ').replace(/air\s?pods?/gi, 'Audífonos Inalámbricos').replace(/\s+/g, ' ').trim();
+    return base.toLowerCase().split(' ').map((w, i) => {
+        if (/^\d+(?:[.,]\d+)?mah$/.test(w)) return w.replace('mah', 'mAh');
+        if (w === 'mah') return 'mAh';
+        if (/^\d+(ra|da|ta|ro|do|to|va|vo|na|no)$/.test(w)) return w; // 2da, 3ra
+        if (w === 'audífonos' || w === 'inalámbricos') return w.charAt(0).toUpperCase() + w.slice(1);
+        if (SIGLAS.has(w) || /\d/.test(w)) return w.toUpperCase();
+        if (i > 0 && menores.has(w)) return w;
+        return w.charAt(0).toUpperCase() + w.slice(1);
+    }).join(' ');
+}
+export const idDc = (p) => `er-${String(p.slug || p.nombre).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 140)}-${p.id}`;
+
+export function productosTienda(datos) {
+    return datos.productos
+        .filter((p) => p.activo && p.stock > 0 && p.costo > 0 && CATEGORIAS_IMPORTAR.includes(p.categoria) && !EXCLUIR_CATEGORIAS.includes(p.categoria) && !NOMBRE_REPLICA.test(p.nombre))
+        .map((p) => ({
+            id: idDc(p),
+            tipo: 'tecnologia',
+            marca: 'DC Technology',
+            nombre: nombreBonito(p.nombre),
+            imagen: p.imagenes[0],
+            descripcion: p.descripcion_dc ?? (limpiarHtml(p.descripcion) || (p.descripcion_corta ? `<p>${p.descripcion_corta}</p>` : '')),
+            variantes: [{ nombre: 'Unidad', precio: precioVenta(p.costo), precio_anterior: null }],
+            sincronizado: true,
+            _proveedor: { id: p.id, ref: p.referencia, costo: p.costo, stock: p.stock },
+        }));
+}
+
+// productos.json conserva su formato: se reemplaza solo el bloque de productos "er-" (al final del arreglo)
+export function escribirProductosJson(ruta, nuevos) {
+    const crudo = fs.readFileSync(ruta, 'utf8');
+    const eol = crudo.includes('\r\n') ? '\r\n' : '\n';
+    const texto = crudo.replace(/\r\n/g, '\n');
+    // Recorta cada objeto de primer nivel del arreglo respetando cadenas
+    const objetos = [];
+    for (let i = texto.indexOf('[') + 1, prof = 0, inicio = -1, cad = false; i < texto.length; i++) {
+        const c = texto[i];
+        if (cad) { if (c === '\\') i++; else if (c === '"') cad = false; continue; }
+        if (c === '"') cad = true;
+        else if (c === '{') { if (prof++ === 0) inicio = i; }
+        else if (c === '}' && --prof === 0) objetos.push(texto.slice(inicio, i + 1));
+    }
+    const propios = objetos.filter((o) => !JSON.parse(o).id?.startsWith('er-'));
+    const inline = (o) => `{ ${Object.entries(o).map(([k, v]) => `${JSON.stringify(k)}: ${JSON.stringify(v)}`).join(', ')} }`;
+    const formato = (p) => `{\n${Object.entries(p).filter(([k]) => !k.startsWith('_'))
+        .map(([k, v]) => `    ${JSON.stringify(k)}: ${k === 'variantes' ? `[ ${v.map(inline).join(', ')} ]` : JSON.stringify(v)}`).join(',\n')}\n  }`;
+    const salida = `[\n${[...propios, ...nuevos.map(formato)].map((o) => `  ${o}`).join(',\n')}\n]\n`;
+    JSON.parse(salida); // nunca se escribe un archivo roto
+    fs.writeFileSync(ruta, salida.replace(/\n/g, eol));
+    return { propios: propios.length, proveedor: nuevos.length };
+}
+
+const sqlTexto = (v) => `'${String(v).replace(/'/g, "''")}'`;
+export function generarSql(nuevos, leidoAt) {
+    const items = nuevos.map((p) => ({ producto_id: p.id, variante: 'Unidad', producto: p.nombre, tipo: 'tecnologia',
+        costo: p._proveedor.costo, precio: p.variantes[0].precio, stock: p._proveedor.stock, ref: p._proveedor.ref ?? String(p._proveedor.id) }));
+    return `-- =====================================================================
+-- WO-041 · Productos de Emprende Red (dropshipping) en catalogo_precios: precio, costo y stock
+-- Generado por herramientas/sincronizar-emprendered.mjs el ${new Date().toISOString()} con el catálogo leído el ${leidoAt}.
+-- No editar a mano: volver a generar. Ejecutar en Supabase → SQL Editor. Es idempotente.
+-- Regla: precio = costo + ${MARGEN_PCT} % redondeado a $${REDONDEO}; activo solo si hay stock. Solo toca filas de este proveedor.
+-- n8n usa la misma función cada día (paso 4) con su credencial de servidor.
+-- =====================================================================
+
+do $$
+begin
+    if to_regclass('public.catalogo_precios') is null then
+        raise exception 'Nada se aplicó. Falta public.catalogo_precios: aplica antes supabase/wo-032-fase3.sql.';
+    end if;
+end;
+$$;
+
+alter table public.catalogo_precios
+    add column if not exists costo_proveedor    bigint check (costo_proveedor is null or costo_proveedor >= 0),
+    add column if not exists plan_proveedor     text,
+    add column if not exists costo_proveedor_at timestamptz,
+    add column if not exists proveedor          text,
+    add column if not exists stock_proveedor    integer;
+
+-- p_items: [{producto_id, variante, producto, tipo, costo, precio, stock, ref}]. Lo que el proveedor ya no trae queda inactivo.
+create or replace function public.sincronizar_proveedor(p_proveedor text, p_items jsonb)
+returns table (insertados integer, actualizados integer, inactivados integer)
+language plpgsql
+volatile
+security definer
+set search_path = ''
+as $$
+declare
+    v_ins integer := 0; v_act integer := 0; v_inact integer := 0;
+    v_nuevo boolean;
+    i jsonb;
+begin
+    if p_proveedor is null or p_items is null or jsonb_typeof(p_items) <> 'array' then
+        raise exception 'Datos no válidos';
+    end if;
+    for i in select * from jsonb_array_elements(p_items) loop
+        insert into public.catalogo_precios as c (producto_id, variante, producto, tipo, precio, precio_anterior, activo,
+                costo_proveedor, plan_proveedor, costo_proveedor_at, proveedor, stock_proveedor, updated_at)
+        values (i->>'producto_id', i->>'variante', i->>'producto', i->>'tipo', round((i->>'precio')::numeric)::bigint, null,
+                coalesce(round((i->>'stock')::numeric)::integer, 0) > 0, round((i->>'costo')::numeric)::bigint, p_proveedor || ' ' || coalesce(i->>'ref', ''),
+                now(), p_proveedor, coalesce(round((i->>'stock')::numeric)::integer, 0), now())
+        on conflict (producto_id, variante) do update
+            set producto = excluded.producto, precio = excluded.precio, activo = excluded.activo,
+                costo_proveedor = excluded.costo_proveedor, plan_proveedor = excluded.plan_proveedor,
+                costo_proveedor_at = now(), proveedor = excluded.proveedor, stock_proveedor = excluded.stock_proveedor,
+                updated_at = now()
+            where c.proveedor = p_proveedor  -- nunca pisa productos propios ni de ANC con el mismo id
+        returning (xmax = 0) into v_nuevo;
+        if v_nuevo then v_ins := v_ins + 1; elsif v_nuevo is not null then v_act := v_act + 1; end if;
+        v_nuevo := null;
+    end loop;
+    update public.catalogo_precios c set activo = false, stock_proveedor = 0, updated_at = now()
+     where c.proveedor = p_proveedor and c.activo
+       and not exists (select 1 from jsonb_array_elements(p_items) x where x->>'producto_id' = c.producto_id and x->>'variante' = c.variante);
+    get diagnostics v_inact = row_count;
+    return query select v_ins, v_act, v_inact;
+end;
+$$;
+revoke all on function public.sincronizar_proveedor(text, jsonb) from public, anon, authenticated;
+grant execute on function public.sincronizar_proveedor(text, jsonb) to service_role;
+
+select * from public.sincronizar_proveedor('emprendered', ${sqlTexto(JSON.stringify(items))}::jsonb);
+
+-- Verificación: debe dar ${items.length} filas de Emprende Red, ${items.filter((x) => x.stock > 0).length} activas
+select count(*) as filas, count(*) filter (where activo) as activas, min(precio) as precio_min, max(precio) as precio_max
+  from public.catalogo_precios where proveedor = 'emprendered';
+`;
+}
+
 // Solo al ejecutarlo directo (los pasos siguientes lo importan para usar leerEmprendeRed)
 //   --ia [--limite N]   también reescribe las descripciones (paso 2)
+//   --tienda            agrega los productos a productos.json y genera supabase/wo-041-emprendered.sql (paso 3)
 if (process.argv[1] && fileURLToPath(import.meta.url).toLowerCase() === process.argv[1].replace(/\//g, '\\').toLowerCase()) {
     const datos = await leerEmprendeRed({ alAvanzar: (pg, n) => process.stdout.write(`\r  leyendo página ${pg} · ${n} productos…`) });
     process.stdout.write('\r' + ' '.repeat(50) + '\r');
@@ -243,6 +395,17 @@ if (process.argv[1] && fileURLToPath(import.meta.url).toLowerCase() === process.
         const r = await enriquecer(datos, { env, limite: i > 0 ? Number(process.argv[i + 1]) : Infinity });
         console.log(`\nIA: ${r.nuevos} reescritas · ${r.rechazados} rechazadas por la validación (queda el texto del proveedor) · ${r.errores} errores · ${r.pendientes} sin hacer`);
         if (r.fatal) console.log(`✘ ${r.fatal}`);
+    }
+    if (process.argv.includes('--tienda')) {
+        if (!process.argv.includes('--ia')) await enriquecer(datos, { llamar: async () => { throw Object.assign(new Error('sin IA'), { fatal: true }); } }); // solo caché
+        const nuevos = productosTienda(datos);
+        const r = escribirProductosJson('productos.json', nuevos);
+        fs.writeFileSync('supabase/wo-041-emprendered.sql', generarSql(nuevos, datos.leido_at));
+        console.log(`\nTienda: ${r.proveedor} productos de Emprende Red (${CATEGORIAS_IMPORTAR.join(', ')}, con stock) + ${r.propios} propios en productos.json`);
+        const replicas = datos.productos.filter((p) => CATEGORIAS_IMPORTAR.includes(p.categoria) && NOMBRE_REPLICA.test(p.nombre));
+        if (replicas.length) console.log(`  excluidas por ser réplicas declaradas (${replicas.length}): ${replicas.map((p) => p.nombre).join(' | ')}`);
+        console.log(`  precios: costo + ${MARGEN_PCT} % · ${nuevos.filter((p) => datos.productos.find((x) => idDc(x) === p.id)?.texto_ia).length} con texto de IA`);
+        console.log('  SQL: supabase/wo-041-emprendered.sql → ejecútalo en Supabase y luego: npm run seo && node generar_bot_conocimiento.js');
     }
     const salida = process.argv.slice(2).find((a) => a.endsWith('.json')) ?? SALIDA;
     fs.mkdirSync(salida.replace(/[/\\][^/\\]+$/, ''), { recursive: true });

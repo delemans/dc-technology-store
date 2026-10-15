@@ -43,7 +43,12 @@ const vivo = await api(`/workflows/${resumen.id}`);
 
 // Nodos que se pueden agregar sin credenciales y nodos cuyas reglas se comparan (los ids internos de las reglas cambian
 // en cada generación, por eso se comparan sin ellos)
-const SIN_CREDENCIALES = ['n8n-nodes-base.code', 'n8n-nodes-base.switch', 'n8n-nodes-base.if', 'n8n-nodes-base.set', 'n8n-nodes-base.noOp', 'n8n-nodes-base.merge'];
+const SIN_CREDENCIALES = ['n8n-nodes-base.code', 'n8n-nodes-base.switch', 'n8n-nodes-base.if', 'n8n-nodes-base.set', 'n8n-nodes-base.noOp', 'n8n-nodes-base.merge', 'n8n-nodes-base.scheduleTrigger', 'n8n-nodes-base.httpRequest'];
+// Un nodo HTTP nuevo que usa una credencial (Supabase, Evolution) toma la MISMA credencial que ya usan tus otros nodos:
+// solo se copia la referencia (id y nombre), nunca el secreto
+const tipoCredencial = (n) => (n.parameters?.authentication === 'predefinedCredentialType' ? n.parameters.nodeCredentialType
+    : n.parameters?.authentication === 'genericCredentialType' ? n.parameters.genericAuthType : null);
+const credencialViva = (tipo) => (tipo ? vivo.nodes.find((x) => x.credentials?.[tipo])?.credentials[tipo] ?? null : null);
 const CON_REGLAS = ['n8n-nodes-base.switch', 'n8n-nodes-base.if'];
 const sinIds = (v) => JSON.stringify(v, (k, x) => (k === 'id' ? undefined : x));
 const aristas = (conexiones) => Object.entries(conexiones ?? {}).flatMap(([desde, tipos]) => Object.entries(tipos ?? {})
@@ -52,7 +57,7 @@ const aristas = (conexiones) => Object.entries(conexiones ?? {}).flatMap(([desde
 const porNombre = new Map(vivo.nodes.map((n) => [n.name, n]));
 const cambios = generado.nodes.filter((n) => n.type === 'n8n-nodes-base.code' && porNombre.has(n.name) && porNombre.get(n.name).parameters?.jsCode !== n.parameters.jsCode).map((n) => n.name);
 const faltan = generado.nodes.filter((n) => !porNombre.has(n.name));
-const agregables = faltan.filter((n) => SIN_CREDENCIALES.includes(n.type) && !n.credentials);
+const agregables = faltan.filter((n) => SIN_CREDENCIALES.includes(n.type) && !n.credentials && (!tipoCredencial(n) || credencialViva(tipoCredencial(n))));
 const conCredenciales = faltan.filter((n) => !agregables.includes(n));
 const sobran = vivo.nodes.filter((n) => !generado.nodes.some((g) => g.name === n.name)).map((n) => n.name);
 // Los nodos Set también se sincronizan (Config posventa copia de Config bot, los "Marcar …"), salvo Config bot: tus valores
@@ -74,7 +79,7 @@ const puedeEstructura = !conCredenciales.length && !tocaPropios.length;
 
 console.log(`\n${APLICAR ? 'APLICAR' : 'REVISIÓN (usa --aplicar para escribir)'} · ${N8N} · flujo "${vivo.name}" (${vivo.active ? 'activo' : 'INACTIVO'}, ${vivo.nodes.length} nodos)`);
 console.log(`  nodos con código nuevo: ${cambios.length ? cambios.join(', ') : 'ninguno (ya está al día)'}`);
-if (agregables.length) console.log(`  nodos nuevos que se agregan: ${agregables.map((n) => n.name).join(', ')}`);
+if (agregables.length) console.log(`  nodos nuevos que se agregan: ${agregables.map((n) => n.name + (tipoCredencial(n) ? ` (credencial ${credencialViva(tipoCredencial(n)).name})` : '')).join(', ')}`);
 if (reglas.length) console.log(`  nodos Switch/IF/Set que cambian: ${reglas.join(', ')}`);
 if (sin57.length) console.log(`  Config bot: números sin el 57 que se corrigen: ${sin57.map((a) => `${a.name} ${a.value} → 57${String(a.value).replace(/\D/g, '')}`).join(', ')}`);
 if (nuevas.length) console.log(`  conexiones nuevas:\n    ${nuevas.join('\n    ')}`);
@@ -95,7 +100,8 @@ let nodos = vivo.nodes;
 let conexiones = vivo.connections;
 if (estructura && puedeEstructura) {
     const idsVivos = new Set(vivo.nodes.map((n) => n.id));
-    nodos = [...vivo.nodes, ...agregables.map((n) => ({ ...n, id: idsVivos.has(n.id) ? crypto.randomUUID() : n.id }))];
+    nodos = [...vivo.nodes, ...agregables.map((n) => ({ ...n, id: idsVivos.has(n.id) ? crypto.randomUUID() : n.id,
+        ...(tipoCredencial(n) ? { credentials: { [tipoCredencial(n)]: credencialViva(tipoCredencial(n)) } } : {}) }))];
     for (const nombre of reglas) porNombre.get(nombre).parameters = delGenerado(nombre).parameters;
     // Conexiones del flujo generado + las que salen de nodos propios de tu n8n (no hay: si las hubiera, no se llega aquí)
     conexiones = generado.connections;

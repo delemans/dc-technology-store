@@ -16,11 +16,12 @@ Contexto de negocio e invariantes: `CONTEXT.md`. Responder siempre en español.
 | Menú del bot (WO-040) | Nodo "Responder menú": catálogo, compra (plan → medio de pago → datos), soporte, pagos y Mis pedidos SIN IA. Lo que no es compra → `[NO_COMPRA]`: el bot no contesta y avisa al director |
 | Flujo n8n | `n8n/generar_flujo_n8n.js` → `n8n/flujo_bot_dctechnology.json` + `n8n/simulador-nodos.js` (no editar los generados) |
 | SQL Supabase | `supabase/wo-*.sql` (idempotentes, con verificación previa "Nada se aplicó…") |
+| Proveedor Emprende Red (WO-041) | `herramientas/sincronizar-emprendered.mjs` [--ia] [--tienda]: catálogo de catalogovirtual.co → productos `er-*` en `productos.json` (solo TECNOLOGIA, costo + 40 %, sin réplicas) + `supabase/wo-041-emprendered.sql`. n8n actualiza costo, precio y stock cada 6 h con `sincronizar_proveedor()`. El bot y la tienda usan los precios de la base (`precios_publicos`) |
 | Logo | `img/logo-dc-192.png` (encabezados, favicon) y `img/logo-dc-512.png` (redes, apple-touch) |
 | Herramientas | `herramientas/`: `sincronizar-n8n.mjs` (lleva el flujo al n8n en vivo), `configurar-ia.mjs`, `configurar-n8n.js`, `configurar-evolution.js`, `iniciar-bot.ps1`, `comparar_ancpagos.mjs`, `nombres_ancpagos.mjs`, `generar_seo.js` |
 
 ## Orden de los SQL
-wo-011 → 012 → 014 → 015 (o 015b) → 015a → 027 → 028 → 029 → 030 → 024 → 026 → 031 → 032 → 033 → 034 (→ 034b tras publicar) → 035 → 036 → 037.
+wo-011 → 012 → 014 → 015 (o 015b) → 015a → 027 → 028 → 029 → 030 → 024 → 026 → 031 → 032 → 033 → 034 (→ 034b tras publicar) → 035 → 036 → 037 → 038 → 041 (Emprende Red; se regenera con el script).
 
 ## Comandos
 - `npm run css` tras cambiar clases (Tailwind compilado); `npm run seo` tras cambiar `productos.json`.

@@ -42,7 +42,7 @@ const kbEmbebida = {
     plantillas: kb.plantillas,
     notificaciones: { plantilla_por_tipo: kb.notificaciones.plantilla_por_tipo },
     menu: kb.menu,
-    catalogo: kb.catalogo.map(({ id, nombre, tipo, url, variantes }) => ({ id, nombre, tipo, url, variantes: variantes.map(({ nombre: n, precio }) => ({ nombre: n, precio })) })),
+    catalogo: kb.catalogo.map(({ id, nombre, tipo, url, variantes, sincronizado }) => ({ id, nombre, tipo, url, ...(sincronizado ? { sincronizado } : {}), variantes: variantes.map(({ nombre: n, precio }) => ({ nombre: n, precio })) })),
 };
 // Nombre visible de cada tipo de método de pago (NEQUI → Nequi, LLAVE_BREB → Llave Bre-B) para el menú
 const nombresPago = Object.fromEntries(WA.TIPOS_PAGO.map((t) => [t.tipo, t.nombre]));
@@ -98,6 +98,23 @@ function utilidades() {
     const montoCripto = __MONTO_CRIPTO__;
     // Base de conocimiento leída de la web: si el nodo HTTP quedó con "respuesta completa" (headers + body), viene en body
     const baseViva = (j) => (j && !j.plantillas && j.body && typeof j.body === 'object' ? j.body : j);
+    // Precios vigentes de la base (precios_publicos, igual que la tienda): reemplazan los del catálogo; un producto de
+    // proveedor (sincronizado) sin precio activo está agotado y no se ofrece. Sin datos de la base, queda el catálogo.
+    const aplicarPrecios = (catalogo, filas) => {
+        if (!Array.isArray(filas) || !filas.length) return catalogo ?? [];
+        const por = new Map();
+        for (const f of filas) por.set(f.producto_id, [...(por.get(f.producto_id) ?? []), f]);
+        return (catalogo ?? []).map((p) => {
+            const b = por.get(p.id);
+            if (!b) return p.sincronizado ? null : p;
+            const variantes = (p.variantes ?? []).map((v) => {
+                const x = b.find((y) => y.variante === v.nombre);
+                return x ? { ...v, precio: Number(x.precio) } : null;
+            }).filter(Boolean);
+            return variantes.length ? { ...p, variantes } : null;
+        }).filter(Boolean);
+    };
+    const preciosVivos = () => { try { return $('Precios vivos').all().map((i) => i.json).filter((x) => x && x.producto_id); } catch { return []; } };
     const cop = (v) => `$${Number(v || 0).toLocaleString('es-CO')}`;
     // Triangulación: termina el pedido. El error va a la salida de error del nodo → "Cerrar triangulación"
     const terminar = (estado, avisoAdmin, avisoCliente) => {
@@ -308,7 +325,8 @@ function responderMenu() {
     const msg = $('Normalizar mensaje').first().json;
     if (msg.ruta !== 'menu' || !msg.menu) return [{ json: { via: 'ia', numero: msg.numero } }];
     const enVivo = baseViva($('Base de conocimiento').first().json);
-    const kb = enVivo && Array.isArray(enVivo.catalogo) && enVivo.menu ? enVivo : __KB__;
+    const kbBase = enVivo && Array.isArray(enVivo.catalogo) && enVivo.menu ? enVivo : __KB__;
+    const kb = { ...kbBase, catalogo: aplicarPrecios(kbBase.catalogo, preciosVivos()) }; // precios de la base, sin agotados
     const M = kb.menu;
     const T = M.textos;
     const memoria = $getWorkflowStaticData('global');
@@ -316,6 +334,7 @@ function responderMenu() {
     const ahora = Date.now();
     const numero = msg.numero;
     const DIGITALES = ['streaming', 'licencias', 'pines', 'recargas'];
+    const POR_PAGINA = 10;
     const NOMBRES_PAGO = __NOMBRES_PAGO__;
     const ETIQUETA_PAGO = { NEQUI: 'Número', DAVIPLATA: 'Número', LLAVE_BREB: 'Llave', BANCOLOMBIA: 'Cuenta', TRANSFERENCIA: 'Cuenta', PSE: 'Enlace', ENLACE: 'Enlace', PAYPAL: 'PayPal' };
     const nombreMetodo = (x) => (x.categoria === 'cripto' ? `${x.moneda ?? x.tipo} (${x.red})` : NOMBRES_PAGO[x.tipo] ?? x.banco_alias ?? x.tipo);
@@ -352,11 +371,22 @@ function responderMenu() {
             return { lineas: [T.catalogo, T.elige_categoria, '', ...categorias.map((c, i) => `${tecla(i)} ${c.emoji} ${c.titulo} · ${c.productos.length}`),
                 ...(lineaCombos ? ['', lineaCombos] : []), '', T.volver_menu, T.web], opciones: categorias.map((c) => `cat:${c.tipos[0]}`), atras: 'principal' };
         }
+        // Categoría en páginas de 10 (WhatsApp corta los mensajes muy largos): "cat:tecnologia:2"
         if (id.startsWith('cat:')) {
-            const c = categorias.find((x) => x.tipos[0] === id.slice(4));
+            const [, tipo, pag] = /^cat:([^:]+)(?::(\d+))?$/.exec(id) ?? [];
+            const c = categorias.find((x) => x.tipos[0] === tipo);
             if (!c) return pantalla('catalogo');
-            return { lineas: [`${c.emoji} *${c.titulo}*`, '', ...c.productos.map((p, j) => `*${j + 1}.* ${p.nombre} · ${desde(p)}`), '', T.elige_producto, T.volver_catalogo],
-                opciones: c.productos.map((p) => `prod:${p.id}`), atras: 'catalogo' };
+            const total = Math.ceil(c.productos.length / POR_PAGINA);
+            const n = Math.min(Math.max(Number(pag) || 1, 1), total);
+            const lista = c.productos.slice((n - 1) * POR_PAGINA, n * POR_PAGINA);
+            const hayMas = n < total;
+            return { lineas: [`${c.emoji} *${c.titulo}*${total > 1 ? ` · página ${n} de ${total}` : ''}`, '',
+                ...lista.map((p, j) => `*${j + 1}.* ${p.nombre} · ${desde(p)}`),
+                ...(hayMas ? [`*${lista.length + 1}.* ➡️ Ver más productos`] : []), '',
+                total > 1 ? `${T.elige_producto} También puedes escribir lo que buscas.` : T.elige_producto,
+                n > 1 ? '0️⃣ Página anterior' : T.volver_catalogo],
+            opciones: [...lista.map((p) => `prod:${p.id}`), ...(hayMas ? [`cat:${tipo}:${n + 1}`] : [])],
+            atras: n > 1 ? `cat:${tipo}:${n - 1}` : 'catalogo' };
         }
         if (id.startsWith('prod:')) {
             const p = catalogo.find((x) => String(x.id) === id.slice(5));
@@ -364,7 +394,8 @@ function responderMenu() {
             const c = categorias.find((x) => x.tipos.includes(p.tipo));
             return { lineas: [`${c ? c.emoji : '🛍️'} *${p.nombre}*`, '', ...(p.variantes ?? []).map((v, j) => `*${j + 1}.* ${v.nombre}: *${precio(v.precio)}*`), '',
                 DIGITALES.includes(p.tipo) ? T.elige_opcion_digital : T.elige_opcion_fisico, p.url ? `${T.ver_web} ${p.url}` : null, T.volver_lista],
-            opciones: (p.variantes ?? []).map((v, j) => `elegir:${p.id}:${j}`), atras: c ? `cat:${c.tipos[0]}` : 'catalogo' };
+            opciones: (p.variantes ?? []).map((v, j) => `elegir:${p.id}:${j}`),
+            atras: c ? `cat:${c.tipos[0]}:${Math.floor(c.productos.indexOf(p) / POR_PAGINA) + 1}` : 'catalogo' };
         }
         // Compra sin IA: resumen del pedido y medios de pago (los locales activos, agrupados por nombre) + la web
         if (id.startsWith('pedir:')) {
@@ -470,7 +501,8 @@ function armarContexto() {
     const estadoMenu = ($getWorkflowStaticData('global').menu || {})[msg.numero];
     const ultimoMenu = estadoMenu && Date.now() - estadoMenu.t < 30 * 60e3 ? estadoMenu : null;
     const enVivo = baseViva($('Base de conocimiento').first().json);
-    const base = enVivo && enVivo.prompt_sistema && enVivo.plantillas ? enVivo : __KB__;
+    const base0 = enVivo && enVivo.prompt_sistema && enVivo.plantillas ? enVivo : __KB__;
+    const base = { ...base0, catalogo: aplicarPrecios(base0.catalogo, preciosVivos()) }; // la IA cotiza con los precios de la base
     const cuentas = $('Metodos de pago').all().map((i) => i.json).filter((m) => m && (m.numero_cuenta || m.url_pago));
     const linea = (c) => {
         if (c.categoria !== 'cripto') {
@@ -540,7 +572,8 @@ function revisarRespuesta() {
     const msg = $('Normalizar mensaje').first().json;
     // Catálogo, precios y plantillas EN VIVO desde el sitio (la copia embebida solo si el sitio no respondió)
     const enVivo = baseViva($('Base de conocimiento').first().json);
-    const kb = enVivo && Array.isArray(enVivo.catalogo) && enVivo.plantillas ? enVivo : __KB__;
+    const kbBase = enVivo && Array.isArray(enVivo.catalogo) && enVivo.plantillas ? enVivo : __KB__;
+    const kb = { ...kbBase, catalogo: aplicarPrecios(kbBase.catalogo, preciosVivos()) }; // pedidos con el precio de la base
     let r = String($input.first().json.output ?? '').trim();
     const memoria = $getWorkflowStaticData('global');
     // Falla técnica de la IA (clave vencida, sin saldo, caída): el cliente recibe un mensaje de espera, su chat
@@ -1430,6 +1463,86 @@ function enrutarEvento() {
     return [{ json: { accion: 'reanudar', url: t.resume_url, cuerpo: { tipo: t.esperando === 'COTIZACION' ? 'cotizacion' : 'credenciales', texto: msg.texto, wamid: msg.wamid } } }];
 }
 
+/* ---------- F) Proveedor Emprende Red (WO-041 · paso 4): precio y stock cada 6 horas ----------
+   Mismas reglas que herramientas/sincronizar-emprendered.mjs (id "er-<slug>-<id>", costo + margen redondeado a $100,
+   réplicas fuera). Solo actualiza productos que YA están en la tienda; los nuevos se agregan con el script. */
+
+// F1 · Lee todo el catálogo (Inertia: primera página en el HTML, las demás en JSON) y arma precio y stock
+async function leerProveedor() {
+    const cfg = $('Config bot').first().json;
+    const base = String(cfg.emprendered_url || 'https://dctechnology.catalogovirtual.co').replace(/\/+$/, '');
+    const margen = Number(cfg.emprendered_margen) > 0 ? Number(cfg.emprendered_margen) : 40;
+    const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Safari/537.36';
+    const http = (opciones) => this.helpers.httpRequest({ timeout: 20000, ...opciones, headers: { 'User-Agent': UA, ...(opciones.headers ?? {}) } });
+    const html = String(await http({ url: `${base}/catalogo`, headers: { Accept: 'text/html' } }));
+    const bloque = /<script[^>]*data-page="app"[^>]*>([\s\S]*?)<\/script>/i.exec(html);
+    if (!bloque) throw new Error('la página del catálogo cambió de estructura');
+    const inicio = JSON.parse(bloque[1]);
+    const categorias = new Map((inicio.props?.categories ?? []).map((c) => [c.id, String(c.name ?? '').trim()]));
+    const productos = new Map((inicio.props?.products ?? []).map((p) => [p.id, p]));
+    let siguiente = inicio.props?.hasMore ? inicio.props.nextPage : null;
+    for (let n = 0; siguiente && n < 500; n++) {
+        const pg = await http({ url: `${base}/catalogo?page=${siguiente}`, json: true,
+            headers: { 'X-Inertia': 'true', 'X-Inertia-Version': inicio.version, 'X-Requested-With': 'XMLHttpRequest', Accept: 'text/html, application/xhtml+xml' } });
+        const datos = typeof pg === 'string' ? JSON.parse(pg) : pg;
+        for (const p of datos.props?.products ?? []) productos.set(p.id, p);
+        siguiente = datos.props?.hasMore ? datos.props.nextPage : null;
+    }
+    if (siguiente) throw new Error('el catálogo no terminó de cargar');
+    const idDc = (p) => `er-${String(p.url || p.name).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+        .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 140)}-${p.id}`;
+    const replica = /\b1[.:]1\b|r[eé]plica|\bclon|\bcopia\b|\baaa\b|tipo original/i;
+    // Productos de Emprende Red que ya están en la tienda: los de la base de conocimiento publicada (o la embebida)
+    let kbTienda = null;
+    try { kbTienda = baseViva(await http({ url: cfg.url_conocimiento, json: true })); } catch { kbTienda = null; }
+    const conProveedor = (c) => Array.isArray(c) && c.some((p) => String(p.id).startsWith('er-'));
+    const tienda = new Map((conProveedor(kbTienda?.catalogo) ? kbTienda.catalogo : __KB__.catalogo)
+        .filter((p) => String(p.id).startsWith('er-')).map((p) => [p.id, p]));
+    // Sin productos del proveedor en la tienda no se sincroniza: si no, todos quedarían agotados
+    if (!tienda.size) throw new Error('la tienda no tiene productos de Emprende Red (ejecuta el script con --tienda y publica)');
+    const items = [];
+    let nuevos = 0;
+    for (const p of productos.values()) {
+        const id = idDc(p);
+        const costo = Math.round(Number(p.price_buy) || 0);
+        const stock = Math.round(Number(p.quantity_available ?? (p.stock ?? []).reduce((s, x) => s + (Number(x.quantity) || 0), 0)) || 0);
+        const nuestro = tienda.get(id);
+        if (nuestro) {
+            items.push({ producto_id: id, variante: nuestro.variantes?.[0]?.nombre ?? 'Unidad', producto: nuestro.nombre, tipo: nuestro.tipo,
+                costo, precio: Math.ceil((costo * (1 + margen / 100)) / 100) * 100, stock: p.active && costo > 0 ? stock : 0, ref: String(p.reference ?? p.id) });
+        } else if (categorias.get(p.category_id) === 'TECNOLOGIA' && p.active && stock > 0 && !replica.test(String(p.name))) nuevos++;
+    }
+    // Si el proveedor devuelve muy pocos de los nuestros, algo falló: no se toca nada (si no, todo quedaría agotado)
+    if (tienda.size && items.length < tienda.size * 0.5) throw new Error(`solo encontré ${items.length} de ${tienda.size} productos de la tienda`);
+    return [{ json: { items, nuevos, leidos: productos.size, en_tienda: tienda.size } }];
+}
+
+// F2 · Resultado: te avisa si falló (máx. cada 6 h) y, una vez por semana, si hay productos nuevos para agregar
+function resultadoProveedor() {
+    const cfg = $('Config bot').first().json;
+    const lectura = $('Leer Emprende Red').first().json;
+    const r = $input.first().json;
+    const memoria = $getWorkflowStaticData('global');
+    const aviso = soloDigitos(cfg.numero_aviso_admin);
+    const ahora = Date.now();
+    const fallo = lectura.error
+        ? `No pude leer el catálogo: ${String(lectura.error.message ?? lectura.error).slice(0, 160)}`
+        : r.error ? `La base no aceptó los precios: ${String(r.error.message ?? r.error).slice(0, 160)} (¿aplicaste supabase/wo-041-emprendered.sql?)` : null;
+    memoria.proveedor = { at: new Date(ahora).toISOString(), fallo, leidos: lectura.leidos ?? 0, actualizados: r.actualizados ?? 0, agotados: r.inactivados ?? 0 };
+    const salida = [];
+    if (!aviso) return salida;
+    if (fallo && ahora - (memoria.avisoProveedor || 0) > 6 * 3600e3) {
+        memoria.avisoProveedor = ahora;
+        salida.push({ json: { numero: aviso, texto: ['⚠️ *Sincronización con Emprende Red*', fallo, 'Precios y stock quedan como estaban; reintento en 6 horas.'].join('\n') } });
+    }
+    if (!fallo && lectura.nuevos > 0 && ahora - (memoria.avisoNuevosProveedor || 0) > 7 * 864e5) {
+        memoria.avisoNuevosProveedor = ahora;
+        salida.push({ json: { numero: aviso, texto: [`🆕 *Emprende Red tiene ${lectura.nuevos} productos de tecnología nuevos con stock*`,
+            'Aún no están en tu tienda. Para agregarlos: node herramientas/sincronizar-emprendered.mjs --tienda (y publicar).'].join('\n') } });
+    }
+    return salida;
+}
+
 /* ==================== SERIALIZACIÓN ==================== */
 
 const cuerpo = (fn) => {
@@ -1548,6 +1661,11 @@ nodo('Reglas combo', 'n8n-nodes-base.httpRequest', 4.2, [1230, 300], supabaseRpc
     config: 'Config bot',
     body: '={{ JSON.stringify({}) }}',
 }), { onError: 'continueRegularOutput', alwaysOutputData: true, executeOnce: true });
+// WO-041: precios vigentes de la base (los mismos de la tienda) para el menú, la IA y la revisión de pedidos
+nodo('Precios vivos', 'n8n-nodes-base.httpRequest', 4.2, [1230, 620], supabaseRpc('precios_publicos', {
+    config: 'Config bot',
+    body: '={{ JSON.stringify({}) }}',
+}), { onError: 'continueRegularOutput', alwaysOutputData: true, executeOnce: true });
 // WO-040: menú con números sin IA. "¿Menú?" envía su respuesta directo; lo demás sigue a la IA
 nodoCodigo('Responder menú', [1120, 480], responderMenu, { conUtilidades: true });
 nodo('¿Menú?', 'n8n-nodes-base.switch', 3.2, [1340, 480], {
@@ -1619,7 +1737,7 @@ const terminal = { onError: 'continueErrorOutput' };
 
 // WO-033: entrada del despacho de órdenes web
 nodo('Origen', 'n8n-nodes-base.switch', 3.2, [330, 0], {
-    rules: { values: [regla('si', 'Despacho', 'despacho'), regla('si', 'ANC', 'revisar_anc'), regla('si', 'Posventa', 'posventa'), regla('si', 'Evolution', 'configurar_evolution')] },
+    rules: { values: [regla('si', 'Despacho', 'despacho'), regla('si', 'ANC', 'revisar_anc'), regla('si', 'Posventa', 'posventa'), regla('si', 'Evolution', 'configurar_evolution'), regla('si', 'Proveedor', 'sincronizar_proveedor')] },
     options: { fallbackOutput: 'extra', renameFallbackOutput: 'WhatsApp' },
 });
 nodo('Órdenes por despachar', 'n8n-nodes-base.httpRequest', 4.2, [1780, 440], rpcPanel('tomar_despachos', '={{ JSON.stringify({}) }}'), { onError: 'continueRegularOutput' });
@@ -1847,6 +1965,15 @@ nodo('Latido bot', 'n8n-nodes-base.httpRequest', 4.2, [440, -160], rpcPanel('reg
 { onError: 'continueRegularOutput' });
 nodo('Latido ANC', 'n8n-nodes-base.httpRequest', 4.2, [440, 460], rpcPanel('registrar_latido', '={{ JSON.stringify({ p_rama: "anc" }) }}'), { onError: 'continueRegularOutput', alwaysOutputData: true });
 
+/* ---------- F) Emprende Red cada 6 horas (WO-041): costo, precio y stock en catalogo_precios ---------- */
+nodo('Proveedor cada 6 horas', 'n8n-nodes-base.scheduleTrigger', 1.2, [-220, 1000], { rule: { interval: [{ field: 'hours', hoursInterval: 6 }] } });
+nodo('Marcar proveedor', 'n8n-nodes-base.set', 3.4, [0, 1000], set({ sincronizar_proveedor: 'si' }));
+nodoCodigo('Leer Emprende Red', [440, 1000], leerProveedor, { conUtilidades: true }, { onError: 'continueRegularOutput' });
+nodo('Sincronizar precios proveedor', 'n8n-nodes-base.httpRequest', 4.2, [660, 1000],
+    rpcPanel('sincronizar_proveedor', "={{ JSON.stringify({ p_proveedor: 'emprendered', p_items: $json.items }) }}"),
+    { onError: 'continueRegularOutput', alwaysOutputData: true });
+nodoCodigo('Resultado proveedor', [880, 1000], resultadoProveedor, { conUtilidades: true });
+
 /* ---------- E) Configurar Evolution (WO-038): botón manual ---------- */
 nodo('Configurar Evolution', 'n8n-nodes-base.manualTrigger', 1, [-220, -480], {});
 nodo('Marcar configuración Evolution', 'n8n-nodes-base.set', 3.4, [0, -480], set({ configurar_evolution: 'si' }));
@@ -1955,10 +2082,16 @@ unir('Origen', 'Latido ANC', 1);
 unir('Latido ANC', 'Pedidos ANC esperando');
 unir('Origen', 'Config posventa', 2);
 unir('Origen', 'Webhook Evolution v2', 3);
-unir('Origen', 'Normalizar mensaje', 4);
-unir('Origen', 'Latido bot', 4);
+unir('Origen', 'Leer Emprende Red', 4);
+unir('Origen', 'Normalizar mensaje', 5);
+unir('Origen', 'Latido bot', 5);
 unir('Configurar Evolution', 'Marcar configuración Evolution');
 unir('Marcar configuración Evolution', 'Config bot');
+unir('Proveedor cada 6 horas', 'Marcar proveedor');
+unir('Marcar proveedor', 'Config bot');
+unir('Leer Emprende Red', 'Sincronizar precios proveedor');
+unir('Sincronizar precios proveedor', 'Resultado proveedor');
+unir('Resultado proveedor', 'Enviar respuesta');
 unir('Webhook Evolution v2', 'Webhook Evolution v1');
 unir('Webhook Evolution v1', 'Leer webhook de Evolution');
 unir('Leer webhook de Evolution', 'Resultado Evolution');
@@ -1985,7 +2118,8 @@ unir('Respuesta fija', 'Enviar respuesta');
 unir('Escalar a asesor', 'Enviar respuesta');
 unir('Base de conocimiento', 'Metodos de pago');
 unir('Metodos de pago', 'Reglas combo');
-unir('Reglas combo', 'Responder menú');
+unir('Reglas combo', 'Precios vivos');
+unir('Precios vivos', 'Responder menú');
 unir('Responder menú', '¿Menú?');
 unir('¿Menú?', 'Enviar respuesta', 0);
 unir('¿Menú?', 'Crear triangulación', 0);         // compra por el menú: arranca el pedido al proveedor
@@ -2077,7 +2211,9 @@ for (const [desde, tipos] of Object.entries(conexiones)) {
         if (!nombres.has(c.node)) throw new Error(`Conexión hacia nodo inexistente: ${c.node}`);
     }
 }
-for (const n of nodos.filter((x) => x.type === 'n8n-nodes-base.code')) new Function('$', '$input', '$getWorkflowStaticData', n.parameters.jsCode);
+// Los nodos Code de n8n corren como funciones async (pueden usar await): se validan igual
+const FuncionAsync = Object.getPrototypeOf(async () => {}).constructor;
+for (const n of nodos.filter((x) => x.type === 'n8n-nodes-base.code')) new FuncionAsync('$', '$input', '$getWorkflowStaticData', n.parameters.jsCode);
 
 const flujo = {
     name: 'DC Technology · Bot WhatsApp + Posventa',
@@ -2110,4 +2246,4 @@ fs.writeFileSync(path.join(__dirname, 'simulador-nodos.js'), [
 ].join('\n'), 'utf8');
 console.log(`Flujo generado: ${path.relative(RAIZ, SALIDA)} · ${nodos.length} nodos · modelo ${MODELO}`);
 
-module.exports = { comprobanteRecibido, responderMenu, normalizarMensaje, rutaAsesor, respuestaFija, armarContexto, revisarRespuesta, armarNotificacion, recordarResena, utilidades, kbEmbebida };
+module.exports = { comprobanteRecibido, responderMenu, leerProveedor, resultadoProveedor, normalizarMensaje, rutaAsesor, respuestaFija, armarContexto, revisarRespuesta, armarNotificacion, recordarResena, utilidades, kbEmbebida };

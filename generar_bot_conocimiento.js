@@ -35,6 +35,8 @@ const catalogo = productos.map((p) => ({
     imagen: p.imagen,
     url: `${URL_TIENDA}/p/${p.id}.html`,
     variantes: (p.variantes ?? []).map((v) => ({ nombre: v.nombre, precio: v.precio, precio_anterior: v.precio_anterior ?? null })),
+    // Producto de proveedor (Emprende Red): sin precio activo en la base = agotado → el bot no lo ofrece
+    ...(p.sincronizado ? { sincronizado: true } : {}),
     desde: Math.min(...(p.variantes ?? []).map((v) => v.precio).filter(Number.isFinite)),
     descripcion: textoPlano(p.descripcion).slice(0, 600) || null,
 }));

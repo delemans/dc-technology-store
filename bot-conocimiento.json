@@ -1,5 +1,5 @@
 {
-  "version": "2026-10-14T18:58:55.645Z",
+  "version": "2026-10-15T12:29:16.063Z",
   "identidad": [
     "Eres DC TECHNOLOGY: respondes el WhatsApp de la tienda (https://dctecnology.xyz) en nombre del equipo. Habla como la tienda (\"te ayudamos\", \"te enviamos\").",
     "En el PRIMER mensaje de la conversación saluda así: \"¡Hola! Te saluda *DC TECHNOLOGY* 👋\", responde lo que preguntó y cierra con: \"Escribe *menú* para ver todas las opciones.\" Después no vuelvas a presentarte (si el contexto trae un mensaje del menú, la conversación ya empezó).",
@@ -2153,6 +2153,3102 @@
       ],
       "desde": 0,
       "descripcion": null
+    },
+    {
+      "id": "er-cargador-con-cable-original-yookie-20w-rapido-2",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Cargador con Cable Original Yookie 20W Rapido",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/7-caragor-con-cable-original-yookie-20w-rapido-2.webp",
+      "url": "https://dctecnology.xyz/p/er-cargador-con-cable-original-yookie-20w-rapido-2.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 22400,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 22400,
+      "descripcion": "¡Olvídate de esperar! Carga tus dispositivos a la velocidad de la luz con el CARAGOR YOOKIE 20W. Potencia original para tu vida digital. ¿Listo para experimentar la carga rápida definitiva? ¡No te quedes atrás!"
+    },
+    {
+      "id": "er-power-bank-20000-mah-display-4-cables-3",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Power Bank 20.000 mAh Display / 4 Cables",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/13-power-bank-20-000-mah-display-4-cables-1-1cd1afb2.webp",
+      "url": "https://dctecnology.xyz/p/er-power-bank-20000-mah-display-4-cables-3.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 47400,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 47400,
+      "descripcion": "Capacidad de 20.000 mAhDisplay indicador de carga4 cables integrados y luz LED"
+    },
+    {
+      "id": "er-anc-airpods-pantalla-tactil-5",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "ANC Audífonos Inalámbricos Pantalla Tactil",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/36-b74ba385-413c-41af-8c9d-be23ef20dfba.webp",
+      "url": "https://dctecnology.xyz/p/er-anc-airpods-pantalla-tactil-5.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 53200,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 53200,
+      "descripcion": "Audífonos inalámbricos con cancelación activa y ambiental de ruido (ANC/ENC), modo sonido ambiente, control táctil y estuche con pantalla que muestra batería y hora. Sonido nítido, llamadas claras y diseño cómodo con almohadillas de silicona.GARANTIA DE 2 MESES"
+    },
+    {
+      "id": "er-lamparas-usb-led-07-6",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Lamparas USB LED-07",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/37-whatsapp-image-2026-03-04-at-30247-pm.webp",
+      "url": "https://dctecnology.xyz/p/er-lamparas-usb-led-07-6.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 8700,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 8700,
+      "descripcion": "Convierte cualquier espacio en una fiesta con esta mini luz disco USB. Su potente iluminaci&oacute;n multicolor proyecta efectos de luces vibrantes que llenan la habitaci&oacute;n, el carro o cualquier lugar con un ambiente divertido y &uacute;nico.\r\n\r\nGracias a su cuello flexible, puedes ajustar f&aacute;cilmente la direcci&oacute;n de la luz para lograr el efecto que desees. Solo debes conectarla a un puerto USB y comenzar&aacute; a iluminar al instante.\r\n\r\nCaracter&iacute;sticas:\n\r\n&bull; Luces LED multicolores con efecto disco\n\r\n&bull; Conexi&oacute;n USB compatible con carros, computadore"
+    },
+    {
+      "id": "er-cargador-iphone-lightning-original-yookie-kl02-7",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Cargador Iphone Lightning Original Yookie KL02",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/38-whatsapp-image-2026-04-09-at-124114-pm.webp",
+      "url": "https://dctecnology.xyz/p/er-cargador-iphone-lightning-original-yookie-kl02-7.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 23100,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 23100,
+      "descripcion": "25W POWER ADAPTERGARANTIA 30 DIASPRODUCTO IMPORTADO DE CALIDAD"
+    },
+    {
+      "id": "er-smart-wacht-gus-16-10",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Smart Wacht GUS-16",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/43-smart-wacht-gus-16-1-e865b0d6.webp",
+      "url": "https://dctecnology.xyz/p/er-smart-wacht-gus-16-10.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 41900,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 41900,
+      "descripcion": "Función Contestar llamadas, Cargador magnético, Material aleación de zinc, Control de presión arterial + 2 pulso. Compatible con Android y iphone"
+    },
+    {
+      "id": "er-game-retro-400-juegos-2-jugadores-16",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Game Retro 400 Juegos (2) Jugadores",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/89-retro-sup-game-console-handheld-mini-500-classical-video-game-controller.webp",
+      "url": "https://dctecnology.xyz/p/er-game-retro-400-juegos-2-jugadores-16.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 40500,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 40500,
+      "descripcion": "1 CONTROL SE PUEDE JUGAR 2 PERSONAS AL MISMO TIEMPOCARGA PORTATILVIENE CON BANANAS PARA CONECTAR AL TV400 JUEGOS DISPONIBLES RETROEL PREFERIDO DE LOS CLIENTES"
+    },
+    {
+      "id": "er-power-bank-inalambrico-iphone-grande-10-000mah-18",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Power Bank Inalambrico Iphone Grande 10. 000mAh",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/101-power-bank-inalambrico-iphone-grande-10-000mah-1-407577e7.webp",
+      "url": "https://dctecnology.xyz/p/er-power-bank-inalambrico-iphone-grande-10-000mah-18.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 37800,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 37800,
+      "descripcion": "🔋📱 Mantén tu iPhone con energía de forma práctica con este power bank inalámbrico de 10.000 mAh. Su formato grande ofrece una solución cómoda para llevar energía adicional contigo.\r\n⚡️ Características destacadas:\r\n• Capacidad de 10.000 mAh: proporciona energía adicional para tu dispositivo.\r\n• Carga inalámbrica: permite cargar dispositivos compatibles sin necesidad de cable.\r\n• Diseño grande: ofrece una presentación práctica para el uso diario."
+    },
+    {
+      "id": "er-mouse-gamer-3200-dpi-20",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Mouse Gamer 3200 Dpi",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/107-mouse-gamer.webp",
+      "url": "https://dctecnology.xyz/p/er-mouse-gamer-3200-dpi-20.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 37100,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 37100,
+      "descripcion": "DescripciónMOUSE PARA JUEGOS ,DISEÑO DE ILUMINACION\nDISEÑO ERGONOMICO\nSOPORTA MOTOR OPTICO 1600/2400/3200 DPI\nSOPORTE DE OPERACION DEL SISTEMA /WINDOWS/2000/XP/ VISTA7 WINDOWS 7\n\nGarantía del vendedor: 3 meses"
+    },
+    {
+      "id": "er-bafle-koleer-original-21",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Bafle Koleer Original",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/110-1-opt.webp",
+      "url": "https://dctecnology.xyz/p/er-bafle-koleer-original-21.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 37100,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 37100,
+      "descripcion": null
+    },
+    {
+      "id": "er-lampara-usb-led-18-22",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Lampara USB LED-18",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/115-whatsapp-image-2026-03-04-at-33448-pm.webp",
+      "url": "https://dctecnology.xyz/p/er-lampara-usb-led-18-22.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 2300,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 2300,
+      "descripcion": "Ilumina cualquier espacio de forma pr&aacute;ctica con esta mini l&aacute;mpara nocturna USB. Su dise&ntilde;o compacto permite conectarla f&aacute;cilmente a computadores, cargadores, power bank o puertos USB, brindando una luz suave y agradable ideal para la noche.\r\n\r\nEs perfecta para leer, trabajar con el port&aacute;til, iluminar el cuarto o usarla como luz ambiental sin ocupar espacio. Solo con&eacute;ctala y tendr&aacute;s iluminaci&oacute;n instant&aacute;nea.\r\n\r\nCaracter&iacute;sticas:\n\r\n&bull; Conexi&oacute;n USB universal\n\r\n&bull; Luz LED suave y eficiente\n\r\n&bull; Dise&ntilde;o comp"
+    },
+    {
+      "id": "er-cable-type-c-a-lightning-20w-29",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Cable Type-c a Lightning 20W",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/158-power-bank-10000-mah-con-cable-1-43221918.webp",
+      "url": "https://dctecnology.xyz/p/er-cable-type-c-a-lightning-20w-29.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 7300,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 7300,
+      "descripcion": "¡Olvídate de las esperas! Carga tu iPhone a la velocidad de la luz con nuestro cable Type-C a Lightning de 20W. Diseñado para la máxima potencia y durabilidad, conéctate y listo. ¿Quieres experimentar la carga rápida definitiva? ¡Descubre más ahora!"
+    },
+    {
+      "id": "er-power-bank-30000-mah-sin-cable-30",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Power Bank 30.000 mAh sin Cable",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/159-power-bank-10000-mah-sin-cable-1-f35f5c3c.webp",
+      "url": "https://dctecnology.xyz/p/er-power-bank-30000-mah-sin-cable-30.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 98000,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 98000,
+      "descripcion": "🔋 Características destacadas:Capacidad de 30.000 mAh.Luz solar LED integrada.Marca JIMZI, referencia JR 309."
+    },
+    {
+      "id": "er-reloj-inteligente-audifonos-39",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Reloj Inteligente + Audifonos",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/272-a26b035e-52f9-47bf-8217-22d41eaccb04.webp",
+      "url": "https://dctecnology.xyz/p/er-reloj-inteligente-audifonos-39.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 55900,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 55900,
+      "descripcion": "Reloj Inteligente D100 + Aud&iacute;fonos Inal&aacute;mbricos ????\n Caja de titanio 49mm\n Pantalla AMOLED de alta definici&oacute;n\n Incluye 2 correas intercambiables\n Conexi&oacute;n estable y r&aacute;pida Dise&ntilde;o moderno y elegante"
+    },
+    {
+      "id": "er-airpods-generacion-6-53",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Audífonos Inalámbricos Generacion 6",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/445-029568a8-97e9-4b28-ad16-aba90f7c79c9.webp",
+      "url": "https://dctecnology.xyz/p/er-airpods-generacion-6-53.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 57400,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 57400,
+      "descripcion": "DISEÑO DE AIRPODS DE SEGUNDA GENERAION"
+    },
+    {
+      "id": "er-set-de-labubu-54",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Set de Labubu",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/446-whatsapp-image-2026-02-20-at-91845-pm.webp",
+      "url": "https://dctecnology.xyz/p/er-set-de-labubu-54.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 37800,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 37800,
+      "descripcion": "Descubr&iacute; la combinaci&oacute;n perfecta para tu d&iacute;a a d&iacute;a con este exclusivo Set de Labubu. Ideal para quienes buscan tecnolog&iacute;a, estilo y funcionalidad en un solo paquete. Auriculares Labubu: Disfrut&aacute; de un sonido n&iacute;tido y envolvente con estos auriculares dise&ntilde;ados para ofrecer comodidad y calidad en cada uso. Perfectos para escuchar m&uacute;sica, atender llamadas o acompa&ntilde;arte en tus actividades diarias. Llavero funcional: Complementa tu set con un llavero pr&aacute;ctico y moderno, pensado para que lleves tus llaves siempre a mano con"
+    },
+    {
+      "id": "er-diadema-bluetooh-b31-56",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Diadema Bluetooh B31",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/468-781512d8-6b2f-4a7f-9ef4-31a1bda8cfd3.webp",
+      "url": "https://dctecnology.xyz/p/er-diadema-bluetooh-b31-56.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 49000,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 49000,
+      "descripcion": "&iexcl;Vive la m&uacute;sica con estilo y color! \n Conexi&oacute;n Bluetooth estable \n Luces RGB multicolor que brillan al ritmo \n Sonido potente con Extra Bass Dise&ntilde;o c&oacute;modo y ajustable Bater&iacute;a de larga duraci&oacute;N"
+    },
+    {
+      "id": "er-set-de-stitch-57",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Set de Stitch",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/471-whatsapp-image-2026-04-28-at-54818-pm.webp",
+      "url": "https://dctecnology.xyz/p/er-set-de-stitch-57.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 34900,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 34900,
+      "descripcion": "Descubrí la combinación perfecta para tu día a día con este exclusivo Set de SET DE STITCH . Ideal para quienes buscan tecnología, estilo y funcionalidad en un solo paquete.Auriculares Labubu: Disfrutá de un sonido nítido y envolvente con estos auriculares diseñados para ofrecer comodidad y calidad en cada uso. Perfectos para escuchar música, atender llamadas o acompañarte en tus actividades diarias.Reloj DIGITAL BASICOLlavero funcional: Complementa tu set con un llavero práctico y moderno, pensado para que lleves tus llaves siempre a mano con un diseño atractivo y resistente.Este set es una e"
+    },
+    {
+      "id": "er-airpods-bluetooh-es21-59",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Audífonos Inalámbricos Bluetooh ES21",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/514-22751b84-4898-4180-9e3b-785dec2d970e.webp",
+      "url": "https://dctecnology.xyz/p/er-airpods-bluetooh-es21-59.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 37800,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 37800,
+      "descripcion": "Est&eacute;reo verdaderamente inal&aacute;mbrico\n * Soluci&oacute;n Bluetooth: JL, modelo t&aacute;ctil\n * Tama&ntilde;o de la bocina: ?13,5 mm, anillo de lat&oacute;n de 32 &Omega;\n * Resistencia al agua: IPX grado 4\n * Micr&oacute;fono: Micr&oacute;fono original 2718\n * Bater&iacute;a de los auriculares: 30 mAh, placa IC plus\n * Bater&iacute;a principal: 200 mAh, placa protectora\n * Tiempo de carga de los auriculares: 1 h\n * Tiempo de carga de la bater&iacute;a principal: 1,5 h\n * Distancia de transmisi&oacute;n: &ge;10 m (sin barreras)\n * Tiempo de reproducci&oacute;n: 5-6 h\n * Puerto de ca"
+    },
+    {
+      "id": "er-power-bank-30000-mah-original-potente-60",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Power Bank 30.000 mAh Original Potente",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/517-0c90d5bb-a603-4af3-ac05-180e0bc0a8f6.webp",
+      "url": "https://dctecnology.xyz/p/er-power-bank-30000-mah-original-potente-60.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 125900,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 125900,
+      "descripcion": "Batería externa\n* Capacidad: 30000 mAh\n* Entrada Micro: 5 V = 2 A, 9 V = 2 A, 12 V = 1,5 A\n* Entrada Tipo C: 5 V = 2 A, 9 V = 2 A, 12 V = 1,5 A\n* Salida Tipo C: 5 V = 2,2 A, 9 V = 2 A, 12 V = 1,6 A\n* Salida USB: 4,5 V = 5 A, 5 V = 3 A, 9 V = 2 A, 12 V = 1,5 A"
+    },
+    {
+      "id": "er-mouse-m29-dpi-1600-61",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Mouse M29 Dpi 1600",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/518-b14cf836-c7c1-47c4-afbd-2b5e9778262b.webp",
+      "url": "https://dctecnology.xyz/p/er-mouse-m29-dpi-1600-61.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 12200,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 12200,
+      "descripcion": "Es un mouse óptico accesible, ideal para uso diario en oficinas, educación y entornos corporativos. Con diseño ergonómico, conexión USB alámbrica Plug &amp; Play y sensibilidad media, ofrece funcionamiento sencillo, confiable y sin fricciones para tareas cotidianas."
+    },
+    {
+      "id": "er-mouse-m30-depi-1600-62",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Mouse M30 Depi 1600",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/519-b2f621b4-957a-4306-a739-129ba155a1cc.webp",
+      "url": "https://dctecnology.xyz/p/er-mouse-m30-depi-1600-62.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 14000,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 14000,
+      "descripcion": "Es un mouse óptico accesible, ideal para uso diario en oficinas, educación y entornos corporativos. Con diseño ergonómico, conexión USB alámbrica Plug &amp; Play y sensibilidad media, ofrece funcionamiento sencillo, confiable y sin fricciones para tareas cotidianas"
+    },
+    {
+      "id": "er-mouse-inalambrico-hp-w10-63",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Mouse Inalambrico Hp W10",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/520-mouse-inalambrico-hp-w10-1-b3bd4ac1.webp",
+      "url": "https://dctecnology.xyz/p/er-mouse-inalambrico-hp-w10-63.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 21700,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 21700,
+      "descripcion": "Mouse óptico inalámbrico, elegante, compacto y confortable, con conexión estable de 2.4GHz que alcanza hasta 10metros. Incluye receptor nano desmontable, diseño plug &amp; play sin drivers y ciclo de vida de interruptores hasta de 5 millones de clics."
+    },
+    {
+      "id": "er-combo-teclado-inalambrico-64",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Combo Teclado Inalámbrico",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/521-daf63aea-26ad-4598-81d9-f11215131dce.webp",
+      "url": "https://dctecnology.xyz/p/er-combo-teclado-inalambrico-64.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 42000,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 42000,
+      "descripcion": "Es un kit inalámbrico que incluye teclado y mouse de diseño delgado y elegante, disponible en colores pastel como celeste, rosa, durazno y beige. Se destaca por su versatilidad y compatibilidad amplia, ideal para entornos de trabajo modernos, educación, oficinas y trabajo remoto"
+    },
+    {
+      "id": "er-soporte-para-moto-65",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Soporte para Moto",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/523-soporte-para-moto-6-2e6b18c4.webp",
+      "url": "https://dctecnology.xyz/p/er-soporte-para-moto-65.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 18500,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 18500,
+      "descripcion": "RESISTENTE AL AGUA"
+    },
+    {
+      "id": "er-parlante-karaoke-con-microfono-67",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Parlante Karaoke con Microfono",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/530-40b451dc-8418-4760-a167-d86ab4211319.webp",
+      "url": "https://dctecnology.xyz/p/er-parlante-karaoke-con-microfono-67.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 25900,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 25900,
+      "descripcion": "Convierte cualquier lugar en una fiesta con esta m&aacute;quina de karaoke Bluetooth 5.1 con micr&oacute;fono inal&aacute;mbrico y altavoz de 10W .\n Ideal para ni&ntilde;os y adultos, ofrece efectos de voz m&aacute;gicos (voz original, KTV, monstruo y beb&eacute;) y un sonido profesional con reducci&oacute;n de ruido DSP que hace brillar cada nota Con&eacute;ctala f&aacute;cil por Bluetooth, USB o tarjeta TF y disfruta donde quieras de un sonido potente, n&iacute;tido y lleno de diversi&oacute;n."
+    },
+    {
+      "id": "er-bombillo-parlante-led-rgb-69",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Bombillo Parlante LED RGB",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/544-b07f9cca-5b40-44f6-a730-c862cdd3dc00.webp",
+      "url": "https://dctecnology.xyz/p/er-bombillo-parlante-led-rgb-69.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 17500,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 17500,
+      "descripcion": null
+    },
+    {
+      "id": "er-diademas-bass-inalambricas-eb620-81",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Diademas Bass Inalambricas EB620",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/622-f07f46ec-034f-41de-a580-fa7e2336393a.webp",
+      "url": "https://dctecnology.xyz/p/er-diademas-bass-inalambricas-eb620-81.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 66500,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 66500,
+      "descripcion": "&bull;Versi&oacute;n: Bluetooth de doble modo V5.3+EDR\n &bull;Consumo de energ&iacute;a ultrabajo\n &bull;Rango de trabajo: alrededor de 10 m (sin interferencias)\n &bull;Tiempo de reproducci&oacute;n: 40H (50% de volumen)\n &bull;Tiempo de reproducci&oacute;n: 30H (100% de volumen)\n &bull;Tiempo de carga: alrededor de 2 horas\n &bull;Impedancia: 31&Omega;\n &bull;Altavoz: &Phi;40mm\n &bull;Capacidad de la bater&iacute;a del auricular: 350 mAh\n &bull;Material de la oreta: pl&aacute;stico\n &bull;Regalo: Cable de carga y cable de audio"
+    },
+    {
+      "id": "er-diademas-inalambricas-eb610-82",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Diademas Inalambricas EB610",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/623-7a3247b7-903b-4c2b-97bf-fd6fc9b3c346.webp",
+      "url": "https://dctecnology.xyz/p/er-diademas-inalambricas-eb610-82.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 63000,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 63000,
+      "descripcion": "•Versión: Bluetooth de doble modo V5.3+EDR\n•Consumo de energía ultrabajo\n•Rango de trabajo: alrededor de 10 m (sin interferencias)\n•Tiempo de reproducción: 40H (50% de volumen)\n•Tiempo de reproducción: 30H (100% de volumen)\n•Tiempo de carga: alrededor de 2 horas\n•Impedancia: 31Ω\n•Altavoz: Φ40mm\n•Capacidad de la batería del auricular: 350 mAh\n•Material de la oreta: plástico\n•Regalo: Cable de carga y cable de audio"
+    },
+    {
+      "id": "er-airpods-anc-enc-yw08-83",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Audífonos Inalámbricos ANC Enc YW08",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/624-61f866c2-b5fc-4257-b9f9-2aae0941b137.webp",
+      "url": "https://dctecnology.xyz/p/er-airpods-anc-enc-yw08-83.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 79600,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 79600,
+      "descripcion": "•Versión Bluetooth: V5.4\n•Tiempo De Reproducción De Música: 6H\n•Tiempo De Conversación: 6H\n•Tiempo de espera (estuche de carga): 180 días\n•Tiempo De Carga (Estuche De Carga): 1,5H\n•Profundidad de reducción de ruido: 37dB\n•Capacidad de la batería: 40mAh\n•Capacidad del estuche de carga: 530mAh\n•Tiempo De Carga (Auricular): 1H\n•Distancia de transmisión: 10 m\n•Potencia nominal: 25 mW"
+    },
+    {
+      "id": "er-airpods-manos-libres-tws-xg23-84",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Audífonos Inalámbricos Manos Libres TWS XG23",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/625-5d2b0e9f-e051-4897-a5f6-a526481f87f8.webp",
+      "url": "https://dctecnology.xyz/p/er-airpods-manos-libres-tws-xg23-84.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 67900,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 67900,
+      "descripcion": "Versión inalámbrica: V5.4\nRango de transmisión: 10M\nPotencia de transmisión: 2,402 GHz-2,480 GHz\nBatería del estuche de carga: 200mAh\nBatería de auriculares: 40 mAh\nTiempos de conversación: alrededor de 5H\nTiempo de música: alrededor de 6H\nVoltaje de carga: DC 5V"
+    },
+    {
+      "id": "er-porta-celular-x1-unidad-85",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Porta Celular X1 Unidad",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/632-porta-celular-x1-unidad-2-289e041a.webp",
+      "url": "https://dctecnology.xyz/p/er-porta-celular-x1-unidad-85.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 3500,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 3500,
+      "descripcion": "COLORES AL AZAR"
+    },
+    {
+      "id": "er-gafas-inteligentes-inalambricas-xg89-89",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Gafas Inteligentes Inalambricas XG89",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/690-e09a2bfb-d7f2-441c-a14e-73b9f186bab0.webp",
+      "url": "https://dctecnology.xyz/p/er-gafas-inteligentes-inalambricas-xg89-89.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 58800,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 58800,
+      "descripcion": "GARANTIA DE 6 MESESModelo de producto: XG89Entrada: CC 5V\nTiempo de espera: 120 horas\nTiempo de trabajo: Hasta 5 horas\nVersión inalámbrica: V6.0\nBatería para auriculares: 50 mAh\nTiempo de carga: 1 hora\nAlcance de funcionamiento: 10m"
+    },
+    {
+      "id": "er-lapiz-tactil-universal-91",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Lapiz Tactil Universal",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/709-eb94dfbc-b5b8-4584-9a78-771840488730.webp",
+      "url": "https://dctecnology.xyz/p/er-lapiz-tactil-universal-91.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 32900,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 32900,
+      "descripcion": "COMPATBLES PARA TABLETS"
+    },
+    {
+      "id": "er-aibimy-original-my212-waterproof-92",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Aibimy Original MY212 Waterproof",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/714-6fff3445-f929-4fc6-99b0-96869df09d26.webp",
+      "url": "https://dctecnology.xyz/p/er-aibimy-original-my212-waterproof-92.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 69300,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 69300,
+      "descripcion": "La conectividad Bluetooth 5.3 asegura que puedas reproducir tu música de forma inalámbrica desde cualquier dispositivo compatible. Además, su diseño portátil y su resistencia al agua IPX6 lo hacen ideal para llevarlo a la playa, a una reunión al aire libre o simplemente para disfrutar en tu sala o alcoba. La batería recargable proporciona hasta 4 horas de reproducción continua, con un tiempo de carga de solo 1 hora, lo que significa que siempre estará listo para la acción.La iluminación LED RGB añade un toque especial a tus fiestas o noches de relajación, creando un ambiente armonioso mientras"
+    },
+    {
+      "id": "er-original-cable-usb-a-tipo-c-30w-94",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Original Cable USB a Tipo C / 30W",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/766-845efbe9-6e5a-497a-82c6-600d3a7d98da.webp",
+      "url": "https://dctecnology.xyz/p/er-original-cable-usb-a-tipo-c-30w-94.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 4200,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 4200,
+      "descripcion": "* Potencia: 30 W m&aacute;x.\n\r\n* Material: TPE con n&uacute;cleo de alta calidad\n\r\n* Longitud: 1 m\n\r\n* Modelo compatible: Tipo C\n\r\n* Transmisi&oacute;n de datos\n\r\n* Carga estable"
+    },
+    {
+      "id": "er-original-cable-tipo-c-a-tipo-c-60w-carga-rapida-95",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Original Cable Tipo C a Tipo C 60W Carga Rapida",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/767-original-cable-tipo-c-a-tipo-c-60w-carga-rapida-2-d391a949.webp",
+      "url": "https://dctecnology.xyz/p/er-original-cable-tipo-c-a-tipo-c-60w-carga-rapida-95.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 11000,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 11000,
+      "descripcion": "¡Libera la potencia! Este cable Tipo-C a Tipo-C de 60W carga tus dispositivos a velocidad luz. Olvida las esperas y sumérgete en la acción. ¿Listo para la carga más rápida de tu vida? ¡Hazlo tuyo!"
+    },
+    {
+      "id": "er-gafas-bluetooh-recargable-98",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Gafas Bluetooh Recargable",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/802-d7e7ab8f-b84c-41ec-a06a-42f333497d24.webp",
+      "url": "https://dctecnology.xyz/p/er-gafas-bluetooh-recargable-98.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 33600,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 33600,
+      "descripcion": "Funci&oacute;n contestar llamadas, conexi&oacute;n inal&aacute;mbrica v5.0, controles y cancelaci&oacute;n de ruido, audio HD, compatible con Android y iPhone, cable de carga y led indicador de carga."
+    },
+    {
+      "id": "er-teclado-tv-original-99",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Teclado TV Original",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/806-teclado-tv-original-3-bf79cc3f.webp",
+      "url": "https://dctecnology.xyz/p/er-teclado-tv-original-99.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 23700,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 23700,
+      "descripcion": "Mini teclado mouse t&aacute;ctil Inal&aacute;mbrico Iluminado Smart Tv Xbox Tablet. Cuenta con 92teclas, teclado inal&aacute;mbrico con touchpad, teclas de control multimedia, reposo autom&aacute;tico, dise&ntilde;o ergon&oacute;mico. Bater&iacute;a recargable extra&iacute;ble incorporada."
+    },
+    {
+      "id": "er-parlante-okop-kp-539-100",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Parlante Okop KP-539",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/813-parlante-okop-kp-539-1-41206fde.webp",
+      "url": "https://dctecnology.xyz/p/er-parlante-okop-kp-539-100.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 51100,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 51100,
+      "descripcion": "100% ORIGINAL RESISTENTE AL AGUA CON GARANTIA DE 3 MESES \r\n\r\nBUEN SONIDO Y BAJO"
+    },
+    {
+      "id": "er-aibimy-my262bt-original-ipx6-101",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Aibimy MY262BT Original IPX6",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/817-ab67cf85-0bd1-4af6-bb2e-bbb317ac111c.webp",
+      "url": "https://dctecnology.xyz/p/er-aibimy-my262bt-original-ipx6-101.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 105700,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 105700,
+      "descripcion": "Resistencia al Agua IPX6: Protegido contra salpicaduras y chorros potentes de agua, ideal para exteriores.\n\r\n Sonido Potente: Disfruta de un audio claro y graves profundos que llenar&aacute;n cualquier espacio.\n\r\n Bater&iacute;a de Larga Duraci&oacute;n: Horas de reproducci&oacute;n continua para que la m&uacute;sica nunca pare.\n\r\n Conectividad Bluetooth: Empareja tus dispositivos f&aacute;cilmente y reproduce tu m&uacute;sica sin cables."
+    },
+    {
+      "id": "er-smart-watch-original-pro-a4-102",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Smart Watch Original Pro A4",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/818-c907d597-227f-42b2-94e9-0e9f640f3025.webp",
+      "url": "https://dctecnology.xyz/p/er-smart-watch-original-pro-a4-102.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 51800,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 51800,
+      "descripcion": "100% ORIGINAL!\r\n\r\nINCLUYE TODO LO DE LA IMAGEN"
+    },
+    {
+      "id": "er-smart-watch-10pro-original-103",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Smart Watch 10PRO Original",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/819-unnamed-82.webp",
+      "url": "https://dctecnology.xyz/p/er-smart-watch-10pro-original-103.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 36400,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 36400,
+      "descripcion": "100% ORIGINAL \r\n\r\nINCLUYE TODO LO DE LA IMAGEN"
+    },
+    {
+      "id": "er-airpods-originales-tws-mms-107",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Audífonos Inalámbricos TWS M&m's",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/844-a5f2dae1-f837-4f24-833d-b3c12286b07f.webp",
+      "url": "https://dctecnology.xyz/p/er-airpods-originales-tws-mms-107.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 39500,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 39500,
+      "descripcion": "&quot;Rainbow Bean TWS\n\r\nBobina m&oacute;vil: 13,5 mm\n\r\nVersi&oacute;n inal&aacute;mbrica: BT5.1\n\r\nTiempo de reproducci&oacute;n: 5-6 horas\n\r\nNivel de impermeabilidad: iPX 4\n\r\nInterfaz de carga: Tipo C\n\r\nDistancia: 10 m (sin barreras)\n\r\nTiempo de carga: 1 h (auriculares), 1,5 h (caja de carga)\n\r\nCapacidad de la bater&iacute;a: 200 mAh (caja de carga), 30 mAh (auriculares)&quot;"
+    },
+    {
+      "id": "er-microfono-de-solapa-108",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Microfono de Solapa",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/858-f9cf4ed5-723e-4426-bed9-c3d42781240b.webp",
+      "url": "https://dctecnology.xyz/p/er-microfono-de-solapa-108.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 18200,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 18200,
+      "descripcion": "Micr&oacute;fono: marca digital de silicona\r\n \r\n \r\n Capacidad de la bater&iacute;a: 60mAh\r\n \r\n \r\n Duraci&oacute;n de la bater&iacute;a: 5-6 horas\r\n \r\n \r\n Relaci&oacute;n se&ntilde;al-ruido: 60dB\r\n \r\n \r\n Caracter&iacute;sticas: reducci&oacute;n de ruido, Cable de carga\r\n \r\n \r\n Conector de salida: tipo C"
+    },
+    {
+      "id": "er-kit-de-limpieza-7-en-1-109",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Kit de Limpieza 7 en 1",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/871-3e540a54-a96d-496d-a0e5-c5c7a7b184c4.webp",
+      "url": "https://dctecnology.xyz/p/er-kit-de-limpieza-7-en-1-109.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 11900,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 11900,
+      "descripcion": "&quot;Se pueden utilizar de manera eficiente para recoger, cepillar, pegar y limpiar todo el polvo. 7 tipos de cabezales de limpieza se ocupar&aacute;n de todo tipo de necesidades de limpieza. El kit limpiador electr&oacute;nico es adecuado para auriculares Bluetooth, tel&eacute;fonos m&oacute;viles y otros productos digitales.&quot;"
+    },
+    {
+      "id": "er-parlante-bluetooh-rgb-110",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Parlante Bluetooh RGB",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/884-71f2eba7-ea70-4230-8868-63cc818dc5d3.webp",
+      "url": "https://dctecnology.xyz/p/er-parlante-bluetooh-rgb-110.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 28700,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 28700,
+      "descripcion": "Potencia de 3W, Bluetooth 5.0, bater&iacute;a de 500 mAh con duraci&oacute;n de hasta 2 horas.\n\r\nLector de tarjeta micro SD y USB.\n\r\nLuces RGB.\n\r\nPort&aacute;til y f&aacute;cil de llevar."
+    },
+    {
+      "id": "er-original-sh-30-g-tide-mobulaa-speeaker-box-111",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Original SH-30 G-tide Mobulaa Speeaker Box",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/891-08b5785c-b953-410a-94ce-7ce6d3aa29fd.webp",
+      "url": "https://dctecnology.xyz/p/er-original-sh-30-g-tide-mobulaa-speeaker-box-111.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 120400,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 120400,
+      "descripcion": "GARANTIA DE 6 MESES SPEAKER BOX ORIGINAL"
+    },
+    {
+      "id": "er-lampara-decorativa-astronauta-a1-112",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Lampara Decorativa Astronauta A1",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/919-a030c469-d704-453c-9070-b356f3b14bc6.webp",
+      "url": "https://dctecnology.xyz/p/er-lampara-decorativa-astronauta-a1-112.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 19500,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 19500,
+      "descripcion": null
+    },
+    {
+      "id": "er-mouse-ergonomico-inalambrico-115",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Mouse Ergonomico Inalambrico",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/950-unnamed-2026-01-07t110417489.webp",
+      "url": "https://dctecnology.xyz/p/er-mouse-ergonomico-inalambrico-115.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 41900,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 41900,
+      "descripcion": "Mouse Ergon&oacute;mico Vertical M1688 Dile adi&oacute;s al dolor de mu&ntilde;eca y evita el t&uacute;nel carpiano. Dise&ntilde;o vertical saludable, 100% inal&aacute;mbrico y con velocidad ajustable. &iexcl;Trabaja c&oacute;modo por horas! ????"
+    },
+    {
+      "id": "er-cargador-de-coche-rapido-original-pc17-118",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Cargador de Coche Rapido Original PC17",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1015-6057bcb1-1cd1-4955-95f8-1e4a62f6238c.webp",
+      "url": "https://dctecnology.xyz/p/er-cargador-de-coche-rapido-original-pc17-118.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 13100,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 13100,
+      "descripcion": "100% ORIGINAL"
+    },
+    {
+      "id": "er-cargador-pro-ultra-rapido-carro-pc19-original-119",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Cargador Pro Ultra Rapido Carro PC19 Original",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1016-c1020db0-9cd5-4722-9311-b03821521161.webp",
+      "url": "https://dctecnology.xyz/p/er-cargador-pro-ultra-rapido-carro-pc19-original-119.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 18600,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 18600,
+      "descripcion": "GARANTIA DE 4 MESES ORIGINAL"
+    },
+    {
+      "id": "er-airpods-edicion-especial-codabury-original-120",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Audífonos Inalámbricos Edicion Especial Codabury",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1017-5374496d-fefe-48c3-84c8-e9ddc56049a1.webp",
+      "url": "https://dctecnology.xyz/p/er-airpods-edicion-especial-codabury-original-120.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 54500,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 54500,
+      "descripcion": "100% ORIGINAL"
+    },
+    {
+      "id": "er-airpods-tws-original-es45-121",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Audífonos Inalámbricos TWS ES45",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1018-be47888b-b54c-46a1-8cc9-f26a23236f52.webp",
+      "url": "https://dctecnology.xyz/p/er-airpods-tws-original-es45-121.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 40300,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 40300,
+      "descripcion": "VARIEDAD DE COLORES"
+    },
+    {
+      "id": "er-airpods-original-es48-122",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Audífonos Inalámbricos ES48",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1019-22e92322-a925-4842-9efe-4442b50f8da0.webp",
+      "url": "https://dctecnology.xyz/p/er-airpods-original-es48-122.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 49000,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 49000,
+      "descripcion": "100% ORIGINAL"
+    },
+    {
+      "id": "er-mouse-original-inalambrico-pro-124",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Mouse Original Inalambrico Pro",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1021-ef88e1b6-5288-4592-a4b3-1e872fe7585e.webp",
+      "url": "https://dctecnology.xyz/p/er-mouse-original-inalambrico-pro-124.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 37100,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 37100,
+      "descripcion": "Rat&oacute;n Inal&aacute;mbrico Profesional (Modelo YE03)\r\n\r\nEs un mouse ergon&oacute;mico con bater&iacute;a recargable de 500mAh (sin pilas) e iluminaci&oacute;n LED. Destaca por su conectividad dual (Bluetooth 5.0 + 2.4G) que garantiza una respuesta r&aacute;pida y estable. Es compatible con pr&aacute;cticamente todas las versiones de Windows."
+    },
+    {
+      "id": "er-diademas-de-alta-calidad-eb31-125",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Diademas de Alta Calidad EB31",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1022-0db54c6c-18eb-4338-8cf4-e94dc81baaef.webp",
+      "url": "https://dctecnology.xyz/p/er-diademas-de-alta-calidad-eb31-125.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 74100,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 74100,
+      "descripcion": "100% ORIGINAL Y 3 MESES DE GARANTIA"
+    },
+    {
+      "id": "er-soporte-portatil-para-celular-o-tablet-moderno-126",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Soporte Portatil para Celular o Tablet Moderno",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1023-fea8f720-c8cd-42be-8511-ebd65ebfb329.webp",
+      "url": "https://dctecnology.xyz/p/er-soporte-portatil-para-celular-o-tablet-moderno-126.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 12900,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 12900,
+      "descripcion": "¡Libera tus manos con este soporte moderno y elegante! Perfectamente plegable, se adapta a tu celular o tablet para una experiencia visual sin igual. Descubre la comodidad y la portabilidad que transformarán tu día. ¿Listo para verlo todo con nueva perspectiva?"
+    },
+    {
+      "id": "er-diademas-pro-eb32-127",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Diademas Pro EB32",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1025-1d1e77f3-ddae-49ba-8037-ebde5a9cda6d.webp",
+      "url": "https://dctecnology.xyz/p/er-diademas-pro-eb32-127.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 74200,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 74200,
+      "descripcion": null
+    },
+    {
+      "id": "er-cargador-inalambrico-ki90-128",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Cargador Inalambrico KI90",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1043-cargador-inalambrico-ki90-5-dbaf51ce.webp",
+      "url": "https://dctecnology.xyz/p/er-cargador-inalambrico-ki90-128.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 45100,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 45100,
+      "descripcion": "el soporte cargador inal&aacute;mbrico Yookie KI90. Su dise&ntilde;o 2-en-1 combina cargador inal&aacute;mbrico de 15W y soporte plegable, permiti&eacute;ndote usar el tel&eacute;fono en posici&oacute;n vertical u horizontal mientras se carga. Cuenta con doble bobina para una carga m&aacute;s estable, dise&ntilde;o port&aacute;til y compatibilidad universal, ideal para el hogar, oficina o viajes."
+    },
+    {
+      "id": "er-p9-ultra-combo-7-correas-129",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "P9 Ultra Combo 7 Correas",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1044-ed4ce334-88b4-4c0c-80dc-25e4a0bbd036.webp",
+      "url": "https://dctecnology.xyz/p/er-p9-ultra-combo-7-correas-129.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 81100,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 81100,
+      "descripcion": null
+    },
+    {
+      "id": "er-airpods-pea-pod-edicion-especial-130",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Audífonos Inalámbricos Pea Pod Edicion Especial",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1046-0408f144-bdd3-4f1f-88af-2a2ca42afe0e.webp",
+      "url": "https://dctecnology.xyz/p/er-airpods-pea-pod-edicion-especial-130.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 66100,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 66100,
+      "descripcion": "COLOR BLANCO O NEGRO DE AIRPODS"
+    },
+    {
+      "id": "er-airpods-pro-6-131",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Audífonos Inalámbricos Pro 6",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1053-a990bace-2458-4afa-afe5-6addc9537721.webp",
+      "url": "https://dctecnology.xyz/p/er-airpods-pro-6-131.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 27900,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 27900,
+      "descripcion": "GARANTIA AL RECIBIR"
+    },
+    {
+      "id": "er-palo-de-selfie-132",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Palo de Selfie",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1089-ab7c020b-388a-4a2d-886c-28743e61bdc7.webp",
+      "url": "https://dctecnology.xyz/p/er-palo-de-selfie-132.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 12900,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 12900,
+      "descripcion": null
+    },
+    {
+      "id": "er-soporte-giratorio-para-tablet-133",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Soporte Giratorio para Tablet",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1090-500a5c65-dccc-4ff8-90d4-84a2af2f53c3.webp",
+      "url": "https://dctecnology.xyz/p/er-soporte-giratorio-para-tablet-133.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 20900,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 20900,
+      "descripcion": null
+    },
+    {
+      "id": "er-original-smartwacht-wisme-airpods-7-correas-134",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Smartwacht Wisme + Audífonos Inalámbricos + 7 Correas",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1095-original-smartwacht-wisme-airpods-7-correas-1-82c36941.webp",
+      "url": "https://dctecnology.xyz/p/er-original-smartwacht-wisme-airpods-7-correas-134.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 83900,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 83900,
+      "descripcion": "PRODUCTO ORIGINAL CON GARANTIA"
+    },
+    {
+      "id": "er-holder-388a-136",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Holder 388A",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1111-whatsapp-image-2026-02-13-at-91033-pm.webp",
+      "url": "https://dctecnology.xyz/p/er-holder-388a-136.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 5500,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 5500,
+      "descripcion": "Caracter&iacute;sticas:\r\n\r\nEspacio libre para el puerto de carga.\r\n\r\nSe ajusta a m&uacute;ltiples &aacute;ngulos.\r\n\r\nAltura m&aacute;xima de 32 cm."
+    },
+    {
+      "id": "er-soporte-microfono-de-solapa-137",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Soporte Microfono de Solapa",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1112-whatsapp-image-2026-02-13-at-94025-pm.webp",
+      "url": "https://dctecnology.xyz/p/er-soporte-microfono-de-solapa-137.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 27300,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 27300,
+      "descripcion": "&bull; Adaptador para micr&oacute;fono de solapa, convi&eacute;rtelo en micr&oacute;fono de mano f&aacute;cilmente.\n\r\n&bull; Incluye espuma antiviento, reduce ruidos y mejora la calidad del audio.\n\r\n&bull; Dise&ntilde;o ligero y ergon&oacute;mico, c&oacute;modo para entrevistas y presentaciones.\n\r\n&bull; Compatibilidad universal, apto para micr&oacute;fonos inal&aacute;mbricos."
+    },
+    {
+      "id": "er-aro-de-luz-rgb-26ctms-138",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Aro de Luz RGB 26CTMS",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1115-aro-de-luz-rgb-26ctms-1-ec23c018.webp",
+      "url": "https://dctecnology.xyz/p/er-aro-de-luz-rgb-26ctms-138.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 44800,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 44800,
+      "descripcion": "¡Desata tu creatividad con el Aro de Luz RGB 26cm! Transforma tus fotos y videos con un sinfín de colores vibrantes y brillo ajustable. Ideal para selfies, streaming y maquillaje. ¡Ilumina tu contenido y capta todas las miradas! ✨"
+    },
+    {
+      "id": "er-microfono-de-solapa-entrada-aux-139",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Microfono de Solapa Entrada AUX",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1116-fadd7cba-e676-4f3b-b1ab-132574a35248.webp",
+      "url": "https://dctecnology.xyz/p/er-microfono-de-solapa-entrada-aux-139.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 9100,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 9100,
+      "descripcion": null
+    },
+    {
+      "id": "er-tripode-estabilizador-celular-ay49t-140",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Tripode Estabilizador Celular AY49T",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1118-whatsapp-image-2026-02-14-at-54610-pm.webp",
+      "url": "https://dctecnology.xyz/p/er-tripode-estabilizador-celular-ay49t-140.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 51100,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 51100,
+      "descripcion": "Caracter&iacute;sticas:\r\n\r\n\r\n \r\n Soporte Expandible hasta 55cm.\r\n \r\n \r\n Micr&oacute;fono Conexi&oacute;n por cable 3.5mm\r\n \r\n \r\n Luz LED de 6500 K.\r\n \r\n \r\n Control Bluetooth\r\n \r\n \r\n El montaje superior del gancho permite un montaje r&aacute;pido del micr&oacute;fono y la luz LED."
+    },
+    {
+      "id": "er-mini-tripode-tp-009-141",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Mini Tripode TP-009",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1119-whatsapp-image-2026-02-14-at-55848-pm.webp",
+      "url": "https://dctecnology.xyz/p/er-mini-tripode-tp-009-141.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 8900,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 8900,
+      "descripcion": "Caracter&iacute;sticas:\r\n\r\n&bull; Mini tr&iacute;pode flexible.\n\r\n&bull; Alto de 24 cm (tr&iacute;pode en estado cerrado incluyendo el soporte del celular).\n\r\n&bull; Fabricado en ABS y espuma de alta densidad, compacto y ligero.\n\r\n&bull; Universal para tel&eacute;fono o para c&aacute;mara."
+    },
+    {
+      "id": "er-soporte-astronauta-celular-142",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Soporte Astronauta Celular",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1120-whatsapp-image-2026-02-15-at-113850-am.webp",
+      "url": "https://dctecnology.xyz/p/er-soporte-astronauta-celular-142.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 16400,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 16400,
+      "descripcion": "Caracter&iacute;sticas:\r\n\r\n&bull; Dise&ntilde;o &uacute;nico en forma de astronauta, ideal para decorar y dar un toque divertido a tu escritorio.\n\r\n&bull; Soporte universal para tel&eacute;fonos m&oacute;viles, compatible con la mayor&iacute;a de modelos.\n\r\n&bull; Base estable y resistente que asegura un soporte firme.\n\r\n&bull; Material ABS resistente."
+    },
+    {
+      "id": "er-airpods-originales-ep5-143",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Audífonos Inalámbricos EP5",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1121-whatsapp-image-2026-04-23-at-122256-pm.webp",
+      "url": "https://dctecnology.xyz/p/er-airpods-originales-ep5-143.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 63600,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 63600,
+      "descripcion": "Los aud&iacute;fonos Yooki ofrecen una experiencia de sonido de alta fidelidad, con un micr&oacute;fono de alta definici&oacute;n para llamadas claras. Son c&oacute;modos de llevar durante todo el d&iacute;a, con una amplia compatibilidad con diversos dispositivos. Su dise&ntilde;o elegante y moderno los convierte en la opci&oacute;n perfecta para quienes buscan calidad y estilo."
+    },
+    {
+      "id": "er-holders-s059-144",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Holders S059",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1122-whatsapp-image-2026-02-15-at-115422-am.webp",
+      "url": "https://dctecnology.xyz/p/er-holders-s059-144.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 3000,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 3000,
+      "descripcion": "Caracter&iacute;sticas:\r\n\r\n\r\n \r\n Hecho de material ABS de alta calidad, duradero y liviano.\r\n \r\n \r\n F&aacute;cil de ajustar y transportar.\r\n \r\n \r\n Soporte de celular o tablet.\r\n \r\n \r\n Con un dise&ntilde;o plegable y ajustable, puede ajustar el &aacute;ngulo dentro de 270 grados a voluntad."
+    },
+    {
+      "id": "er-blafle-smart-speaker-app-145",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Blafle Smart Speaker App",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1123-whatsapp-image-2026-02-15-at-120451-pm.webp",
+      "url": "https://dctecnology.xyz/p/er-blafle-smart-speaker-app-145.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 50300,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 50300,
+      "descripcion": "Caracter&iacute;sticas:\r\n\r\n\r\n \r\n Conexi&oacute;n Bluetooth 5.3 con sonido claro y potente.\r\n \r\n \r\n Luces LED RGB din&aacute;micas, controladas desde la app (Android y iOS).\r\n \r\n \r\n Ranura para tarjeta SD y entrada auxiliar, ideal para reproducir m&uacute;sica sin conexi&oacute;n."
+    },
+    {
+      "id": "er-auriculares-con-cable-md011-146",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Auriculares con Cable MD011",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1125-auriculares-con-cable-md011-1-ff2d4a1c.webp",
+      "url": "https://dctecnology.xyz/p/er-auriculares-con-cable-md011-146.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 3800,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 3800,
+      "descripcion": "100% ORIGINAL"
+    },
+    {
+      "id": "er-auriculares-con-cable-ath-73-147",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Auriculares con Cable ATH-73",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1126-auriculares-con-cable-ath-73-1-85c740cd.webp",
+      "url": "https://dctecnology.xyz/p/er-auriculares-con-cable-ath-73-147.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 1900,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 1900,
+      "descripcion": "100% ORIGINAL"
+    },
+    {
+      "id": "er-holders-hold-326-148",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Holders HOLD-326",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1127-whatsapp-image-2026-02-16-at-121230-pm.webp",
+      "url": "https://dctecnology.xyz/p/er-holders-hold-326-148.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 3300,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 3300,
+      "descripcion": "Caracter&iacute;sticas:\r\n\r\n&bull; Soporte fijo y de aluminio.\n\r\n&bull; Cuenta con una articulaci&oacute;n flexible que permite ajustar el &aacute;ngulo de 5&deg; a 45&deg;.\n\r\n&bull; Se adapta a dispositivos de entre 4.0 y 7.9 pulgadas."
+    },
+    {
+      "id": "er-pad-mause-carga-inalambrica-151",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Pad Mause Carga Inalambrica",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1133-whatsapp-image-2026-02-16-at-12509-pm.webp",
+      "url": "https://dctecnology.xyz/p/er-pad-mause-carga-inalambrica-151.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 53200,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 53200,
+      "descripcion": null
+    },
+    {
+      "id": "er-airpods-pro-rs16-152",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Audífonos Inalámbricos Pro RS16",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1135-whatsapp-image-2026-02-16-at-14546-pm.webp",
+      "url": "https://dctecnology.xyz/p/er-airpods-pro-rs16-152.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 63000,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 63000,
+      "descripcion": "100 PRO ORIGINALES"
+    },
+    {
+      "id": "er-combo-airpods-tws-k30-153",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Combo Audífonos Inalámbricos TWS-K30",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1138-whatsapp-image-2026-02-16-at-31448-pm.webp",
+      "url": "https://dctecnology.xyz/p/er-combo-airpods-tws-k30-153.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 51000,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 51000,
+      "descripcion": "PUEDE VENIR DISTINTOS COLORES! PERO EL DE LA FOTO ES EL PRINCIPAL"
+    },
+    {
+      "id": "er-airpods-kt30-154",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Audífonos Inalámbricos KT30",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1141-whatsapp-image-2026-02-16-at-42645-pm.webp",
+      "url": "https://dctecnology.xyz/p/er-airpods-kt30-154.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 40100,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 40100,
+      "descripcion": "Caracter&iacute;sticas:\r\n\r\n\r\n \r\n Sistema rotatorio 360&deg; tipo Spinner.\r\n \r\n \r\n Tecnolog&iacute;a Bluetooth 5.3 de alta estabilidad y menor latencia.\r\n \r\n \r\n Dise&ntilde;o c&oacute;modo para uso prolongado con excelente fijaci&oacute;n.\r\n \r\n \r\n Compacto, ligero y resistente."
+    },
+    {
+      "id": "er-parlante-airpods-rgb-profesional-155",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Parlante + Audífonos Inalámbricos RGB Profesional",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1144-whatsapp-image-2026-02-16-at-51504-pm.webp",
+      "url": "https://dctecnology.xyz/p/er-parlante-airpods-rgb-profesional-155.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 114800,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 114800,
+      "descripcion": "Caracter&iacute;sticas:\r\n\r\n\r\n \r\n Bluetooth 5.0\r\n \r\n \r\n Altavoz incorporado de alta potencia.\r\n \r\n \r\n Luces LED RGB.\r\n \r\n \r\n Pantalla con indicador de carga (%)."
+    },
+    {
+      "id": "er-smart-watch-fit-economico-fd68-157",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Smart Watch Fit Economico FD68",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1161-whatsapp-image-2026-02-18-at-25440-pm.webp",
+      "url": "https://dctecnology.xyz/p/er-smart-watch-fit-economico-fd68-157.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 19000,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 19000,
+      "descripcion": "SMAR WACHT FIT\r\n\r\nNO RESISTENTE AL AGUA"
+    },
+    {
+      "id": "er-microfono-condensador-sf-666-158",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Microfono Condensador SF-666",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1162-whatsapp-image-2026-02-18-at-30143-pm.webp",
+      "url": "https://dctecnology.xyz/p/er-microfono-condensador-sf-666-158.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 27300,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 27300,
+      "descripcion": "PRODUCTO ALTAMENTE ROTATIVO"
+    },
+    {
+      "id": "er-combo-x8-smart-wacht-162",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Combo X8 Smart Wacht",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1181-combo-x8-smart-wacht-1-ab4a7faa.webp",
+      "url": "https://dctecnology.xyz/p/er-combo-x8-smart-wacht-162.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 69900,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 69900,
+      "descripcion": "Eleva tu estilo y productividad con este exclusivo combo de 8 piezas. Incluye un reloj inteligente Smart Ultra con dise&ntilde;o met&aacute;lico, un power bank inal&aacute;mbrico, un cargador MagSafe, aud&iacute;fonos Bluetooth, y m&aacute;s. Recibe llamadas, notificaciones de WhatsApp y Facebook, y monitorea tu salud. &iexcl;Todo lo que necesitas para estar conectado!"
+    },
+    {
+      "id": "er-audifonos-con-cable-tipo-c-tm-a-165",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Audifonos con Cable Tipo C Tm-a",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1203-whatsapp-image-2026-02-28-at-121304-pm.webp",
+      "url": "https://dctecnology.xyz/p/er-audifonos-con-cable-tipo-c-tm-a-165.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 7700,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 7700,
+      "descripcion": "Conector USB Tipo C\n\r\nCompatible con la mayor&iacute;a de dispositivos Android\r\n\r\nSonido Est&eacute;reo HD\n\r\nDisfruta de graves potentes y agudos claros\r\n\r\nControl integrado\n\r\nLlamadas, m&uacute;sica y ajuste de volumen con facilidad\r\n\r\nCOLORES VARIOS DISPPNIBLES"
+    },
+    {
+      "id": "er-mouse-inalambrico-dj-125-166",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Mouse Inalambrico DJ-125",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1210-whatsapp-image-2026-03-02-at-122634-pm.webp",
+      "url": "https://dctecnology.xyz/p/er-mouse-inalambrico-dj-125-166.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 27400,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 27400,
+      "descripcion": "CONEXION A BLUETOOH RECARGABLE"
+    },
+    {
+      "id": "er-smart-watch-gamebox-correa-pro-hot-5-167",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Smart Watch + Gamebox + Correa Pro HOT-5",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1212-whatsapp-image-2026-03-02-at-21224-pm.webp",
+      "url": "https://dctecnology.xyz/p/er-smart-watch-gamebox-correa-pro-hot-5-167.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 89600,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 89600,
+      "descripcion": "COMBO PERFECTO"
+    },
+    {
+      "id": "er-lapiz-tactil-hx-22-169",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Lapiz Tactil HX-22",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1216-whatsapp-image-2026-03-04-at-21613-pm.webp",
+      "url": "https://dctecnology.xyz/p/er-lapiz-tactil-hx-22-169.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 3500,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 3500,
+      "descripcion": "Bol&iacute;grafo con Punta Stylus para Pantallas T&aacute;ctiles\r\n\r\nEste pr&aacute;ctico bol&iacute;grafo 2 en 1 combina escritura tradicional con tecnolog&iacute;a para dispositivos m&oacute;viles. Cuenta con punta stylus suave, ideal para usar en celulares, tablets o pantallas t&aacute;ctiles sin rayarlas, y bol&iacute;grafo giratorio para escribir c&oacute;modamente en papel.\r\n\r\nSu dise&ntilde;o moderno incluye gancho tipo clip, perfecto para colgar en bolsillos, cuadernos o agendas y tenerlo siempre a la mano.\r\n\r\nCaracter&iacute;sticas:\n\r\n&bull; Funci&oacute;n 2 en 1: stylus + bol&iacute;g"
+    },
+    {
+      "id": "er-holders-hold-ps-228-171",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Holders HOLD-PS/228",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1219-whatsapp-image-2026-03-04-at-41921-pm.webp",
+      "url": "https://dctecnology.xyz/p/er-holders-hold-ps-228-171.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 9100,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 9100,
+      "descripcion": "Gracias a su sistema de m&uacute;ltiples ventosas, se adhiere con fuerza a superficies lisas y te permite usar tu celular sin sostenerlo con la mano.\r\n\r\nMejor agarre para evitar ca&iacute;das\n\r\n Soporte ajustable para ver videos o hacer videollamadas\n\r\n Fuerte adherencia con ventosas de alta succi&oacute;n\n\r\n Compacto y port&aacute;til (50mm)\n\r\n Ideal para trabajo, estudio, streaming o redes sociales\r\n\r\n Pega tu celular, ajusta el soporte y disfruta manos libres en segundos."
+    },
+    {
+      "id": "er-kit-labubu-177",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Kit Labubu",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1239-whatsapp-image-2026-03-11-at-101743-am.webp",
+      "url": "https://dctecnology.xyz/p/er-kit-labubu-177.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 42000,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 42000,
+      "descripcion": "INCLUYE LO DE LA IMAGEN"
+    },
+    {
+      "id": "er-original-airpods-es53-181",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Audífonos Inalámbricos ES53",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1271-whatsapp-image-2026-04-01-at-25822-pm.webp",
+      "url": "https://dctecnology.xyz/p/er-original-airpods-es53-181.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 46900,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 46900,
+      "descripcion": "GARANTIA DE 6 MESES"
+    },
+    {
+      "id": "er-airpdos-t11-labubu-2-182",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Airpdos T11 Labubu",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1273-whatsapp-image-2026-04-01-at-92958-pm.webp",
+      "url": "https://dctecnology.xyz/p/er-airpdos-t11-labubu-2-182.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 27300,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 27300,
+      "descripcion": "PUEDE VENIR ROSADO O AZUL CLARO"
+    },
+    {
+      "id": "er-multipuerto-x4-usb-184",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Multipuerto X4 USB",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1277-whatsapp-image-2026-04-02-at-35222-pm.webp",
+      "url": "https://dctecnology.xyz/p/er-multipuerto-x4-usb-184.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 5600,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 5600,
+      "descripcion": null
+    },
+    {
+      "id": "er-airpods-abiertos-pro-v12-original-185",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Audífonos Inalámbricos Abiertos Pro V12",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1280-whatsapp-image-2026-04-04-at-44020-pm-1.webp",
+      "url": "https://dctecnology.xyz/p/er-airpods-abiertos-pro-v12-original-185.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 97900,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 97900,
+      "descripcion": "AIRPODS PRO SONIDO EXCELENTE\r\n\r\nGARANTIA DE 6 MESES"
+    },
+    {
+      "id": "er-buscador-inteligente-original-186",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Buscador Inteligente Original",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1281-7ba08aac-286d-4a3b-928c-b6f5138bdccf.webp",
+      "url": "https://dctecnology.xyz/p/er-buscador-inteligente-original-186.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 41900,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 41900,
+      "descripcion": "Ficha T&eacute;cnica &ndash; Yookie F08\n\r\n &bull; Tipo: Buscador inteligente (rastreador)\n\r\n &bull; Compatibilidad: iPhone / app Find My\n\r\n &bull; Funciones: Ubicaci&oacute;n en tiempo real, alerta de objeto olvidado y sonido para encontrarlo\n\r\n &bull; Bater&iacute;a: CR2032 (duraci&oacute;n 9&ndash;13 meses, reemplazable)\n\r\n &bull; Uso: Llaves, billeteras, equipaje\n\r\n &bull; Dise&ntilde;o: Compacto, color blanco con llavero"
+    },
+    {
+      "id": "er-soporte-para-tablet-y-celular-hold-356-187",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Soporte para Tablet y Celular HOLD-356",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1292-whatsapp-image-2026-04-10-at-14115-pm.webp",
+      "url": "https://dctecnology.xyz/p/er-soporte-para-tablet-y-celular-hold-356-187.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 34300,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 34300,
+      "descripcion": "Caracter&iacute;sticas:\r\n\r\n&bull; Estructura en acero/metal con piezas ABS y gomas antideslizantes.\n\r\n&bull; Brazo con resortes dobles que sostiene el peso sin caerse ni &ldquo;bailar&rdquo;.\n\r\n&bull; Rotaci&oacute;n 360&deg;.\n\r\n&bull; Soporte extensible 12-18 cm."
+    },
+    {
+      "id": "er-base-para-portatil-y-tablet-holdpc-102-188",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Base para Portatil y Tablet HOLDPC-102",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1293-whatsapp-image-2026-04-10-at-22727-pm.webp",
+      "url": "https://dctecnology.xyz/p/er-base-para-portatil-y-tablet-holdpc-102-188.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 27900,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 27900,
+      "descripcion": "Caracter&iacute;sticas:\r\n\r\nALUMINIO MAXIMA CALIDAD\r\n\r\n\r\n \r\n Compatible con Macbook Air, Macbook Pro y otros port&aacute;tiles de 10 a 15.6 pulgadas.\r\n \r\n \r\n Material de aleaci&oacute;n de aluminio + almohadilla de silicona antideslizante.\r\n \r\n \r\n Dise&ntilde;o ventilado para mejorar la disipaci&oacute;n de calor.\r\n \r\n \r\n Compacto y port&aacute;til"
+    },
+    {
+      "id": "er-ym-300-rgb-led-ring-fill-light-189",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "YM-300 RGB LED Ring Fill Light",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1294-whatsapp-image-2026-04-10-at-25051-pm.webp",
+      "url": "https://dctecnology.xyz/p/er-ym-300-rgb-led-ring-fill-light-189.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 62900,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 62900,
+      "descripcion": "La YM-300 RGB LED Ring Fill Light es la soluci&oacute;n ideal para creadores de contenido, streamers, fot&oacute;grafos y vide&oacute;grafos que buscan una iluminaci&oacute;n profesional en un formato compacto y port&aacute;til.\r\n\r\nGracias a su tecnolog&iacute;a RGB, podr&aacute;s personalizar el ambiente con m&uacute;ltiples colores y ajustar la intensidad seg&uacute;n tus necesidades, logrando resultados m&aacute;s atractivos y de alta calidad en cada toma.\r\n\r\nIncluye un pr&aacute;ctico soporte para celular, permiti&eacute;ndote grabar, hacer transmisiones en vivo o tomar fotograf&iacute;as "
+    },
+    {
+      "id": "er-base-para-portatil-en-aluminio-hold-406-192",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Base para Portatil en Aluminio HOLD-406",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1298-whatsapp-image-2026-04-11-at-33258-pm.webp",
+      "url": "https://dctecnology.xyz/p/er-base-para-portatil-en-aluminio-hold-406-192.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 20900,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 20900,
+      "descripcion": "Caracter&iacute;sticas:\r\n\r\n\r\n \r\n Compatible con Macbook Air, Macbook Pro y otros port&aacute;tiles de 11 a 15.6 pulgadas.\r\n \r\n \r\n Material de aleaci&oacute;n de aluminio + almohadilla de silicona antideslizante.\r\n \r\n \r\n Dise&ntilde;o ventilado para mejorar la disipaci&oacute;n de calor.\r\n \r\n \r\n Dise&ntilde;o plegable y port&aacute;til."
+    },
+    {
+      "id": "er-funda-para-portatil-na-bag-105-193",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Funda para Portatil Na-bag 105",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1313-f135ef32-b297-4984-8d82-da9789e9af26.webp",
+      "url": "https://dctecnology.xyz/p/er-funda-para-portatil-na-bag-105-193.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 34900,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 34900,
+      "descripcion": "¡Protección imbatible para tu laptop! Descubre la FUNDA NA-BAG 105: diseño slim y tela resistente que cuida tu equipo con estilo. Su interior acolchado garantiza seguridad total. ¿Listo para llevar tu tecnología sin preocupaciones? ¡Hazla tuya!"
+    },
+    {
+      "id": "er-airpods-originales-es60-198",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Audífonos Inalámbricos ES60",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1333-64d46f3c-a875-4e6c-a0e8-8c5d87bb3ca8-1.webp",
+      "url": "https://dctecnology.xyz/p/er-airpods-originales-es60-198.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 51600,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 51600,
+      "descripcion": "Los aud&iacute;fonos inal&aacute;mbricos Yooki ofrecen una conexi&oacute;n estable, un potente driver din&aacute;mico de 13 mm para un sonido claro y profundo, y un dise&ntilde;o c&oacute;modo para largas horas de uso. Con hasta 4 horas de reproducci&oacute;n y 3 horas de llamadas, son perfectos para quienes buscan calidad y durabilidad en un solo producto."
+    },
+    {
+      "id": "er-repetidor-de-wifi-wr03t-199",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Repetidor de Wifi WR03T",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1341-whatsapp-image-2026-04-25-at-42814-pm.webp",
+      "url": "https://dctecnology.xyz/p/er-repetidor-de-wifi-wr03t-199.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 32800,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 32800,
+      "descripcion": "Mejora la se&ntilde;al de internet en tu hogar u oficina con este Repetidor WiFi Inal&aacute;mbrico-N. Ampl&iacute;a la cobertura de tu red, ayuda a reducir zonas con se&ntilde;al d&eacute;bil y permite conectar equipos por WiFi o puerto LAN. Su bot&oacute;n WPS facilita la configuraci&oacute;n y su dise&ntilde;o compacto se adapta a cualquier espacio. Ideal para habitaciones, salas, oficinas y puntos alejados del router."
+    },
+    {
+      "id": "er-reloj-en-combo-x9-200",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Reloj en Combo X9",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1342-196f87be-b747-4dc4-a2e5-86069de453d8.webp",
+      "url": "https://dctecnology.xyz/p/er-reloj-en-combo-x9-200.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 69900,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 69900,
+      "descripcion": "Lleva todo en un solo paquete con el X9 Unique Combination: smartwatch, aud&iacute;fonos inal&aacute;mbricos, correas intercambiables, cargador y accesorios incluidos. Su dise&ntilde;o moderno en blanco y naranja lo hace ideal para uso diario, deporte y estilo personal. Una opci&oacute;n pr&aacute;ctica y completa para quienes quieren tecnolog&iacute;a, conectividad y buena presentaci&oacute;n en un solo producto."
+    },
+    {
+      "id": "er-maquina-de-verificacion-de-billetes-201",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Maquina de Verificacion de Billetes",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1346-08b5884f-ef30-496e-b184-1e536b70c790.webp",
+      "url": "https://dctecnology.xyz/p/er-maquina-de-verificacion-de-billetes-201.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 27900,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 27900,
+      "descripcion": "Protege tu negocio con este verificador de billetes UV, ideal para revisar billetes de forma r&aacute;pida y confiable. Su luz ultravioleta permite detectar marcas de seguridad, cuenta con regla de medici&oacute;n integrada y dise&ntilde;o compacto para caja, mostrador u oficina. F&aacute;cil de usar, resistente y &uacute;til para comercios, ventas y manejo diario de efectivo."
+    },
+    {
+      "id": "er-audifonos-m10-202",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Audifonos M10",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1347-86fd242b-4f70-487c-988d-132d23c2db6b.webp",
+      "url": "https://dctecnology.xyz/p/er-audifonos-m10-202.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 17500,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 17500,
+      "descripcion": "Aud&iacute;fonos inal&aacute;mbricos M10 con estuche de carga, dise&ntilde;o compacto y pantalla indicadora de bater&iacute;a. Ideales para llamadas, m&uacute;sica y uso diario, con conexi&oacute;n Bluetooth y formato pr&aacute;ctico para llevar en el bolsillo. Una opci&oacute;n moderna, funcional y f&aacute;cil de vender por su presentaci&oacute;n llamativa."
+    },
+    {
+      "id": "er-parlante-portatil-mg2-203",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Parlante Portatil MG2",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1376-8100aae5-4722-4915-917b-ee000a7f5577.webp",
+      "url": "https://dctecnology.xyz/p/er-parlante-portatil-mg2-203.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 12600,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 12600,
+      "descripcion": "BAFLE ECONOMICO\r\n\r\nParlante port&aacute;til\n\r\nMedidas aproximadas del producto: 13 x 8 cm.\n\r\nIncluye cable USB de carga.\n\r\nConexi&oacute;n: bluetooth / USB / Micro SD.\n\r\nCompatible con todos los dispositivos.\n\r\nColor: rojo y negro"
+    },
+    {
+      "id": "er-dama-smartwatch-me32-204",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Dama Smartwatch ME32",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1392-69dc4901-344b-47d3-acc3-5944c0e85f28.webp",
+      "url": "https://dctecnology.xyz/p/er-dama-smartwatch-me32-204.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 77000,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 77000,
+      "descripcion": "7 CORREAS INCLUIDAS PARA DAMA"
+    },
+    {
+      "id": "er-airpods-anc-jm19-traductores-208",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Audífonos Inalámbricos ANC-JM19 Traductores",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1411-7efb9960-cec2-4bc6-b4b3-5727ce5a74fa.webp",
+      "url": "https://dctecnology.xyz/p/er-airpods-anc-jm19-traductores-208.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 77000,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 77000,
+      "descripcion": "Presentamos los ANC-JM19, auriculares inal&aacute;mbricos deportivos con cancelaci&oacute;n activa de ruido. Disfruta de un sonido Hi-Fi claro y potente, con bater&iacute;a de larga duraci&oacute;n y carga r&aacute;pida mediante USB. Su estuche inteligente muestra informaci&oacute;n de carga en pantalla y permite transportar y proteger los auriculares f&aacute;cilmente. Ideales para entrenamientos, viajes o el uso diario, combinan comodidad, estilo y tecnolog&iacute;a avanzada."
+    },
+    {
+      "id": "er-smart-watch-s11-kz-w42-209",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Smart Watch S11 KZ-W42",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1429-40c131fc-38fb-4625-b270-0bec70466724.webp",
+      "url": "https://dctecnology.xyz/p/er-smart-watch-s11-kz-w42-209.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 50400,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 50400,
+      "descripcion": "Smartwatch con dise&ntilde;o moderno y funciones avanzadas para el d&iacute;a a d&iacute;a. Cuenta con llamadas Bluetooth, modo deportivo, carga inal&aacute;mbrica y monitoreo inteligente. Incluye 7 correas para combinar con cualquier estilo.\r\n\r\nTecnolog&iacute;a, elegancia y versatilidad en un solo producto."
+    },
+    {
+      "id": "er-smartwacht-serie-11-mini-213",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Smartwacht Serie 11 Mini",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1511-smartwacht-serie-11-mini-2-640c0324.webp",
+      "url": "https://dctecnology.xyz/p/er-smartwacht-serie-11-mini-213.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 48900,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 48900,
+      "descripcion": "Función Contestar Ilamadas, Cargador magnético, Material aleación de zinc,\r\nControl de presión arterial + 2 pulso. Compatible con Android y iphone"
+    },
+    {
+      "id": "er-original-mobulaa-iw12-mini-216",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Original Mobulaa IW12 Mini",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1543-ce58dd7c-ccf6-4821-97ff-d322030030ca.webp",
+      "url": "https://dctecnology.xyz/p/er-original-mobulaa-iw12-mini-216.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 138600,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 138600,
+      "descripcion": "Acabados Est&eacute;ticos: Dise&ntilde;o completo y est&eacute;tico que combina funcionalidad y estilo.\r\n Notificaciones de Redes Sociales: Recibe y lee mensajes de WhatsApp, Facebook, Instagram y m&aacute;s.\r\n Llamadas Directas: Marca, contesta, cuelga y habla directamente desde tu reloj.\r\n Pantalla Full HD: Pantalla de alta resoluci&oacute;n para una experiencia visual excepcional.\r\n Resistente a Salpicaduras: Perfecto para uso diario, incluso en condiciones h&uacute;medas.\r\n Carga Inal&aacute;mbrica: Carga f&aacute;cil y conveniente, sin necesidad de cables.\r\n Fondos de Pantalla Personaliza"
+    },
+    {
+      "id": "er-original-cargador-usb-a-tipo-c-yookie-ei32-217",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Original Cargador USB a Tipo C Yookie EI32",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1559-dc4987b1-6153-4614-adb8-6a63d3190b33.webp",
+      "url": "https://dctecnology.xyz/p/er-original-cargador-usb-a-tipo-c-yookie-ei32-217.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 20100,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 20100,
+      "descripcion": "Yookie Ei32 &ndash; Carga r&aacute;pida 18W \r\n\r\n1 A&Ntilde;O DE GARANTIA\r\n\r\nDisfruta de carga r&aacute;pida QC3.0 con reconocimiento inteligente para tus dispositivos. Con salida USB-C, alta potencia y protecci&oacute;n m&uacute;ltiple, tu equipo estar&aacute; seguro mientras se carga r&aacute;pidamente. Incluye cable USB a Tipo C para empezar a usarlo de inmediato. Ideal para smartphones, tablets y otros dispositivos modernos."
+    },
+    {
+      "id": "er-smart-watch-big-3-218",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Smart Watch Big 3",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1560-88789e79-5856-4a0f-a80b-136dc4616ab6.webp",
+      "url": "https://dctecnology.xyz/p/er-smart-watch-big-3-218.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 48900,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 48900,
+      "descripcion": "Smartwatch Ultra Big 3, un reloj moderno y multifuncional con pantalla amplia de 2.01&rdquo;. Incluye 7 correas intercambiables para combinar con cualquier estilo, adem&aacute;s de cargador y accesorios. Ideal para uso diario, deporte y looks casuales o elegantes."
+    },
+    {
+      "id": "er-smart-watch-zt-36s-plus-219",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Smart Watch ZT-36S Plus",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1561-f0c4842b-5d89-42eb-b45f-1b1f0a21fa3e-1.webp",
+      "url": "https://dctecnology.xyz/p/er-smart-watch-zt-36s-plus-219.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 83900,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 83900,
+      "descripcion": "GAFAS BLUETOOTH INCLUIDAS Smartwatch ZT-36S Plus: el set premium que lo tiene todo. Incluye reloj multifunci&oacute;n y 7 correas intercambiables para combinar con tu estilo en cualquier ocasi&oacute;n, adem&aacute;s de accesorios adicionales como gafas. Ideal para quienes buscan tecnolog&iacute;a, versatilidad y estilo en un solo paquete."
+    },
+    {
+      "id": "er-impresora-portatil-220",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Impresora Portatil",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1562-e4b5d431-1065-415d-a610-2a81696b52aa-1.webp",
+      "url": "https://dctecnology.xyz/p/er-impresora-portatil-220.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 55900,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 55900,
+      "descripcion": "Mini Printer port&aacute;til: imprime fotos al instante de forma pr&aacute;ctica y sin tinta. Es compacta, f&aacute;cil de llevar y perfecta para recuerdos, notas, etiquetas o detalles creativos. Ideal para estudiantes, regalos y uso diario."
+    },
+    {
+      "id": "er-microfono-de-solapa-tipo-c-221",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Microfono de Solapa Tipo C",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1564-aef97804-778c-4f74-81df-19c39bbe60ee.webp",
+      "url": "https://dctecnology.xyz/p/er-microfono-de-solapa-tipo-c-221.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 9100,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 9100,
+      "descripcion": "Graba audio y video con calidad profesional de manera sencilla. Con conexi&oacute;n Tipo C, compacto y port&aacute;til, ideal para entrevistas, vlogs, clases online y transmisiones en vivo. Incluye accesorios para un uso c&oacute;modo y vers&aacute;til."
+    },
+    {
+      "id": "er-microfono-de-solapa-entrada-lightning-222",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Microfono de Solapa Entrada Lightning",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1565-5731f047-b15d-4cbc-abc3-ec36b6e06a41.webp",
+      "url": "https://dctecnology.xyz/p/er-microfono-de-solapa-entrada-lightning-222.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 9100,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 9100,
+      "descripcion": "Ideal para grabar videos, clases, entrevistas y transmisiones con sonido claro. Es port&aacute;til, f&aacute;cil de usar y compatible con iPhone y iPad. Incluye cable largo y bolsa de transporte para mayor comodidad."
+    },
+    {
+      "id": "er-parlante-bluetooth-alexa-15w-223",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Parlante Bluetooth Alexa 15W",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1566-84ae985e-14cc-44a4-aa3d-c188b17a3ff0.webp",
+      "url": "https://dctecnology.xyz/p/er-parlante-bluetooth-alexa-15w-223.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 64400,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 64400,
+      "descripcion": "Disfruta de un sonido potente y envolvente con este espectacular parlante inal&aacute;mbrico de dise&ntilde;o deportivo.\r\n\r\nPotencia de 15W\n\r\n Conexi&oacute;n Bluetooth\n\r\n Bater&iacute;a recargable de larga duraci&oacute;n\n\r\n Sonido Super Bass\n\r\n Dise&ntilde;o port&aacute;til y moderno\n\r\n Ideal para hogar, viajes, reuniones y actividades al aire libre"
+    },
+    {
+      "id": "er-ampliador-de-pantalla-celular-226",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Ampliador de Pantalla Celular",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1586-b4a69e54-9c2c-4d15-a844-60aa97e880de.webp",
+      "url": "https://dctecnology.xyz/p/er-ampliador-de-pantalla-celular-226.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 13900,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 13900,
+      "descripcion": "Caracter&iacute;sticas principales: Pantalla curva amplificadora para celular\n Aumento de imagen de 2 a 4 veces\n Imagen en alta definici&oacute;n\n Dise&ntilde;o port&aacute;til y f&aacute;cil de guardar\n Compatible con diferentes modelos de celular\n Ideal para entretenimiento, estudio y descanso visual Una opci&oacute;n pr&aacute;ctica para quienes quieren disfrutar m&aacute;s contenido desde el celular sin forzar la vista. Compra el tuyo y mejora tu experiencia al ver videos desde el celular."
+    },
+    {
+      "id": "er-smart-watch-audifonos-d200-ultra-229",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Smart Watch + Audifonos D200 Ultra",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1606-c4f4e747-5b71-4f63-a1bc-415b5a674f23.webp",
+      "url": "https://dctecnology.xyz/p/er-smart-watch-audifonos-d200-ultra-229.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 55900,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 55900,
+      "descripcion": "Smart Watch D200 Ultra 2 es un combo completo y moderno: incluye reloj inteligente, aud&iacute;fonos inal&aacute;mbricos y varias correas intercambiables para combinar con tu estilo.\r\n\r\nIdeal para llamadas, m&uacute;sica, notificaciones, deporte y uso diario. Una excelente opci&oacute;n para quienes buscan tecnolog&iacute;a, practicidad y variedad en un solo kit."
+    },
+    {
+      "id": "er-smart-watch-audifonos-i20-230",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Smart Watch + Audifonos I20",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1607-792dedf8-0fcd-41c7-ab01-c70ca4ade4fd-1.webp",
+      "url": "https://dctecnology.xyz/p/er-smart-watch-audifonos-i20-230.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 49000,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 49000,
+      "descripcion": "Smart Watch i20 Ultra Max Suit es un kit completo y pr&aacute;ctico: incluye reloj inteligente, aud&iacute;fonos, cargador y varias correas para cambiar de estilo cuando quieras.\r\n\r\nIdeal para llamadas, notificaciones, m&uacute;sica, deporte y uso diario. Todo en una sola presentaci&oacute;n, moderno, funcional y perfecto para regalar o revender."
+    },
+    {
+      "id": "er-mini-proyector-led-yg-300-esquinas-cuadradas-231",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Mini Proyector LED Yg 300 - Esquinas Cuadradas",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1614-6ab29b56-3715-4b14-bc37-ea49889bbe6d.webp",
+      "url": "https://dctecnology.xyz/p/er-mini-proyector-led-yg-300-esquinas-cuadradas-231.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 77000,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 77000,
+      "descripcion": "Cuando buscamos un proyector port&aacute;til, lo imprescindible es que sea peque&ntilde;o y poco pesado. En este caso, el proyector YG 300 cumple estas premisas, con unas dimensiones de 12.50 x 8.50 x 4.50 cm y un peso de 245 g. No es de tama&ntilde;o de bolsillo, pero entra sin ninguna dificultad dentro de cualquier bolso o mochila, para acompa&ntilde;arte en todo momento. El proyector est&aacute; realizado en material pl&aacute;stico ABS, robusto y una combinaci&oacute;n de color blanco y amarillo que le aporta un toque desenfadado.\n\r\n\n\r\nProyector LCD YG-300\n\r\nReproductor multimedia con 320 "
+    },
+    {
+      "id": "er-luz-led-potente-para-celular-corazon-238",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Luz LED Potente para Celular Corazon",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1642-07ec2791-cdcd-481f-8879-917ea184fe48-1.webp",
+      "url": "https://dctecnology.xyz/p/er-luz-led-potente-para-celular-corazon-238.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 20900,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 20900,
+      "descripcion": "Luz LED en forma de coraz&oacute;n con tecnolog&iacute;a RGB (modelo M85RGB), ofrece colores vibrantes, efectos din&aacute;micos y tonos blanco fr&iacute;o/c&aacute;lido. Su dise&ntilde;o proporciona iluminaci&oacute;n amplia y uniforme. Es recargable para uso inal&aacute;mbrico e incluye un clip de sujeci&oacute;n universal para smartphones."
+    },
+    {
+      "id": "er-mouse-ergonomico-alambrico-239",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Mouse Ergonomico Alambrico",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1667-9fb324c4-db94-4791-995e-7f7067dcfd36.webp",
+      "url": "https://dctecnology.xyz/p/er-mouse-ergonomico-alambrico-239.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 26600,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 26600,
+      "descripcion": "Trabaja y navega con mayor comodidad gracias a este mouse ergon&oacute;mico, dise&ntilde;ado para adaptarse mejor a la mano y reducir la fatiga durante largas jornadas de uso.\r\n\r\nCuenta con conexi&oacute;n al&aacute;mbrica estable, respuesta r&aacute;pida y dise&ntilde;o c&oacute;modo para oficina, estudio, computador de casa o negocio.\r\n\r\nPr&aacute;ctico, c&oacute;modo y listo para usar. Ideal para quienes buscan un mouse funcional y econ&oacute;mico."
+    },
+    {
+      "id": "er-audifonos-bluetooth-yx29-con-pantalla-tactil-244",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Audifonos Bluetooth YX29 con Pantalla Tactil",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1691-audifonos-bluetooth-yx29-con-pantalla-tactil-1.webp",
+      "url": "https://dctecnology.xyz/p/er-audifonos-bluetooth-yx29-con-pantalla-tactil-244.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 55900,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 55900,
+      "descripcion": "**¡Descubre el futuro del sonido!** Los AUDIFONOS BLUETOOTH YX29 con pantalla táctil te ofrecen una experiencia inmersiva y control total. Música, llamadas y más, a tu alcance con un solo toque. ¿Listo para innovar?"
+    },
+    {
+      "id": "er-kit-gamer-x4-articulos-245",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Kit Gamer X4 Articulos",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1717-kit-gamer-x4-articulos-1.webp",
+      "url": "https://dctecnology.xyz/p/er-kit-gamer-x4-articulos-245.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 97900,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 97900,
+      "descripcion": "Equipa tu espacio con todo lo necesario para jugar: teclado, mouse, audífonos y mouse pad con diseño moderno e iluminación llamativa. Ideal para PC, estudio, oficina o regalo.Completo, práctico y listo para usar."
+    },
+    {
+      "id": "er-tv-box-contra-marcado-247",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "TV Box Contra Marcado",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1758-fire-tv-stick-contra-marcado-1.webp",
+      "url": "https://dctecnology.xyz/p/er-tv-box-contra-marcado-247.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 119000,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 119000,
+      "descripcion": "¡Transforma tu TV en una central de entretenimiento 4K HDR con un solo toque! Accede a tus apps favoritas al instante y navega con la voz. ¿Listo para el siguiente nivel de streaming? ¡No te quedes atrás!"
+    },
+    {
+      "id": "er-smart-watch-lg88-pro-248",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Smart Watch LG88 Pro",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1761-smart-watch-lg88-pro-1.webp",
+      "url": "https://dctecnology.xyz/p/er-smart-watch-lg88-pro-248.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 82600,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 82600,
+      "descripcion": "**SMART WATCH LG88 PRO:** ¡Eleva tu estilo y tu conexión! Descubre la combinación perfecta de tecnología avanzada y diseño sofisticado. Con correas personalizables y un look premium, este smartwatch se adapta a ti. ¿Listo para experimentar el futuro en tu muñeca?"
+    },
+    {
+      "id": "er-smart-watch-s9-mini-amoled-249",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Smart Watch S9 Mini Amoled",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1762-smart-watch-s9-mini-amoled-1.webp",
+      "url": "https://dctecnology.xyz/p/er-smart-watch-s9-mini-amoled-249.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 68600,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 68600,
+      "descripcion": "**¡Descubre el poder en tu muñeca!** El SMART WATCH S9 MINI AMOLED redefine la elegancia y la tecnología. Su pantalla vibrante y diseño compacto esconden funciones increíbles. ¿Listo para vivir tu vida al máximo? ¡Pregunta cómo!"
+    },
+    {
+      "id": "er-smartwacht-ultra-combo-pro-253",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Smartwacht Ultra Combo Pro",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1771-smart-watch-ultra-combo-pro-1.webp",
+      "url": "https://dctecnology.xyz/p/er-smartwacht-ultra-combo-pro-253.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 49000,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 49000,
+      "descripcion": "¡Eleva tu estilo y tu rendimiento! Descubre el **SMART WATCH ULTRA COMBO PRO**. Monitoriza tu salud, conecta tus llamadas y disfruta de tu música, todo en un solo dispositivo elegante y funcional. ¡La tecnología y el diseño que necesitas para conquistar tu día!"
+    },
+    {
+      "id": "er-aro-de-luz-tik-tok-con-soporte-para-2-celulares-254",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Aro de Luz Tik Tok con Soporte para 2 Celulares",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1777-aro-de-luz-tik-tok-con-soporte-para-2-celulares-1.webp",
+      "url": "https://dctecnology.xyz/p/er-aro-de-luz-tik-tok-con-soporte-para-2-celulares-254.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 23100,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 23100,
+      "descripcion": "✅ Iluminación profesional\n✅ Soporte para dos celulares\n✅ Altura ajustable\n✅ Rotación de 360°\n✅ Control de intensidad\n✅ Conexión USB\n✅ Base estable y resistente¡Haz que cada video y fotografía se vea más profesional! Pide el tuyo hoy."
+    },
+    {
+      "id": "er-audifonos-tws-s510-con-pantalla-digital-256",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Audifonos TWS S510 con Pantalla Digital",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1781-audifonos-tws-s510-con-pantalla-digital-1.webp",
+      "url": "https://dctecnology.xyz/p/er-audifonos-tws-s510-con-pantalla-digital-256.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 18900,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 18900,
+      "descripcion": "¡Descubre el sonido con estilo! Los AUDIFONOS TWS S510 con pantalla digital te ofrecen una experiencia auditiva inmersiva con cancelación de ruido activa. Controla tu música y llamadas de forma inteligente. ¡Prepárate para escuchar la diferencia!"
+    },
+    {
+      "id": "er-kit-de-grabacion-para-celular-ay-49rgb-fino-258",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Kit de Grabacion para Celular AY-49RGB Fino",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1790-kit-de-grabacion-para-celular-ay-49rgb-2-c1c45ca7.webp",
+      "url": "https://dctecnology.xyz/p/er-kit-de-grabacion-para-celular-ay-49rgb-fino-258.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 38500,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 38500,
+      "descripcion": "Características: • Micrófono tipo mini “shotgun” con espuma antiviento. • Luz de video LED universal (modo RGB) para mejorar iluminación. • Soporte para teléfono con ajuste (horizontal/vertical). • Trípode de mesa (también sirve como agarradera). • Control Bluetooth para foto/video a distancia."
+    },
+    {
+      "id": "er-audifonos-inalambricos-con-pantalla-inteligente-anc-259",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Audifonos Inalambricos con Pantalla Inteligente ANC",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1791-audifonos-inalambricos-con-pantalla-inteligente-anc-1-1810651d.webp",
+      "url": "https://dctecnology.xyz/p/er-audifonos-inalambricos-con-pantalla-inteligente-anc-259.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 53200,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 53200,
+      "descripcion": "✅ Cancelación de ruido ANC/ENC\n✅ Pantalla táctil a color\n✅ Control de música y volumen\n✅ Visualización del nivel de batería\n✅ Estuche de carga recargable\n✅ Diseño cómodo y moderno\n✅ Excelente calidad de sonido"
+    },
+    {
+      "id": "er-power-bank-magnetico-10000-mah-yo11-261",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Power Bank Magnetico 10.000 mAh YO11",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1796-power-bank-magnetico-10-000-mah-1-75566a07.webp",
+      "url": "https://dctecnology.xyz/p/er-power-bank-magnetico-10000-mah-yo11-261.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 92400,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 92400,
+      "descripcion": "🔋 BATERÍA EXTERNA MAGNÉTICA YOOKIE YO111Carga tu celular donde quieras, sin cables y con total comodidad. ⚡📱✅ 5000mAh\n✅ Carga inalámbrica de 15W\n✅ Carga rápida Tipo-C de 22.5W\n✅ Fuerte imán magnético\n✅ Soporte integrado para usar el celular mientras carga🔥 Compacta, potente y perfecta para llevar a todas partes."
+    },
+    {
+      "id": "er-audifonos-ows-yks286-262",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Audifonos Ows YKS286",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1797-audifonos-ows-yks286-1-60f6e183.webp",
+      "url": "https://dctecnology.xyz/p/er-audifonos-ows-yks286-262.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 68600,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 68600,
+      "descripcion": "**¡Libera tu sonido sin límites!** Los AUDIFONOS OWS YKS286 te ofrecen una experiencia auditiva superior con un ajuste perfecto para tus aventuras. **Descubre un audio potente y una comodidad inigualable.** ¡No te conformes con menos, eleva tu ritmo!"
+    },
+    {
+      "id": "er-airpods-originales-es57-263",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Audífonos Inalámbricos ES57",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1798-airpods-originales-es57-1-070e7e8a.webp",
+      "url": "https://dctecnology.xyz/p/er-airpods-originales-es57-263.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 47600,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 47600,
+      "descripcion": "¡Sumérgete en un sonido puro con los Yookie ES57! Experimenta libertad inalámbrica y un diseño elegante que te acompaña a todas partes. Descubre la calidad que te hará vibrar. ¡Siente la diferencia!"
+    },
+    {
+      "id": "er-airpods-originales-es56-264",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Audífonos Inalámbricos ES56",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1799-airpods-originales-es56-1-5b0675f0.webp",
+      "url": "https://dctecnology.xyz/p/er-airpods-originales-es56-264.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 51800,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 51800,
+      "descripcion": "¡Libera tu sonido! Descubre los Yookie ES56, la libertad inalámbrica con un audio inmersivo que te acompaña a donde vayas. Diseñados para tu ritmo de vida. ¡No te quedes sin los tuyos!"
+    },
+    {
+      "id": "er-cargador-superrapido-60w-ki275-265",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Cargador Superrapido 60W KI275",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1800-cargador-superrapido-60w-1-7f748f63.webp",
+      "url": "https://dctecnology.xyz/p/er-cargador-superrapido-60w-ki275-265.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 81200,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 81200,
+      "descripcion": "cable incluido"
+    },
+    {
+      "id": "er-pantalla-selfie-270",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Pantalla Selfie",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1827-pantalla-selfie-1-dce9922b.webp",
+      "url": "https://dctecnology.xyz/p/er-pantalla-selfie-270.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 54600,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 54600,
+      "descripcion": "¡Captura la luz perfecta para tus selfies! La PANTALLA SELFIE te brinda la iluminación ideal para deslumbrar en cada foto. ¿Lista para elevar tu contenido y atraer todas las miradas? ¡Descubre el secreto de las fotos profesionales, al instante!"
+    },
+    {
+      "id": "er-mini-luz-led-recargable-para-celular-3w-272",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Mini Luz LED Recargable para Celular 3W",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1840-mini-luz-led-recargable-para-celular-3w-1-b1b5dddf.webp",
+      "url": "https://dctecnology.xyz/p/er-mini-luz-led-recargable-para-celular-3w-272.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 6900,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 6900,
+      "descripcion": "¡Captura la luz perfecta en cada foto! Con esta MINI LUZ LED RECARGABLE, tus selfies y videos brillarán como nunca antes. Olvídate de la poca luz y luce espectacular al instante. ¡Descubre el secreto de la iluminación profesional!"
+    },
+    {
+      "id": "er-soporte-celular-hold-371-273",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Soporte Celular HOLD-371",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1848-soporte-celular-hold-371-1-58c1eb2d.webp",
+      "url": "https://dctecnology.xyz/p/er-soporte-celular-hold-371-273.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 6600,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 6600,
+      "descripcion": "Características: • Soporte de escritorio con forma de oso para sostener celular o tablet en posición horizontal. • Plástico rígido (tipo PVC/ABS) con acabado texturizado; base estable para escritorio. • Funciona con la mayoría de smartphones y tablets pequeñas/medianas."
+    },
+    {
+      "id": "er-soporte-celular-hold-439-274",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Soporte Celular HOLD-439",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1849-soporte-celular-hold-439-1-200c0304.webp",
+      "url": "https://dctecnology.xyz/p/er-soporte-celular-hold-439-274.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 6600,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 6600,
+      "descripcion": "¡Tu celular merece un guardián adorable! El SOPORTE CELULAR HOLD-439, con su diseño de lobito juguetón, no solo asegura tu dispositivo, sino que añade un toque de ternura a tu espacio. ¡Descubre cómo puede transformar tu experiencia!"
+    },
+    {
+      "id": "er-mesa-auto-hold-372-275",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Mesa Auto HOLD-372",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1850-mesa-auto-hold-372-1-5a0db807.webp",
+      "url": "https://dctecnology.xyz/p/er-mesa-auto-hold-372-275.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 26200,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 26200,
+      "descripcion": "¡No más comidas incómodas en el coche! Descubre la MESA AUTO HOLD-372, tu solución revolucionaria para disfrutar de tus antojos y mantener tu móvil a la vista. ¡Tu copiloto perfecto te espera!"
+    },
+    {
+      "id": "er-parlante-kimiso-kms-295-277",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Parlante Kimiso KMS-295",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1868-parlante-kimiso-kms-295-2-6ab70538.webp",
+      "url": "https://dctecnology.xyz/p/er-parlante-kimiso-kms-295-277.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 50400,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 50400,
+      "descripcion": "¡Siente el ritmo y vive la fiesta en cualquier lugar! El Parlante Kimiso KMS-295 te envuelve en sonido potente y luces vibrantes. Resistente al agua y con 8W de potencia, ¿listo para que la música nunca pare? ¡Descubre su magia!"
+    },
+    {
+      "id": "er-teclado-gamer-278",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Teclado Gamer",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1869-teclado-gamer-1-39489b68.webp",
+      "url": "https://dctecnology.xyz/p/er-teclado-gamer-278.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 50400,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 50400,
+      "descripcion": "¡Domina el juego con este teclado gamer de una mano! Sumérgete en la acción con su iluminación RGB vibrante y diseño ergonómico. Precisión y confort para victorias épicas. ¡Prepárate para la experiencia definitiva!"
+    },
+    {
+      "id": "er-parlante-portatil-ajustable-kms-299-279",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Parlante Portatil Ajustable KMS-299",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1870-parlante-portatil-ajustable-kms-299-1-d0459181.webp",
+      "url": "https://dctecnology.xyz/p/er-parlante-portatil-ajustable-kms-299-279.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 41900,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 41900,
+      "descripcion": "El altavoz portátil KIMISO (modelo KMS-299) cuenta con soporte integrado para montaje en manubrio de bicicleta o motocicleta, controles frontales integrados de encendido, modo y volumen en color naranja, acabado exterior en malla textil resistente y radiador pasivo lateral para bajos."
+    },
+    {
+      "id": "er-parlante-portatil-original-kimiso-kms-374-283",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Parlante Portatil Original Kimiso KMS-374",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1876-parlante-portatil-original-kimiso-kms-374-1-d3f2235c.webp",
+      "url": "https://dctecnology.xyz/p/er-parlante-portatil-original-kimiso-kms-374-283.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 189000,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 189000,
+      "descripcion": "El altavoz portátil KIMISO Bass Speaker (modelo KMS-374) cuenta con una potencia de 30W Extra Bass, certificación IPX6 de resistencia al agua, iluminación LED RGB en los laterales y una robusta asa de transporte superior, además de múltiples opciones de conexión como tarjeta Micro SD, entrada auxiliar y puerto USB."
+    },
+    {
+      "id": "er-parlante-portatil-original-kimiso-kms-323-284",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Parlante Portatil Original Kimiso KMS-323",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1877-parlante-portatil-original-kimiso-kms-323-1-3a11fc59.webp",
+      "url": "https://dctecnology.xyz/p/er-parlante-portatil-original-kimiso-kms-323-284.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 123200,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 123200,
+      "descripcion": "El altavoz portátil KIMISO (modelo KMS-323) cuenta con iluminación LED RGB en la base frontal y en los radiadores pasivos laterales, botones de control de gran tamaño, asa superior integrada para transporte cómodo y cuerpo recubierto en malla textil de alta resistencia."
+    },
+    {
+      "id": "er-parlante-portatil-original-kimiso-kms-325-max-285",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Parlante Portatil Original Kimiso KMS-325 Max",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1878-parlante-portatil-original-kimiso-kms-325-max-1-0f03f967.webp",
+      "url": "https://dctecnology.xyz/p/er-parlante-portatil-original-kimiso-kms-325-max-285.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 278600,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 278600,
+      "descripcion": "El altavoz portátil KIMISO (modelo KMS-325 Max) ofrece una potencia pico de 120W con tecnología Extra Bass, batería de 8000 mAh (3.7V), certificación IPX6 de resistencia al agua, iluminación RGB LED y correa para transporte al hombro, junto con múltiples opciones de conectividad."
+    },
+    {
+      "id": "er-diademas-yookie-originales-eb37-286",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Diademas Yookie Originales EB37",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1881-diademas-originales-eb37-1-e20ffe0f.webp",
+      "url": "https://dctecnology.xyz/p/er-diademas-yookie-originales-eb37-286.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 83900,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 83900,
+      "descripcion": "¡Despierta tus sentidos! Las DIADEMAS ORIGINALES EB37 te sumergirán en un sonido puro y envolvente. Diseño elegante, comodidad excepcional. Descubre la experiencia auditiva que estabas esperando. ¡No te conformes con menos!"
+    },
+    {
+      "id": "er-soporte-para-carro-hold-372-287",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Soporte para Carro HOLD-372",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1885-soporte-para-carro-hold-372-1-244addb8.webp",
+      "url": "https://dctecnology.xyz/p/er-soporte-para-carro-hold-372-287.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 33200,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 33200,
+      "descripcion": "¡Adiós al desorden! Con el HOLD-372, tu celular y bebida estarán siempre seguros y a mano. Gira 360° para una visibilidad perfecta y disfruta de la ruta sin preocupaciones. ¡Instalación en segundos! ¿Listo para una experiencia de manejo superior?"
+    },
+    {
+      "id": "er-cable-tipo-c-trenzado-av-10728-ccr-293",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Cable Tipo C Trenzado AV-10728-CCR",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1906-cable-tipo-c-trenzado-fino-1-d48fe6c8.webp",
+      "url": "https://dctecnology.xyz/p/er-cable-tipo-c-trenzado-av-10728-ccr-293.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 6100,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 6100,
+      "descripcion": "¡Cansado de cables que se enredan y rompen! Descubre la elegancia y durabilidad del CABLE TIPO C TRENZADO FINO. Su diseño trenzado no solo luce increíble, sino que garantiza una carga rápida y segura. ¡Transforma tu experiencia de carga!"
+    },
+    {
+      "id": "er-diademas-pro-tuka-xh-648-295",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Diademas Pro Tuka XH-648",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1922-diademas-pro-tuka-xh-648-1-11405211.webp",
+      "url": "https://dctecnology.xyz/p/er-diademas-pro-tuka-xh-648-295.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 41900,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 41900,
+      "descripcion": "¡Sumérgete en un sonido estéreo inmersivo! Los Audífonos Tuka XH-648 te ofrecen libertad inalámbrica y una batería que no te abandonará. ¿Listo para disfrutar tu música sin límites? ¡Descúbrelos!"
+    },
+    {
+      "id": "er-audifonos-de-conduccion-osea-298",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Audifonos de Conduccion Osea",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1928-audifonos-de-conduccion-osea-1-bcaa8c2e.webp",
+      "url": "https://dctecnology.xyz/p/er-audifonos-de-conduccion-osea-298.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 44700,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 44700,
+      "descripcion": "¡Libera tus oídos y siente la música! Con los auriculares de conducción ósea OKMAX, disfruta de un sonido envolvente y total conciencia de tu entorno. Perfectos para deportistas, su diseño ligero y seguro te permite moverte libremente. ¡Descubre una nueva forma de escuchar!"
+    },
+    {
+      "id": "er-teclado-inalambrico-tactil-yookie-ye36-299",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Teclado Inalambrico Tactil Yookie YE36",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1929-teclado-inalambrico-tactil-yookie-ye36-1-105b69a0.webp",
+      "url": "https://dctecnology.xyz/p/er-teclado-inalambrico-tactil-yookie-ye36-299.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 83900,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 83900,
+      "descripcion": "1 AÑO GARANTIA"
+    },
+    {
+      "id": "er-teclado-inalambrico-portatil-ultrafino-300",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Teclado Inalambrico Portatil Ultrafino",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1930-teclado-inalambrico-portatil-ultrafino-1-5954770f.webp",
+      "url": "https://dctecnology.xyz/p/er-teclado-inalambrico-portatil-ultrafino-300.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 55900,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 55900,
+      "descripcion": "1 año garantia"
+    },
+    {
+      "id": "er-power-bank-225w-yookie-original-301",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Power Bank 22.5W Yookie Original",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1931-power-bank-22-5w-yookie-original-1-98c109b0.webp",
+      "url": "https://dctecnology.xyz/p/er-power-bank-225w-yookie-original-301.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 81900,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 81900,
+      "descripcion": "1 AÑO GARANTIA"
+    },
+    {
+      "id": "er-cable-de-carga-rapida-y-datos-4-en-1-yookie-ec27-120w-303",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Cable de Carga Rapida y Datos 4 en 1 Yookie EC27 120W",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1933-cable-de-carga-rapida-y-datos-4-en-1-yookie-ec27-120w-1-d0509a45.webp",
+      "url": "https://dctecnology.xyz/p/er-cable-de-carga-rapida-y-datos-4-en-1-yookie-ec27-120w-303.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 17700,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 17700,
+      "descripcion": "¡Adiós esperas! Carga tus dispositivos al instante con el YOOKIE EC27. Un solo cable 4 en 1, 120W de potencia y transferencia de datos ultrarrápida. ¿Listo para revolucionar tu carga? ¡Descubre la velocidad que te mereces!"
+    },
+    {
+      "id": "er-cable-de-datos-y-carga-rapida-yookie-cb108-100w-304",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Cable de Datos y Carga Rapida Yookie CB108 100W",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1934-cable-de-datos-y-carga-rapida-yookie-cb108-100w-1-88cd0d7f.webp",
+      "url": "https://dctecnology.xyz/p/er-cable-de-datos-y-carga-rapida-yookie-cb108-100w-304.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 29000,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 29000,
+      "descripcion": "¡Olvídate de esperar! Con el CABLE YOOKIE CB108 de 100W, tus dispositivos estarán cargados a toda velocidad. Su diseño de carga rápida y transferencia veloz te sorprenderá. ¿Listo para experimentar la potencia?"
+    },
+    {
+      "id": "er-tv-stick-216-economico-h245-305",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "TV Stick 2+16 Economico H245",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1950-tv-stick-2-16-economico-h245-1-764efb3a.webp",
+      "url": "https://dctecnology.xyz/p/er-tv-stick-216-economico-h245-305.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 77000,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 77000,
+      "descripcion": "**¡Transforma tu TV en un centro de entretenimiento 4K!** Descubre el nuevo TV Stick Y10 y accede a tus apps favoritas, películas y series al instante. ¡Calidad de imagen espectacular y a un precio que no podrás creer! ¿Listo para el siguiente nivel?"
+    },
+    {
+      "id": "er-parlante-bluetooth-con-luz-rgb-kts-2310-307",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Parlante Bluetooth con Luz RGB KTS-2310",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1960-parlante-bluetooth-con-luz-rgb-kts-2310-1-b5c5cb9a.webp",
+      "url": "https://dctecnology.xyz/p/er-parlante-bluetooth-con-luz-rgb-kts-2310-307.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 41900,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 41900,
+      "descripcion": "¡Prepárate para la fiesta bajo el agua! El Parlante Bluetooth KTS-2310 es tu compañero ideal para cualquier aventura. Con resistencia IPX7 y luces RGB vibrantes, transforma tus momentos con sonido y color. ¡No querrás que la música pare!"
+    },
+    {
+      "id": "er-smart-watch-sii-pro-original-308",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Smart Watch Sii Pro Original",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1969-smart-watch-sii-pro-original-1-56f9bfaf.webp",
+      "url": "https://dctecnology.xyz/p/er-smart-watch-sii-pro-original-308.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 132300,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 132300,
+      "descripcion": "Conexión Bluetooth Reproductor de música Sensor Ritmo Cardiaco РАСА X 100 NWT MACtive pro GPS 10 SAT Contestar y Realizar Llamadas Cargador Magnético Tipo USB Función Deportes • Cámara Remota por Bluetooth Alarma-Función Anti-perdida Calendario Contador de Pasos Notificación Redes Sociales Asistente de vOZ Grabación de vOZ Almacenamiento de fotos Medidor de decibeles Traductor - Brújul"
+    },
+    {
+      "id": "er-smart-watch-w33-original-309",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Smart Watch W33 Original",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1970-smart-watch-w33-original-1-3798d119.webp",
+      "url": "https://dctecnology.xyz/p/er-smart-watch-w33-original-309.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 139900,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 139900,
+      "descripcion": "Conexión Bluetooth Reproductor de música Sensor Ritmo Cardíaco РАСА X 100 Contestar y Realizar Llamadas Cargador Magnético Tipo USB Función Deportes Cámara Remota por Bluetooth Alarma-Función Anti-perdida Calendario Contador de Pasos Notificación Redes Sociales Asistente de vOZ Medidor de decibeles Traductor - Brújula Correa de broche"
+    },
+    {
+      "id": "er-lampara-proyectora-de-estrellas-star-master-310",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Lampara Proyectora de Estrellas Star Master",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1972-lampara-proyectora-de-estrellas-star-master-1-e22185dc.webp",
+      "url": "https://dctecnology.xyz/p/er-lampara-proyectora-de-estrellas-star-master-310.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 23100,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 23100,
+      "descripcion": "✅ Proyección de estrellas y figuras\n✅ Efecto de luces de colores\n✅ Ideal para habitaciones y decoración\n✅ Diseño compacto y fácil de usar\n✅ Incluye cable de alimentación\n✅ Disponible en azul, rosado y morado"
+    },
+    {
+      "id": "er-smart-watch-ace-180-312",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Smart Watch ACE-180",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1985-smart-watch-ace-180-1-8a575a80.webp",
+      "url": "https://dctecnology.xyz/p/er-smart-watch-ace-180-312.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 48900,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 48900,
+      "descripcion": "Función Contestar llamadas, Cargador magnético, Material aleación de zinc, Control de presión arterial + 7 pulsos + Funda protectora trasparente , Compatible con Android y iphone SOLO UN RELOJ"
+    },
+    {
+      "id": "er-smart-watch-ws-75-ultra-3-313",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Smart Watch WS-75 Ultra 3",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1986-smart-watch-ws-75-ultra-3-1-54aba6b0.webp",
+      "url": "https://dctecnology.xyz/p/er-smart-watch-ws-75-ultra-3-313.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 55900,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 55900,
+      "descripcion": "¡Descubre el **SMART WATCH WS-75 ULTRA 3**! Con su vibrante pantalla AMOLED y diseño ultra, te conecta con tu mundo y tu bienestar. ¿Listo para elevar tu estilo y tu vida? ¡Pregunta cómo!"
+    },
+    {
+      "id": "er-smart-watch-x10-pro-max-314",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Smart Watch X10 Pro Max",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1987-smart-watch-x10-pro-max-1-8e882402.webp",
+      "url": "https://dctecnology.xyz/p/er-smart-watch-x10-pro-max-314.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 78400,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 78400,
+      "descripcion": "Función Contestar llamadas, Cargador magnético, Material aleación de zinc, Control de presión arterial + 1 pulso , Compatible con Android y iphone"
+    },
+    {
+      "id": "er-mouse-gamer-rgb-x6-316",
+      "tipo": "tecnologia",
+      "marca": "DC Technology",
+      "nombre": "Mouse Gamer RGB X6",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1993-mouse-gamer-rgb-x6-1-bec892e0.webp",
+      "url": "https://dctecnology.xyz/p/er-mouse-gamer-rgb-x6-316.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 15400,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "desde": 15400,
+      "descripcion": "Características:Conexión mediante cable USB.Iluminación LED RGB multicolor.Diseño ergonómico para mayor comodidad durante el uso.Rueda de desplazamiento y botones de fácil acceso."
     }
   ]
 }
