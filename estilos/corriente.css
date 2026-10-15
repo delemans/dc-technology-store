@@ -1,0 +1,119 @@
+/* estilos/corriente.css — Identidad "Corriente DC" (va después de profesional.css).
+   La C del logo está hecha de pistas de circuito y DC es corriente directa: la interfaz es sobria, pero una
+   "corriente" roja recorre la portada, los bordes de las tarjetas, los botones y la línea bajo el encabezado.
+   Movimiento con propósito: solo transform/opacity/stroke (60 fps) y nada si el equipo pide reducir movimiento. */
+
+@property --angulo { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+
+/* ---------- Portada: siempre grafito (también en modo claro), con tokens propios ---------- */
+.hero-dc {
+    --tinta: 236 239 244; --n200: 229 231 235; --n300: 209 213 219; --n400: 163 170 181; --n500: 120 128 140;
+    --em400: 52 211 153; --am400: 251 191 36;
+    position: relative; overflow: hidden; isolation: isolate;
+    margin: 18px auto 34px; max-width: calc(80rem - 2rem); border-radius: 28px;
+    background:
+        radial-gradient(120% 90% at 85% 40%, rgb(224 52 69 / .14), transparent 60%),
+        linear-gradient(160deg, #12161D 0%, #0B0E13 100%);
+    color: rgb(var(--tinta));
+    box-shadow: 0 0 0 1px rgb(255 255 255 / .06), 0 30px 60px -30px rgb(0 0 0 / .55);
+}
+@media (max-width: 1310px) { .hero-dc { margin-inline: 1rem; } }
+/* Rejilla de placa de circuito, muy tenue, que se desvanece hacia los bordes */
+.hero-dc::before {
+    content: ''; position: absolute; inset: 0; z-index: -1; opacity: .5;
+    background-image: linear-gradient(rgb(255 255 255 / .035) 1px, transparent 1px), linear-gradient(90deg, rgb(255 255 255 / .035) 1px, transparent 1px);
+    background-size: 32px 32px;
+    -webkit-mask-image: radial-gradient(70% 80% at 70% 50%, #000 30%, transparent 75%);
+            mask-image: radial-gradient(70% 80% at 70% 50%, #000 30%, transparent 75%);
+}
+/* Foco que sigue el puntero (efectos.js mueve --px/--py) */
+.hero-dc__luz {
+    position: absolute; inset: 0; z-index: -1; pointer-events: none; opacity: 0; transition: opacity .4s ease;
+    background: radial-gradient(420px circle at var(--px, 70%) var(--py, 40%), rgb(224 52 69 / .16), transparent 60%);
+}
+.hero-dc:hover .hero-dc__luz { opacity: 1; }
+.hero-dc__grid { display: grid; gap: 28px; align-items: center; padding-block: 44px 40px; }
+@media (min-width: 900px) { .hero-dc__grid { grid-template-columns: 1.15fr .85fr; padding-block: 64px; } }
+.hero-dc__texto { min-width: 0; }
+.hero-dc__eyebrow { display: inline-flex; align-items: center; gap: 10px; margin: 0 0 18px; padding: 6px 12px 6px 10px; border-radius: 999px;
+    font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: #F2A3AB;
+    background: rgb(224 52 69 / .1); box-shadow: inset 0 0 0 1px rgb(224 52 69 / .3); }
+.hero-dc__led { width: 7px; height: 7px; border-radius: 99px; background: #E03445; box-shadow: 0 0 0 3px rgb(224 52 69 / .25); animation: led 2.4s ease-in-out infinite; }
+@keyframes led { 50% { box-shadow: 0 0 0 6px rgb(224 52 69 / 0); } }
+.hero-dc__titulo { margin: 0; font: 800 clamp(2.1rem, 5.4vw, 4.1rem)/1.03 Inter, system-ui, sans-serif; letter-spacing: -.035em; color: #fff; text-wrap: balance; }
+.hero-dc__titulo span {
+    background: linear-gradient(90deg, #FF5A69, #E03445 45%, #FF8A94 60%, #E03445 75%);
+    background-size: 220% 100%; -webkit-background-clip: text; background-clip: text; color: transparent;
+    animation: carga 6s ease-in-out infinite;
+}
+@keyframes carga { 0%, 100% { background-position: 100% 0; } 50% { background-position: 0 0; } }
+.hero-dc__lead { margin: 18px 0 0; max-width: 34rem; font-size: clamp(15px, 1.6vw, 17px); line-height: 1.6; color: #AEB5C1; }
+.hero-dc__acciones { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+.hero-dc__btn { position: relative; display: inline-flex; align-items: center; gap: 10px; min-height: 50px; padding: 0 22px; border-radius: 14px;
+    font-size: 15px; font-weight: 700; text-decoration: none; transition: transform .2s ease, background-color .2s ease, box-shadow .2s ease; }
+.hero-dc__btn--p { color: #fff; background: #E03445; box-shadow: 0 10px 24px -12px rgb(224 52 69 / .8); overflow: hidden; }
+.hero-dc__btn--p::after { content: ''; position: absolute; inset: 0; background: linear-gradient(110deg, transparent 35%, rgb(255 255 255 / .28) 50%, transparent 65%); transform: translateX(-120%); }
+.hero-dc__btn--p:hover { transform: translateY(-1px); background: #C8233A; }
+.hero-dc__btn--p:hover::after { transition: transform .7s ease; transform: translateX(120%); }
+.hero-dc__btn--s { color: #E6E9EE; background: rgb(255 255 255 / .06); box-shadow: inset 0 0 0 1px rgb(255 255 255 / .14); }
+.hero-dc__btn--s:hover { background: rgb(255 255 255 / .1); transform: translateY(-1px); }
+.hero-dc__btn--s .fa-whatsapp { color: #25D366; font-size: 18px; }
+.hero-dc__datos { list-style: none; margin: 30px 0 0; padding: 0; display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); max-width: 40rem; }
+.hero-dc__datos li { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-radius: 14px; font-size: 12.5px; line-height: 1.35; color: #AEB5C1;
+    background: rgb(255 255 255 / .035); box-shadow: inset 0 0 0 1px rgb(255 255 255 / .07); }
+.hero-dc__datos b { display: block; color: #fff; font-size: 14px; }
+.hero-dc__datos i { flex: none; display: grid; place-items: center; width: 32px; height: 32px; border-radius: 10px; color: #FF7A86; background: rgb(224 52 69 / .12); }
+.hero-dc__social { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 18px; font-size: 13px; font-weight: 600; color: #AEB5C1; }
+.hero-dc__social .fa-heart { color: #E03445; }
+.hero-dc__social .text-white, .hero-dc__social b { color: #fff !important; }
+
+/* ---------- El circuito ---------- */
+.hero-dc__visual { position: relative; min-width: 0; display: grid; place-items: center; }
+.circuito { width: min(100%, 460px); height: auto; overflow: visible; }
+.circuito__pistas path { fill: none; stroke: rgb(255 255 255 / .1); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.circuito__corriente path {
+    fill: none; stroke: #FF4D5E; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;
+    stroke-dasharray: 26 600; stroke-dashoffset: 626; filter: drop-shadow(0 0 4px rgb(255 77 94 / .9));
+    animation: corriente var(--d, 3s) cubic-bezier(.45, 0, .2, 1) var(--r, 0s) infinite;
+}
+@keyframes corriente { 0% { stroke-dashoffset: 626; opacity: 0; } 8% { opacity: 1; } 85% { opacity: 1; } 100% { stroke-dashoffset: 0; opacity: 0; } }
+.circuito__nodos circle { fill: #12161D; stroke: rgb(255 255 255 / .25); stroke-width: 2; }
+.circuito__chip { fill: #161B23; stroke: rgb(224 52 69 / .55); stroke-width: 2; animation: chip 3s ease-in-out infinite; }
+@keyframes chip { 50% { stroke: rgb(255 77 94 / .95); } }
+.circuito__halo { animation: halo 4s ease-in-out infinite; transform-origin: 240px 210px; }
+@keyframes halo { 50% { opacity: .55; transform: scale(1.06); } }
+@media (max-width: 899px) { .circuito { width: min(100%, 340px); } .hero-dc__visual { order: -1; } }
+
+/* ---------- Línea de energía bajo el encabezado ---------- */
+body > header.sticky { position: sticky; background-color: rgb(var(--tarjeta)) !important; } /* sólido: nada se transparenta al pegarse */
+body > header.sticky::after {
+    content: ''; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; pointer-events: none;
+    background: linear-gradient(90deg, transparent, #E03445 20%, #FF8A94 50%, #E03445 80%, transparent) 0 0 / 40% 100% no-repeat;
+    animation: energia 5s linear infinite; opacity: .85;
+}
+@keyframes energia { from { background-position: -40% 0; } to { background-position: 140% 0; } }
+
+/* ---------- Tarjetas de producto: la corriente recorre el borde al pasar el cursor ---------- */
+.tarjeta-3d::after, .prod::after {
+    content: ''; position: absolute; inset: 0; border-radius: inherit; padding: 1.5px; pointer-events: none; z-index: 2; opacity: 0;
+    background: conic-gradient(from var(--angulo), transparent 0deg, #E03445 40deg, #FF8A94 60deg, transparent 100deg, transparent 360deg);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
+            mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+    transition: opacity .3s ease; transform: none !important;
+}
+.tarjeta-3d:hover::after, .tarjeta-3d:focus-visible::after, .prod:hover::after { opacity: 1; animation: recorrido 2.2s linear infinite; }
+@keyframes recorrido { to { --angulo: 360deg; } }
+.prod { position: relative; }
+
+/* ---------- Aparición al bajar (efectos.js agrega .revelar y luego .visible) ---------- */
+.revelar { opacity: 0; transform: translateY(18px); transition: opacity .6s cubic-bezier(.2, .8, .2, 1), transform .6s cubic-bezier(.2, .8, .2, 1); transition-delay: var(--retardo, 0ms); }
+.revelar.visible { opacity: 1; transform: none; }
+
+/* ---------- Títulos de sección con nodo de circuito ---------- */
+#category-title, #titulo-combos, #titulo-servicios, #titulo-opiniones, #titulo-formas-pago, #promos-titulo { position: relative; }
+
+@media (prefers-reduced-motion: reduce) {
+    .circuito__corriente path, .circuito__chip, .circuito__halo, .hero-dc__led, .hero-dc__titulo span, body > header.sticky::after { animation: none !important; }
+    .circuito__corriente path { opacity: 0; }
+    .revelar { opacity: 1; transform: none; transition: none; }
+}

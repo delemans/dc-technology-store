@@ -56,14 +56,14 @@
     </script>
 
     <!-- Estilos compilados con Tailwind (npm run css): sin CDN de desarrollo -->
-    <link rel="stylesheet" href="estilos/tailwind.css?v=202610151452">
+    <link rel="stylesheet" href="estilos/tailwind.css?v=202610151502">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" integrity="sha384-iw3OoTErCYJJB9mCa8LNS2hbsQ7M3C0EpIsO/H5+EGAkPGc6rk+V8i04oW/K5xq0" crossorigin="anonymous" referrerpolicy="no-referrer">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;700;800;900&display=swap" rel="stylesheet">
     <!-- Tema claro/oscuro (antes de pintar, sin destello) -->
-    <script src="tema.js?v=202610151452"></script>
-    <link rel="stylesheet" href="tema.css?v=202610151452">
+    <script src="tema.js?v=202610151502"></script>
+    <link rel="stylesheet" href="tema.css?v=202610151502">
     <!-- Carrito, combos y pago web: mismos estilos que el portal (carrito.js) -->
-    <link rel="stylesheet" href="estilos/cliente.css?v=202610151452">
+    <link rel="stylesheet" href="estilos/cliente.css?v=202610151502">
     <style>
         html { -webkit-tap-highlight-color: transparent; }
         [hidden] { display: none !important; }
@@ -250,7 +250,8 @@
         }
     </style>
     <!-- Estilo corporativo (va de último: recalibra colores y apaga efectos neón) -->
-    <link rel="stylesheet" href="estilos/profesional.css?v=202610151452">
+    <link rel="stylesheet" href="estilos/profesional.css?v=202610151502">
+    <link rel="stylesheet" href="estilos/corriente.css?v=202610151502">
 </head>
 <body class="bg-dcDarkBg text-white min-h-screen flex flex-col font-sans antialiased selection:bg-dcRed/40">
     <div class="mesh" aria-hidden="true"><span></span><span></span><span></span></div>
@@ -294,15 +295,65 @@
 
     <main class="relative z-10 flex-grow">
         <!-- Héroe -->
-        <section class="max-w-7xl mx-auto px-4 pt-8 sm:pt-12 pb-6 entrada">
-            <p class="text-[10px] sm:text-xs font-black uppercase tracking-[0.3em] text-dcRed mb-3">Tienda oficial · Colombia</p>
-            <h1 class="font-tech font-black text-3xl sm:text-5xl lg:text-6xl uppercase leading-[0.95] tracking-tight max-w-3xl">
-                Streaming, licencias y tecnología <span class="text-dcRed dc-text-glow">sin esperas</span>
-            </h1>
-            <p class="mt-4 text-sm sm:text-base text-neutral-400 max-w-2xl">Entrega inmediata (máximo 15 minutos tras validar tu pago), garantía en cuentas y licencias, y soporte directo por WhatsApp de lunes a sábado, 8 a.m. – 8 p.m.</p>
-            <!-- Prueba social: se llena con datos reales de Supabase (o un texto neutro) -->
-            <div id="prueba-social" class="mt-5 inline-flex flex-wrap items-center gap-3 rounded-2xl bg-white/[0.03] ring-1 ring-white/10 backdrop-blur-xl px-4 py-3 text-xs sm:text-sm font-semibold text-neutral-300">
-                <i class="fa-solid fa-heart text-dcRed"></i> Únete a nuestros clientes satisfechos
+        <!-- Portada "Corriente DC" (estilos/corriente.css + efectos.js): el circuito del logo lleva la corriente hasta la marca -->
+        <section id="hero" class="hero-dc entrada" aria-labelledby="hero-titulo">
+            <div class="hero-dc__luz" aria-hidden="true"></div>
+            <div class="hero-dc__grid max-w-7xl mx-auto px-4">
+                <div class="hero-dc__texto">
+                    <p class="hero-dc__eyebrow"><span class="hero-dc__led" aria-hidden="true"></span>Tienda oficial · Colombia</p>
+                    <h1 id="hero-titulo" class="hero-dc__titulo">Streaming, licencias y tecnología <span>sin esperas</span></h1>
+                    <p class="hero-dc__lead">Elige, paga con tu medio favorito y recibe tus accesos por WhatsApp en máximo 15 minutos tras validar el pago. Con garantía y soporte de personas reales.</p>
+                    <div class="hero-dc__acciones">
+                        <a href="#catalogo" class="hero-dc__btn hero-dc__btn--p"><i class="fa-solid fa-bolt" aria-hidden="true"></i> Ver catálogo</a>
+                        <a href="https://wa.me/573223284622?text=Hola%20DC%20TECHNOLOGY" target="_blank" rel="noopener" class="hero-dc__btn hero-dc__btn--s"><i class="fa-brands fa-whatsapp" aria-hidden="true"></i> Comprar por WhatsApp</a>
+                    </div>
+                    <ul class="hero-dc__datos" aria-label="Por qué comprar en DC TECHNOLOGY">
+                        <li><i class="fa-solid fa-stopwatch" aria-hidden="true"></i><span><b>≤ 15 min</b> entrega tras validar</span></li>
+                        <li><i class="fa-solid fa-shield-halved" aria-hidden="true"></i><span><b>30 días</b> de garantía</span></li>
+                        <li><i class="fa-solid fa-wallet" aria-hidden="true"></i><span><b>Pagos locales</b> Nequi, Daviplata y llaves</span></li>
+                    </ul>
+                    <!-- Prueba social: se llena con datos reales de Supabase (o un texto neutro) -->
+                    <div id="prueba-social" class="hero-dc__social"><i class="fa-solid fa-heart" aria-hidden="true"></i> Únete a nuestros clientes satisfechos</div>
+                </div>
+                <div class="hero-dc__visual" aria-hidden="true">
+                    <svg class="circuito" viewBox="0 0 480 420" role="presentation">
+                        <defs>
+                            <radialGradient id="halo-dc" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#E03445" stop-opacity=".35"/><stop offset="1" stop-color="#E03445" stop-opacity="0"/></radialGradient>
+                        </defs>
+                        <circle cx="240" cy="210" r="150" fill="url(#halo-dc)" class="circuito__halo"/>
+                        <g class="circuito__pistas">
+                            <path d="M10 70 H120 L170 120 H190"/>
+                            <path d="M10 210 H150"/>
+                            <path d="M10 350 H110 L160 300 H190"/>
+                            <path d="M470 60 H370 L320 110 H290"/>
+                            <path d="M470 210 H330"/>
+                            <path d="M470 360 H380 L330 310 H290"/>
+                            <path d="M240 10 V80 L215 105 V130"/>
+                            <path d="M240 410 V340 L265 315 V290"/>
+                            <path d="M60 140 H100 L130 170 H150"/>
+                            <path d="M420 280 H380 L350 250 H330"/>
+                        </g>
+                        <g class="circuito__corriente">
+                            <path d="M10 70 H120 L170 120 H190" style="--d:3.1s;--r:0s"/>
+                            <path d="M10 210 H150" style="--d:2.4s;--r:.6s"/>
+                            <path d="M10 350 H110 L160 300 H190" style="--d:3.4s;--r:1.2s"/>
+                            <path d="M470 60 H370 L320 110 H290" style="--d:2.9s;--r:.3s"/>
+                            <path d="M470 210 H330" style="--d:2.2s;--r:1.6s"/>
+                            <path d="M470 360 H380 L330 310 H290" style="--d:3.6s;--r:.9s"/>
+                            <path d="M240 10 V80 L215 105 V130" style="--d:2.6s;--r:2s"/>
+                            <path d="M240 410 V340 L265 315 V290" style="--d:2.8s;--r:1.4s"/>
+                            <path d="M60 140 H100 L130 170 H150" style="--d:3.3s;--r:2.4s"/>
+                            <path d="M420 280 H380 L350 250 H330" style="--d:3s;--r:.2s"/>
+                        </g>
+                        <g class="circuito__nodos">
+                            <circle cx="10" cy="70" r="4"/><circle cx="10" cy="210" r="4"/><circle cx="10" cy="350" r="4"/>
+                            <circle cx="470" cy="60" r="4"/><circle cx="470" cy="210" r="4"/><circle cx="470" cy="360" r="4"/>
+                            <circle cx="240" cy="10" r="4"/><circle cx="240" cy="410" r="4"/><circle cx="60" cy="140" r="4"/><circle cx="420" cy="280" r="4"/>
+                        </g>
+                        <rect x="150" y="120" width="180" height="180" rx="34" class="circuito__chip"/>
+                        <image href="img/logo-dc-512.png" x="168" y="138" width="144" height="144" preserveAspectRatio="xMidYMid meet" clip-path="inset(0 round 24px)"/>
+                    </svg>
+                </div>
             </div>
         </section>
 
@@ -610,12 +661,13 @@
     <div id="toasts" class="fixed z-[60] left-4 right-24 sm:right-auto bottom-[max(1rem,env(safe-area-inset-bottom))] flex flex-col items-start gap-2 pointer-events-none" aria-live="polite"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js" integrity="sha384-Rj26LVGvoeRVR6+mwQmFfcR3QOBEwT+ZmuCWpuiqeTzJpCs0ER4ITAWGb4Hiy3Ok" crossorigin="anonymous"></script>
-    <script src="plantillas-whatsapp.js?v=202610151452"></script>
-    <script src="ui.js?v=202610151452"></script>
-    <script src="app.js?v=202610151452"></script>
-    <script src="tienda-carrito.js?v=202610151452"></script>
-    <script src="carrito.js?v=202610151452"></script>
-    <script src="copiloto.js?v=202610151452"></script>
+    <script src="plantillas-whatsapp.js?v=202610151502"></script>
+    <script src="ui.js?v=202610151502"></script>
+    <script src="app.js?v=202610151502"></script>
+    <script src="tienda-carrito.js?v=202610151502"></script>
+    <script src="carrito.js?v=202610151502"></script>
+    <script src="efectos.js?v=202610151502"></script>
+    <script src="copiloto.js?v=202610151502"></script>
 
 </body>
 </html>
