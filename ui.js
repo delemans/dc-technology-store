@@ -178,10 +178,12 @@ function htmlFormasDePago(metodos, { compacto = false } = {}) {
         const red = m.categoria === 'cripto' && m.red && m.red !== 'BINANCE_PAY' ? ` · ${m.red}` : '';
         return `<span class="inline-flex items-center gap-2 rounded-xl bg-white/[0.04] ring-1 ring-white/10 ${compacto ? 'px-2.5 py-1.5 text-[11px]' : 'px-3 py-2 text-xs'} font-bold text-white">
             <span class="grid place-items-center w-6 h-6 rounded-lg text-white text-[11px]" style="background:${escaparHTML(t.color)}"><i class="${escaparHTML(t.icono)}"></i></span>
-            ${escaparHTML(m.tipo === 'BINANCE_PAY' ? `Binance Pay${m.moneda ? ` (${m.moneda})` : ''}` : m.categoria === 'cripto' ? (m.moneda || t.nombre) : (m.nombre || t.nombre))}${escaparHTML(red)}</span>`;
+            ${escaparHTML(m.tipo === 'BINANCE_PAY' ? `Binance Pay${m.moneda ? ` (${m.moneda})` : ''}` : m.categoria === 'cripto' ? (m.moneda || t.nombre) : (t.nombre || m.nombre))}${escaparHTML(red)}</span>`;
     };
     const grupos = Object.entries(WA.CATEGORIAS_PAGO)
-        .map(([cat, titulo]) => [cat, titulo, metodos.filter((m) => m.categoria === cat)])
+        // Un chip por tipo: dos llaves Bre-B se muestran como una sola (los alias internos del panel no se muestran)
+        .map(([cat, titulo]) => [cat, titulo, metodos.filter((m) => m.categoria === cat)
+            .filter((m, i, a) => cat === 'cripto' || a.findIndex((x) => x.tipo === m.tipo) === i)])
         .filter(([, , lista]) => lista.length);
     return grupos.map(([cat, titulo, lista]) => `
         <div class="space-y-2">
@@ -194,7 +196,7 @@ function htmlFormasDePago(metodos, { compacto = false } = {}) {
 // Frase corta para textos ("Nequi, Daviplata o cripto (USDT · TRC20)"); genérica si aún no hay datos
 function resumenFormasDePago(metodos) {
     if (!metodos?.length) return 'transferencia o billetera digital';
-    const locales = [...new Set(metodos.filter((m) => m.categoria !== 'cripto').map((m) => m.nombre || m.tipo))];
+    const locales = [...new Set(metodos.filter((m) => m.categoria !== 'cripto').map((m) => window.PlantillasWA?.tipoPago(m.tipo)?.nombre || m.nombre || m.tipo))];
     const cripto = [...new Set(metodos.filter((m) => m.categoria === 'cripto').map((m) => (m.red && m.red !== 'BINANCE_PAY' ? `${m.moneda} ${m.red}` : m.nombre || m.tipo)))];
     const partes = [...locales.slice(0, 3)];
     if (cripto.length) partes.push(`cripto (${cripto.slice(0, 3).join(', ')})`);

@@ -143,3 +143,7 @@ header[class*="backdrop-blur"], .cab { background-color: rgb(var(--fondo) / .96)
 .btn-p, .btn-s, .nav-sup { text-transform: none !important; letter-spacing: 0 !important; font-weight: 700 !important; font-size: 13.5px !important; }
 .pasos-inicio li { background: rgb(var(--fondo)) !important; box-shadow: inset 0 0 0 1px rgb(var(--borde)) !important; }
 .menu-inferior a, .menu-inferior button { text-transform: none !important; letter-spacing: 0 !important; }
+/* Sin desenfoque, el "vidrio" dejaba ver la página detrás de las ventanas: paneles y tarjetas son sólidos */
+.modal-panel, [class*="bg-dcDarkCard/"], [class*="backdrop-blur"][class*="bg-white/[0.0"] { background-color: rgb(var(--tarjeta)) !important; }
+.modal-fondo { background-color: rgb(10 12 16 / .62) !important; }
+.tema-claro .modal-fondo { background-color: rgb(16 24 40 / .45) !important; }
