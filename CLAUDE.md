@@ -17,6 +17,7 @@ Contexto de negocio e invariantes: `CONTEXT.md`. Responder siempre en español.
 | Flujo n8n | `n8n/generar_flujo_n8n.js` → `n8n/flujo_bot_dctechnology.json` + `n8n/simulador-nodos.js` (no editar los generados) |
 | SQL Supabase | `supabase/wo-*.sql` (idempotentes, con verificación previa "Nada se aplicó…") |
 | Proveedor Emprende Red (WO-041) | `herramientas/sincronizar-emprendered.mjs` [--ia] [--tienda]: catálogo de catalogovirtual.co → productos `er-*` en `productos.json` (solo TECNOLOGIA, costo + 40 %, sin réplicas) + `supabase/wo-041-emprendered.sql`. n8n actualiza costo, precio y stock cada 6 h con `sincronizar_proveedor()`. El bot y la tienda usan los precios de la base (`precios_publicos`) |
+| Estilo corporativo | `estilos/profesional.css` (último en el <head> de las 4 páginas): tokens grafito/blanco roto, rojo de marca #C8102E/#E03445 solo como acento, Inter, sin neón ni animaciones decorativas. Las páginas p/ toman la misma paleta desde `generar_seo.js` |
 | Logo | `img/logo-dc-192.png` (encabezados, favicon) y `img/logo-dc-512.png` (redes, apple-touch) |
 | Herramientas | `herramientas/`: `sincronizar-n8n.mjs` (lleva el flujo al n8n en vivo), `configurar-ia.mjs`, `configurar-n8n.js`, `configurar-evolution.js`, `iniciar-bot.ps1`, `comparar_ancpagos.mjs`, `nombres_ancpagos.mjs`, `generar_seo.js` |
 

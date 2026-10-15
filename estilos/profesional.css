@@ -1,0 +1,145 @@
+/* estilos/profesional.css — Capa de estilo corporativo de DC TECHNOLOGY (tienda, Mis pedidos, panel y rastreo).
+   Va de ÚLTIMA en el <head> de cada página: recalibra los tokens de tema.css y apaga los efectos "neón".
+   Criterio: superficies sobrias (grafito / blanco roto), el rojo del logo solo como acento (botones, precios,
+   estados activos), tipografía Inter con títulos en mayúscula y minúscula, sombras suaves, movimiento mínimo. */
+
+/* ---------- Tokens ---------- */
+:root {
+    --fondo: 13 16 21;          /* #0D1015 grafito */
+    --tarjeta: 21 25 32;        /* #151920 */
+    --borde: 44 50 60;
+    --rojo: 224 52 69;          /* #E03445: rojo de marca con contraste sobre grafito */
+    --acento: rgb(var(--rojo));
+    --acento-hover: rgb(200 35 52);
+    --sombra-1: 0 1px 2px rgb(0 0 0 / .35);
+    --sombra-2: 0 1px 2px rgb(0 0 0 / .3), 0 12px 28px -16px rgb(0 0 0 / .6);
+    --radio: 14px;
+    --scroll: #2C323C;
+}
+.tema-claro {
+    --fondo: 246 247 249;       /* #F6F7F9 */
+    --tarjeta: 255 255 255;
+    --borde: 225 228 234;
+    --rojo: 200 16 46;          /* #C8102E: carmesí del logo, AA sobre blanco */
+    --acento-hover: rgb(168 12 38);
+    --sombra-1: 0 1px 2px rgb(16 24 40 / .06);
+    --sombra-2: 0 1px 2px rgb(16 24 40 / .05), 0 10px 24px -14px rgb(16 24 40 / .18);
+    --scroll: #CDD2DA;
+}
+
+/* ---------- Tipografía ---------- */
+body { font-feature-settings: "cv11", "ss01"; letter-spacing: -.003em; }
+.font-tech { font-family: Inter, system-ui, sans-serif !important; }
+/* Títulos: mayúscula y minúscula, compactos. Las etiquetas pequeñas conservan su versalita */
+h1, h2, h3,
+.font-tech:is(.text-lg, .text-xl, .text-2xl, .text-3xl, .text-4xl, .text-5xl, .text-6xl),
+.titulo-sec {
+    text-transform: none !important;
+    letter-spacing: -.02em !important;
+}
+h1 { font-weight: 800 !important; line-height: 1.08 !important; }
+.dc-text-glow { text-shadow: none !important; }
+
+/* ---------- Fondos decorativos: fuera ---------- */
+.mesh, .fondo-portal, .bg-grid { display: none !important; }
+.marquesina-pista { animation-duration: 60s !important; }
+
+/* ---------- Logo: quieto, nítido ---------- */
+.logo-neon, .dc-logo { animation: none !important; filter: none !important; transform: none !important; border-radius: 10px; }
+.logo-marca:hover .logo-neon, .dc-logo:hover { transform: none !important; }
+
+/* ---------- Botones ---------- */
+.btn-cyber { transition: background-color .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease !important; }
+.btn-cyber:hover, .btn-cyber:focus-visible, .btn-cyber.ancho:hover, .btn-cyber.verde:hover { transform: none !important; box-shadow: var(--sombra-1) !important; }
+.btn-cyber:active { transform: translateY(1px) !important; }
+.btn-neon, .btn-p, .prod .agregar, .menu-inferior .central, .pasos-inicio i, .categoria i, .desc-paso-icono {
+    background: var(--acento) !important;
+    box-shadow: var(--sombra-1) !important;
+    text-shadow: none !important;
+    filter: none !important;
+}
+.btn-neon:hover, .btn-p:hover, .prod .agregar:hover, .btn-neon:focus-visible { background: var(--acento-hover) !important; box-shadow: var(--sombra-1) !important; }
+.btn-neon::after, .insignia-desc::after { display: none !important; }
+[class~="shadow-red-600/30"], [class*="shadow-red-"], [class*="shadow-dcRed"] { --tw-shadow-color: rgb(0 0 0 / .12) !important; }
+:focus-visible { outline: 2px solid rgb(var(--rojo) / .7); outline-offset: 2px; }
+
+/* ---------- Tarjetas de producto ---------- */
+.tarjeta-3d {
+    transform: none !important;
+    background: rgb(var(--tarjeta)) !important;
+    box-shadow: 0 0 0 1px rgb(var(--borde)), var(--sombra-1) !important;
+    transition: box-shadow .2s ease, transform .2s ease !important;
+}
+.tarjeta-3d::before, .tarjeta-3d .brillo { display: none !important; }
+.tarjeta-3d:hover, .tarjeta-3d:focus-visible { transform: translateY(-2px) !important; box-shadow: 0 0 0 1px rgb(var(--borde)), var(--sombra-2) !important; }
+.marco-img, .marco-logo { background: rgb(var(--fondo)) !important; box-shadow: inset 0 0 0 1px rgb(var(--borde)) !important; backdrop-filter: none !important; }
+.marco-img::after { display: none !important; }
+.tema-claro .marco-img, .tema-claro .marco-logo { background: #F3F4F6 !important; }
+.marco-img img, .marco-logo img, .marco-foto img.sin-fondo { animation: none !important; filter: none !important; }
+.tarjeta-3d:hover .marco-logo img { transform: scale(1.18) !important; }
+.tarjeta-3d:hover .marco-foto img { transform: scale(1.03) !important; }
+
+/* Insignias y cintas: planas */
+.insignia-desc, .cinta-promo, .prod .desc, .sello-combo, .reglas-combo span.alcanzada, .chip[aria-selected="true"] {
+    background: var(--acento) !important; box-shadow: none !important; animation: none !important;
+}
+.tarjeta-3d:hover .insignia-desc { transform: none !important; box-shadow: none !important; }
+.tarjeta-3d:hover .insignia { box-shadow: none !important; }
+.cinta-promo i { animation: none !important; }
+
+/* Promociones del día: un recuadro sobrio */
+.promo-banda { background: rgb(var(--tarjeta)) !important; box-shadow: 0 0 0 1px rgb(var(--borde)), var(--sombra-1) !important; }
+.promo-banda::before { display: none !important; }
+.promo-reloj { box-shadow: inset 0 0 0 1px rgb(var(--borde)) !important; }
+.promo-reloj b { color: var(--acento) !important; font-family: Inter, sans-serif !important; }
+
+/* Descripciones del producto */
+.desc-titulo { font-family: Inter, sans-serif !important; letter-spacing: .08em !important; }
+.desc-titulo i { color: var(--acento) !important; background: rgb(var(--rojo) / .1) !important; box-shadow: none !important; }
+.desc-pasos::before { background: rgb(var(--borde)) !important; }
+.desc-paso-icono { box-shadow: 0 0 0 3px rgb(var(--tarjeta)) !important; }
+.desc-comparar i { color: var(--acento) !important; }
+.skeleton::after { background: linear-gradient(90deg, transparent, rgb(var(--tinta) / .06), transparent) !important; }
+
+/* ---------- Portal de clientes (estilos/cliente.css) ---------- */
+.menu-inferior .activo { color: var(--acento) !important; }
+.menu-inferior .activo::after { background: var(--acento) !important; box-shadow: none !important; }
+.menu-inferior .central { box-shadow: 0 0 0 4px rgb(var(--fondo)), var(--sombra-2) !important; }
+.titulo-sec { font-family: Inter, sans-serif !important; font-size: 18px !important; font-weight: 800 !important; }
+.titulo-sec::before { background: var(--acento) !important; box-shadow: none !important; width: 4px !important; }
+.pasos-inicio li:hover, .categoria:hover, .prod:hover { transform: translateY(-2px) !important; box-shadow: 0 0 0 1px rgb(var(--borde)), var(--sombra-2) !important; }
+.pasos-inicio b, .categoria b, .prod h3, .prod .precio b { font-family: Inter, sans-serif !important; letter-spacing: -.01em; }
+.categoria::before { display: none !important; }
+.prod .vitrina { background: rgb(var(--fondo)) !important; box-shadow: inset 0 0 0 1px rgb(var(--borde)) !important; }
+.tema-claro .prod .vitrina { background: #F3F4F6 !important; }
+.prod .vitrina img { filter: none !important; }
+.prod.elegido { box-shadow: inset 0 0 0 2px var(--acento) !important; }
+.reglas-combo span i { color: var(--acento) !important; }
+.reglas-combo span.alcanzada { transform: none !important; }
+.barra-combo { box-shadow: 0 0 0 1px rgb(var(--borde)), var(--sombra-2) !important; }
+
+/* ---------- Vidrio y desenfoques: superficies sólidas (más nítido y más rápido) ---------- */
+[class*="backdrop-blur"] { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+header[class*="backdrop-blur"], .cab { background-color: rgb(var(--fondo) / .96) !important; }
+.tema-claro header[class*="backdrop-blur"], .tema-claro .cab { background-color: rgb(255 255 255 / .96) !important; }
+
+/* Movimiento: entradas cortas; quien prefiere menos movimiento, nada */
+.entrada { animation-duration: .3s !important; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+
+/* ---------- Ajustes tras revisar las capturas ---------- */
+/* Franja de avisos: grafito sobrio con el texto normal (el rojo queda para los botones) */
+#banner-promo { background: #111418 !important; color: #E6E8EB !important; font-weight: 600 !important; letter-spacing: .02em !important; text-transform: none !important; }
+#banner-promo * { --tinta: 230 232 235; }
+/* Elementos rojos sólidos (pestaña activa, carrito, asistente): sin halo */
+[class~="bg-dcRed"], [class*=" bg-dcRed "], [class~="hover:bg-dcRed"]:hover { box-shadow: var(--sombra-1) !important; }
+[class*="shadow-red"], [class*="shadow-dcRed"], [class*="shadow-[0_0"] { box-shadow: var(--sombra-1) !important; }
+/* Botones y enlaces: mayúscula inicial, peso semibold, sin espaciado de letras exagerado.
+   Las etiquetas pequeñas (p, span) conservan su versalita como "eyebrow" */
+:is(button, a, [role="tab"], label).uppercase { text-transform: none !important; letter-spacing: 0 !important; font-weight: 700 !important; }
+:is(button, a, [role="tab"]).uppercase.text-\[10px\], :is(button, a, [role="tab"]).uppercase.text-\[11px\] { font-size: 12px !important; }
+/* Portal: tarjeta principal neutra; botones y menú en mayúscula inicial */
+.hero { background: rgb(var(--tarjeta)) !important; box-shadow: 0 0 0 1px rgb(var(--borde)), var(--sombra-1) !important; }
+.btn-p, .btn-s, .nav-sup { text-transform: none !important; letter-spacing: 0 !important; font-weight: 700 !important; font-size: 13.5px !important; }
+.pasos-inicio li { background: rgb(var(--fondo)) !important; box-shadow: inset 0 0 0 1px rgb(var(--borde)) !important; }
+.menu-inferior a, .menu-inferior button { text-transform: none !important; letter-spacing: 0 !important; }
