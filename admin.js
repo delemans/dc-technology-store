@@ -1746,7 +1746,7 @@ function itemMetodo(fila) {
     const item = document.createElement('div');
     item.className = `flex items-center gap-3 rounded-2xl bg-dcDarkBg/60 ring-1 ${activo ? 'ring-emerald-500/30' : 'ring-white/5 opacity-70'} px-3 py-3`;
     item.innerHTML = `
-        <span class="shrink-0 w-10 h-10 grid place-items-center rounded-xl text-white" style="background:${escaparHTML(tipo?.color ?? '#475569')}"><i class="${escaparHTML(tipo?.icono ?? 'fa-solid fa-wallet')}"></i></span>
+        ${WA_PAGO.insigniaPago(fila.tipo, 34)}
         <div class="flex-1 min-w-0">
             <p class="text-sm font-bold text-white truncate">${escaparHTML(nombreMetodo(fila))}
                 ${fila.categoria === 'cripto' ? `<span class="ml-1 px-1.5 py-0.5 rounded-md bg-amber-500/15 text-amber-300 text-[9px] font-black">${escaparHTML(fila.moneda ?? '')} · ${escaparHTML(fila.red ?? '')}</span>` : ''}</p>

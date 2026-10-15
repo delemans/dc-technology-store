@@ -147,3 +147,7 @@ header[class*="backdrop-blur"], .cab { background-color: rgb(var(--fondo) / .96)
 .modal-panel, [class*="bg-dcDarkCard/"], [class*="backdrop-blur"][class*="bg-white/[0.0"] { background-color: rgb(var(--tarjeta)) !important; }
 .modal-fondo { background-color: rgb(10 12 16 / .62) !important; }
 .tema-claro .modal-fondo { background-color: rgb(16 24 40 / .45) !important; }
+
+/* Logos oficiales de los medios de pago (img/pagos/): siempre sobre blanco, en ambos temas */
+.pago-logo { display: inline-grid; place-items: center; flex: none; aspect-ratio: 2.4 / 1; padding: 3px 7px; border-radius: 8px; background: #fff; box-shadow: inset 0 0 0 1px rgb(16 24 40 / .08); }
+.pago-logo img { display: block; width: 100%; height: 100%; object-fit: contain; }

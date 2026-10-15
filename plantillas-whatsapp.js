@@ -60,10 +60,10 @@
        administrador activa en public.metodos_pago (supabase/wo-027-metodos-pago.sql).
        'valor' = valor del enum public.metodo_pago (registro del pago). 'campo' = qué dato pide el panel. */
     const TIPOS_PAGO = [
-        { tipo: 'NEQUI', nombre: 'Nequi', categoria: 'electronico', icono: 'fa-solid fa-mobile-screen-button', color: '#DA0081', campo: 'Número Nequi' },
-        { tipo: 'DAVIPLATA', nombre: 'Daviplata', categoria: 'electronico', icono: 'fa-solid fa-mobile-screen-button', color: '#E1251B', campo: 'Número Daviplata' },
-        { tipo: 'LLAVE_BREB', nombre: 'Llave Bre-B', categoria: 'electronico', icono: 'fa-solid fa-key', color: '#0EA5E9', campo: 'Llave (celular, correo, cédula o @alias)' },
-        { tipo: 'BANCOLOMBIA', nombre: 'Bancolombia', categoria: 'electronico', icono: 'fa-solid fa-building-columns', color: '#FDDA24', campo: 'Número de cuenta' },
+        { tipo: 'NEQUI', nombre: 'Nequi', logo: 'img/pagos/nequi.svg', categoria: 'electronico', icono: 'fa-solid fa-mobile-screen-button', color: '#DA0081', campo: 'Número Nequi' },
+        { tipo: 'DAVIPLATA', nombre: 'Daviplata', logo: 'img/pagos/daviplata.svg', categoria: 'electronico', icono: 'fa-solid fa-mobile-screen-button', color: '#E1251B', campo: 'Número Daviplata' },
+        { tipo: 'LLAVE_BREB', nombre: 'Llave Bre-B', logo: 'img/pagos/breb.png', categoria: 'electronico', icono: 'fa-solid fa-key', color: '#0EA5E9', campo: 'Llave (celular, correo, cédula o @alias)' },
+        { tipo: 'BANCOLOMBIA', nombre: 'Bancolombia', logo: 'img/pagos/bancolombia.svg', categoria: 'electronico', icono: 'fa-solid fa-building-columns', color: '#FDDA24', campo: 'Número de cuenta' },
         { tipo: 'TRANSFERENCIA', nombre: 'Transferencia bancaria', categoria: 'electronico', icono: 'fa-solid fa-building-columns', color: '#64748B', campo: 'Banco y número de cuenta' },
         { tipo: 'PSE', nombre: 'PSE', categoria: 'electronico', icono: 'fa-solid fa-globe', color: '#1D4ED8', campo: 'Enlace de pago PSE', requiereUrl: true },
         { tipo: 'ENLACE', nombre: 'Tarjeta (enlace de pago)', categoria: 'electronico', icono: 'fa-solid fa-credit-card', color: '#7C3AED', campo: 'Enlace de pago', requiereUrl: true },
@@ -80,6 +80,13 @@
     ];
     const CATEGORIAS_PAGO = { electronico: 'Pagos locales y electrónicos', cripto: 'Criptomonedas' };
     const tipoPago = (tipo) => TIPOS_PAGO.find((t) => t.tipo === tipo) ?? null;
+    // Insignia del medio de pago para la web: el logo oficial (img/pagos/, sobre blanco) o, si no hay, el ícono con su color
+    const escHtml = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    function insigniaPago(tipo, alto = 24) {
+        const t = tipoPago(tipo) ?? { icono: 'fa-solid fa-wallet', color: '#64748B', nombre: tipo };
+        if (t.logo) return `<span class="pago-logo" style="height:${alto}px"><img src="${escHtml(t.logo)}" alt="${escHtml(t.nombre)}" loading="lazy" decoding="async"></span>`;
+        return `<span class="grid place-items-center rounded-lg text-white shrink-0" style="width:${alto}px;height:${alto}px;font-size:${Math.round(alto * 0.45)}px;background:${escHtml(t.color)}"><i class="${escHtml(t.icono)}"></i></span>`;
+    }
 
     // Formato de dirección por red: un error de red o de dirección es pérdida total de fondos.
     // Mismas reglas que public.direccion_cripto_valida() en la base de datos.
@@ -123,6 +130,7 @@
         TIPOS_PAGO,
         CATEGORIAS_PAGO,
         tipoPago,
+        insigniaPago,
         FORMATO_RED,
         direccionValida,
         montoCripto,

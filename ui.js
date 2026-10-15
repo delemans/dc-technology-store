@@ -177,7 +177,7 @@ function htmlFormasDePago(metodos, { compacto = false } = {}) {
         const t = WA.tipoPago(m.tipo) ?? { icono: 'fa-solid fa-wallet', color: '#64748B', nombre: m.tipo };
         const red = m.categoria === 'cripto' && m.red && m.red !== 'BINANCE_PAY' ? ` · ${m.red}` : '';
         return `<span class="inline-flex items-center gap-2 rounded-xl bg-white/[0.04] ring-1 ring-white/10 ${compacto ? 'px-2.5 py-1.5 text-[11px]' : 'px-3 py-2 text-xs'} font-bold text-white">
-            <span class="grid place-items-center w-6 h-6 rounded-lg text-white text-[11px]" style="background:${escaparHTML(t.color)}"><i class="${escaparHTML(t.icono)}"></i></span>
+            ${WA.insigniaPago(m.tipo, compacto ? 22 : 26)}
             ${escaparHTML(m.tipo === 'BINANCE_PAY' ? `Binance Pay${m.moneda ? ` (${m.moneda})` : ''}` : m.categoria === 'cripto' ? (m.moneda || t.nombre) : (t.nombre || m.nombre))}${escaparHTML(red)}</span>`;
     };
     const grupos = Object.entries(WA.CATEGORIAS_PAGO)

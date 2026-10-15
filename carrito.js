@@ -196,8 +196,8 @@
             b.className = 'opcion';
             b.setAttribute('aria-pressed', String(m === pago.metodo));
             b.innerHTML = `<span class="flex items-center gap-3"><span class="radio"></span>
-                <span class="w-8 h-8 grid place-items-center rounded-lg text-white text-sm" style="background:${escaparHTML(t.color)}"><i class="${escaparHTML(t.icono)}"></i></span>
-                <span class="text-sm font-bold">${escaparHTML(m.categoria === 'cripto' ? `${m.moneda ?? t.nombre}${m.red && m.red !== 'BINANCE_PAY' ? ` · red ${m.red}` : ' · Binance Pay'}` : (m.nombre || t.nombre))}</span></span>`;
+                ${WA.insigniaPago(m.tipo, 30)}
+                <span class="text-sm font-bold">${escaparHTML(m.categoria === 'cripto' ? `${m.moneda ?? t.nombre}${m.red && m.red !== 'BINANCE_PAY' ? ` · red ${m.red}` : ' · Binance Pay'}` : (t.nombre || m.nombre))}</span></span>`;
             b.addEventListener('click', () => { pago.metodo = m; abrirCarrito(); });
             return b;
         }));
