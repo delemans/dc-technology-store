@@ -189,6 +189,8 @@
             <div class="flex gap-2 mt-3"><button type="button" class="btn-s" data-atras aria-label="Atrás"><i class="fa-solid fa-arrow-left"></i></button>
             <button type="button" class="${window.DC.sb && pago.metodo ? 'btn-s' : 'btn-p btn-w'} flex-1" data-confirmar><i class="fa-brands fa-whatsapp ${window.DC.sb && pago.metodo ? 'text-emerald-400' : ''}"></i> Confirmar por WhatsApp</button></div>`;
         zona.querySelectorAll('[data-cat]').forEach((b) => b.addEventListener('click', () => { pago.categoria = b.dataset.cat; abrirCarrito(); }));
+        // Dos cuentas del mismo tipo (dos llaves Bre-B): se distinguen por el nombre que les diste en el panel
+        const repetidos = (tipo) => lista.filter((x) => x.tipo === tipo).length > 1;
         zona.querySelector('[data-metodos]').replaceChildren(...lista.map((m) => {
             const t = WA.tipoPago(m.tipo) ?? { icono: 'fa-solid fa-wallet', color: '#64748B', nombre: m.tipo };
             const b = document.createElement('button');
@@ -197,7 +199,7 @@
             b.setAttribute('aria-pressed', String(m === pago.metodo));
             b.innerHTML = `<span class="flex items-center gap-3"><span class="radio"></span>
                 ${WA.insigniaPago(m.tipo, 30)}
-                <span class="text-sm font-bold">${escaparHTML(m.categoria === 'cripto' ? `${m.moneda ?? t.nombre}${m.red && m.red !== 'BINANCE_PAY' ? ` · red ${m.red}` : ' · Binance Pay'}` : (t.nombre || m.nombre))}</span></span>`;
+                <span class="text-sm font-bold">${escaparHTML(m.categoria === 'cripto' ? `${m.moneda ?? t.nombre}${m.red && m.red !== 'BINANCE_PAY' ? ` · red ${m.red}` : ' · Binance Pay'}` : (repetidos(m.tipo) && m.nombre && m.nombre !== t.nombre ? `${t.nombre} · ${m.nombre}` : t.nombre || m.nombre))}</span></span>`;
             b.addEventListener('click', () => { pago.metodo = m; abrirCarrito(); });
             return b;
         }));

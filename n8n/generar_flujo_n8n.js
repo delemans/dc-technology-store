@@ -557,7 +557,8 @@ function armarContexto() {
         'MÉTODOS DE PAGO ACTIVOS (los únicos que puedes ofrecer; datos EXACTOS):',
         ...(cuentas.length ? [
             'Pagos locales y electrónicos:',
-            ...(locales.length ? locales.map(linea) : ['- (ninguno activo)']),
+            // La IA no recibe números ni llaves: solo los nombres y la marca para pedir los datos del que elija el cliente
+            ...(locales.length ? [...new Set(locales.map((c) => c.tipo))].map((t) => `- ${(__NOMBRES_PAGO__)[t] ?? t} → sus datos: [DATOS_PAGO ${t}]`) : ['- (ninguno activo)']),
             'Criptomonedas:',
             ...(criptos.length ? criptos.map(linea) : ['- (ninguna activa: no ofrezcas cripto)']),
         ] : ['- NO hay métodos activos: no compartas datos de pago; escala a un asesor.']),
@@ -586,6 +587,7 @@ function armarContexto() {
         ...(ultimoMenu ? ['', 'ÚLTIMO MENSAJE DEL MENÚ QUE VIO EL CLIENTE (la conversación ya empezó: no te presentes):', ultimoMenu.texto,
             ...(ultimoMenu.accion ? [`(Después: ${ultimoMenu.accion})`] : []), ''] : []),
         'DATOS QUE NO TIENES: si el cliente pregunta algo que no está escrito en el catálogo, las FAQ o las reglas (diferencias técnicas entre planes, región, compatibilidad, calidad, dispositivos), NO lo supongas ni lo deduzcas del nombre. Di solo lo que dice el nombre del plan y ofrece confirmarlo con un asesor (escribe *asesor*).',
+        'DATOS DE PAGO LOCALES: tú no tienes números ni llaves. Si el cliente paga por aquí, primero pregúntale con cuál paga mostrando SOLO los nombres. Cuando elija, escribe en una línea aparte la marca [DATOS_PAGO CODIGO] de ESE método (una sola marca): el sistema la cambia por los datos exactos. Nunca escribas números de cuenta, llaves ni la lista de todos los medios con datos.',
         'NO ES COMPRA: si el mensaje no es de un cliente de la tienda, responde EXACTAMENTE "[NO_COMPRA] <tema en pocas palabras>" y nada más (el dueño le contesta en persona). Ante la duda, atiéndelo como cliente.',
         'ESCALAMIENTO: si aplica cualquier disparador de escalamiento, responde EXACTAMENTE "[ESCALAR] <motivo breve>" y nada más.',
         'PEDIDO DIGITAL: cuando el cliente CONFIRME un producto digital del catálogo (streaming, licencias, pines o recargas) y su opción, agrega al FINAL de tu respuesta, en una línea aparte: [PEDIDO_DIGITAL] {"producto":"<nombre exacto del catálogo>","variante":"<opción exacta>"}. Una sola vez por pedido. El cliente no ve esa línea. Luego sigue con el pago normalmente.',
@@ -698,6 +700,20 @@ function revisarRespuesta() {
                 `*Total: ${cop(totalCombo)}*`,
             ].join('\n');
         } catch { return '(el precio de ese combo te lo confirma un asesor)'; }
+    });
+    // [DATOS_PAGO TIPO]: los datos exactos SOLO del medio que eligió el cliente (la IA nunca tiene los números).
+    // Una sola marca por respuesta; si la IA pone varias, se usa la primera.
+    const ETIQUETA_PAGO = { NEQUI: 'Número', DAVIPLATA: 'Número', LLAVE_BREB: 'Llave', BANCOLOMBIA: 'Cuenta', TRANSFERENCIA: 'Cuenta', PSE: 'Enlace', ENLACE: 'Enlace', PAYPAL: 'PayPal' };
+    const cuentasLocales = $('Metodos de pago').all().map((i) => i.json).filter((m) => m && m.categoria !== 'cripto' && (m.numero_cuenta || m.url_pago));
+    let marcasPago = 0;
+    r = r.replace(/\[DATOS_PAGO\s+([A-Z_]+)\]/g, (_, tipo) => {
+        if (marcasPago++) return '';
+        const cuentas = cuentasLocales.filter((m) => m.tipo === tipo);
+        if (!cuentas.length) return '(ese medio no está activo hoy: elige otro o escribe *asesor*)';
+        return [`💳 *${(__NOMBRES_PAGO__)[tipo] ?? tipo}*`, ...cuentas.map((m) => [
+            `${ETIQUETA_PAGO[tipo] ?? 'Datos'}: *${m.numero_cuenta ?? ''}*${m.titular ? ` (${m.titular})` : ''}`,
+            m.url_pago ? `🔗 ${m.url_pago}` : null, m.instrucciones ? `ℹ️ ${m.instrucciones}` : null,
+        ].filter(Boolean).join('\n'))].join('\n');
     });
     // [PEDIDO_COMBO] {"items":[...]}: el cliente CONFIRMÓ el combo → compra automática al proveedor (WO-031).
     // Mismas reglas que [COMBO]: productos del catálogo, plataformas distintas y descuento vigente de la base.
@@ -818,6 +834,7 @@ function crearTriangulacion() {
         producto: p.producto,
         variante: p.variante,
         precio_venta: p.precio,
+        pagado: web, // orden web: el cliente ya pagó. Por chat aún no: no se le escribe mientras se cotiza
         texto_proveedor: [
             `Hola, cotización pedido *#${referencia}*:`,
             `• ${p.producto}${p.variante ? ` – ${p.variante}` : ''}`,
@@ -830,7 +847,8 @@ function crearTriangulacion() {
 function evaluarCotizacion() {
     const t = $('Crear triangulación').first().json;
     const b = $input.first().json.body;
-    const demora = 'Tu pedido está tomando más tiempo de lo normal; un asesor te escribe enseguida 🙏';
+    // Solo a quien YA pagó (orden web) se le avisa la demora; en el chat aún no ha pagado: el aviso es solo para ti
+    const demora = t.pagado ? 'Tu pedido está tomando más tiempo de lo normal; un asesor te escribe enseguida 🙏' : null;
     if (!b) terminar('VENCIDO', `⏰ El proveedor no respondió la cotización de *#${t.referencia}* (${t.producto}) en __HORAS_COTIZACION__ h. Atiéndelo a mano.`, demora);
     if (b.tipo === 'cancelar') terminar('CANCELADO', `🛑 Pedido *#${t.referencia}* cancelado.`, null);
     if (b.tipo === 'web') return cotizacionWeb(t, b, demora);
@@ -1249,7 +1267,7 @@ function lineasCombo() {
 function evaluarCotizacionCombo() {
     const t = $('Crear combo').first().json;
     const b = $input.first().json.body;
-    const demora = 'Tu combo está tomando más tiempo de lo normal; un asesor te escribe enseguida 🙏';
+    const demora = t.web ? 'Tu combo está tomando más tiempo de lo normal; un asesor te escribe enseguida 🙏' : null;
     if (!b) terminar('VENCIDO', `⏰ El proveedor no respondió la cotización del combo *#${t.referencia}* en __HORAS_COTIZACION__ h. Atiéndelo a mano.`, demora);
     if (b.tipo === 'cancelar') terminar('CANCELADO', `🛑 Combo *#${t.referencia}* cancelado.`, null);
     const texto = String(b.texto ?? '');

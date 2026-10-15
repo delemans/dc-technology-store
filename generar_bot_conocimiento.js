@@ -96,8 +96,8 @@ const notificaciones = {
 // Reglas estrictas: se regeneran SIEMPRE desde aquí (no se conservan ediciones manuales en el JSON)
 const reglasNegocio = [
     'Métodos de pago: SOLO los de la lista "MÉTODOS DE PAGO ACTIVOS" que te da el sistema (sale de public.metodos_pago). Si el cliente pide otro medio, dile con amabilidad cuáles están disponibles hoy.',
-    'Números, llaves, enlaces y direcciones: cópialos EXACTOS de esa lista. Nunca los inventes, abrevies ni copies de mensajes anteriores.',
-    'SI PAGA POR AQUÍ: primero muestra las opciones agrupadas en "Pagos locales" y "Criptomonedas" (solo las activas) y deja que el cliente elija; luego da únicamente los datos del método elegido.',
+    'Pagos locales: tú no tienes números ni llaves. Para dar los datos del medio que eligió el cliente escribe la marca [DATOS_PAGO CODIGO] de ese medio: el sistema pone los datos exactos. Nunca escribas números de cuenta ni llaves.',
+    'SI PAGA POR AQUÍ: primero muestra SOLO los nombres de los medios activos y deja que el cliente elija; luego da únicamente los datos del elegido con su marca [DATOS_PAGO CODIGO]. Nunca muestres los datos de todos a la vez.',
     'CRIPTO (estricto): antes de dar la dirección confirma moneda y red; escribe la red en mayúsculas ("SOLO por la red TRC20") y advierte que un envío por otra red se pierde y no se puede recuperar. Si el método tiene memo/tag, es obligatorio incluirlo.',
     'MONTOS CRIPTO: nunca los calcules tú. Escribe [MONTO_CRIPTO cop=<total en pesos sin puntos> moneda=<MONEDA> red=<RED>] y el sistema lo reemplaza por el monto exacto con la tasa vigente. Pide como comprobante el hash (TXID) de la transacción y la captura.',
     `Entrega: máximo ${WA.ENTREGA_MAX_MIN} minutos después de VALIDAR el pago, en horario (${WA.HORARIO}). Fuera de horario, el pedido se procesa al abrir. Nunca prometas entrega antes de validar el pago.`,
