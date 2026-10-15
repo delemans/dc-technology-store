@@ -261,7 +261,7 @@ async function cargarCatalogo() {
         </div>`).join('');
 
     try {
-        const respuesta = await fetch('productos.json');
+        const respuesta = await fetch('productos.json', { cache: 'no-cache' }); // revalida: nunca el catálogo viejo del navegador
         if (!respuesta.ok) throw new Error(`HTTP ${respuesta.status}`);
         const datos = await respuesta.json();
         estado.productos = await aplicarPreciosBase(datos.map((p) => ({ ...p, tipo: clasificarCategoria(p) })));
@@ -273,6 +273,7 @@ async function cargarCatalogo() {
 
     pintarModulos();
     renderizar();
+    pintarNovedades();
     pintarCotizador();
     inyectarSEO();
     abrirDesdeEnlace();
@@ -444,6 +445,24 @@ function renderizar() {
 }
 const tarjetasCache = new Map(); // id → <article>
 let idsPintados = '';
+
+// "Nuevo en tecnología": 8 productos del proveedor con precio activo; cambian cada día (mismo orden para todos ese día)
+function pintarNovedades() {
+    const seccion = $('novedades');
+    const nuevos = estado.productos.filter((p) => p.sincronizado);
+    if (!seccion || !nuevos.length) return;
+    const dia = Math.floor(Date.now() / 864e5);
+    const orden = (p) => [...p.id].reduce((h, c) => (Math.imul(h ^ c.charCodeAt(0), 16777619) + dia) >>> 0, 2166136261);
+    $('novedades-lista').replaceChildren(...nuevos.slice().sort((a, b) => orden(a) - orden(b)).slice(0, 8).map(crearTarjeta));
+    $('novedades-ver').innerHTML = `Ver los ${estado.productos.filter((p) => p.tipo === 'tecnologia').length} <i class="fa-solid fa-arrow-right"></i>`;
+    $('novedades-ver').onclick = () => {
+        estado.filtro = { modulo: 'todos', categoria: 'tecnologia', busqueda: '' };
+        pintarModulos();
+        renderizar();
+        $('catalogo')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+    seccion.hidden = false;
+}
 
 function crearTarjeta(prod) {
     const base = prod.variantes?.[0] ?? { precio: 0 };
