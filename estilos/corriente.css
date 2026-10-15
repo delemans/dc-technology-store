@@ -117,3 +117,6 @@ body > header.sticky::after {
     .circuito__corriente path { opacity: 0; }
     .revelar { opacity: 1; transform: none; transition: none; }
 }
+
+/* Al saltar a una sección (Ver catálogo, Ver todos) el título no queda debajo del encabezado fijo */
+main > section { scroll-margin-top: 96px; }
