@@ -1,6 +1,6 @@
 // herramientas/revisar-entrada.mjs — ¿Le están LLEGANDO mensajes al WhatsApp del bot? (lo usa vigilante-bot.ps1)
 // Evolution puede seguir enviando y no recibir nada (pasó del 13 al 16/10/2026: un mensaje de "Meta Business Agent"
-// trabó la cola de Baileys). Se mira en la base de Evolution la hora del último mensaje entrante (clientes y grupos).
+// trabó la cola de Baileys). Se mira en la base de Evolution la hora del último mensaje entrante (clientes; los grupos se ignoran).
 //   node herramientas/revisar-entrada.mjs            → muestra el último entrante; sale con código 2 si lleva más de
 //                                                      ENTRADA_HORAS (por defecto 8) sin entrar nada
 //   node herramientas/revisar-entrada.mjs --avisar   → además te escribe por WhatsApp (máximo una vez cada 8 h)
