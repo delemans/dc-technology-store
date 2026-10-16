@@ -636,7 +636,7 @@
     "tipo": "servicios",
     "marca": "DC Service",
     "nombre": "Instalación de Sistema Operativo y Licenciamiento",
-    "imagen": "https://images.unsplash.com/photo-1629654297299-c8506221ca97?auto=format&fit=crop&w=640&q=80",
+    "imagen": "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?auto=format&fit=crop&w=640&q=80",
     "variantes": [
       { "nombre": "Windows 10/11 Pro + Office + Software Base", "precio": 60000, "precio_anterior": 90000 }
     ]
