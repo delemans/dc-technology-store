@@ -30,7 +30,7 @@ console.log(`\n${APLICAR ? 'APLICAR' : 'PRUEBA (usa --aplicar para conectarla al
 async function probarModelo(modelo) {
     const t = Date.now();
     const r = await fetch(`${URL_IA}/chat/completions`, { method: 'POST', headers: H, body: JSON.stringify({
-        model: modelo, max_tokens: 40, messages: [{ role: 'system', content: 'Eres el asistente de DC TECHNOLOGY.' }, { role: 'user', content: 'Responde solo: listo' }],
+        model: modelo, max_tokens: 40, messages: [{ role: 'system', content: 'Eres el asistente de DC TECNOLOGY.' }, { role: 'user', content: 'Responde solo: listo' }],
     }) }).catch((e) => ({ ok: false, status: pista(e), json: async () => ({}) }));
     const j = await r.json().catch(() => ({}));
     const texto = String(j.choices?.[0]?.message?.content ?? '').trim();

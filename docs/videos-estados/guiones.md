@@ -1,4 +1,4 @@
-# Videos para estados de WhatsApp — DC Technology
+# Videos para estados de WhatsApp — DC Tecnology
 
 Un video corto por proceso, grabado sobre el sitio real (dctecnology.xyz). Esta carpeta es la
 estructura de producción: guion por video, escenas y textos en pantalla. `escenas.json` describe las

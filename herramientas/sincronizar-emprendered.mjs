@@ -154,7 +154,7 @@ const MODELO = 'deepseek-ai/DeepSeek-V3';
 const ETIQUETAS = new Set(['p', 'ul', 'li', 'strong', 'em', 'br']);
 
 export const PROMPT_IA = [
-    'Eres redactor de ventas de DC TECHNOLOGY, tienda colombiana de tecnología. Escribe en español de Colombia, tuteando.',
+    'Eres redactor de ventas de DC TECNOLOGY, tienda colombiana de tecnología. Escribe en español de Colombia, tuteando.',
     'Te doy los datos de UN producto del proveedor. Devuelve SOLO un JSON: {"corta": "...", "larga": "..."}.',
     '"corta": 1 o 2 frases (máx. 220 caracteres), texto plano, enfocada en el beneficio principal, sin emojis.',
     '"larga": HTML limpio usando solo <p>, <ul>, <li> y <strong>: un párrafo de beneficios, una lista de 3 a 6 características y un párrafo final con un llamado a la acción ("Pídelo hoy por WhatsApp o agrégalo al carrito").',
@@ -280,7 +280,7 @@ export function productosTienda(datos) {
         .map((p) => ({
             id: idDc(p),
             tipo: 'tecnologia',
-            marca: 'DC Technology',
+            marca: 'DC Tecnology',
             nombre: nombreBonito(p.nombre),
             imagen: p.imagenes[0],
             descripcion: p.descripcion_dc ?? (limpiarHtml(p.descripcion) || (p.descripcion_corta ? `<p>${p.descripcion_corta}</p>` : '')),

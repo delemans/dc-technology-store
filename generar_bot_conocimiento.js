@@ -115,17 +115,17 @@ const reglasNegocio = [
 
 // Solo temas de la tienda (WO-040): lo que no es compra lo responde el dueño en persona
 const soloTienda = [
-    'Atiendes SOLO temas de DC TECHNOLOGY: productos y precios del catálogo, compras, pagos, pedidos, accesos, soporte, garantía y los servicios del catálogo.',
+    'Atiendes SOLO temas de DC TECNOLOGY: productos y precios del catálogo, compras, pagos, pedidos, accesos, soporte, garantía y los servicios del catálogo.',
     'Si el mensaje claramente NO es de un cliente de la tienda (conversación personal o familiar, un conocido que habla de otro tema, proveedores u ofertas de servicios, publicidad, cobros, encuestas, empleo o asuntos de otro negocio), responde EXACTAMENTE "[NO_COMPRA] <tema en pocas palabras>" y nada más: no le contestas y el dueño le responde en persona.',
     'Ante la duda, trátalo como cliente: un saludo, una pregunta general o alguien que busca algo que no vendemos SÍ son clientes (dile con amabilidad que no lo tenemos y ofrece lo más parecido del catálogo).',
 ];
 
 // Identidad y estilo (WO-039): el bot habla como la tienda, cercano y ágil, y vende con criterio
 const identidad = [
-    `Eres DC TECHNOLOGY: respondes el WhatsApp de la tienda (${URL_TIENDA}) en nombre del equipo. Habla como la tienda ("te ayudamos", "te enviamos").`,
-    'En el PRIMER mensaje de la conversación saluda así: "¡Hola! Te saluda *DC TECHNOLOGY* 👋", responde lo que preguntó y cierra con: "Escribe *menú* para ver todas las opciones." Después no vuelvas a presentarte (si el contexto trae un mensaje del menú, la conversación ya empezó).',
+    `Eres DC TECNOLOGY: respondes el WhatsApp de la tienda (${URL_TIENDA}) en nombre del equipo. Habla como la tienda ("te ayudamos", "te enviamos").`,
+    'En el PRIMER mensaje de la conversación saluda así: "¡Hola! Te saluda *DC TECNOLOGY* 👋", responde lo que preguntó y cierra con: "Escribe *menú* para ver todas las opciones." Después no vuelvas a presentarte (si el contexto trae un mensaje del menú, la conversación ya empezó).',
     'El cliente tiene un menú con números (catálogo, cómo comprar, mis pedidos, soporte, formas de pago y asesor): si no sabe qué hacer o pide opciones, dile que escriba *menú*.',
-    'Si te preguntan si eres un bot o una persona, sé honesto: eres el asistente automático de DC TECHNOLOGY y, si prefiere, lo pasas con una persona del equipo.',
+    'Si te preguntan si eres un bot o una persona, sé honesto: eres el asistente automático de DC TECNOLOGY y, si prefiere, lo pasas con una persona del equipo.',
     'Tono cercano y ágil, en español de Colombia: tutea, frases cortas, máximo 6 líneas por mensaje, 1 o 2 emojis y *negrita* solo para datos clave (producto, precio, total).',
     'Una pregunta a la vez y termina cada mensaje con el siguiente paso claro (qué responder, qué elegir o qué enviar).',
     'Si el cliente escribe con errores, audios transcritos o mensajes cortos, entiéndelo sin corregirlo; si algo no queda claro, pregunta solo eso.',
@@ -277,7 +277,7 @@ const faqObligatorias = (horario) => [
 ];
 
 const negocioPorDefecto = {
-    nombre: 'DC Technology',
+    nombre: 'DC Tecnology',
     sitio: 'https://dctecnology.xyz',
     portal_rastreo: WA.URL_PORTAL,
     whatsapp: WA.NUMERO_TIENDA,
@@ -398,9 +398,9 @@ const TIENDA_CORTA = URL_TIENDA.replace(/^https?:\/\//, '');
 const menu = {
     garantia_dias: negocio.garantia_dias_por_defecto ?? negocioPorDefecto.garantia_dias_por_defecto,
     principal: {
-        saludo: '¡Hola{nombre}! 👋 Te saluda *DC TECHNOLOGY*',
+        saludo: '¡Hola{nombre}! 👋 Te saluda *DC TECNOLOGY*',
         lema: 'Streaming, licencias, pines y recargas con entrega por este chat ⚡',
-        titulo: '📋 *Menú DC TECHNOLOGY*',
+        titulo: '📋 *Menú DC TECNOLOGY*',
         pregunta: '*¿En qué te ayudo?* Responde con un número:',
         opciones: [
             { id: 'catalogo', texto: 'Catálogo y precios' },
@@ -482,7 +482,7 @@ const menu = {
         'En un solo mensaje: qué producto es, qué te aparece y tu número de pedido si lo tienes. Si tienes una captura, envíala con una frase.',
     ],
     textos: {
-        catalogo: '🛍️ *Catálogo DC TECHNOLOGY*',
+        catalogo: '🛍️ *Catálogo DC TECNOLOGY*',
         elige_categoria: 'Elige una categoría:',
         elige_producto: 'Responde con el número para ver planes y precios.',
         elige_opcion_digital: 'Responde con el número de la opción que quieres y te digo cómo pagar.',

@@ -37,7 +37,9 @@ do {
     lista.push(...(pagina.data ?? []));
     cursor = pagina.nextCursor;
 } while (cursor);
-const resumen = lista.find((w) => w.name === generado.name);
+// La marca pasó de "DC Technology" a "DC Tecnology" (15/10/2026): se reconoce el flujo con cualquiera de los dos nombres y se renombra
+const marca = (n) => String(n).replace(/Technology/gi, "Tecnology");
+const resumen = lista.find((w) => w.name === generado.name) ?? lista.find((w) => marca(w.name) === marca(generado.name));
 if (!resumen) throw new Error(`Tu n8n no tiene el flujo "${generado.name}": impórtalo con herramientas/configurar-n8n.js.`);
 const vivo = await api(`/workflows/${resumen.id}`);
 
@@ -60,6 +62,9 @@ generado.nodes = generado.nodes.filter((n) => !AJENOS.includes(n.name));
 for (const n of AJENOS) delete generado.connections[n];
 const porNombre = new Map(vivo.nodes.map((n) => [n.name, n]));
 const cambios = generado.nodes.filter((n) => n.type === 'n8n-nodes-base.code' && porNombre.has(n.name) && porNombre.get(n.name).parameters?.jsCode !== n.parameters.jsCode).map((n) => n.name);
+// Reintentos (retryOnFail/maxTries/waitBetweenTries): solo ajustes del nodo, sin tocar parámetros ni credenciales
+const REINTENTO = ['retryOnFail', 'maxTries', 'waitBetweenTries'];
+const reintentos = generado.nodes.filter((n) => porNombre.has(n.name) && REINTENTO.some((k) => n[k] !== undefined && porNombre.get(n.name)[k] !== n[k])).map((n) => n.name);
 const faltan = generado.nodes.filter((n) => !porNombre.has(n.name));
 const agregables = faltan.filter((n) => SIN_CREDENCIALES.includes(n.type) && !n.credentials && (!tipoCredencial(n) || credencialViva(tipoCredencial(n))));
 const conCredenciales = faltan.filter((n) => !agregables.includes(n));
@@ -82,6 +87,7 @@ const estructura = Boolean(agregables.length || reglas.length || nuevas.length |
 const puedeEstructura = !conCredenciales.length && !tocaPropios.length;
 
 console.log(`\n${APLICAR ? 'APLICAR' : 'REVISIÓN (usa --aplicar para escribir)'} · ${N8N} · flujo "${vivo.name}" (${vivo.active ? 'activo' : 'INACTIVO'}, ${vivo.nodes.length} nodos)`);
+if (reintentos.length) console.log(`  reintento automático en: ${reintentos.join(', ')}`);
 console.log(`  nodos con código nuevo: ${cambios.length ? cambios.join(', ') : 'ninguno (ya está al día)'}`);
 if (agregables.length) console.log(`  nodos nuevos que se agregan: ${agregables.map((n) => n.name + (tipoCredencial(n) ? ` (credencial ${credencialViva(tipoCredencial(n)).name})` : '')).join(', ')}`);
 if (reglas.length) console.log(`  nodos Switch/IF/Set que cambian: ${reglas.join(', ')}`);
@@ -91,7 +97,7 @@ if (quitadas.length) console.log(`  conexiones que se quitan:\n    ${quitadas.jo
 if (conCredenciales.length) console.log(`  ⚠ nodos nuevos con credenciales (requieren importar el flujo completo, no se tocan): ${conCredenciales.map((n) => n.name).join(', ')}`);
 if (tocaPropios.length) console.log(`  ⚠ hay conexiones de nodos que solo existen en tu n8n: la estructura no se cambia\n    ${tocaPropios.join('\n    ')}`);
 if (sobran.length) console.log(`  · tu n8n tiene nodos que el flujo nuevo no trae (no se tocan): ${sobran.join(', ')}`);
-if (!APLICAR || (!cambios.length && !sin57.length && !(estructura && puedeEstructura))) process.exit(0);
+if (!APLICAR || (!cambios.length && !sin57.length && !reintentos.length && !(estructura && puedeEstructura))) process.exit(0);
 
 const carpeta = path.join(RAIZ, 'n8n', 'respaldos');
 fs.mkdirSync(carpeta, { recursive: true });
@@ -99,6 +105,7 @@ const respaldo = path.join(carpeta, `${vivo.id}-${new Date().toISOString().repla
 fs.writeFileSync(respaldo, JSON.stringify(vivo, null, 2));
 const delGenerado = (nombre) => generado.nodes.find((n) => n.name === nombre);
 for (const nombre of cambios) porNombre.get(nombre).parameters.jsCode = delGenerado(nombre).parameters.jsCode;
+for (const nombre of reintentos) for (const k of REINTENTO) if (delGenerado(nombre)[k] !== undefined) porNombre.get(nombre)[k] = delGenerado(nombre)[k];
 for (const a of sin57) a.value = `57${String(a.value).replace(/\D/g, '')}`;
 let nodos = vivo.nodes;
 let conexiones = vivo.connections;
@@ -112,7 +119,7 @@ if (estructura && puedeEstructura) {
 }
 const PERMITIDOS = ['saveExecutionProgress', 'saveManualExecutions', 'saveDataErrorExecution', 'saveDataSuccessExecution', 'executionTimeout', 'errorWorkflow', 'timezone', 'executionOrder'];
 await api(`/workflows/${vivo.id}`, { method: 'PUT', body: JSON.stringify({
-    name: vivo.name, nodes: nodos, connections: conexiones,
+    name: generado.name, nodes: nodos, connections: conexiones,
     settings: Object.fromEntries(Object.entries(vivo.settings ?? {}).filter(([k]) => PERMITIDOS.includes(k))),
 }) });
 const despues = await api(`/workflows/${vivo.id}`);

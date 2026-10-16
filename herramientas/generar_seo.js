@@ -84,7 +84,7 @@ function datosDe(p) {
 function descripcionMeta(p) {
     const { desde, cotizable } = datosDe(p);
     const partes = [
-        `${p.nombre}${desde ? ` desde ${cop(desde)}` : ''} en DC Technology Colombia.`,
+        `${p.nombre}${desde ? ` desde ${cop(desde)}` : ''} en DC Tecnology Colombia.`,
         DIGITALES.includes(p.tipo) ? `Entrega en máximo ${WA.ENTREGA_MAX_MIN} min tras validar tu pago.` : cotizable ? 'Cotización sin compromiso.' : 'Envíos a todo el país.',
         CON_GARANTIA.includes(p.tipo) ? `Garantía de ${GARANTIA_DIAS} días.` : '',
         `Paga con ${PAGO.texto}.`,
@@ -98,7 +98,7 @@ function jsonLd(p) {
     const { precios, desde, cotizable, categoria } = datosDe(p);
     const item = cotizable
         ? { '@type': 'Service', name: p.nombre, serviceType: categoria, areaServed: { '@type': 'Country', name: 'Colombia' }, provider: { '@id': `${SITIO}/#organizacion` }, image: p.imagen, url: urlProducto(p) }
-        : { '@type': 'Product', name: p.nombre, image: [p.imagen], brand: { '@type': 'Brand', name: p.marca || 'DC Technology' }, category: categoria, url: urlProducto(p), description: descripcionMeta(p) };
+        : { '@type': 'Product', name: p.nombre, image: [p.imagen], brand: { '@type': 'Brand', name: p.marca || 'DC Tecnology' }, category: categoria, url: urlProducto(p), description: descripcionMeta(p) };
     if (desde) {
         item.offers = precios.length === 1
             ? { '@type': 'Offer', price: desde, priceCurrency: 'COP', url: urlProducto(p), seller: { '@id': `${SITIO}/#organizacion` } }
@@ -140,7 +140,7 @@ footer{margin-top:40px;padding:24px 0;border-top:1px solid var(--b);color:var(--
 
 function pagina(p) {
     const { desde, desc, cotizable, categoria } = datosDe(p);
-    const titulo = `${p.nombre}${desde ? ` desde ${cop(desde)}` : ''} | ${categoria} en Colombia | DC Technology`;
+    const titulo = `${p.nombre}${desde ? ` desde ${cop(desde)}` : ''} | ${categoria} en Colombia | DC Tecnology`;
     const descripcion = descripcionMeta(p);
     const pasos = (cotizable ? PASOS.servicio : p.tipo === 'tecnologia' ? PASOS.tecnologia : PASOS.digital)
         .map((x) => x.replace('el método que elijas', PAGO.texto));
@@ -165,7 +165,7 @@ function pagina(p) {
 <meta name="description" content="${esc(descripcion)}">
 <link rel="canonical" href="${urlProducto(p)}">
 <meta property="og:type" content="product">
-<meta property="og:site_name" content="DC Technology">
+<meta property="og:site_name" content="DC Tecnology">
 <meta property="og:locale" content="es_CO">
 <meta property="og:url" content="${urlProducto(p)}">
 <meta property="og:title" content="${esc(titulo)}">
@@ -179,7 +179,7 @@ ${jsonLd(p).map((o) => `<script type="application/ld+json">${jsonSeguro(o)}</scr
 </head>
 <body>
 <header><div class="envoltura">
-<a class="marca" href="${SITIO}/"><img src="${LOGO}" alt="DC Technology" width="36" height="36">DC <b>TECHNOLOGY</b></a>
+<a class="marca" href="${SITIO}/"><img src="${LOGO}" alt="DC Tecnology" width="36" height="36">DC <b>TECNOLOGY</b></a>
 <a class="btn btn-p" href="${comprar}">Ver en la tienda</a>
 </div></header>
 <main class="envoltura">
@@ -187,7 +187,7 @@ ${jsonLd(p).map((o) => `<script type="application/ld+json">${jsonSeguro(o)}</scr
 <article class="ficha">
 <div class="vitrina"><img src="${esc(p.imagen)}" alt="${esc(p.nombre)}" width="480" height="480" loading="eager" decoding="async"></div>
 <div>
-<p class="marca-p">${esc(p.marca || 'DC Technology')}</p>
+<p class="marca-p">${esc(p.marca || 'DC Tecnology')}</p>
 <h1>${esc(p.nombre)}</h1>
 <div class="chips">${chips.map((c) => `<span class="chip">${esc(c)}</span>`).join('')}</div>
 <table><tbody>${(p.variantes ?? []).map((v) => `<tr><td>${esc(v.nombre)}</td><td>${Number(v.precio) > 0 ? `${Number(v.precio_anterior) > Number(v.precio) ? `<s>${cop(v.precio_anterior)}</s>` : ''}${cop(v.precio)}` : 'A cotizar'}</td></tr>`).join('')}</tbody></table>
@@ -200,7 +200,7 @@ ${detalles ? `<section class="bloque"><h2>Detalles del producto</h2><p style="co
 <section class="bloque"><h2>Reglas y garantía</h2><ul>${REGLAS[grupoReglas(p.tipo)].map((x) => `<li>${esc(x)}</li>`).join('')}</ul></section>
 ${relacionados.length ? `<section><h2 style="font-size:18px">También en ${esc(categoria)}</h2><div class="rel">${relacionados.map((r) => `<a href="${SITIO}/p/${r.id}.html"><img src="${esc(r.imagen)}" alt="" width="44" height="44" loading="lazy">${esc(r.nombre)}</a>`).join('')}</div></section>` : ''}
 </main>
-<footer><div class="envoltura">© ${new Date().getFullYear()} DC Technology · ${esc(WA.HORARIO)} · <a href="${SITIO}/portal.html">Rastrear mi pedido</a> · <a href="${SITIO}/">Tienda</a></div></footer>
+<footer><div class="envoltura">© ${new Date().getFullYear()} DC Tecnology · ${esc(WA.HORARIO)} · <a href="${SITIO}/portal.html">Rastrear mi pedido</a> · <a href="${SITIO}/">Tienda</a></div></footer>
 </body>
 </html>
 `;

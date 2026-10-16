@@ -1,4 +1,4 @@
-// plantillas-whatsapp.js — Fuente única de los mensajes de WhatsApp de DC Technology.
+// plantillas-whatsapp.js — Fuente única de los mensajes de WhatsApp de DC Tecnology.
 // Funciona en el navegador (window.PlantillasWA) y en Node (require), para que
 // generar_bot_conocimiento.js copie EXACTAMENTE los mismos textos a bot-conocimiento.json (n8n / Evolution API).
 (function (raiz, fabrica) {
@@ -11,7 +11,7 @@
     const DESCUENTO_RENOVACION = 10; // % prometido en el recordatorio de renovación
     const ENTREGA_MAX_MIN = 15;      // minutos máximos de entrega tras validar el pago (en horario)
     const HORARIO = 'lunes a sábado, 8:00 a.m. a 8:00 p.m.';
-    const FIRMA = '⚡ *DC TECHNOLOGY*';
+    const FIRMA = '⚡ *DC TECNOLOGY*';
 
     // Números colombianos: 3001234567 → 573001234567. Devuelve null si no parece un número válido.
     function normalizarNumero(numero) {
@@ -147,7 +147,7 @@
         ],
 
         comprarAhora: ({ producto, variante, precio }) => [
-            'Hola DC Technology, quiero comprar:',
+            'Hola DC Tecnology, quiero comprar:',
             `• Producto: ${limpiarVariable(producto)}`,
             variante ? `• Opción: ${limpiarVariable(variante)}` : null,
             precio !== undefined && precio !== '' ? `• Valor: ${precioCOP(precio)}` : null,
@@ -157,7 +157,7 @@
         // Sin encodeURIComponent: los códigos son [A-Z0-9-] y así el marcador {pedido} llega intacto a n8n
         // Pedido desde la tienda con cantidad y cupón. El descuento se confirma al validar el pago.
         pedidoTienda: ({ producto, variante, cantidad = 1, precioUnitario, cupon, porcentaje, total }) => [
-            'Hola DC Technology, quiero comprar:',
+            'Hola DC Tecnology, quiero comprar:',
             `• Producto: ${limpiarVariable(producto)}`,
             variante ? `• Opción: ${limpiarVariable(variante)}` : null,
             `• Cantidad: ${cantidad}`,
@@ -168,7 +168,7 @@
         ].filter(Boolean).join('\n'),
 
         agendarServicio: ({ servicio, opcion, fecha, franja, detalle, estimado }) => [
-            'Hola DC Technology, quiero agendar un servicio:',
+            'Hola DC Tecnology, quiero agendar un servicio:',
             `• Servicio: ${servicio}`,
             opcion ? `• Opción: ${opcion}` : null,
             fecha ? `• Fecha preferida: ${fecha}` : null,
@@ -185,7 +185,7 @@
             `Hola, requiero soporte sobre mi pedido #${pedido}${producto ? ` (${producto})` : ''}.`,
 
         reclamarGarantia: ({ idCompra, pedido, producto, serialFinal, vence }) => [
-            'Hola, equipo de soporte DC Technology.',
+            'Hola, equipo de soporte DC Tecnology.',
             'Quiero reclamar la garantía de mi compra:',
             `• ID de compra: #${idCompra}`,
             pedido && pedido !== idCompra ? `• Pedido: #${pedido}` : null,
@@ -323,7 +323,7 @@
             'Escríbelo en dctecnology.xyz para ver tus pedidos y accesos.',
             '⏱️ Vence en *5 minutos*.',
             '',
-            '⚠️ No lo compartas: nadie de DC TECHNOLOGY te lo va a pedir.',
+            '⚠️ No lo compartas: nadie de DC TECNOLOGY te lo va a pedir.',
             '_Si no lo pediste, ignora este mensaje._',
         ].join('\n'),
 

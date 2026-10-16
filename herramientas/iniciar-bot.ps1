@@ -32,7 +32,7 @@ function Esperar($nombre, $prueba, $segundos) {
 
 if (-not (Test-Path $certificado)) { Write-Host "Falta $certificado (certificado de Kaspersky)." -ForegroundColor Red; exit 1 }
 $env:NODE_EXTRA_CA_CERTS = $certificado
-Write-Host "`nEncendiendo el bot de DC TECHNOLOGY…" -ForegroundColor Cyan
+Write-Host "`nEncendiendo el bot de DC TECNOLOGY…" -ForegroundColor Cyan
 
 # 1) Evolution API (WhatsApp)
 if (Escucha 8080) { Write-Host '  · Evolution ya estaba encendido' }

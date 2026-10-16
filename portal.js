@@ -110,7 +110,7 @@ form.addEventListener('submit', async (e) => {
 function mostrarPedido(id, data, { actualizado = false } = {}) {
   const tieneCredenciales = CAMPOS_CREDENCIALES.some(({ clave }) => data[clave]);
   const estado = tieneCredenciales ? ESTADO_LISTO : (ESTADOS[data.estado] ?? ESTADO_DESCONOCIDO);
-  const producto = data.producto ?? data.referencia_externa ?? data.variante_id ?? 'Servicio DC Technology';
+  const producto = data.producto ?? data.referencia_externa ?? data.variante_id ?? 'Servicio DC Tecnology';
   const ref = String(data.pedido_id ?? id);
 
   pintarResultado({
@@ -259,7 +259,7 @@ function mostrarError(titulo, detalle, codigo = '') {
 function mensajeSoporteVIP({ ref, producto, estado }) {
   const hora = new Date().toLocaleString('es-CO', { dateStyle: 'short', timeStyle: 'short' });
   return [
-    'Hola, equipo de soporte DC Technology.',
+    'Hola, equipo de soporte DC Tecnology.',
     'Solicito asistencia con mi pedido:',
     `• Pedido: #${ref}`,
     `• Producto: ${producto}`,

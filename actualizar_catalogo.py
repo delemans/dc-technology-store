@@ -1,7 +1,7 @@
 ﻿# -*- coding: utf-8 -*-
 import json
 
-print("Sincronizando catalogo de DC Technology...")
+print("Sincronizando catalogo de DC Tecnology...")
 
 try:
     with open('productos.json', 'r', encoding='utf-8') as f:

@@ -112,7 +112,7 @@
             const texto = s.problema.garantia && s.pedido
                 ? `${WA.reclamarGarantia({ idCompra: s.pedido.codigo, pedido: s.pedido.codigo, producto: s.pedido.producto ?? s.producto.texto, serialFinal: s.pedido.serialFinal })}\n• Falla: ${s.problema.texto}${form.detalle.value.trim() ? `\n• Detalle: ${WA.limpiarVariable(form.detalle.value, 300)}` : ''}`
                 : [
-                    'Hola DC Technology, necesito soporte (vengo del portal):',
+                    'Hola DC Tecnology, necesito soporte (vengo del portal):',
                     pedido ? `• Pedido: #${WA.limpiarVariable(pedido, 30)}` : null,
                     `• Producto: ${s.pedido?.producto ? WA.limpiarVariable(s.pedido.producto) : s.producto.texto}`,
                     `• Problema: ${s.problema.texto}`,

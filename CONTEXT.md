@@ -1,4 +1,4 @@
-# CONTEXTO: DC Technology
+# CONTEXTO: DC Tecnology
 
 ## Modelo de Negocio
 Somos un e-commerce de reventa de servicios digitales (streaming, pines, licencias). Compramos al proveedor (ALL NECESSARY COLOMBIA) vía WhatsApp y entregamos al cliente final.

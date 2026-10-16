@@ -1,4 +1,4 @@
-# Reglas Estrictas de DC Technology
+# Reglas Estrictas de DC Tecnology
 
 - **Stack Técnico:** HTML, JavaScript Vanilla (sin frameworks como React o Vue) y Tailwind CSS vía CDN. No instales dependencias de npm ni uses Node.js en el frontend.
 - **Base de Datos (Supabase):** La BD es la única fuente de verdad. No inventes nombres de tablas o columnas. Revisa siempre el esquema antes de escribir consultas.

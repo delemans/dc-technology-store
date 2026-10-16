@@ -345,7 +345,7 @@
     }
 
     function ordenRecibida(orden) {
-        const aviso = `Hola DC Technology, acabo de subir el comprobante de mi orden ${orden.codigo} (${precioCOP(orden.total)}).`;
+        const aviso = `Hola DC Tecnology, acabo de subir el comprobante de mi orden ${orden.codigo} (${precioCOP(orden.total)}).`;
         abrirHoja('¡Comprobante recibido!', `
             <div class="text-center py-4">
                 <div class="exito-check" aria-hidden="true"><i class="fa-solid fa-check"></i></div>
@@ -366,7 +366,7 @@
         const m = pago.metodo;
         const metodo = !m ? 'Por definir' : m.categoria === 'cripto' ? `${m.moneda}${m.red && m.red !== 'BINANCE_PAY' ? ` (red ${m.red})` : ' (Binance Pay)'}` : (m.nombre || WA.tipoPago(m.tipo)?.nombre || m.tipo);
         const texto = [
-            `Hola DC Technology, quiero hacer este pedido${datos.nombre ? ` (soy ${WA.limpiarVariable(datos.nombre, 40)})` : ''}:`,
+            `Hola DC Tecnology, quiero hacer este pedido${datos.nombre ? ` (soy ${WA.limpiarVariable(datos.nombre, 40)})` : ''}:`,
             ...lineas.map((l) => `• ${WA.limpiarVariable(l.nombre)}${l.variante ? ` – ${WA.limpiarVariable(l.variante)}` : ''}: ${precioCOP(l.precio)}`),
             ...combos().filter((c) => c.descuento > 0).map((c) => `• Descuento combo (${c.plataformas} plataformas, -${pctTexto(c.pct)}): -${precioCOP(c.descuento)}`),
             cupon && descuento() > 0 ? `• Cupón: ${cupon.codigo} (-${cupon.porcentaje}%): -${precioCOP(descuento())}` : null,

@@ -1,4 +1,6 @@
-# DC Technology — mapa del proyecto
+# DC Tecnology — mapa del proyecto
+
+Marca visible: **DC Tecnology** (igual que el dominio y el logo; desde el 16/10/2026, antes "DC Technology"). No cambiar identificadores técnicos: `dctechnology.catalogovirtual.co` (subdominio real de Emprende Red), el repo y `flujo_bot_dctechnology.json`.
 
 Tienda de productos digitales (streaming, licencias, pines, recargas) + tecnología física. Sitio estático en
 GitHub Pages (`dctecnology.xyz`, repo delemans/dc-technology-store, rama main). Proveedor: ANC Pagos (ancpagos.com).
@@ -17,6 +19,9 @@ Contexto de negocio e invariantes: `CONTEXT.md`. Responder siempre en español.
 | Flujo n8n | `n8n/generar_flujo_n8n.js` → `n8n/flujo_bot_dctechnology.json` + `n8n/simulador-nodos.js` (no editar los generados) |
 | SQL Supabase | `supabase/wo-*.sql` (idempotentes, con verificación previa "Nada se aplicó…") |
 | Proveedor Emprende Red (WO-041) | `herramientas/sincronizar-emprendered.mjs` [--ia] [--tienda]: catálogo de catalogovirtual.co → productos `er-*` en `productos.json` (solo TECNOLOGIA, costo + 40 %, sin réplicas) + `supabase/wo-041-emprendered.sql`. n8n actualiza costo, precio y stock cada 6 h con `sincronizar_proveedor()`. El bot y la tienda usan los precios de la base (`precios_publicos`) |
+| Respaldo de ANC | Si ancpagos.com no responde (mantenimiento), `catalogo_ancpagos.mjs` (`leerAnc`) y el nodo "Tienda ANC (respaldo)" leen su tienda pública allnecessarycolombia.com (mismos precios). En compras web el pedido queda en REVISION_MANUAL con el costo de referencia y dónde comprarlo |
+| Salud del sistema | Nodo "Revisar salud" cada 30 min: portal ANC, tienda de ANC y dctecnology.xyz/bot-conocimiento.json. Avisa al director solo al caer (2 fallas seguidas) y al volver. "Agente IA" reintenta 3 veces (3 s) antes del aviso de falla |
+| Videos para estados | `docs/videos-estados/mp4/anuncio-*.mp4` (ignorados por git; copia en el Escritorio "Anuncios DC Tecnology"). Sin precios para que no queden viejos. Voz: Gemini TTS (10 por día por modelo) |
 | Estilo corporativo | `estilos/profesional.css` (último en el <head> de las 4 páginas): tokens grafito/blanco roto, rojo de marca #C8102E/#E03445 solo como acento, Inter, sin neón ni animaciones decorativas. Las páginas p/ toman la misma paleta desde `generar_seo.js` |
 | Identidad "Corriente DC" | `estilos/corriente.css` + `efectos.js` (solo tienda): portada grafito con circuito animado que lleva la corriente al logo, borde de corriente en tarjetas, línea de energía bajo el encabezado, aparición al bajar. Respeta "reducir movimiento" |
 | Logo | `img/logo-dc-192.png` (encabezados, favicon) y `img/logo-dc-512.png` (redes, apple-touch) |

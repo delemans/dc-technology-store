@@ -134,7 +134,7 @@
     function botonAsesor(etiqueta = 'Hablar con un asesor') {
         const texto = ultimoProducto
             ? WA.comprarAhora({ producto: ultimoProducto.nombre })
-            : 'Hola DC Technology, necesito asesoría para elegir un producto.';
+            : 'Hola DC Tecnology, necesito asesoría para elegir un producto.';
         return `<a href="${WA.enlace(WA.NUMERO_TIENDA, texto)}" target="_blank" rel="noopener"
             class="btn-cyber verde mt-1 inline-flex items-center gap-2 min-h-[44px] px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-xs font-black uppercase tracking-wider text-white">
             <i class="fa-brands fa-whatsapp text-base"></i> ${escaparHTML(etiqueta)}</a>`;

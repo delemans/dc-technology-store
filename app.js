@@ -1,4 +1,4 @@
-// app.js — Tienda DC Technology (index.html)
+// app.js — Tienda DC Tecnology (index.html)
 // Catálogo tri-módulo, checkout por WhatsApp con cupones validados en Supabase,
 // prueba social con datos reales, reseñas verificadas y datos estructurados para Google.
 
@@ -487,7 +487,7 @@ function crearTarjeta(prod) {
             <img src="${escaparHTML(prod.imagen || imagenRespaldo(prod.nombre))}" alt="${escaparHTML(prod.nombre)}" loading="lazy" decoding="async"
                 class="${esLogo ? '' : 'rounded-xl'}">
         </div>
-        <p class="text-[10px] font-black uppercase tracking-[0.22em] text-dcNeon">${escaparHTML(prod.marca || 'DC Technology')}</p>
+        <p class="text-[10px] font-black uppercase tracking-[0.22em] text-dcNeon">${escaparHTML(prod.marca || 'DC Tecnology')}</p>
         <h3 class="mt-1 font-tech font-bold text-[15px] sm:text-base leading-snug text-white line-clamp-2">${escaparHTML(prod.nombre)}</h3>
         <div class="mt-2.5 flex flex-wrap gap-1.5">${insignias(prod).slice(0, 2).map(htmlInsignia).join('')}</div>
         <div class="mt-auto pt-4 border-t border-white/[0.06] flex items-end justify-between gap-3">
@@ -537,13 +537,19 @@ function activarInclinacion(tarjeta) {
 
 /* ==================== MODAL DE PRODUCTO ==================== */
 
+// Servicios destacados de la portada → su ficha
+document.addEventListener('click', (e) => {
+    const b = e.target.closest?.('[data-servicio]');
+    if (b) abrirProducto(b.dataset.servicio);
+});
+
 function abrirProducto(id) {
     const prod = estado.productos.find((p) => p.id === id);
     if (!prod) return;
     const precioValido = (prod.variantes ?? []).find((v) => Number(v.precio) > 0) ?? prod.variantes?.[0];
     estado.seleccion = { producto: prod, variante: precioValido, cantidad: 1, cupon: estado.seleccion.cupon };
 
-    $('modal-brand').textContent = prod.marca || 'DC Technology';
+    $('modal-brand').textContent = prod.marca || 'DC Tecnology';
     $('modal-title').textContent = prod.nombre;
     metaProducto(prod);
     $('modal-badges').innerHTML = insignias(prod).map(htmlInsignia).join('');
@@ -721,7 +727,7 @@ function pintarFicha(prod) {
     // Busca "Garantía: 30 días…" (con número), no el título "…USO Y GARANTÍA:"
     const garantia = /Garant[ií]a:?\s*(\d[^.•]*)/i.exec(texto)?.[1]?.trim() || `${GARANTIA_DIAS} días por defectos de fábrica`;
     const filas = [
-        ['Marca', prod.marca || 'DC Technology'],
+        ['Marca', prod.marca || 'DC Tecnology'],
         ['Modelo', prod.nombre],
         ['Garantía', garantia],
         ['Disponibilidad', 'Confirmada por WhatsApp al pedir'],
@@ -1004,7 +1010,7 @@ function tarjetaResena(r) {
             <div class="mt-auto flex flex-wrap items-center justify-between gap-2">
                 <span class="text-xs font-bold">${escaparHTML(r.nombre_publico)}${r.producto ? ` <span class="text-neutral-500 font-medium">· ${escaparHTML(r.producto)}</span>` : ''}</span>
                 <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-emerald-500/10 ring-1 ring-emerald-500/30 text-emerald-300 text-[9px] font-black uppercase tracking-wider">
-                    <i class="fa-solid fa-circle-check"></i> Compra verificada por DC Technology
+                    <i class="fa-solid fa-circle-check"></i> Compra verificada por DC Tecnology
                 </span>
             </div>
         </article>`;
@@ -1043,7 +1049,7 @@ function inyectarSEO() {
         const precios = (p.variantes ?? []).map((v) => Number(v.precio)).filter((n) => n > 0);
         const item = esCotizable(p)
             ? { '@type': 'Service', name: p.nombre, provider: { '@id': `${SITIO}#organizacion` }, areaServed: 'CO', image: p.imagen }
-            : { '@type': 'Product', name: p.nombre, image: p.imagen, url: `${SITIO}p/${p.id}.html`, brand: { '@type': 'Brand', name: p.marca || 'DC Technology' }, category: CATEGORIAS[p.tipo]?.texto };
+            : { '@type': 'Product', name: p.nombre, image: p.imagen, url: `${SITIO}p/${p.id}.html`, brand: { '@type': 'Brand', name: p.marca || 'DC Tecnology' }, category: CATEGORIAS[p.tipo]?.texto };
         if (precios.length) {
             item.offers = precios.length === 1
                 ? { '@type': 'Offer', price: precios[0], priceCurrency: 'COP', availability: 'https://schema.org/InStock', url: `${SITIO}p/${p.id}.html` }
@@ -1054,7 +1060,7 @@ function inyectarSEO() {
 
     const script = document.createElement('script');
     script.type = 'application/ld+json';
-    script.textContent = JSON.stringify({ '@context': 'https://schema.org', '@type': 'ItemList', name: 'Catálogo DC Technology', itemListElement: elementos });
+    script.textContent = JSON.stringify({ '@context': 'https://schema.org', '@type': 'ItemList', name: 'Catálogo DC Tecnology', itemListElement: elementos });
     document.head.appendChild(script);
 }
 
@@ -1132,8 +1138,8 @@ function metaProducto(prod) {
         return;
     }
     const precios = (prod.variantes ?? []).map((v) => Number(v.precio)).filter((n) => n > 0);
-    document.title = `${prod.nombre}${precios.length ? ` desde ${formatearPrecio(Math.min(...precios))}` : ''} | DC Technology`;
-    descripcion?.setAttribute('content', `${prod.nombre} en DC Technology Colombia. Paga con ${resumenFormasDePago(estado.metodosPago)} y recibe soporte por WhatsApp.`);
+    document.title = `${prod.nombre}${precios.length ? ` desde ${formatearPrecio(Math.min(...precios))}` : ''} | DC Tecnology`;
+    descripcion?.setAttribute('content', `${prod.nombre} en DC Tecnology Colombia. Paga con ${resumenFormasDePago(estado.metodosPago)} y recibe soporte por WhatsApp.`);
     canonical?.setAttribute('href', `${SITIO}p/${prod.id}.html`);
 }
 

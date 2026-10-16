@@ -1,7 +1,7 @@
 {
   "name": "dc-technology-store",
   "private": true,
-  "description": "Herramientas de compilación de DC Technology (el sitio publicado no usa Node).",
+  "description": "Herramientas de compilación de DC Tecnology (el sitio publicado no usa Node).",
   "scripts": {
     "css": "tailwindcss -c tailwind.config.js -i estilos/entrada.css -o estilos/tailwind.css --minify",
     "css:vigilar": "tailwindcss -c tailwind.config.js -i estilos/entrada.css -o estilos/tailwind.css --watch",
