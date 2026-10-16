@@ -337,12 +337,19 @@ function comprobanteRecibido() {
         'No necesitas enviarlo de nuevo 🙌',
     ].join('\n') } }];
     const aviso = String(cfg.numero_aviso_admin ?? '').replace(/\D/g, '').replace(/^(3\d{9})$/, '57$1');
+    // Pedido que el cliente confirmó por chat en las últimas 48 h (lo guarda "Crear triangulación" / "Crear combo")
+    const guardada = ($getWorkflowStaticData('global').ordenesChat ?? {})[msg.numero];
+    const orden = guardada && Date.now() - guardada.at < 48 * 3600e3 ? guardada : null;
     if (aviso) {
         salida.push({ json: { numero: aviso, texto: [
             msg.txid ? `🔗 *Pago cripto · TXID*\n${msg.txid}` : '🧾 *Comprobante recibido*',
             `Cliente: +${msg.numero}${msg.nombre ? ` (${String(msg.nombre).slice(0, 40)})` : ''}`,
             msg.texto ? `Nota del cliente: ${msg.texto.slice(0, 200)}` : null,
-            'Valídalo en el panel → Pagos & Bot.',
+            ...(orden ? ['', `🛒 Pedido *#${orden.referencia}*: ${orden.producto}${orden.variante ? ` – ${orden.variante}` : ''}`,
+                `1) Valida que el pago sea por *${cop(orden.precio)}*${orden.cupon ? ` (con cupón ${orden.cupon}: confirma que sea su primera compra)` : ''} (panel → Pagos & Bot).`,
+                `2) Compra en ANC: ${orden.plan ?? orden.producto}${orden.costo ? ` (costo ${cop(orden.costo)})` : ''}.`,
+                '3) Entrégale los accesos por su chat y márcalo entregado en el panel (activa la garantía).']
+                : ['Valídalo en el panel → Pagos & Bot.']),
         ].filter(Boolean).join('\n') } });
     }
     return salida;
@@ -579,7 +586,29 @@ function armarContexto() {
             : n.includes(w) || junto.includes(w) || (w.length > 4 && n.includes(w.replace(/(es|s)$/, ''))) ? 1 : 0), 0);
     };
     const tecnoIa = tecnologia.map((p) => [p, puntaje(p)]).filter(([, s]) => s > 0).sort((a, b) => b[1] - a[1]).slice(0, 12).map(([p]) => p);
+    // Por categoría y sin etiquetas (antes "Nombre [streaming]": la IA copiaba la etiqueta y el pedido no se reconocía).
+    // Streaming y licencias siempre con precios; pines, recargas, servicios y alquiler solo con nombres, salvo que la
+    // charla trate de ellos (así la consulta cabe en las IA gratuitas rápidas, como Groq)
+    const charla = normalizar([texto, ...anteriores, ultimoMenu?.texto ?? ''].join(' '));
+    const TEMAS = {
+        pines: /\bpin|tarjeta|gift|google ?play|roblox|xbox|psn|playstation|steam|free ?fire|mcafee|datacredito|codigo/,
+        recargas: /recarga|minutos|paquete|claro|movistar|tigo|wom|saldo|celular/,
+        servicios: /servicio|mantenimiento|reparac|repuesto|instalac|formate|asesor|tutori|automatiza|dashboard|inventario|macro|software|desarrollo|pagina|web|sistema|pos\b|rifa|catalogo|computador|portatil/,
+        alquiler: /alquil|rentar|renta|prestamo de equipo|portatil|computador/,
+    };
+    const TITULOS = { streaming: 'STREAMING', licencias: 'LICENCIAS Y APPS', pines: 'PINES Y TARJETAS', recargas: 'RECARGAS', servicios: 'SERVICIOS TÉCNICOS (a cotizar = lo coordina una persona)', alquiler: 'ALQUILER DE EQUIPOS' };
+    const lineaProducto = (p) => `- ${p.nombre}: ${(p.variantes ?? []).map((v) => `${v.nombre} ${Number(v.precio) > 0 ? cop(v.precio) : 'a cotizar'}`).join('; ')}`;
+    const bloquesCatalogo = Object.keys(TITULOS).flatMap((tipo) => {
+        const items = catalogoTodo.filter((p) => p.tipo === tipo);
+        if (!items.length) return [];
+        const completo = tipo === 'streaming' || tipo === 'licencias' || TEMAS[tipo]?.test(charla) || items.some((p) => puntaje(p) > 0 && palabrasIa.some((w) => w.length >= 4 && normalizar(p.nombre).includes(w)));
+        return [`${TITULOS[tipo]}:`, ...(completo ? items.map(lineaProducto) : [`- ${items.map((p) => p.nombre).join(', ')} (si pide uno, pregúntale cuál; el precio te llega en el siguiente mensaje)`])];
+    });
     const catalogoIa = [...catalogoTodo.filter((p) => p.tipo !== 'tecnologia'), ...tecnoIa];
+    // Preguntas frecuentes: solo las 6 que más se relacionan con la charla (todas cuando no hay pistas)
+    const faqUtiles = (base.faq ?? []).filter((f) => !f.pendiente_configurar && f.respuesta);
+    const puntajeFaq = (f) => { const t = normalizar(`${f.pregunta} ${f.respuesta}`); return palabrasIa.filter((w) => w.length >= 4 && t.includes(w)).length; };
+    const faqIa = palabrasIa.length ? faqUtiles.map((f, i) => [f, puntajeFaq(f), i]).sort((a, b) => b[1] - a[1] || a[2] - b[2]).slice(0, 6).map(([f]) => f) : faqUtiles.slice(0, 6);
     const cuentas = $('Metodos de pago').all().map((i) => i.json).filter((m) => m && (m.numero_cuenta || m.url_pago));
     const linea = (c) => {
         if (c.categoria !== 'cripto') {
@@ -622,25 +651,25 @@ function armarContexto() {
         ...(base.promociones ?? []).filter((p) => p.activa && !p.pendiente_configurar).map((p) => `- ${p.descripcion}`),
         '',
         'PREGUNTAS FRECUENTES (usa estas respuestas):',
-        ...(base.faq ?? []).filter((f) => !f.pendiente_configurar && f.respuesta).map((f) => `- ${f.pregunta} → ${f.respuesta}${f.accion ? ` (Después: ${f.accion})` : ''}`),
+        ...faqIa.map((f) => `- ${f.pregunta} → ${f.respuesta}${f.accion ? ` (Después: ${f.accion})` : ''}`),
         '',
         'REGLAS DE USO DE LAS CUENTAS:',
         ...(base.reglas_uso ?? []).map((r) => `- ${r}`),
         '',
-        'CATÁLOGO (precios en COP, solo estos):',
-        ...catalogoIa.map((p) => `- ${p.nombre} [${p.tipo}]: ${(p.variantes ?? []).map((v) => `${v.nombre} ${Number(v.precio) > 0 ? cop(v.precio) : 'a cotizar'}`).join('; ')}`),
-        ...(tecnologia.length ? [`- TECNOLOGÍA: ${tecnologia.length} productos físicos (relojes inteligentes, audífonos, diademas, parlantes, power banks, cargadores y cables, soportes, mouse y teclados, luces y trípodes…).${tecnoIa.length ? ' Arriba están los que coinciden con lo que pide el cliente.' : ''} Si pide uno que no aparece arriba, NO inventes precio ni disponibilidad: pídele el modelo o envíalo al menú (opción 1 → Tecnología) o a la web.`] : []),
+        'CATÁLOGO (precios en COP, solo estos; usa el nombre del producto tal cual, sin la categoría):',
+        ...bloquesCatalogo,
+        ...(tecnoIa.length ? ['TECNOLOGÍA (los que coinciden con lo que pide el cliente):', ...tecnoIa.map(lineaProducto)] : []),
+        ...(tecnologia.length ? [`- TECNOLOGÍA en total: ${tecnologia.length} productos físicos (relojes inteligentes, audífonos, diademas, parlantes, power banks, cargadores y cables, soportes, mouse y teclados, luces y trípodes…).${tecnoIa.length ? ' Arriba están los que coinciden con lo que pide el cliente.' : ''} Si pide uno que no aparece arriba, NO inventes precio ni disponibilidad: pídele el modelo o envíalo al menú (opción 1 → Tecnología) o a la web.`] : []),
         '',
         'FORMATO: español de Colombia, máximo 6 líneas, *negrita* de WhatsApp solo para datos clave, sin títulos ni tablas.',
-        'PRODUCTOS DIGITALES (venta y soporte completos, sin pasar a un asesor):',
-        ...(base.flujo_digital ?? []).map((x) => `- ${x}`),
         ...(ultimoMenu ? ['', 'ÚLTIMO MENSAJE DEL MENÚ QUE VIO EL CLIENTE (la conversación ya empezó: no te presentes):', ultimoMenu.texto,
             ...(ultimoMenu.accion ? [`(Después: ${ultimoMenu.accion})`] : []), ''] : []),
         'DATOS QUE NO TIENES: si el cliente pregunta algo que no está escrito en el catálogo, las FAQ o las reglas (diferencias técnicas entre planes, región, compatibilidad, calidad, dispositivos), NO lo supongas ni lo deduzcas del nombre. Di solo lo que dice el nombre del plan y ofrece confirmarlo con un asesor (escribe *asesor*).',
         'DATOS DE PAGO LOCALES: tú no tienes números ni llaves. Si el cliente paga por aquí, primero pregúntale con cuál paga mostrando SOLO los nombres. Cuando elija, escribe en una línea aparte la marca [DATOS_PAGO CODIGO] de ESE método (una sola marca): el sistema la cambia por los datos exactos. Nunca escribas números de cuenta, llaves ni la lista de todos los medios con datos.',
+        'CUPONES: aplica DCTECH2026 SOLO si el cliente escribe el código. Si no lo escribió, el total es el precio del catálogo: NO calcules ni muestres un total con descuento (puedes decir una vez "si es tu primera compra, escribe el código DCTECH2026"). Con cupón escrito, di el total con descuento y aclara que se confirma al validar el pago.',
         'NO ES COMPRA: si el mensaje no es de un cliente de la tienda, responde EXACTAMENTE "[NO_COMPRA] <tema en pocas palabras>" y nada más (el dueño le contesta en persona). Ante la duda, atiéndelo como cliente.',
         'ESCALAMIENTO: si aplica cualquier disparador de escalamiento, responde EXACTAMENTE "[ESCALAR] <motivo breve>" y nada más.',
-        'PEDIDO DIGITAL: cuando el cliente CONFIRME un producto digital del catálogo (streaming, licencias, pines o recargas) y su opción, agrega al FINAL de tu respuesta, en una línea aparte: [PEDIDO_DIGITAL] {"producto":"<nombre exacto del catálogo>","variante":"<opción exacta>"}. Una sola vez por pedido. El cliente no ve esa línea. Luego sigue con el pago normalmente.',
+        'PEDIDO DIGITAL: cuando el cliente CONFIRME un producto digital del catálogo (streaming, licencias, pines o recargas) y su opción, agrega al FINAL de tu respuesta, en una línea aparte: [PEDIDO_DIGITAL] {"producto":"<nombre exacto del catálogo>","variante":"<opción exacta>"} (si el cliente ESCRIBIÓ un cupón, agrega "cupon":"<código>"). Una sola vez por pedido. El cliente no ve esa línea. Luego sigue con el pago normalmente.',
         'PEDIDO COMBO: si lo que el cliente confirma es un COMBO (2 o más plataformas), en vez de [PEDIDO_DIGITAL] agrega al FINAL, en una línea aparte: [PEDIDO_COMBO] {"items":[{"producto":"<nombre exacto>","variante":"<opción exacta>"}]}. Una sola vez por combo.',
     ].join('\n');
 
@@ -714,6 +743,8 @@ function revisarRespuesta() {
     const pedido = r.match(/^\[ESCALAR\]\s*(.*)$/is);
     if (!r || pedido) return escalar(msg, pedido ? pedido[1] || 'Escalado por el agente' : 'El agente no respondió', cfg, kb.plantillas);
 
+    // La IA a veces copia la categoría del catálogo ("Prime Video Ultra HD [streaming]"): se quita antes de comparar
+    const sinEtiqueta = (t) => String(t ?? '').replace(/\s*\[[^\]]*\]/g, '').replace(/\s*\((streaming|licencias|pines|recargas|tecnologia|servicios|alquiler)\)\s*$/i, '').trim();
     // Marca de pedido digital: se quita del texto y se valida contra el catálogo (el precio sale del
     // catálogo, nunca de lo que escriba la IA). Si no coincide con un producto real, se ignora.
     let digital = null;
@@ -722,11 +753,20 @@ function revisarRespuesta() {
         r = r.replace(marca[0], '').trim() || 'Perfecto, tomé tu pedido ✅';
         try {
             const p = JSON.parse(marca[1]);
-            const prod = kb.catalogo.find((x) => normalizar(x.nombre) === normalizar(p.producto)
+            const prod = kb.catalogo.find((x) => normalizar(x.nombre) === normalizar(sinEtiqueta(p.producto))
                 && ['streaming', 'licencias', 'pines', 'recargas'].includes(x.tipo));
-            const v = prod && (prod.variantes.find((x) => normalizar(x.nombre) === normalizar(p.variante))
+            const v = prod && (prod.variantes.find((x) => normalizar(x.nombre) === normalizar(sinEtiqueta(p.variante)))
                 ?? (prod.variantes.length === 1 ? prod.variantes[0] : null));
             if (prod && v) digital = { producto: prod.nombre, variante: v.nombre, precio: v.precio };
+            // Cupón (DCTECH2026): solo si el CLIENTE escribió el código (en este mensaje o antes en la charla) y la
+            // promoción está activa. El precio con descuento lo calcula el sistema, nunca la IA.
+            const promo = (kb.promociones ?? []).find((x) => x.activa && x.codigo && normalizar(x.codigo) === normalizar(p.cupon ?? ''));
+            const escritos = [msg.texto, ...((memoria.chatsIa?.[msg.numero]?.m ?? []).filter((x) => x.role === 'user').map((x) => x.content))].join(' ');
+            if (digital && promo && normalizar(escritos).includes(normalizar(promo.codigo))) {
+                digital.precio_lista = digital.precio;
+                digital.precio = Math.round(digital.precio * (1 - Number(promo.porcentaje || 0) / 100));
+                digital.cupon = promo.codigo;
+            }
         } catch { /* JSON inválido: se ignora la marca */ }
     }
     // [COMBO] {"items":[...]}: precios del catálogo + regla vigente de la base (misma lógica que descuento_combo()
@@ -739,9 +779,9 @@ function revisarRespuesta() {
         try {
             const elegidos = [];
             for (const it of JSON.parse(json).items ?? []) {
-                const prod = kb.catalogo.find((x) => normalizar(x.nombre) === normalizar(it.producto)
+                const prod = kb.catalogo.find((x) => normalizar(x.nombre) === normalizar(sinEtiqueta(it.producto))
                     && ['streaming', 'licencias', 'pines', 'recargas'].includes(x.tipo));
-                const v = prod && (prod.variantes.find((x) => normalizar(x.nombre) === normalizar(it.variante))
+                const v = prod && (prod.variantes.find((x) => normalizar(x.nombre) === normalizar(sinEtiqueta(it.variante)))
                     ?? (prod.variantes.length === 1 ? prod.variantes[0] : null));
                 if (!prod || !v || !(Number(v.precio) > 0)) return '(el precio de ese combo te lo confirma un asesor)';
                 if (!elegidos.some((e) => e.producto === prod.nombre)) elegidos.push({ producto: prod.nombre, variante: v.nombre, precio: Number(v.precio) });
@@ -783,9 +823,9 @@ function revisarRespuesta() {
             const elegidos = [];
             let valido = true;
             for (const it of JSON.parse(marcaCombo[1]).items ?? []) {
-                const prod = kb.catalogo.find((x) => normalizar(x.nombre) === normalizar(it.producto)
+                const prod = kb.catalogo.find((x) => normalizar(x.nombre) === normalizar(sinEtiqueta(it.producto))
                     && ['streaming', 'licencias', 'pines', 'recargas'].includes(x.tipo));
-                const v = prod && (prod.variantes.find((x) => normalizar(x.nombre) === normalizar(it.variante))
+                const v = prod && (prod.variantes.find((x) => normalizar(x.nombre) === normalizar(sinEtiqueta(it.variante)))
                     ?? (prod.variantes.length === 1 ? prod.variantes[0] : null));
                 if (!prod || !v || !(Number(v.precio) > 0)) { valido = false; break; }
                 if (!elegidos.some((e) => e.producto === prod.nombre)) elegidos.push({ producto: prod.nombre, variante: v.nombre, precio: Number(v.precio) });
@@ -865,9 +905,12 @@ function crearTriangulacion() {
     const cfg = $('Config bot').first().json;
     const item = $input.first().json;
     const p = item.pedido;
-    // Canal de compra (WO-035): 'web' compra en el portal de ANC; 'whatsapp' le escribe al proveedor.
-    // Sin tu número de aviso no hay a quién pedir el pago; por WhatsApp además hace falta el del proveedor.
-    const canal = String(cfg.canal_compra || 'whatsapp').trim().toLowerCase() === 'web' ? 'web' : 'whatsapp';
+    // Canal de compra (WO-035): 'web' compra en el portal de ANC; 'whatsapp' le escribe al proveedor; 'manual' (por
+    // defecto): el bot NO compra ni le escribe al proveedor: lee el plan y el costo en ANC y te avisa a ti para que compres.
+    // Sin tu número de aviso no hay a quién avisar; por WhatsApp además hace falta el del proveedor.
+    const modoCompra = String(cfg.canal_compra || 'manual').trim().toLowerCase();
+    const manual = !['web', 'whatsapp'].includes(modoCompra);
+    const canal = manual || modoCompra === 'web' ? 'web' : 'whatsapp';
     if (!p || !soloDigitos(cfg.numero_aviso_admin) || (canal === 'whatsapp' && !soloDigitos(cfg.numero_proveedor))) return [];
     const memoria = $getWorkflowStaticData('global');
     memoria.pedidos = memoria.pedidos || {};
@@ -884,14 +927,22 @@ function crearTriangulacion() {
     for (let i = 0; i < 5; i++) referencia += alfabeto[Math.floor(Math.random() * alfabeto.length)];
     if (web) referencia = p.referencia;
     const nombre = item.nombre ?? $('Normalizar mensaje').first().json.nombre;
+    // Pedido por chat (aún sin pagar): se recuerda para que el aviso del comprobante te diga qué comprar y cuánto validar
+    if (!web) {
+        memoria.ordenesChat = memoria.ordenesChat || {};
+        for (const [k, o] of Object.entries(memoria.ordenesChat)) if (ahora - o.at > 48 * 3600e3) delete memoria.ordenesChat[k];
+        memoria.ordenesChat[item.numero] = { referencia, producto: p.producto, variante: p.variante, precio: p.precio, cupon: p.cupon ?? null, at: ahora };
+    }
     return [{ json: {
         referencia,
         canal,
+        manual,
         cliente: item.numero,
         cliente_nombre: String(nombre ?? '').slice(0, 60),
         producto: p.producto,
         variante: p.variante,
         precio_venta: p.precio,
+        cupon: p.cupon ?? null,
         pagado: web, // orden web: el cliente ya pagó. Por chat aún no: no se le escribe mientras se cotiza
         texto_proveedor: [
             `Hola, cotización pedido *#${referencia}*:`,
@@ -937,6 +988,26 @@ function evaluarCotizacion() {
     function cotizacionWeb(t, b, demora) {
     const cfg = $('Config bot').first().json;
     const producto = `${t.producto}${t.variante ? ` – ${t.variante}` : ''}`;
+    if (t.manual) {
+        const enPortal = b.catalogo_ok && b.existe;
+        const costo = enPortal ? b.costo : b.respaldo?.costo ?? null;
+        const plan = b.eq ? `${b.eq.anc_producto} · ${b.eq.anc_plan}` : null;
+        const margen = costo !== null && t.precio_venta ? t.precio_venta - costo : null;
+        const fuente = enPortal ? 'ancpagos.com' : b.respaldo?.leida ? 'allnecessarycolombia.com (el portal no responde)' : null;
+        const memoria = $getWorkflowStaticData('global');
+        if (memoria.ordenesChat?.[t.cliente]?.referencia === t.referencia) Object.assign(memoria.ordenesChat[t.cliente], { plan, costo });
+        terminar('REVISION_MANUAL', [
+            t.pagado ? `🛒 *Pedido PAGADO · cómpralo ya en ANC* · #${t.referencia}` : `🛒 *Pedido nuevo · ⏳ AÚN NO HA PAGADO* · #${t.referencia}`,
+            `Cliente: +${t.cliente}${t.cliente_nombre ? ` (${t.cliente_nombre})` : ''}`,
+            `Producto: ${producto} · Venta ${cop(t.precio_venta)}${t.cupon ? ` (con cupón ${t.cupon}: confirma que sea su PRIMERA compra)` : ''}`,
+            plan ? `Comprar en ANC: *${plan}*${costo !== null ? ` · costo ${cop(costo)}` : ''}${fuente ? ` (${fuente})` : ''}${b.respaldo && b.respaldo.disponible === false ? ' · ⚠️ AGOTADO en la tienda de ANC' : ''}`
+                : '⚠️ Sin equivalencia en ANC (herramientas/equivalencias-ancpagos.json): búscalo por nombre.',
+            margen !== null ? `Margen: ${cop(margen)}${margen <= 0 ? ' ⛔ en cero o en pérdida' : ''}` : null,
+            '',
+            t.pagado ? '✅ El pago ya está validado en el panel. Compra, entrégale los accesos por su chat y márcalo entregado (activa la garantía).'
+                : 'No compres todavía: cuando envíe el comprobante te aviso con el monto que debes validar.',
+        ].filter((l) => l !== null).join('\n'), null);
+    }
     if (!b.catalogo_ok && b.respaldo?.leida) {
         const r = b.respaldo;
         const margen = r.costo !== null && t.precio_venta ? t.precio_venta - r.costo : null;
@@ -1095,6 +1166,24 @@ function avisoEntrega() {
         `Cliente: +${t.cliente} · clave terminada en …${e.clave_final}`,
         panel.ok === true ? '🛡️ Registrado en el panel con garantía activa.' : `⚠️ No se registró en el panel (${String(panel.mensaje ?? 'sin respuesta').slice(0, 160)}): márcalo entregado a mano para activar la garantía.`,
     ].join('\n') } }] : [];
+}
+
+// Combo en modo manual: en vez de cotizarle al proveedor por WhatsApp, te avisa a ti (estado REVISION_MANUAL)
+function comboManual() {
+    const t = $('Crear combo').first().json;
+    if (!t.manual) return $input.all();
+    const lista = t.lineas.map((l) => {
+        const e = __ANC_MAPA__.find((m) => normalizar(m.producto) === normalizar(l.producto) && normalizar(m.variante) === normalizar(l.variante));
+        return `• ${l.producto} – ${l.variante} (${cop(l.precio_venta)})${e ? ` → ANC: *${e.anc_producto} · ${e.anc_plan}*` : ' → sin equivalencia en ANC'}`;
+    });
+    terminar('REVISION_MANUAL', [
+        t.web ? `🧩 *Combo PAGADO · cómpralo ya en ANC* · #${t.referencia}` : `🧩 *Combo nuevo · ⏳ AÚN NO HA PAGADO* · #${t.referencia}`,
+        `Cliente: +${t.cliente}${t.cliente_nombre ? ` (${t.cliente_nombre})` : ''} · Total ${cop(t.total ?? t.lineas.reduce((a, l) => a + l.precio_venta, 0))}`,
+        ...lista,
+        '',
+        t.web ? '✅ Pago validado en el panel: compra cada plataforma, entrégale los accesos por su chat y márcalo entregado.'
+            : 'No compres todavía: cuando envíe el comprobante te aviso con el monto que debes validar.',
+    ].join('\n'), null);
 }
 
 /* ---------- C-web) Compra en el portal del proveedor (WO-035) ----------
@@ -1310,7 +1399,8 @@ function crearCombo() {
     const item = $input.first().json;
     const c = item.combo;
     const web = Boolean(c?.referencia && Array.isArray(c?.lineas));
-    if (!c || (!web && (!Array.isArray(c.items) || c.items.length < 2)) || !soloDigitos(cfg.numero_proveedor) || !soloDigitos(cfg.numero_aviso_admin)) return [];
+    const manual = !['web', 'whatsapp'].includes(String(cfg.canal_compra || 'manual').trim().toLowerCase());
+    if (!c || (!web && (!Array.isArray(c.items) || c.items.length < 2)) || (!manual && !soloDigitos(cfg.numero_proveedor)) || !soloDigitos(cfg.numero_aviso_admin)) return [];
     const memoria = $getWorkflowStaticData('global');
     memoria.pedidos = memoria.pedidos || {};
     const ahora = Date.now();
@@ -1346,7 +1436,13 @@ function crearCombo() {
             variante: lineas.map((l) => l.producto).join(' + ').slice(0, 200), precio_venta: total, esperando: 'COTIZACION', es_combo: true, lineas }),
         ...lineas.map((l) => fila({ ...l, grupo: referencia })),
     ];
+    if (!web) {
+        memoria.ordenesChat = memoria.ordenesChat || {};
+        memoria.ordenesChat[item.numero] = { referencia, producto: `Combo: ${lineas.map((l) => `${l.producto} – ${l.variante}`).join(' + ')}`, variante: '', precio: total, at: ahora,
+            plan: lineas.map((l) => { const e = __ANC_MAPA__.find((m) => normalizar(m.producto) === normalizar(l.producto) && normalizar(m.variante) === normalizar(l.variante)); return e ? `${e.anc_producto} · ${e.anc_plan}` : l.producto; }).join(' + ') };
+    }
     return [{ json: {
+        manual,
         referencia, cliente: item.numero, cliente_nombre: nombre, total, pct: c.pct ?? 0, web, lineas, filas,
         texto_proveedor: [
             `Hola, cotización pedido *#${referencia}* (combo):`,
@@ -1708,14 +1804,20 @@ function resultadoProveedor() {
    Las claves NO están en git: herramientas/sincronizar-n8n.mjs las pone desde .env al escribir el flujo en tu n8n. */
 function motorIa() {
     const PROVEEDORES_IA = [] /*__CLAVES_IA__*/;
-    async function consultarIa(helpers, mensajes, { temperatura = 0.3, maxTokens = 500, timeoutMs = 45000 } = {}) {
+    async function consultarIa(helpers, mensajes, { temperatura = 0.3, maxTokens = 500, timeoutMs = 45000, presupuestoMs = 40000 } = {}) {
         const memoria = $getWorkflowStaticData('global');
         const hoy = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Bogota' });
         const previo = memoria.iaEstado ?? { dia: hoy, p: {} };
         // Día nuevo: el conteo de usos vuelve a cero, las pausas siguen
         const est = previo.dia === hoy ? previo : { dia: hoy, p: Object.fromEntries(Object.entries(previo.p ?? {}).map(([k, v]) => [k, { ...v, usos: 0 }])) };
         memoria.iaEstado = est;
-        const lista = PROVEEDORES_IA.filter((p) => p.clave && p.url && p.modelo);
+        // Tamaño aproximado de la consulta (tokens): una IA con límite menor (p. ej. Groq gratis: 8.000 por minuto) ni se intenta
+        // (español ≈ 3,6 caracteres por token; cada IA puede pedir menos espacio de respuesta con maxTokens)
+        const entrada = Math.ceil(JSON.stringify(mensajes).length / 3.6);
+        const respuesta = (p) => Math.min(maxTokens, Number(p.maxTokens) > 0 ? Number(p.maxTokens) : maxTokens);
+        const todas = PROVEEDORES_IA.filter((p) => p.clave && p.url && p.modelo);
+        const caben = todas.filter((p) => !(Number(p.limite) > 0) || entrada + respuesta(p) <= Number(p.limite));
+        const lista = caben.length ? caben : todas;
         if (!lista.length) throw new Error('No hay ninguna IA configurada (claves IA_* en .env → node herramientas/sincronizar-n8n.mjs --aplicar)');
         const ahora = Date.now();
         const e = (p) => (est.p[p.nombre] = est.p[p.nombre] ?? { usos: 0, hasta: 0, ultimo: null, motivo: null });
@@ -1723,14 +1825,17 @@ function motorIa() {
         const libres = lista.filter((p) => e(p).hasta <= ahora).sort((a, b) => carga(a) - carga(b));
         const enPausa = lista.filter((p) => e(p).hasta > ahora).sort((a, b) => e(a).hasta - e(b).hasta);
         const fallas = [];
-        // Si todas están en pausa se intentan igual (por si ya se recargó alguna)
+        const inicio = Date.now();
+        // Si todas están en pausa se intentan igual (por si ya se recargó alguna). Tope total: el cliente no espera más de ~40 s
         for (const p of [...libres, ...enPausa]) {
+            const resta = presupuestoMs - (Date.now() - inicio);
+            if (resta < 4000) { fallas.push('tiempo máximo agotado'); break; }
             const s = e(p);
             let codigo = 0, detalle = '';
             try {
-                const r = await helpers.httpRequest({ method: 'POST', url: `${String(p.url).replace(/\/+$/, '')}/chat/completions`, json: true, timeout: timeoutMs,
+                const r = await helpers.httpRequest({ method: 'POST', url: `${String(p.url).replace(/\/+$/, '')}/chat/completions`, json: true, timeout: Math.min(timeoutMs, resta),
                     headers: { Authorization: `Bearer ${p.clave}`, 'Content-Type': 'application/json' },
-                    body: { model: p.modelo, messages: mensajes, temperature: temperatura, max_tokens: maxTokens },
+                    body: { model: p.modelo, messages: mensajes, temperature: temperatura, max_tokens: respuesta(p), ...(p.extra ?? {}) },
                     returnFullResponse: true, ignoreHttpStatusErrors: true });
                 let j = r.body ?? {};
                 if (typeof j === 'string') { try { j = JSON.parse(j); } catch { j = {}; } }
@@ -1743,7 +1848,8 @@ function motorIa() {
                 detalle = String(j.error?.message ?? j.message ?? j[0]?.error?.message ?? (texto ? '' : 'respuesta vacía')).replace(/\s+/g, ' ').slice(0, 160);
             } catch (err) { detalle = String(err.message ?? err).slice(0, 160); }
             const sinSaldo = [401, 402, 403].includes(codigo) || /insufficient|balance|credit|billing|saldo|per ?day|daily/i.test(detalle);
-            const pausa = sinSaldo ? 6 * 3600e3 : codigo === 429 || codigo === 413 ? 2 * 60e3 : codigo >= 500 || !codigo ? 60e3 : 10 * 60e3;
+            const lenta = !codigo && /timeout|ETIMEDOUT|aborted/i.test(detalle);
+            const pausa = sinSaldo ? 6 * 3600e3 : codigo === 429 || codigo === 413 ? 2 * 60e3 : lenta ? 5 * 60e3 : codigo >= 500 || !codigo ? 60e3 : 10 * 60e3;
             Object.assign(s, { hasta: ahora + pausa, motivo: `${codigo || 'sin respuesta'} ${detalle}`.trim(), sinSaldo });
             fallas.push(`${p.nombre}: ${codigo || ''} ${detalle}`.replace(/\s+/g, ' ').trim());
         }
@@ -1751,20 +1857,21 @@ function motorIa() {
     }
 }
 
-// H1 · Chat del bot (reemplaza al "Agente IA"): mismo prompt de sistema, memoria de las últimas 8 idas y vueltas por cliente
+// H1 · Chat del bot (reemplaza al "Agente IA"): mismo prompt de sistema, memoria de las últimas 4 idas y vueltas por cliente
 async function iaBalanceada() {
     const datos = $input.first().json;
     const numero = String($('Normalizar mensaje').first().json.numero ?? '');
     const memoria = $getWorkflowStaticData('global');
     const chats = memoria.chatsIa = memoria.chatsIa ?? {};
     const ahora = Date.now();
-    const previo = chats[numero] && ahora - chats[numero].at < 24 * 3600e3 ? chats[numero].m : [];
+    // Últimas 4 idas y vueltas (liviano para las IA gratuitas)
+    const previo = chats[numero] && ahora - chats[numero].at < 24 * 3600e3 ? chats[numero].m.slice(-8).map((x) => ({ ...x, content: String(x.content).slice(0, 600) })) : [];
     const mensajes = [{ role: 'system', content: String(datos.sistema ?? '') }, ...previo, { role: 'user', content: String(datos.texto ?? '') }];
     try {
         // 20 s por IA: si una está lenta (saturada) se pasa a la siguiente sin dejar al cliente esperando
-        const r = await consultarIa(this.helpers, mensajes, { temperatura: 0.3, maxTokens: 1500, timeoutMs: 20000 }); // 1500: los modelos que "piensan" gastan parte antes de responder
+        const r = await consultarIa(this.helpers, mensajes, { temperatura: 0.3, maxTokens: 1200, timeoutMs: 20000, presupuestoMs: 40000 }); // 1500: los modelos que "piensan" gastan parte antes de responder
         const corto = (t) => String(t).slice(0, 900);
-        chats[numero] = { at: ahora, m: [...previo, { role: 'user', content: corto(datos.texto ?? '') }, { role: 'assistant', content: corto(r.texto) }].slice(-16) };
+        chats[numero] = { at: ahora, m: [...previo, { role: 'user', content: corto(datos.texto ?? '') }, { role: 'assistant', content: corto(r.texto) }].slice(-8) };
         // Solo los 400 chats más recientes
         const claves = Object.keys(chats);
         if (claves.length > 400) claves.sort((a, b) => chats[a].at - chats[b].at).slice(0, claves.length - 400).forEach((k) => delete chats[k]);
@@ -1919,7 +2026,7 @@ nodo('Config bot', 'n8n-nodes-base.set', 3.4, [220, 0], set({
     // WO-035 · Compra al proveedor: 'web' = en ancpagos.com (cotiza solo, tú pagas con un toque); 'whatsapp' = por chat
     // WO-038: URL donde Evolution le avisa al bot (localhost solo si Evolution corre en este PC fuera de Docker)
     webhook_publico: 'http://localhost:5678/webhook/dc-whatsapp',
-    canal_compra: 'web',
+    canal_compra: 'manual', // manual (tú compras en ANC, el bot te avisa) · web (portal de ANC automático) · whatsapp
     anc_url: 'https://ancpagos.com',
     anc_metodo: 'nequi',   // clave del medio de pago de ANC con el que les pagas (nequi, daviplata, brebManual, bancolombia)
     anc_correo: '',        // correo donde ANC envía los accesos (obligatorio para comprar por web)
@@ -1950,7 +2057,7 @@ nodo('Registrar baja', 'n8n-nodes-base.httpRequest', 4.2, [900, -300], supabaseR
 }), { onError: 'continueRegularOutput' });
 nodoCodigo('Respuesta fija', [1120, -200], respuestaFija);
 nodoCodigo('Escalar a asesor', [900, -100], rutaAsesor, { conUtilidades: true });
-nodoCodigo('Comprobante recibido', [900, 0], comprobanteRecibido);
+nodoCodigo('Comprobante recibido', [900, 0], comprobanteRecibido, { conUtilidades: true });
 nodo('Base de conocimiento', 'n8n-nodes-base.httpRequest', 4.2, [900, 140], {
     url: "={{ $('Config bot').first().json.url_conocimiento }}",
     options: { timeout: 8000, response: { response: { responseFormat: 'json' } } },
@@ -2153,6 +2260,7 @@ nodoCodigo('Líneas del combo', [2330, YC - 160], lineasCombo);
 nodo('Vincular combo al panel', 'n8n-nodes-base.httpRequest', 4.2, [2440, YC - 160],
     rpcPanel('vincular_triangulacion', '={{ JSON.stringify({ p_referencia: $json.referencia }) }}'),
     { onError: 'continueRegularOutput', alwaysOutputData: true });
+nodoCodigo('Combo manual', [2550, YC], comboManual, { conUtilidades: true }, { ...terminal, executeOnce: true });
 nodo('Cotizar combo al proveedor', 'n8n-nodes-base.httpRequest', 4.2, [2660, YC], enviarA(PROVEEDOR, "$('Crear combo').first().json.texto_proveedor"), { ...terminal, executeOnce: true });
 nodo('Guardar cotización combo', 'n8n-nodes-base.httpRequest', 4.2, [2880, YC], supabaseTabla('PATCH', porReferenciaCombo,
     '={{ JSON.stringify({ wamid_cotizacion: $json.key?.id ?? null }) }}'));
@@ -2343,7 +2451,7 @@ nodo('Leeme', 'n8n-nodes-base.stickyNote', 1, [-420, -360], {
         '',
         '**Latidos (WO-036):** cada rama programada marca un latido; Panel → Prueba del sistema muestra si n8n está vivo (aplica supabase/wo-036-diagnostico.sql).',
         '',
-        '**Compra al proveedor (WO-035):** `canal_compra` = `web` compra en ancpagos.com (cotiza solo, tú pagas y envías la captura con #pago, el bot crea el pedido y lee los accesos de su página cada minuto); `whatsapp` = por chat con `numero_proveedor`. Para web llena `anc_correo` y `anc_metodo`, y aplica supabase/wo-035-compra-web-anc.sql.',
+        '**Compra al proveedor (WO-035):** `canal_compra` = `manual` (recomendado: el bot te avisa con plan, costo y si ya pagó; tú compras en ANC) · `web` compra en ancpagos.com (cotiza solo, tú pagas y envías la captura con #pago, el bot crea el pedido y lee los accesos de su página cada minuto); `whatsapp` = por chat con `numero_proveedor`. Para web llena `anc_correo` y `anc_metodo`, y aplica supabase/wo-035-compra-web-anc.sql.',
         '',
         '**3. Evolution API → Webhook:** pulsa el nodo **Configurar Evolution** (Execute) y n8n lo registra solo con su credencial (URL en Config bot → `webhook_publico`, evento `MESSAGES_UPSERT`). Mira el resultado en "Resultado Evolution".',
         '',
@@ -2462,7 +2570,7 @@ unir('Guardar cierre', 'Mensajes de cierre');
 unir('Mensajes de cierre', 'Enviar aviso triangulación');
 
 // D) Combos
-['Crear combo', 'Registrar combo', 'Líneas del combo', 'Vincular combo al panel', 'Cotizar combo al proveedor', 'Guardar cotización combo',
+['Crear combo', 'Registrar combo', 'Líneas del combo', 'Vincular combo al panel', 'Combo manual', 'Cotizar combo al proveedor', 'Guardar cotización combo',
     'Esperar cotización combo', 'Evaluar cotización combo', 'Pedir pago combo al admin', 'Guardar costo combo', 'Líneas agotadas', '¿Hay agotadas?']
     .forEach((n, i, a) => { if (a[i + 1]) unir(n, a[i + 1]); });
 unir('¿Hay agotadas?', 'Avisar agotadas al cliente', 0);
@@ -2505,6 +2613,12 @@ for (const [desde, tipos] of Object.entries(conexiones)) {
 // Los nodos Code de n8n corren como funciones async (pueden usar await): se validan igual
 const FuncionAsync = Object.getPrototypeOf(async () => {}).constructor;
 for (const n of nodos.filter((x) => x.type === 'n8n-nodes-base.code')) new FuncionAsync('$', '$input', '$getWorkflowStaticData', n.parameters.jsCode);
+
+// Envíos por WhatsApp (Evolution): si la sesión se reconecta ("Connection Closed", 500) el mensaje no se pierde:
+// 3 intentos con 5 s entre cada uno
+for (const n of nodos) {
+    if (n.type === 'n8n-nodes-base.httpRequest' && /\/message\/send(Text|Media)\//.test(String(n.parameters?.url ?? ''))) Object.assign(n, { retryOnFail: true, maxTries: 3, waitBetweenTries: 5000 });
+}
 
 const flujo = {
     name: 'DC Tecnology · Bot WhatsApp + Posventa',

@@ -11,7 +11,7 @@
 // Para apagar una sin borrar su clave: IA_<ID>_APAGADA=1 en .env. Para cambiar su peso: IA_<ID>_PESO=…
 
 export const PROVEEDORES_IA = [
-    { id: 'GROQ', nombre: 'Groq', url: 'https://api.groq.com/openai/v1', claveEnv: 'IA_GROQ_KEY', peso: 1000,
+    { id: 'GROQ', nombre: 'Groq', url: 'https://api.groq.com/openai/v1', claveEnv: 'IA_GROQ_KEY', peso: 1000, limite: 7800, maxTokens: 900, extra: { reasoning_effort: 'low' }, // gratis: 8.000 tokens/min por consulta
         modelo: 'openai/gpt-oss-120b', preferir: [/gpt-oss-120b/i, /qwen\/qwen3/i, /llama-3\.3-70b/i, /llama-4/i],
         registro: 'https://console.groq.com/keys', nota: 'gratis, muy rápido (GPT-OSS 120B, Qwen 3)' },
     { id: 'CEREBRAS', nombre: 'Cerebras', url: 'https://api.cerebras.ai/v1', claveEnv: 'IA_CEREBRAS_KEY', peso: 1000,
@@ -50,6 +50,7 @@ export function armarProveedores(env) {
             modelo: String((p.modeloEnv && env[p.modeloEnv]) || env[`IA_${p.id}_MODELO`] || p.modelo).trim(),
             clave: String(env[p.claveEnv]).trim(),
             peso: Number(env[`IA_${p.id}_PESO`]) > 0 ? Number(env[`IA_${p.id}_PESO`]) : p.peso,
+            ...(p.limite ? { limite: p.limite } : {}), ...(p.maxTokens ? { maxTokens: p.maxTokens } : {}), ...(p.extra ? { extra: p.extra } : {}),
         }));
 }
 

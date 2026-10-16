@@ -21,7 +21,7 @@ Write-Host "Cuenta: $([Security.Principal.WindowsIdentity]::GetCurrent().Name)"
 $certificado = 'C:\evolution-api\kaspersky-ca.pem'
 $carpetaEvolution = 'C:\evolution-api\evolution-api-main'
 # La clave de Evolution sale de .env (EVOLUTION_API_KEY): nunca se escribe en el repositorio
-$claveEvolution = ((Get-Content (Join-Path $PSScriptRoot '...env') -ErrorAction SilentlyContinue) | Where-Object { $_ -match '^EVOLUTION_API_KEY=' } | Select-Object -First 1) -replace '^EVOLUTION_API_KEY=', ''
+$claveEvolution = ((Get-Content (Join-Path (Split-Path $PSScriptRoot -Parent) '.env') -ErrorAction SilentlyContinue) | Where-Object { $_ -match '^EVOLUTION_API_KEY=' } | Select-Object -First 1) -replace '^EVOLUTION_API_KEY=', ''
 
 function Escucha($puerto) { [bool](Get-NetTCPConnection -LocalPort $puerto -State Listen -ErrorAction SilentlyContinue) }
 function Esperar($nombre, $prueba, $segundos) {
@@ -57,3 +57,4 @@ try {
 } catch { Write-Host "  · No pude leer el estado de dc-bot: $($_.Exception.Message)" -ForegroundColor Yellow }
 
 Write-Host "`nListo. Deja abiertas las ventanas 'Evolution API' y 'n8n'. Panel → Prueba del sistema para revisar todo.`n" -ForegroundColor Cyan
+

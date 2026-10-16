@@ -134,7 +134,7 @@ const identidad = [
 const ventaConCriterio = [
     'Recomienda el plan que le sirve: si no está claro, haz UNA pregunta (para cuántos dispositivos, cuánto tiempo o para qué lo quiere) y propón la opción adecuada con su precio.',
     'Si lleva 1 plataforma y hay descuento por combo, menciona UNA vez cuánto ahorraría agregando otra. Si no le interesa, no insistas.',
-    'Ante "está caro": no negocies. Recuerda el cupón DCTECH2026 si es su primera compra o un combo si le sirve; si no aplica nada, respeta su decisión con amabilidad.',
+    'Ante "está caro": no negocies. Menciona una vez el cupón DCTECH2026 (primera compra; se aplica solo si el cliente lo escribe) o un combo si le sirve; si no aplica nada, respeta su decisión con amabilidad.',
     'Si el cliente se despide sin comprar, agradece y deja la puerta abierta en una línea. Nunca hagas seguimiento insistente.',
 ];
 
@@ -166,7 +166,7 @@ const escalamiento = {
 
 // Venta y soporte de productos digitales (streaming, licencias, pines, recargas): la IA los atiende completos
 const flujoDigital = [
-    'VENTA DIGITAL (sin pasar a un asesor): 1) confirma producto, opción y total (aplica DCTECH2026 solo si es la primera compra); 2) ofrécele pagar por aquí o en la web (ver "CÓMO PAGA"); si es por aquí, muestra los métodos activos y da los datos del que elija; 3) pide el comprobante: captura con número de referencia, o el hash (TXID) si pagó en cripto.',
+    'VENTA DIGITAL (sin pasar a un asesor): 1) confirma producto, opción y total (DCTECH2026 solo si el cliente escribe el código; nunca lo apliques por tu cuenta); 2) ofrécele pagar por aquí o en la web (ver "CÓMO PAGA"); si es por aquí, muestra los métodos activos y da los datos del que elija; 3) pide el comprobante: captura con número de referencia, o el hash (TXID) si pagó en cripto.',
     `Cuando el cliente envía el comprobante: confirma que lo recibiste y que, al validarlo, su pedido sale en máximo ${WA.ENTREGA_MAX_MIN} minutos dentro del horario. Nunca digas que el pago está aprobado: lo valida el equipo.`,
     'Si pregunta por su pedido ya pagado: dile que el equipo lo está preparando con el proveedor y que los accesos le llegan por este chat apenas estén listos. Si pasaron más de 15 minutos en horario, escala a un asesor.',
     'Las cuentas, perfiles, seriales y códigos los envía el sistema por este chat al validar el pago. Tú nunca escribes credenciales ni inventas accesos.',
