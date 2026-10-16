@@ -304,7 +304,10 @@
             `Orden: *${codigo}* · $${total} · ${metodo}`,
             `Cliente: +${cliente}`,
             `Referencia: ${referencia}`,
-            'Valídalo en el panel → Pagos & Agente Bot → Comprobantes web.',
+            '',
+            `1️⃣ Revisa en tu ${metodo} que llegaron *${total}*.`,
+            `2️⃣ Si llegó responde *#ok ${codigo}* · si no: *#no ${codigo} motivo*`,
+            '(o en el panel → Pagos & Agente Bot → Comprobantes web)',
         ].join('\n'),
         adminFalla: ({ reporte, cliente, producto, problema, garantia }) => [
             '🛠️ *Falla reportada en Mis pedidos*',
