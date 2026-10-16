@@ -72,10 +72,14 @@ h1 { font-weight: 800 !important; line-height: 1.08 !important; }
 }
 .tarjeta-3d::before, .tarjeta-3d .brillo { display: none !important; }
 .tarjeta-3d:hover, .tarjeta-3d:focus-visible { transform: translateY(-2px) !important; box-shadow: 0 0 0 1px rgb(var(--borde)), var(--sombra-2) !important; }
-.marco-img, .marco-logo { background: rgb(var(--fondo)) !important; box-shadow: inset 0 0 0 1px rgb(var(--borde)) !important; backdrop-filter: none !important; }
+/* Vitrina iluminada: los logos y los productos negros (diademas, relojes) se leen en ambos temas.
+   En oscuro es una placa clara con luz cenital, como un estante iluminado en una tienda de noche */
+.marco-img, .marco-logo, .prod .vitrina { background: radial-gradient(120% 90% at 50% 0%, #FFFFFF 0%, #EEF0F3 55%, #DDE1E7 100%) !important; box-shadow: inset 0 0 0 1px rgb(15 17 26 / .08), inset 0 -18px 30px -24px rgb(15 17 26 / .35) !important; backdrop-filter: none !important; }
 .marco-img::after { display: none !important; }
-.tema-claro .marco-img, .tema-claro .marco-logo { background: #F3F4F6 !important; }
-.marco-img img, .marco-logo img, .marco-foto img.sin-fondo { animation: none !important; filter: none !important; }
+.tema-claro .marco-img, .tema-claro .marco-logo, .tema-claro .prod .vitrina { background: radial-gradient(120% 90% at 50% 0%, #FFFFFF 0%, #F3F4F6 60%, #E8EBEF 100%) !important; }
+.marco-img img, .marco-logo img { animation: none !important; filter: none !important; }
+/* Producto recortado: sombra de contacto sobre la vitrina (da volumen y realismo) */
+.marco-foto img.sin-fondo { animation: none !important; filter: drop-shadow(0 10px 10px rgb(15 17 26 / .22)) !important; }
 .tarjeta-3d:hover .marco-logo img { transform: scale(1.18) !important; }
 .tarjeta-3d:hover .marco-foto img { transform: scale(1.03) !important; }
 
@@ -110,8 +114,6 @@ h1 { font-weight: 800 !important; line-height: 1.08 !important; }
 .pasos-inicio li:hover, .categoria:hover, .prod:hover { transform: translateY(-2px) !important; box-shadow: 0 0 0 1px rgb(var(--borde)), var(--sombra-2) !important; }
 .pasos-inicio b, .categoria b, .prod h3, .prod .precio b { font-family: Inter, sans-serif !important; letter-spacing: -.01em; }
 .categoria::before { display: none !important; }
-.prod .vitrina { background: rgb(var(--fondo)) !important; box-shadow: inset 0 0 0 1px rgb(var(--borde)) !important; }
-.tema-claro .prod .vitrina { background: #F3F4F6 !important; }
 .prod .vitrina img { filter: none !important; }
 .prod.elegido { box-shadow: inset 0 0 0 2px var(--acento) !important; }
 .reglas-combo span i { color: var(--acento) !important; }
@@ -121,7 +123,8 @@ h1 { font-weight: 800 !important; line-height: 1.08 !important; }
 /* ---------- Vidrio y desenfoques: superficies sólidas (más nítido y más rápido) ---------- */
 [class*="backdrop-blur"] { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
 header[class*="backdrop-blur"], .cab { background-color: rgb(var(--fondo) / .96) !important; }
-.tema-claro header[class*="backdrop-blur"], .tema-claro .cab { background-color: rgb(255 255 255 / .96) !important; }
+.tema-claro header[class*="backdrop-blur"], .tema-claro .cab { background-color: rgb(255 255 255) !important; }
+header[class*="backdrop-blur"], .cab { background-color: rgb(var(--fondo)) !important; }
 
 /* Movimiento: entradas cortas; quien prefiere menos movimiento, nada */
 .entrada { animation-duration: .3s !important; }

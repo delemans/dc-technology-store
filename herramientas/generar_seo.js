@@ -71,6 +71,7 @@ const esc = (v) => String(v ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').
 const cop = (v) => `$${Number(v).toLocaleString('es-CO')}`;
 const textoPlano = (html) => String(html ?? '').replace(/<br\s*\/?>/gi, ' ').replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
 const urlProducto = (p) => `${SITIO}/p/${p.id}.html`;
+const urlCategoria = (tipo) => `${SITIO}/c/${tipo}.html`;
 // JSON dentro de <script>: se neutraliza "</" para que un texto del catálogo no cierre la etiqueta
 const jsonSeguro = (obj) => JSON.stringify(obj).replace(/</g, '\\u003c');
 
@@ -108,7 +109,7 @@ function jsonLd(p) {
         { '@context': 'https://schema.org', ...item },
         { '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [
             { '@type': 'ListItem', position: 1, name: 'Inicio', item: `${SITIO}/` },
-            { '@type': 'ListItem', position: 2, name: categoria, item: `${SITIO}/#catalogo` },
+            { '@type': 'ListItem', position: 2, name: categoria, item: urlCategoria(p.tipo) },
             { '@type': 'ListItem', position: 3, name: p.nombre, item: urlProducto(p) },
         ] },
     ];
@@ -123,7 +124,7 @@ header{border-bottom:1px solid var(--b)}header .envoltura{display:flex;align-ite
 .marca{display:flex;align-items:center;gap:10px;font-weight:900;text-decoration:none;letter-spacing:.04em}.marca img{width:36px;height:36px;border-radius:8px}.marca b{color:var(--r)}
 nav.migas{font-size:13px;color:var(--m);margin:18px 0}nav.migas a{text-decoration:none}nav.migas a:hover{color:var(--t)}
 .ficha{display:grid;gap:28px;grid-template-columns:1fr}@media(min-width:820px){.ficha{grid-template-columns:5fr 7fr}}
-.vitrina{display:grid;place-items:center;aspect-ratio:1;border-radius:24px;background:radial-gradient(closest-side,rgba(255,255,255,.08),transparent),linear-gradient(#161D2E,#0E1320);box-shadow:inset 0 0 0 1px var(--b)}
+.vitrina{display:grid;place-items:center;aspect-ratio:1;border-radius:24px;background:radial-gradient(120% 90% at 50% 0%,#FFFFFF 0%,#EEF0F3 55%,#DDE1E7 100%);box-shadow:inset 0 0 0 1px rgba(15,17,26,.08)}
 .vitrina img{width:78%;height:78%;object-fit:contain}
 h1{font-size:clamp(26px,4vw,38px);line-height:1.15;margin:4px 0 10px}.marca-p{color:var(--r);font-size:12px;font-weight:800;letter-spacing:.2em;text-transform:uppercase}
 .chips{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}.chip{font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px;box-shadow:inset 0 0 0 1px var(--b)}
@@ -134,7 +135,11 @@ td{padding:12px 14px;border-bottom:1px solid var(--b)}td:last-child{text-align:r
 section.bloque{margin:28px 0;padding:20px;border-radius:20px;background:var(--c);box-shadow:inset 0 0 0 1px var(--b)}section.bloque h2{font-size:18px;margin:0 0 12px}
 ol,ul{margin:0;padding-left:20px}li{margin:6px 0;color:var(--m)}li b{color:var(--t)}
 .rel{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}.rel a{display:flex;gap:10px;align-items:center;padding:10px;border-radius:14px;background:var(--c);box-shadow:inset 0 0 0 1px var(--b);text-decoration:none;font-size:14px;font-weight:700}
-.rel img{width:44px;height:44px;object-fit:contain;border-radius:10px;background:#121826}
+.rel img{width:44px;height:44px;object-fit:contain;border-radius:10px;background:#F1F3F6}
+.grilla{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));margin:18px 0}.grilla a{display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:18px;background:var(--c);box-shadow:inset 0 0 0 1px var(--b);text-decoration:none}
+.grilla a:hover{box-shadow:inset 0 0 0 1px var(--r)}.grilla .vitrina{border-radius:14px}.grilla b{font-size:14.5px;line-height:1.3}.grilla span{color:var(--r);font-weight:800;font-variant-numeric:tabular-nums}
+.intro{color:var(--m);max-width:68ch}details{padding:12px 0;border-bottom:1px solid var(--b)}details:last-child{border:0}summary{cursor:pointer;font-weight:700}details p{color:var(--m);margin:8px 0 0}
+.cats{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 0}.cats a{font-size:13px;font-weight:700;padding:6px 12px;border-radius:999px;box-shadow:inset 0 0 0 1px var(--b);text-decoration:none}.cats a[aria-current]{color:#fff;background:var(--r);box-shadow:none}
 footer{margin-top:40px;padding:24px 0;border-top:1px solid var(--b);color:var(--m);font-size:13px}
 `;
 
@@ -183,7 +188,7 @@ ${jsonLd(p).map((o) => `<script type="application/ld+json">${jsonSeguro(o)}</scr
 <a class="btn btn-p" href="${comprar}">Ver en la tienda</a>
 </div></header>
 <main class="envoltura">
-<nav class="migas" aria-label="Ruta"><a href="${SITIO}/">Inicio</a> › <a href="${SITIO}/#catalogo">${esc(categoria)}</a> › <span>${esc(p.nombre)}</span></nav>
+<nav class="migas" aria-label="Ruta"><a href="${SITIO}/">Inicio</a> › <a href="${urlCategoria(p.tipo)}">${esc(categoria)}</a> › <span>${esc(p.nombre)}</span></nav>
 <article class="ficha">
 <div class="vitrina"><img src="${esc(p.imagen)}" alt="${esc(p.nombre)}" width="480" height="480" loading="eager" decoding="async"></div>
 <div>
@@ -206,6 +211,97 @@ ${relacionados.length ? `<section><h2 style="font-size:18px">También en ${esc(c
 `;
 }
 
+// Páginas por categoría: apuntan a las búsquedas genéricas ("cuentas de streaming Colombia",
+// "licencias Windows originales", "pines virtuales", "recargas en línea"). Solo hechos del negocio.
+const SEO_CATEGORIA = {
+    streaming: { h1: 'Cuentas de streaming en Colombia', titulo: 'Cuentas de Streaming en Colombia',
+        intro: 'Perfiles y pantallas de las principales plataformas de streaming con entrega por WhatsApp y garantía. Elige la plataforma, paga con tu medio favorito y recibe tus accesos tras validar el pago.' },
+    licencias: { h1: 'Licencias de software y apps premium', titulo: 'Licencias de Software y Apps Premium en Colombia',
+        intro: 'Licencias de Windows y Office, antivirus y apps premium de diseño, edición, idiomas e IA, con entrega por WhatsApp, guía de activación y garantía.' },
+    pines: { h1: 'Pines virtuales en Colombia', titulo: 'Pines Virtuales en Colombia',
+        intro: 'Pines y tarjetas de regalo digitales para plataformas de video, música, juegos y tiendas de apps. El código llega por WhatsApp tras validar tu pago.' },
+    recargas: { h1: 'Recargas en línea en Colombia', titulo: 'Recargas en Línea en Colombia: Celular, Juegos y TV',
+        intro: 'Recargas de celular para los operadores de Colombia, diamantes de juegos y TV prepago. Indica el número o la cuenta a recargar y paga con tu medio favorito.' },
+    tecnologia: { h1: 'Tecnología con garantía y envío a todo el país', titulo: 'Tecnología en Colombia: Relojes Inteligentes, Audífonos y Más',
+        intro: 'Relojes inteligentes, audífonos, diademas, powerbanks y accesorios con garantía por defectos de fábrica y envío a todo Colombia.' },
+    servicios: { h1: 'Servicios técnicos y automatización', titulo: 'Servicios Técnicos, Mantenimiento y Automatización en Colombia',
+        intro: 'Mantenimiento y reparación de computadores, instalación de sistema operativo, asesoría técnica, catálogos web y automatizaciones para negocios. Cotización sin compromiso por WhatsApp.' },
+    alquiler: { h1: 'Alquiler de equipos de cómputo', titulo: 'Alquiler de Laptops y Equipos de Cómputo',
+        intro: 'Alquiler de laptops y equipos de cómputo para eventos, capacitaciones y proyectos. Cotiza por WhatsApp según cantidad y fechas.' },
+};
+
+function preguntas(tipo) {
+    const digital = DIGITALES.includes(tipo);
+    const lista = [];
+    if (digital) lista.push([`¿Cuánto tarda la entrega?`, `Máximo ${WA.ENTREGA_MAX_MIN} minutos después de validar tu pago, en horario de ${WA.HORARIO}. Te llega por WhatsApp.`]);
+    if (tipo === 'tecnologia') lista.push(['¿Hacen envíos?', 'Sí, a todo el país. Confirmamos disponibilidad y coordinamos el envío por WhatsApp.']);
+    if (COTIZABLES.includes(tipo)) lista.push(['¿Cuánto cuesta?', 'El valor de la tienda es estimado: te enviamos la cotización final antes de empezar, sin compromiso.']);
+    lista.push(['¿Cómo pago?', `Con ${PAGO.texto}. Envías el comprobante y lo validamos.`]);
+    if (CON_GARANTIA.includes(tipo)) lista.push(['¿Tiene garantía?', tipo === 'tecnologia' ? `Sí, ${GARANTIA_DIAS} días por defectos de fábrica.` : `Sí, ${GARANTIA_DIAS} días desde la entrega si se cumplen las reglas de uso (no cambiar contraseña, correo ni facturación y no compartir el acceso).`]);
+    if (tipo === 'pines' || tipo === 'recargas') lista.push(['¿Puedo devolver una recarga o un pin?', 'No: las recargas y pines entregados no son reversibles. Verifica bien el número o la cuenta antes de pagar.']);
+    if (digital) lista.push(['¿Hay descuento en la primera compra?', 'Sí: con el cupón DCTECH2026 tienes 10% en tu primera compra.']);
+    lista.push(['¿Cómo los contacto?', `Por WhatsApp al +57 322 328 4622 (${WA.HORARIO}).`]);
+    return lista;
+}
+
+function paginaCategoria(tipo, lista) {
+    const meta = SEO_CATEGORIA[tipo] ?? { h1: CATEGORIAS[tipo], titulo: CATEGORIAS[tipo], intro: '' };
+    const ejemplos = [...new Set(lista.map((p) => p.marca && !p.marca.startsWith('DC ') && !meta.titulo.includes(':') ? p.marca : null).filter(Boolean))].slice(0, 4);
+    const titulo = `${meta.titulo}${ejemplos.length ? `: ${ejemplos.join(', ')}` : ''} | DC Tecnology`;
+    const precios = lista.map((p) => datosDe(p).desde).filter(Boolean);
+    // Frases completas hasta 158 caracteres, como en las páginas de producto
+    const descripcion = [...meta.intro.split(/(?<=\.)\s+/), precios.length ? `Desde ${cop(Math.min(...precios))}.` : '', 'Entrega y soporte por WhatsApp.']
+        .filter(Boolean).reduce((acc, frase) => ((`${acc} ${frase}`).trim().length <= 158 ? `${acc} ${frase}`.trim() : acc), '');
+    const faq = preguntas(tipo);
+    const ld = [
+        { '@context': 'https://schema.org', '@type': 'CollectionPage', name: meta.h1, url: urlCategoria(tipo), description: meta.intro, isPartOf: { '@id': `${SITIO}/#organizacion` },
+            mainEntity: { '@type': 'ItemList', numberOfItems: lista.length, itemListElement: lista.slice(0, 60).map((p, i) => ({ '@type': 'ListItem', position: i + 1, url: urlProducto(p), name: p.nombre })) } },
+        { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: faq.map(([q, a]) => ({ '@type': 'Question', name: q, acceptedAnswer: { '@type': 'Answer', text: a } })) },
+        { '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [
+            { '@type': 'ListItem', position: 1, name: 'Inicio', item: `${SITIO}/` },
+            { '@type': 'ListItem', position: 2, name: CATEGORIAS[tipo], item: urlCategoria(tipo) },
+        ] },
+    ];
+    const tipos = Object.keys(CATEGORIAS).filter((t) => productos.some((p) => p.tipo === t));
+    return `<!DOCTYPE html>
+<html lang="es-CO">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${esc(titulo)}</title>
+<meta name="description" content="${esc(descripcion)}">
+<link rel="canonical" href="${urlCategoria(tipo)}">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="DC Tecnology">
+<meta property="og:locale" content="es_CO">
+<meta property="og:url" content="${urlCategoria(tipo)}">
+<meta property="og:title" content="${esc(titulo)}">
+<meta property="og:description" content="${esc(descripcion)}">
+<meta property="og:image" content="${SITIO}/img/logo-dc-512.png">
+<meta name="theme-color" content="#0B0F19">
+<link rel="icon" href="${LOGO}">
+<style>${CSS.trim()}</style>
+${ld.map((o) => `<script type="application/ld+json">${jsonSeguro(o)}</script>`).join('\n')}
+</head>
+<body>
+<header><div class="envoltura">
+<a class="marca" href="${SITIO}/"><img src="${LOGO}" alt="DC Tecnology" width="36" height="36">DC <b>TECNOLOGY</b></a>
+<a class="btn btn-p" href="${SITIO}/#catalogo">Ir a la tienda</a>
+</div></header>
+<main class="envoltura">
+<nav class="migas" aria-label="Ruta"><a href="${SITIO}/">Inicio</a> › <span>${esc(CATEGORIAS[tipo])}</span></nav>
+<h1>${esc(meta.h1)}</h1>
+<p class="intro">${esc(meta.intro)}</p>
+<nav class="cats" aria-label="Categorías">${tipos.map((t) => `<a href="${urlCategoria(t)}"${t === tipo ? ' aria-current="page"' : ''}>${esc(CATEGORIAS[t])}</a>`).join('')}</nav>
+<div class="grilla">${lista.map((p) => { const d = datosDe(p).desde; return `<a href="${urlProducto(p)}"><div class="vitrina"><img src="${esc(p.imagen)}" alt="${esc(p.nombre)}" width="200" height="200" loading="lazy" decoding="async"></div><b>${esc(p.nombre)}</b>${d ? `<span>${COTIZABLES.includes(p.tipo) ? 'Desde ' : (p.variantes ?? []).length > 1 ? 'Desde ' : ''}${cop(d)}</span>` : '<span>A cotizar</span>'}</a>`; }).join('')}</div>
+<section class="bloque"><h2>Preguntas frecuentes</h2>${faq.map(([q, a]) => `<details><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join('')}</section>
+</main>
+<footer><div class="envoltura">© ${new Date().getFullYear()} DC Tecnology · ${esc(WA.HORARIO)} · <a href="${SITIO}/portal.html">Rastrear mi pedido</a> · <a href="${SITIO}/">Tienda</a></div></footer>
+</body>
+</html>
+`;
+}
+
 async function generar() {
 await cargarFormasDePago();
 // 1) Páginas de producto (se borran las de productos que ya no existen)
@@ -218,9 +314,16 @@ for (const p of productos) {
     fs.writeFileSync(path.join(carpeta, `${p.id}.html`), pagina(p), 'utf8');
 }
 
+// 1b) Páginas por categoría
+const carpetaC = path.join(RAIZ, 'c');
+fs.mkdirSync(carpetaC, { recursive: true });
+const tiposConProductos = Object.keys(CATEGORIAS).filter((t) => productos.some((p) => p.tipo === t));
+for (const f of fs.readdirSync(carpetaC)) if (f.endsWith('.html') && !tiposConProductos.includes(f.slice(0, -5))) fs.unlinkSync(path.join(carpetaC, f));
+for (const t of tiposConProductos) fs.writeFileSync(path.join(carpetaC, `${t}.html`), paginaCategoria(t, productos.filter((p) => p.tipo === t)), 'utf8');
+
 // 2) sitemap.xml
 const hoy = new Date().toISOString().slice(0, 10);
-const urls = [[`${SITIO}/`, '1.0', 'daily'], [`${SITIO}/cliente.html`, '0.7', 'weekly'], [`${SITIO}/portal.html`, '0.4', 'monthly'], ...productos.map((p) => [urlProducto(p), '0.8', 'weekly'])];
+const urls = [[`${SITIO}/`, '1.0', 'daily'], [`${SITIO}/cliente.html`, '0.7', 'weekly'], [`${SITIO}/portal.html`, '0.4', 'monthly'], ...tiposConProductos.map((t) => [urlCategoria(t), '0.9', 'daily']), ...productos.map((p) => [urlProducto(p), '0.8', 'weekly'])];
 fs.writeFileSync(path.join(RAIZ, 'sitemap.xml'), `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urls.map(([u, pr, f]) => `  <url><loc>${u}</loc><lastmod>${hoy}</lastmod><changefreq>${f}</changefreq><priority>${pr}</priority></url>`).join('\n')}
@@ -245,14 +348,14 @@ const index = fs.readFileSync(indexRuta, 'utf8');
 const porCategoria = Object.entries(CATEGORIAS).map(([tipo, nombre]) => [nombre, productos.filter((p) => p.tipo === tipo)]).filter(([, l]) => l.length);
 const directorio = `<!-- SEO:DIRECTORIO (generado por herramientas/generar_seo.js, no editar a mano) -->
         <nav aria-label="Todos los productos" class="max-w-7xl mx-auto px-4 mt-8 pt-6 border-t border-white/5 grid gap-6 sm:grid-cols-2 lg:grid-cols-4 text-xs text-neutral-500">
-${porCategoria.map(([nombre, lista]) => `            <div><p class="font-bold uppercase tracking-wider text-neutral-400 mb-2">${esc(nombre)}</p><ul class="space-y-1">${lista.map((p) => `<li><a href="p/${p.id}.html" class="hover:text-white">${esc(p.nombre)}</a></li>`).join('')}</ul></div>`).join('\n')}
+${porCategoria.map(([nombre, lista]) => `            <div><p class="font-bold uppercase tracking-wider text-neutral-400 mb-2"><a href="c/${Object.keys(CATEGORIAS).find((t) => CATEGORIAS[t] === nombre)}.html" class="hover:text-white">${esc(nombre)}</a></p><ul class="space-y-1">${lista.map((p) => `<li><a href="p/${p.id}.html" class="hover:text-white">${esc(p.nombre)}</a></li>`).join('')}</ul></div>`).join('\n')}
         </nav>
         <!-- /SEO:DIRECTORIO -->`;
 const marca = /<!-- SEO:DIRECTORIO[\s\S]*?<!-- \/SEO:DIRECTORIO -->/;
 if (!marca.test(index)) throw new Error('Falta el marcador <!-- SEO:DIRECTORIO --><!-- /SEO:DIRECTORIO --> en index.html');
 fs.writeFileSync(indexRuta, index.replace(marca, directorio), 'utf8');
 
-console.log(`SEO: ${productos.length} páginas en p/, sitemap.xml (${urls.length} URLs), robots.txt y directorio del pie actualizados. Pagos: ${PAGO.texto}.`);
+console.log(`SEO: ${productos.length} páginas en p/, ${tiposConProductos.length} categorías en c/, sitemap.xml (${urls.length} URLs), robots.txt y directorio del pie actualizados. Pagos: ${PAGO.texto}.`);
 }
 
 generar().catch((error) => {

@@ -170,6 +170,7 @@ main > section { scroll-margin-top: 96px; }
 .desarrollos__cta:hover { transform: translateY(-2px); box-shadow: 0 16px 32px -12px rgb(31 168 85 / .8); }
 .desarrollos__filtros { position: relative; display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 20px; scrollbar-width: none; }
 .desarrollos__filtros::-webkit-scrollbar { display: none; }
+@media (min-width: 600px) { .desarrollos__filtros { flex-wrap: wrap; overflow: visible; } }
 .desarrollos__filtros button { flex: none; display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 16px; border-radius: 999px; font-size: 13px; font-weight: 700;
     color: #C9CFD8; background: rgb(255 255 255 / .05); box-shadow: inset 0 0 0 1px rgb(255 255 255 / .1); cursor: pointer; transition: background .2s ease, color .2s ease; }
 .desarrollos__filtros button[aria-selected="true"] { color: #fff; background: #C8102E; box-shadow: inset 0 0 0 1px rgb(255 255 255 / .15), 0 8px 20px -10px rgb(200 16 46 / .8); }
