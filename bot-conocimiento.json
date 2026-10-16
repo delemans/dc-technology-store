@@ -1,5 +1,5 @@
 {
-  "version": "2026-10-16T18:53:37.226Z",
+  "version": "2026-10-16T22:30:39.736Z",
   "identidad": [
     "Eres DC TECNOLOGY: respondes el WhatsApp de la tienda (https://dctecnology.xyz) en nombre del equipo. Habla como la tienda (\"te ayudamos\", \"te enviamos\").",
     "En el PRIMER mensaje de la conversación saluda así: \"¡Hola! Te saluda *DC TECNOLOGY* 👋\", responde lo que preguntó y cierra con: \"Escribe *menú* para ver todas las opciones.\" Después no vuelvas a presentarte (si el contexto trae un mensaje del menú, la conversación ya empezó).",
@@ -655,7 +655,8 @@
     "admin_comprobante": "🧾 *Comprobante nuevo en la web*\nOrden: *{codigo}* · ${total} · {metodo}\nCliente: +{cliente}\nReferencia: {referencia}\n\n1️⃣ Revisa en tu {metodo} que llegaron *{total}*.\n2️⃣ Si llegó responde *#ok {codigo}* · si no: *#no {codigo} motivo*\n(o en el panel → Pagos & Agente Bot → Comprobantes web)",
     "admin_falla": "🛠️ *Falla reportada en Mis pedidos*\nReporte #{reporte} · Cliente: +{cliente}\nProducto: {producto}\nProblema: {problema}\nEn garantía: {garantia}\nAtiéndelo y ciérralo en el panel (Reportes de falla).",
     "escalar_asesor": "🙋 *Te comunico con un asesor* · ⚡ *DC TECNOLOGY*\n\nUna persona del equipo te responde por este mismo chat en horario de atención (lunes a sábado, 8:00 a.m. a 8:00 p.m.).\nYa tenemos tu pedido *#{pedido}* a la mano.",
-    "entrega_credenciales": "🔐 *¡Tus accesos están listos!* · ⚡ *DC TECNOLOGY*\n\n📦 Pedido: *#{pedido}*\n🛒 Producto: {producto}\n\n👤 Usuario / correo: ```{usuario}```\n🔑 Clave: ```{clave}```\n🙋 Perfil: ```{perfil}```\n🔢 PIN: ```{pin}```\n\n📌 Para no perder la garantía: no cambies correo ni contraseña, usa solo tu perfil y no compartas el acceso.\n\n¿Algo no funciona? Responde *SOPORTE* 🛠️"
+    "entrega_credenciales": "🔐 *¡Tus accesos están listos!* · ⚡ *DC TECNOLOGY*\n\n📦 Pedido: *#{pedido}*\n🛒 Producto: {producto}\n\n👤 Usuario / correo: ```{usuario}```\n🔑 Clave: ```{clave}```\n🙋 Perfil: ```{perfil}```\n🔢 PIN: ```{pin}```\n\n📌 Para no perder la garantía: no cambies correo ni contraseña, usa solo tu perfil y no compartas el acceso.\n\n¿Algo no funciona? Responde *SOPORTE* 🛠️",
+    "entrega_pin": "🎁 *¡Tu PIN está listo!* · ⚡ *DC TECNOLOGY*\n\n📦 Pedido: *#{pedido}*\n🛒 Producto: {producto}\n\n🔢 Código: ```{pin}```\n\n📌 Canjéalo en la app o página oficial de la plataforma. Los pines entregados no son reversibles.\n\n¿Algo no funciona? Responde *SOPORTE* 🛠️"
   },
   "catalogo": [
     {

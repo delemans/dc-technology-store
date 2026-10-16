@@ -66,6 +66,7 @@ const plantillas = {
     admin_falla: WA.adminFalla({ reporte: '{reporte}', cliente: '{cliente}', producto: '{producto}', problema: '{problema}', garantia: '{garantia}' }),
     escalar_asesor: WA.escalarAsesor({ pedido: '{pedido}' }),
     entrega_credenciales: WA.entregaCredenciales({ pedido: '{pedido}', producto: '{producto}', usuario: '{usuario}', clave: '{clave}', perfil: '{perfil}', pin: '{pin}' }),
+    entrega_pin: WA.entregaPin({ pedido: '{pedido}', producto: '{producto}', pin: '{pin}' }),
 };
 
 // Cola de posventa (supabase/wo-015.sql → public.notificaciones_whatsapp). n8n la vacía con estas reglas.

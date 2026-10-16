@@ -351,6 +351,20 @@
             '¿Algo no funciona? Responde *SOPORTE* 🛠️',
         ].filter((l) => l !== null).join('\n'),
 
+        // Pines virtuales (Google Play, Roblox, Disney…): un código para canjear, sin usuario ni clave
+        entregaPin: ({ pedido, producto, pin }) => [
+            `🎁 *¡Tu PIN está listo!* · ${FIRMA}`,
+            '',
+            `📦 Pedido: *#${pedido}*`,
+            `🛒 Producto: ${producto}`,
+            '',
+            `🔢 Código: \`\`\`${pin}\`\`\``,
+            '',
+            '📌 Canjéalo en la app o página oficial de la plataforma. Los pines entregados no son reversibles.',
+            '',
+            '¿Algo no funciona? Responde *SOPORTE* 🛠️',
+        ].join('\n'),
+
         // Respuesta del bot al pasar la conversación a una persona
         escalarAsesor: ({ pedido } = {}) => [
             `🙋 *Te comunico con un asesor* · ${FIRMA}`,

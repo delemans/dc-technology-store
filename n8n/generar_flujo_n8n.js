@@ -1990,6 +1990,29 @@ async function entregaManual() {
     const memoria = $getWorkflowStaticData('global');
     memoria.entregados = memoria.entregados || {};
     if (memoria.entregados[t.referencia]) return [{ json: { accion: 'avisar', numero: admin, texto: `*#${t.referencia}* ya fue entregado.` } }];
+    // Pines virtuales: un solo código para canjear (sin usuario ni clave)
+    if (/\bPIN\b/i.test(`${t.producto} ${t.variante ?? ''}`)) {
+        const promptPin = ['Extrae el código del PIN virtual del siguiente mensaje de un proveedor.', `Producto esperado: ${t.producto}${t.variante ? ` (${t.variante})` : ''}.`,
+            'Responde SOLO con un JSON, sin texto adicional: {"pin":"","confianza":0.0}', 'Copia el código EXACTAMENTE como aparece (mismos guiones, letras y números).',
+            '"confianza" (0 a 1): qué tan seguro estás de que es el código completo de este producto.', 'Mensaje:', '"""', String(texto).slice(0, 2000), '"""'].join('\n');
+        let dp = {};
+        try {
+            const r = await consultarIa(this.helpers, [{ role: 'user', content: promptPin }], { temperatura: 0, maxTokens: 300, timeoutMs: 30000 });
+            dp = JSON.parse(String(r.texto).replace(/```(?:json)?/g, '').match(/\{[\s\S]*\}/)?.[0] ?? '{}');
+        } catch { dp = {}; }
+        const pin = String(dp.pin ?? '').trim();
+        if (pin.length < 6 || (Number(dp.confianza) || 0) < 0.9 || !String(texto).includes(pin)) {
+            return [{ json: { accion: 'avisar', numero: admin, texto: [`⚠️ No pude leer con seguridad el PIN para *#${t.referencia}* (${t.producto}). No le envié nada al cliente.`,
+                `Escríbelo así: *#entregar ${t.referencia} CODIGO*`].join('\n') } }];
+        }
+        const mensajePin = String(__KB__.plantillas.entrega_pin).replace('{pin}', () => pin).replace('{pedido}', () => t.referencia).replace('{producto}', () => limpiar(t.producto));
+        memoria.entregados[t.referencia] = Date.now();
+        return [
+            { json: { accion: 'avisar', numero: t.cliente, texto: mensajePin } },
+            { json: { accion: 'panel', rpc: 'entregar_manual', args: { p_referencia: t.referencia, p_estado: 'ENTREGADO', p_clave: `PIN ${pin}` }, referencia: t.referencia } },
+            { json: { accion: 'avisar', numero: admin, texto: `✅ *#${t.referencia} entregado* a +${t.cliente}${t.cliente_nombre ? ` (${t.cliente_nombre})` : ''} · ${t.producto}.` } },
+        ];
+    }
     const prompt = ['Extrae los datos de acceso del siguiente mensaje de un proveedor de cuentas digitales.',
         `Producto esperado: ${t.producto}${t.variante ? ` (${t.variante})` : ''}.`,
         'Responde SOLO con un JSON, sin texto adicional: {"usuario":"","clave":"","perfil":"","pin":"","confianza":0.0}',
