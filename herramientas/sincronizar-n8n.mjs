@@ -8,12 +8,16 @@
 //   2. Estructura: agrega los nodos nuevos que NO usan credenciales (Code, Switch, IF, Set…), actualiza los Switch/IF y
 //      los Set que cambiaron (salvo Config bot) y deja las conexiones iguales a las del flujo generado.
 //   3. Config bot: si un número (aviso, proveedor, WhatsApp de ANC) quedó sin el 57, se lo agrega.
+//   4. IA balanceada: pone en el código de esos nodos las claves de IA de .env (herramientas/proveedores-ia.mjs).
+//      En git el flujo queda con la lista vacía; en tu n8n, con las claves. Nunca se imprimen.
+//   5. Retira los nodos del Agente IA anterior (agente, memoria, modelos de SiliconFlow, IA de respaldo).
 // No toca credenciales, ni los demás valores de "Config bot", ni los nodos que solo existen en tu n8n. Si el flujo nuevo trae un nodo que
 // necesita credenciales, lo avisa y no cambia la estructura: eso requiere importar el flujo (herramientas/configurar-n8n.js).
 // Antes de escribir guarda un respaldo en n8n/respaldos/.
 import fs from 'node:fs';
 import path from 'node:path';
 import { createRequire } from 'node:module';
+import { armarProveedores, conClaves, MARCA_CLAVES } from './proveedores-ia.mjs';
 
 const require = createRequire(import.meta.url);
 const { RAIZ, cargarEntorno, requerir } = require('./entorno.js');
@@ -22,6 +26,9 @@ const env = cargarEntorno();
 requerir(env, ['N8N_URL', 'N8N_API_KEY']);
 const N8N = env.N8N_URL.replace(/\/+$/, '');
 const generado = JSON.parse(fs.readFileSync(path.join(RAIZ, 'n8n', 'flujo_bot_dctechnology.json'), 'utf8'));
+const IAS = armarProveedores(env);
+const nodosIa = generado.nodes.filter((n) => String(n.parameters?.jsCode ?? '').includes(MARCA_CLAVES));
+for (const n of nodosIa) n.parameters.jsCode = conClaves(n.parameters.jsCode, IAS);
 
 async function api(ruta, opciones = {}) {
     const r = await fetch(`${N8N}/api/v1${ruta}`, { ...opciones, headers: { 'X-N8N-API-KEY': env.N8N_API_KEY, 'Content-Type': 'application/json', Accept: 'application/json' } });
@@ -57,7 +64,10 @@ const aristas = (conexiones) => Object.entries(conexiones ?? {}).flatMap(([desde
     .flatMap(([tipo, salidas]) => (salidas ?? []).flatMap((s, i) => (s ?? []).map((c) => `${desde} [${tipo} ${i}] → ${c.node}`))));
 
 // Nodos que maneja otra herramienta (configurar-ia-respaldo.mjs): ni se agregan, ni se quitan, ni se reconectan
-const AJENOS = ['IA de respaldo'];
+const AJENOS = [];
+// Nodos del Agente IA anterior: se quitan de tu n8n (los reemplaza "IA balanceada" y "Extraer accesos (IA)")
+const RETIRADOS = ['Agente IA', 'Memoria por cliente', 'SiliconFlow · DeepSeek-V3', 'SiliconFlow · Extractor', 'SiliconFlow · Extractor combo',
+    'Extraer credenciales', 'Extraer credenciales combo', 'IA de respaldo'];
 generado.nodes = generado.nodes.filter((n) => !AJENOS.includes(n.name));
 for (const n of AJENOS) delete generado.connections[n];
 const porNombre = new Map(vivo.nodes.map((n) => [n.name, n]));
@@ -68,7 +78,8 @@ const reintentos = generado.nodes.filter((n) => porNombre.has(n.name) && REINTEN
 const faltan = generado.nodes.filter((n) => !porNombre.has(n.name));
 const agregables = faltan.filter((n) => SIN_CREDENCIALES.includes(n.type) && !n.credentials && (!tipoCredencial(n) || credencialViva(tipoCredencial(n))));
 const conCredenciales = faltan.filter((n) => !agregables.includes(n));
-const sobran = vivo.nodes.filter((n) => !AJENOS.includes(n.name) && !generado.nodes.some((g) => g.name === n.name)).map((n) => n.name);
+const retirar = vivo.nodes.filter((n) => RETIRADOS.includes(n.name) && !generado.nodes.some((g) => g.name === n.name)).map((n) => n.name);
+const sobran = vivo.nodes.filter((n) => !AJENOS.includes(n.name) && !RETIRADOS.includes(n.name) && !generado.nodes.some((g) => g.name === n.name)).map((n) => n.name);
 // Los nodos Set también se sincronizan (Config posventa copia de Config bot, los "Marcar …"), salvo Config bot: tus valores
 const NO_TOCAR = ['Config bot'];
 const sincronizable = (n) => CON_REGLAS.includes(n.type) || (n.type === 'n8n-nodes-base.set' && !NO_TOCAR.includes(n.name));
@@ -83,10 +94,12 @@ const nuevas = [...aristasGen].filter((a) => !aristasVivo.has(a));
 const quitadas = [...aristasVivo].filter((a) => !aristasGen.has(a));
 // Una conexión que sale de (o llega a) un nodo que solo existe en tu n8n se perdería al copiar las del flujo generado
 const tocaPropios = quitadas.filter((a) => sobran.some((s) => a.startsWith(`${s} [`) || a.endsWith(`→ ${s}`)));
-const estructura = Boolean(agregables.length || reglas.length || nuevas.length || quitadas.length);
+const estructura = Boolean(agregables.length || reglas.length || nuevas.length || quitadas.length || retirar.length);
 const puedeEstructura = !conCredenciales.length && !tocaPropios.length;
 
 console.log(`\n${APLICAR ? 'APLICAR' : 'REVISIÓN (usa --aplicar para escribir)'} · ${N8N} · flujo "${vivo.name}" (${vivo.active ? 'activo' : 'INACTIVO'}, ${vivo.nodes.length} nodos)`);
+console.log(`  IA balanceada: ${IAS.length ? IAS.map((p) => `${p.nombre} (${p.modelo}, peso ${p.peso})`).join(' · ') : 'SIN CLAVES (el bot responderá solo con el menú)'}`);
+if (retirar.length) console.log(`  nodos que se retiran: ${retirar.join(', ')}`);
 if (reintentos.length) console.log(`  reintento automático en: ${reintentos.join(', ')}`);
 console.log(`  nodos con código nuevo: ${cambios.length ? cambios.join(', ') : 'ninguno (ya está al día)'}`);
 if (agregables.length) console.log(`  nodos nuevos que se agregan: ${agregables.map((n) => n.name + (tipoCredencial(n) ? ` (credencial ${credencialViva(tipoCredencial(n)).name})` : '')).join(', ')}`);
@@ -111,7 +124,7 @@ let nodos = vivo.nodes;
 let conexiones = vivo.connections;
 if (estructura && puedeEstructura) {
     const idsVivos = new Set(vivo.nodes.map((n) => n.id));
-    nodos = [...vivo.nodes, ...agregables.map((n) => ({ ...n, id: idsVivos.has(n.id) ? crypto.randomUUID() : n.id,
+    nodos = [...vivo.nodes.filter((n) => !retirar.includes(n.name)), ...agregables.map((n) => ({ ...n, id: idsVivos.has(n.id) ? crypto.randomUUID() : n.id,
         ...(tipoCredencial(n) ? { credentials: { [tipoCredencial(n)]: credencialViva(tipoCredencial(n)) } } : {}) }))];
     for (const nombre of reglas) porNombre.get(nombre).parameters = delGenerado(nombre).parameters;
     // Conexiones del flujo generado + las que salen de nodos propios de tu n8n (no hay: si las hubiera, no se llega aquí)

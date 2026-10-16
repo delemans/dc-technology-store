@@ -625,11 +625,9 @@ function revisarRespuesta() {
             salida.push({ json: { numero: aviso, texto: [
                 '⚠️ *La IA del bot no está respondiendo*',
                 `Causa: «${causa}»`,
-                /payment|402|balance|insufficient|saldo/i.test(causa)
-                    ? 'La cuenta de SiliconFlow se quedó sin saldo: recárgala en cloud.siliconflow.com → Billing.'
-                    : /authori[sz]ation|401|api key|credential/i.test(causa)
-                        ? 'Revisa la clave de SiliconFlow (credencial "DC · SiliconFlow" en n8n): vencida o borrada.'
-                        : 'Revisa en n8n → Executions el nodo "Agente IA".',
+                /no hay ninguna ia/i.test(causa)
+                    ? 'No hay claves de IA en n8n: agrégalas en .env y ejecuta node herramientas/sincronizar-n8n.mjs --aplicar.'
+                    : 'Ninguna de las IA respondió (arriba la causa de cada una). Recarga la que diga sin saldo o agrega otra gratuita: node herramientas/configurar-ias.mjs.',
                 'Mientras tanto el menú y la compra por menú siguen funcionando sin IA; los mensajes libres reciben un aviso de espera.',
             ].join('\n') } });
         }
@@ -1643,6 +1641,89 @@ function resultadoProveedor() {
     return salida;
 }
 
+/* ---------- H) IA balanceada: varias IA compatibles con OpenAI (modelos abiertos: DeepSeek, Llama, Qwen…) ----------
+   Reparte las consultas según el peso de cada una (≈ su cuota gratuita diaria): siempre va primero la que menos uso
+   lleva hoy en proporción a su peso, así ninguna se agota antes que las demás. Si una falla, sigue con la siguiente:
+   sin saldo o clave inválida (401/402/403, cuota diaria) → pausa 6 h; límite por minuto (429) → 2 min; caída → 1 min.
+   Las claves NO están en git: herramientas/sincronizar-n8n.mjs las pone desde .env al escribir el flujo en tu n8n. */
+function motorIa() {
+    const PROVEEDORES_IA = [] /*__CLAVES_IA__*/;
+    async function consultarIa(helpers, mensajes, { temperatura = 0.3, maxTokens = 500, timeoutMs = 45000 } = {}) {
+        const memoria = $getWorkflowStaticData('global');
+        const hoy = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Bogota' });
+        const previo = memoria.iaEstado ?? { dia: hoy, p: {} };
+        // Día nuevo: el conteo de usos vuelve a cero, las pausas siguen
+        const est = previo.dia === hoy ? previo : { dia: hoy, p: Object.fromEntries(Object.entries(previo.p ?? {}).map(([k, v]) => [k, { ...v, usos: 0 }])) };
+        memoria.iaEstado = est;
+        const lista = PROVEEDORES_IA.filter((p) => p.clave && p.url && p.modelo);
+        if (!lista.length) throw new Error('No hay ninguna IA configurada (claves IA_* en .env → node herramientas/sincronizar-n8n.mjs --aplicar)');
+        const ahora = Date.now();
+        const e = (p) => (est.p[p.nombre] = est.p[p.nombre] ?? { usos: 0, hasta: 0, ultimo: null, motivo: null });
+        const carga = (p) => e(p).usos / Math.max(1, Number(p.peso) || 1);
+        const libres = lista.filter((p) => e(p).hasta <= ahora).sort((a, b) => carga(a) - carga(b));
+        const enPausa = lista.filter((p) => e(p).hasta > ahora).sort((a, b) => e(a).hasta - e(b).hasta);
+        const fallas = [];
+        // Si todas están en pausa se intentan igual (por si ya se recargó alguna)
+        for (const p of [...libres, ...enPausa]) {
+            const s = e(p);
+            let codigo = 0, detalle = '';
+            try {
+                const r = await helpers.httpRequest({ method: 'POST', url: `${String(p.url).replace(/\/+$/, '')}/chat/completions`, json: true, timeout: timeoutMs,
+                    headers: { Authorization: `Bearer ${p.clave}`, 'Content-Type': 'application/json' },
+                    body: { model: p.modelo, messages: mensajes, temperature: temperatura, max_tokens: maxTokens },
+                    returnFullResponse: true, ignoreHttpStatusErrors: true });
+                let j = r.body ?? {};
+                if (typeof j === 'string') { try { j = JSON.parse(j); } catch { j = {}; } }
+                const texto = String(j.choices?.[0]?.message?.content ?? '').replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+                codigo = Number(r.statusCode) || 0;
+                if (codigo >= 200 && codigo < 300 && texto) {
+                    Object.assign(s, { usos: s.usos + 1, hasta: 0, ultimo: new Date(ahora).toISOString(), motivo: null, sinSaldo: false });
+                    return { texto, ia: p.nombre };
+                }
+                detalle = String(j.error?.message ?? j.message ?? j[0]?.error?.message ?? (texto ? '' : 'respuesta vacía')).replace(/\s+/g, ' ').slice(0, 160);
+            } catch (err) { detalle = String(err.message ?? err).slice(0, 160); }
+            const sinSaldo = [401, 402, 403].includes(codigo) || /insufficient|balance|credit|billing|saldo|per ?day|daily/i.test(detalle);
+            const pausa = sinSaldo ? 6 * 3600e3 : codigo === 429 ? 2 * 60e3 : codigo >= 500 || !codigo ? 60e3 : 10 * 60e3;
+            Object.assign(s, { hasta: ahora + pausa, motivo: `${codigo || 'sin respuesta'} ${detalle}`.trim(), sinSaldo });
+            fallas.push(`${p.nombre}: ${codigo || ''} ${detalle}`.replace(/\s+/g, ' ').trim());
+        }
+        throw new Error(fallas.join(' | '));
+    }
+}
+
+// H1 · Chat del bot (reemplaza al "Agente IA"): mismo prompt de sistema, memoria de las últimas 8 idas y vueltas por cliente
+async function iaBalanceada() {
+    const datos = $input.first().json;
+    const numero = String($('Normalizar mensaje').first().json.numero ?? '');
+    const memoria = $getWorkflowStaticData('global');
+    const chats = memoria.chatsIa = memoria.chatsIa ?? {};
+    const ahora = Date.now();
+    const previo = chats[numero] && ahora - chats[numero].at < 24 * 3600e3 ? chats[numero].m : [];
+    const mensajes = [{ role: 'system', content: String(datos.sistema ?? '') }, ...previo, { role: 'user', content: String(datos.texto ?? '') }];
+    try {
+        // 20 s por IA: si una está lenta (saturada) se pasa a la siguiente sin dejar al cliente esperando
+        const r = await consultarIa(this.helpers, mensajes, { temperatura: 0.3, maxTokens: 500, timeoutMs: 20000 });
+        const corto = (t) => String(t).slice(0, 900);
+        chats[numero] = { at: ahora, m: [...previo, { role: 'user', content: corto(datos.texto ?? '') }, { role: 'assistant', content: corto(r.texto) }].slice(-16) };
+        // Solo los 400 chats más recientes
+        const claves = Object.keys(chats);
+        if (claves.length > 400) claves.sort((a, b) => chats[a].at - chats[b].at).slice(0, claves.length - 400).forEach((k) => delete chats[k]);
+        return [{ json: { output: r.texto, ia: r.ia } }];
+    } catch (err) {
+        return [{ json: { error: { message: String(err.message ?? err) } } }];
+    }
+}
+
+// H2 · Extracción de accesos (pedido normal y combo) con la misma cadena de IA. Si ninguna responde → salida de error
+async function extraerAccesosIa() {
+    const r = await consultarIa(this.helpers, [{ role: 'user', content: String($input.first().json.prompt ?? '') }], { temperatura: 0, maxTokens: 300, timeoutMs: 45000 });
+    return [{ json: { text: r.texto, ia: r.ia } }];
+}
+async function extraerAccesosComboIa() {
+    const r = await consultarIa(this.helpers, [{ role: 'user', content: String($input.first().json.prompt ?? '') }], { temperatura: 0, maxTokens: 900, timeoutMs: 60000 });
+    return [{ json: { text: r.texto, ia: r.ia } }];
+}
+
 /* ---------- G) Salud del sistema cada 30 min: te avisa solo cuando algo CAMBIA (cae o vuelve) ----------
    Portal de ANC, su tienda pública (respaldo de costos) y la tienda web con el conocimiento del bot.
    Dos fallas seguidas para avisar (evita falsas alarmas por un corte de segundos). */
@@ -1684,6 +1765,23 @@ async function revisarSalud() {
         }
         memoria.salud[r.clave] = actual;
     }
+    // IA balanceada: cuál quedó sin saldo o con la clave vencida (lo marca el propio nodo al fallar) y cuál volvió
+    const ias = Object.entries((memoria.iaEstado ?? {}).p ?? {});
+    memoria.saludIa = memoria.saludIa ?? {};
+    for (const [nombre, s] of ias) {
+        const avisado = Boolean(memoria.saludIa[nombre]);
+        if (s.sinSaldo && !avisado) {
+            memoria.saludIa[nombre] = true;
+            const activas = ias.filter(([n, x]) => n !== nombre && !x.sinSaldo).map(([n]) => n);
+            if (aviso) salida.push({ json: { numero: aviso, texto: [`⚠️ *IA ${nombre}: sin saldo o clave inválida*`, `Detalle: ${String(s.motivo ?? '').slice(0, 160)}`,
+                activas.length ? `El bot sigue respondiendo con: ${activas.join(', ')}.` : '⛔ No queda otra IA activa: los mensajes libres reciben un aviso de espera (el menú sí funciona).',
+                'Recárgala o agrega otra gratuita: node herramientas/configurar-ias.mjs'].join('\n') } });
+        }
+        if (!s.sinSaldo && avisado) {
+            delete memoria.saludIa[nombre];
+            if (aviso) salida.push({ json: { numero: aviso, texto: `✅ *IA ${nombre} volvió a responder*` } });
+        }
+    }
     return salida;
 }
 
@@ -1694,7 +1792,8 @@ const cuerpo = (fn) => {
     return s.slice(s.indexOf('{') + 1, s.lastIndexOf('}')).replace(/^\n/, '').replace(/^ {4}/gm, '');
 };
 const UTILIDADES = cuerpo(utilidades).replace('__MONTO_CRIPTO__', WA.montoCripto.toString());
-const codigo = (fn, { conUtilidades = false } = {}) => ((conUtilidades ? `${UTILIDADES}\n` : '') + cuerpo(fn))
+const MOTOR_IA = cuerpo(motorIa);
+const codigo = (fn, { conUtilidades = false, conIa = false } = {}) => ((conUtilidades ? `${UTILIDADES}\n` : '') + (conIa ? `${MOTOR_IA}\n` : '') + cuerpo(fn))
     .replace(/__KB__/g, `(${JSON.stringify(kbEmbebida)})`)
     .replace(/__HORAS_PAUSA__/g, String(HORAS_PAUSA_ASESOR))
     .replace(/__ENTREGA_MIN__/g, String(WA.ENTREGA_MAX_MIN))
@@ -1817,21 +1916,8 @@ nodo('¿Menú?', 'n8n-nodes-base.switch', 3.2, [1340, 480], {
     options: { fallbackOutput: 'extra', renameFallbackOutput: 'IA' },
 });
 nodoCodigo('Armar contexto', [1340, 140], armarContexto, { conUtilidades: true });
-nodo('Agente IA', '@n8n/n8n-nodes-langchain.agent', 1.7, [1560, 140], {
-    promptType: 'define',
-    text: '={{ $json.texto }}',
-    options: { systemMessage: '={{ $json.sistema }}', maxIterations: 3 },
-// Reintenta si las dos IA fallan a la vez (p. ej. 503 momentáneo de Gemini con SiliconFlow sin saldo) antes del aviso de falla
-}, { onError: 'continueRegularOutput', retryOnFail: true, maxTries: 3, waitBetweenTries: 3000 });
-nodo('SiliconFlow · DeepSeek-V3', '@n8n/n8n-nodes-langchain.lmChatOpenAi', 1.2, [1480, 360], {
-    model: { __rl: true, value: MODELO, mode: 'id' },
-    options: { baseURL: SILICONFLOW_URL, temperature: 0.3, maxTokens: 500, timeout: 45000, maxRetries: 2 },
-});
-nodo('Memoria por cliente', '@n8n/n8n-nodes-langchain.memoryBufferWindow', 1.3, [1660, 360], {
-    sessionIdType: 'customKey',
-    sessionKey: "={{ $('Normalizar mensaje').first().json.numero }}",
-    contextWindowLength: 8,
-});
+// IA balanceada (varias IA en cadena con reparto de uso): reemplaza al Agente IA + memoria + modelo único
+nodoCodigo('IA balanceada', [1560, 140], iaBalanceada, { conUtilidades: true, conIa: true }, { onError: 'continueRegularOutput' });
 nodoCodigo('Revisar respuesta', [1780, 140], revisarRespuesta, { conUtilidades: true });
 nodo('Enviar respuesta', 'n8n-nodes-base.httpRequest', 4.2, [2000, 0], evolutionEnviar('Config bot'), { onError: 'continueRegularOutput' });
 
@@ -1966,11 +2052,7 @@ nodo('Marcar pedido realizado', 'n8n-nodes-base.httpRequest', 4.2, [4750, Y - 16
     { onError: 'continueRegularOutput', alwaysOutputData: true });
 nodo('Esperar credenciales', 'n8n-nodes-base.wait', 1.1, [4860, Y], esperar(HORAS_CREDENCIALES), { webhookId: uuid() });
 nodoCodigo('Preparar extracción', [5080, Y], prepararExtraccion, { conUtilidades: true }, terminal);
-nodo('Extraer credenciales', '@n8n/n8n-nodes-langchain.chainLlm', 1.5, [5300, Y], { promptType: 'define', text: '={{ $json.prompt }}' }, terminal);
-nodo('SiliconFlow · Extractor', '@n8n/n8n-nodes-langchain.lmChatOpenAi', 1.2, [5300, Y + 220], {
-    model: { __rl: true, value: MODELO, mode: 'id' },
-    options: { baseURL: SILICONFLOW_URL, temperature: 0, maxTokens: 300, timeout: 45000, maxRetries: 2 },
-});
+nodoCodigo('Extraer accesos (IA)', [5300, Y], extraerAccesosIa, { conUtilidades: true, conIa: true }, terminal);
 nodoCodigo('Validar credenciales', [5520, Y], validarCredenciales);
 nodo('¿Entregar?', 'n8n-nodes-base.switch', 3.2, [5740, Y], {
     rules: { values: [regla('entregar', 'Entregar', 'decision'), regla('revisar', 'Revisar', 'decision')] },
@@ -2043,11 +2125,7 @@ nodo('Marcar combo realizado', 'n8n-nodes-base.httpRequest', 4.2, [5410, YC - 16
     lineasPanel("$('Evaluar pago combo').first().json.actualizar"), { onError: 'continueRegularOutput', alwaysOutputData: true, executeOnce: true });
 nodo('Esperar credenciales combo', 'n8n-nodes-base.wait', 1.1, [5520, YC], esperar(HORAS_CREDENCIALES), { webhookId: uuid(), executeOnce: true });
 nodoCodigo('Preparar extracción combo', [5740, YC], prepararExtraccionCombo, { conUtilidades: true }, terminal);
-nodo('Extraer credenciales combo', '@n8n/n8n-nodes-langchain.chainLlm', 1.5, [5960, YC], { promptType: 'define', text: '={{ $json.prompt }}' }, terminal);
-nodo('SiliconFlow · Extractor combo', '@n8n/n8n-nodes-langchain.lmChatOpenAi', 1.2, [5960, YC + 220], {
-    model: { __rl: true, value: MODELO, mode: 'id' },
-    options: { baseURL: SILICONFLOW_URL, temperature: 0, maxTokens: 900, timeout: 60000, maxRetries: 2 },
-});
+nodoCodigo('Extraer accesos combo (IA)', [5960, YC], extraerAccesosComboIa, { conUtilidades: true, conIa: true }, terminal);
 nodoCodigo('Entregar combo', [6180, YC], entregarCombo, { conUtilidades: true }, terminal);
 nodo('Enviar accesos combo', 'n8n-nodes-base.httpRequest', 4.2, [6400, YC], enviarA('$json.numero', '$json.texto'), terminal);
 nodo('Guardar entrega combo', 'n8n-nodes-base.httpRequest', 4.2, [6620, YC],
@@ -2279,10 +2357,8 @@ unir('Responder menú', '¿Menú?');
 unir('¿Menú?', 'Enviar respuesta', 0);
 unir('¿Menú?', 'Crear triangulación', 0);         // compra por el menú: arranca el pedido al proveedor
 unir('¿Menú?', 'Armar contexto', 1);
-unir('Armar contexto', 'Agente IA');
-unir('SiliconFlow · DeepSeek-V3', 'Agente IA', 0, 'ai_languageModel');
-unir('Memoria por cliente', 'Agente IA', 0, 'ai_memory');
-unir('Agente IA', 'Revisar respuesta');
+unir('Armar contexto', 'IA balanceada');
+unir('IA balanceada', 'Revisar respuesta');
 unir('Revisar respuesta', 'Enviar respuesta');
 unir('Revisar respuesta', 'Crear triangulación');
 unir('Revisar respuesta', 'Crear combo');
@@ -2306,8 +2382,7 @@ enCadena(['Preparar compra ANC', 'Comprar en ANC', 'Pedido ANC creado', 'Guardar
 unir('Guardar compra ANC', 'Avisar pedido ANC');
 unir('¿Pago web?', 'Reenviar pago al proveedor', 1);
 enCadena(['Reenviar pago al proveedor', 'Guardar pago enviado', 'Marcar pedido realizado']);
-enCadena(['Marcar pedido realizado', 'Esperar credenciales', 'Preparar extracción', 'Extraer credenciales', 'Validar credenciales', '¿Entregar?']);
-unir('SiliconFlow · Extractor', 'Extraer credenciales', 0, 'ai_languageModel');
+enCadena(['Marcar pedido realizado', 'Esperar credenciales', 'Preparar extracción', 'Extraer accesos (IA)', 'Validar credenciales', '¿Entregar?']);
 unir('¿Entregar?', 'Mensaje de entrega', 0);
 unir('¿Entregar?', 'Pedir aprobación', 1);
 ['Pedir aprobación', 'Enviar revisión al admin', 'Guardar revisión', 'Esperar aprobación', 'Evaluar aprobación', 'Mensaje de entrega']
@@ -2332,10 +2407,9 @@ unir('¿Hay agotadas?', 'Avisar agotadas al cliente', 0);
 unir('¿Hay agotadas?', 'Esperar pago combo', 1);
 unir('Avisar agotadas al cliente', 'Esperar pago combo');
 ['Esperar pago combo', 'Evaluar pago combo', 'Descargar comprobante combo', 'Reenviar pago combo', 'Guardar pago combo', 'Marcar combo realizado',
-    'Esperar credenciales combo', 'Preparar extracción combo', 'Extraer credenciales combo', 'Entregar combo', 'Enviar accesos combo',
+    'Esperar credenciales combo', 'Preparar extracción combo', 'Extraer accesos combo (IA)', 'Entregar combo', 'Enviar accesos combo',
     'Guardar entrega combo', 'Cerrar combo entregado', 'Aviso combo al admin']
     .forEach((n, i, a) => { if (a[i + 1]) unir(n, a[i + 1]); });
-unir('SiliconFlow · Extractor combo', 'Extraer credenciales combo', 0, 'ai_languageModel');
 for (const n of nodos.filter((x) => x.onError === 'continueErrorOutput' && x.position[1] >= YC)) unir(n.name, 'Cerrar combo', 1);
 unir('Cerrar combo', 'Guardar cierre combo');
 unir('Guardar cierre combo', 'Cerrar líneas combo');
