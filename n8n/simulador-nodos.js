@@ -142,6 +142,14 @@ if (key.id) {
     if (memoria.vistos.includes(key.id)) return [];
     memoria.vistos = [...memoria.vistos.slice(-199), key.id];
 }
+// Mensajes atrasados (llegan de golpe cuando WhatsApp vuelve a conectarse): no se contestan horas o días después.
+// Se guardan y "Revisar salud" te manda el resumen para que les escribas tú.
+const enviado = Number(d.messageTimestamp ?? 0);
+if (enviado > 0 && ahora / 1000 - enviado > 20 * 60) {
+    memoria.atrasados = (memoria.atrasados ?? []).slice(-199);
+    memoria.atrasados.push({ numero, nombre: String(d.pushName ?? '').slice(0, 40), texto: (texto || (esImagen ? '(foto)' : esPdf ? '(PDF)' : '(otro)')).slice(0, 120), t: enviado * 1000 });
+    return [];
+}
 // Triangulación (WO-024): mensajes del proveedor y comandos del administrador no van a la IA
 const citado = d.contextInfo?.stanzaId ?? Object.values(m).find((v) => v && v.contextInfo)?.contextInfo?.stanzaId ?? null;
 if (soloDigitos(cfg.numero_proveedor) && numero === soloDigitos(cfg.numero_proveedor)) {
@@ -310,12 +318,20 @@ const memoria = $getWorkflowStaticData('global');
 const errorIa = $input.first().json.error;
 if (!r && errorIa) {
     const ahora = Date.now();
-    // El menú no usa IA: el cliente puede seguir viendo el catálogo y comprar por ahí
-    const salida = [{ json: { numero: msg.numero, texto: [
-        'Dame un momento 🙏 Tuvimos una falla técnica.',
-        'Mientras tanto responde *menú*: ahí ves el catálogo y los precios, y puedes comprar.',
-        'O escribe *asesor* para hablar con una persona.',
-    ].join('\n') } }];
+    // El menú no usa IA: el cliente recibe de una vez el menú principal (con los números activos) y puede seguir
+    // viendo el catálogo, comprar o pedir una persona. Nunca se queda sin respuesta útil.
+    const M = kb.menu;
+    let textoCliente;
+    if (M?.principal?.opciones?.length) {
+        const tecla = (i) => (i < 9 ? `${i + 1}️⃣` : `*${i + 1}.*`);
+        textoCliente = ['Para atenderte más rápido, elige una opción 👇', '', M.principal.pregunta,
+            ...M.principal.opciones.map((o, i) => `${tecla(i)} ${o.texto}`), '', M.principal.pie].filter((l) => l !== undefined && l !== null).join('\n');
+        memoria.menu = memoria.menu || {};
+        memoria.menu[msg.numero] = { id: 'principal', opciones: M.principal.opciones.map((o) => o.id), atras: null, t: ahora, activo: true, texto: textoCliente, accion: null };
+    } else {
+        textoCliente = ['Para atenderte más rápido responde *menú*: ahí ves el catálogo y los precios, y puedes comprar.', 'O escribe *asesor* para hablar con una persona.'].join('\n');
+    }
+    const salida = [{ json: { numero: msg.numero, texto: textoCliente } }];
     const aviso = soloDigitos(cfg.numero_aviso_admin);
     if (aviso && aviso !== msg.numero && ahora - (memoria.ultimaFallaIa || 0) > 30 * 60e3) {
         memoria.ultimaFallaIa = ahora;

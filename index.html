@@ -56,14 +56,14 @@
     </script>
 
     <!-- Estilos compilados con Tailwind (npm run css): sin CDN de desarrollo -->
-    <link rel="stylesheet" href="estilos/tailwind.css?v=202610161215">
+    <link rel="stylesheet" href="estilos/tailwind.css?v=202610161717">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" integrity="sha384-iw3OoTErCYJJB9mCa8LNS2hbsQ7M3C0EpIsO/H5+EGAkPGc6rk+V8i04oW/K5xq0" crossorigin="anonymous" referrerpolicy="no-referrer">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;700;800;900&display=swap" rel="stylesheet">
     <!-- Tema claro/oscuro (antes de pintar, sin destello) -->
-    <script src="tema.js?v=202610161215"></script>
-    <link rel="stylesheet" href="tema.css?v=202610161215">
+    <script src="tema.js?v=202610161717"></script>
+    <link rel="stylesheet" href="tema.css?v=202610161717">
     <!-- Carrito, combos y pago web: mismos estilos que el portal (carrito.js) -->
-    <link rel="stylesheet" href="estilos/cliente.css?v=202610161215">
+    <link rel="stylesheet" href="estilos/cliente.css?v=202610161717">
     <style>
         html { -webkit-tap-highlight-color: transparent; }
         [hidden] { display: none !important; }
@@ -250,8 +250,8 @@
         }
     </style>
     <!-- Estilo corporativo (va de último: recalibra colores y apaga efectos neón) -->
-    <link rel="stylesheet" href="estilos/profesional.css?v=202610161215">
-    <link rel="stylesheet" href="estilos/corriente.css?v=202610161215">
+    <link rel="stylesheet" href="estilos/profesional.css?v=202610161717">
+    <link rel="stylesheet" href="estilos/corriente.css?v=202610161717">
 </head>
 <body class="bg-dcDarkBg text-white min-h-screen flex flex-col font-sans antialiased selection:bg-dcRed/40">
     <div class="mesh" aria-hidden="true"><span></span><span></span><span></span></div>
@@ -303,6 +303,7 @@
                     <p class="hero-dc__eyebrow"><span class="hero-dc__led" aria-hidden="true"></span>Tienda oficial · Colombia</p>
                     <h1 id="hero-titulo" class="hero-dc__titulo">Streaming, licencias y tecnología <span>sin esperas</span></h1>
                     <p class="hero-dc__lead">Elige, paga con tu medio favorito y recibe tus accesos por WhatsApp en máximo 15 minutos tras validar el pago. Con garantía y soporte de personas reales.</p>
+                    <p class="hero-dc__tambien">También desarrollamos <a href="#desarrollos" id="hero-rotador" data-frases="dashboards a la medida|sistemas POS para bares|rifas y pollas|matrices e indicadores|catálogos web con bot|automatizaciones con IA">dashboards a la medida</a></p>
                     <div class="hero-dc__acciones">
                         <a href="#catalogo" class="hero-dc__btn hero-dc__btn--p"><i class="fa-solid fa-bolt" aria-hidden="true"></i> Ver catálogo</a>
                         <a href="https://wa.me/573223284622?text=Hola%20DC%20TECNOLOGY" target="_blank" rel="noopener" class="hero-dc__btn hero-dc__btn--s"><i class="fa-brands fa-whatsapp" aria-hidden="true"></i> Comprar por WhatsApp</a>
@@ -440,6 +441,102 @@
                 </button>
             </div>
         </section>
+
+        <!-- Desarrollos y automatizaciones: sistemas hechos por DC Tecnology (pantallazos reales; datos de clientes difuminados).
+             Filtros y vista ampliada en portafolio.js -->
+        <section id="desarrollos" class="desarrollos max-w-7xl mx-auto px-4 pb-12" aria-labelledby="titulo-desarrollos">
+            <div class="desarrollos__marco">
+                <div class="desarrollos__cabeza">
+                    <div>
+                        <p class="desarrollos__eyebrow">Desarrollo de software a la medida</p>
+                        <h2 id="titulo-desarrollos" class="desarrollos__titulo">Sistemas que ya están <span>trabajando</span></h2>
+                        <p class="desarrollos__lead">Dashboards, sistemas POS, rifas y juegos, matrices, catálogos web y automatizaciones. Hechos para negocios reales en Colombia: tú nos cuentas el proceso y lo convertimos en un sistema.</p>
+                    </div>
+                    <a href="https://wa.me/573223284622?text=Hola%20DC%20TECNOLOGY%2C%20quiero%20cotizar%20un%20desarrollo" target="_blank" rel="noopener" class="desarrollos__cta"><i class="fa-brands fa-whatsapp" aria-hidden="true"></i> Cotiza tu desarrollo</a>
+                </div>
+                <div class="desarrollos__filtros" role="tablist" aria-label="Tipo de desarrollo">
+                    <button type="button" role="tab" aria-selected="true" data-filtro="todos">Todos</button>
+                    <button type="button" role="tab" aria-selected="false" data-filtro="dashboard"><i class="fa-solid fa-chart-pie" aria-hidden="true"></i> Dashboards</button>
+                    <button type="button" role="tab" aria-selected="false" data-filtro="pos"><i class="fa-solid fa-cash-register" aria-hidden="true"></i> Sistemas POS</button>
+                    <button type="button" role="tab" aria-selected="false" data-filtro="juegos"><i class="fa-solid fa-trophy" aria-hidden="true"></i> Rifas y juegos</button>
+                    <button type="button" role="tab" aria-selected="false" data-filtro="matriz"><i class="fa-solid fa-table-cells" aria-hidden="true"></i> Matrices</button>
+                    <button type="button" role="tab" aria-selected="false" data-filtro="catalogo"><i class="fa-solid fa-store" aria-hidden="true"></i> Catálogos web</button>
+                </div>
+                <div class="desarrollos__grid" id="desarrollos-grid">
+                    <article class="proyecto proyecto--ancho" data-tipos="dashboard matriz">
+                        <button type="button" class="proyecto__pantalla" data-ampliar="img/portafolio/capacitaciones.webp" aria-label="Ampliar: control de capacitaciones">
+                            <span class="proyecto__barra" aria-hidden="true"><i></i><i></i><i></i></span>
+                            <img src="img/portafolio/capacitaciones.webp" alt="Panel de control de capacitaciones con indicadores por área" loading="lazy" width="1200" height="565">
+                        </button>
+                        <div class="proyecto__info">
+                            <h3>Control de capacitaciones</h3>
+                            <p>Cumplimiento, asistencia y horas-hombre por área frente a la meta, alertas de pendientes, matriz de cobertura y expedientes.</p>
+                            <ul><li>Dashboard</li><li>Matriz de cobertura</li><li>Alertas</li></ul>
+                        </div>
+                    </article>
+                    <article class="proyecto" data-tipos="pos">
+                        <button type="button" class="proyecto__pantalla" data-ampliar="img/portafolio/pos-bar.webp" aria-label="Ampliar: sistema POS para bares">
+                            <span class="proyecto__barra" aria-hidden="true"><i></i><i></i><i></i></span>
+                            <img src="img/portafolio/pos-bar.webp" alt="Sistema POS para bar con mesas y zona de juegos" loading="lazy" width="1200" height="534">
+                        </button>
+                        <div class="proyecto__info">
+                            <h3>POS para bares y restaurantes</h3>
+                            <p>Mesas y zonas de juego (boliranas, rana) en tiempo real, pedidos por mesa, caja, inventario y reportes.</p>
+                            <ul><li>POS</li><li>Mesas</li><li>Inventario</li></ul>
+                        </div>
+                    </article>
+                    <article class="proyecto" data-tipos="juegos">
+                        <button type="button" class="proyecto__pantalla proyecto__pantalla--vertical" data-ampliar="img/portafolio/polla-mundial.webp" aria-label="Ampliar: polla mundialista">
+                            <span class="proyecto__barra" aria-hidden="true"><i></i><i></i><i></i></span>
+                            <img src="img/portafolio/polla-mundial.webp" alt="Polla del Mundial con registro de usuarios y cuenta regresiva" loading="lazy" width="700" height="670">
+                        </button>
+                        <div class="proyecto__info">
+                            <h3>Pollas, rifas y juegos</h3>
+                            <p>Pronósticos con cuentas de usuario, tabla de posiciones, premios y cuenta regresiva. Ideal para empresas, eventos y comunidades.</p>
+                            <ul><li>Juegos</li><li>Rifas</li><li>Usuarios</li></ul>
+                        </div>
+                    </article>
+                    <article class="proyecto" data-tipos="dashboard">
+                        <button type="button" class="proyecto__pantalla" data-ampliar="img/portafolio/finanzas.webp" aria-label="Ampliar: gestor financiero">
+                            <span class="proyecto__barra" aria-hidden="true"><i></i><i></i><i></i></span>
+                            <img src="img/portafolio/finanzas.webp" alt="Gestor financiero con dashboard, movimientos y ventas" loading="lazy" width="1200" height="814">
+                        </button>
+                        <div class="proyecto__info">
+                            <h3>Gestor financiero</h3>
+                            <p>Ingresos y gastos, pagos recurrentes, ventas, notas y solicitudes de gasto con su viabilidad, en un solo tablero.</p>
+                            <ul><li>Dashboard</li><li>Finanzas</li><li>Ventas</li></ul>
+                        </div>
+                    </article>
+                    <article class="proyecto" data-tipos="dashboard matriz">
+                        <button type="button" class="proyecto__pantalla" data-ampliar="img/portafolio/formacion.webp" aria-label="Ampliar: programa de formación">
+                            <span class="proyecto__barra" aria-hidden="true"><i></i><i></i><i></i></span>
+                            <img src="img/portafolio/formacion.webp" alt="Programa de formación con indicadores, cronograma y matriz detallada" loading="lazy" width="1200" height="601">
+                        </button>
+                        <div class="proyecto__info">
+                            <h3>Programa de formación integral</h3>
+                            <p>Indicadores de actividades ejecutadas, pendientes y canceladas, gestión por proceso, cronograma y matriz detallada por vigencia.</p>
+                            <ul><li>Indicadores</li><li>Cronograma</li><li>Matriz</li></ul>
+                        </div>
+                    </article>
+                    <article class="proyecto" data-tipos="catalogo">
+                        <button type="button" class="proyecto__pantalla" data-ampliar="img/portafolio/catalogo-tienda.webp" aria-label="Ampliar: tienda y catálogo web">
+                            <span class="proyecto__barra" aria-hidden="true"><i></i><i></i><i></i></span>
+                            <img src="img/portafolio/catalogo-tienda.webp" alt="Tienda en línea con catálogo de productos y carrito" loading="lazy" width="1200" height="727">
+                        </button>
+                        <div class="proyecto__info">
+                            <h3>Tienda y catálogo web con bot</h3>
+                            <p>Esta misma tienda: catálogo sincronizado con proveedores, carrito, pagos locales, bot de WhatsApp con IA y panel de pedidos.</p>
+                            <ul><li>Catálogo</li><li>Bot con IA</li><li>Automatización</li></ul>
+                        </div>
+                    </article>
+                </div>
+                <p class="desarrollos__nota">Pantallazos de sistemas en uso; los nombres de clientes y personas están difuminados por privacidad.</p>
+            </div>
+        </section>
+        <dialog id="visor-proyecto" class="visor" aria-label="Pantallazo ampliado">
+            <button type="button" class="visor__cerrar" aria-label="Cerrar"><i class="fa-solid fa-xmark"></i></button>
+            <img alt="">
+        </dialog>
 
         <section id="catalogo" class="max-w-7xl mx-auto px-4 pb-10" aria-labelledby="category-title">
             <div role="tablist" aria-label="Tipo de producto" id="modulos" class="grid grid-cols-2 sm:grid-cols-4 gap-2 p-1.5 rounded-3xl bg-white/[0.03] ring-1 ring-white/10 backdrop-blur-xl mb-4">
@@ -710,13 +807,14 @@
     <div id="toasts" class="fixed z-[60] left-4 right-24 sm:right-auto bottom-[max(1rem,env(safe-area-inset-bottom))] flex flex-col items-start gap-2 pointer-events-none" aria-live="polite"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js" integrity="sha384-Rj26LVGvoeRVR6+mwQmFfcR3QOBEwT+ZmuCWpuiqeTzJpCs0ER4ITAWGb4Hiy3Ok" crossorigin="anonymous"></script>
-    <script src="plantillas-whatsapp.js?v=202610161215"></script>
-    <script src="ui.js?v=202610161215"></script>
-    <script src="app.js?v=202610161215"></script>
-    <script src="tienda-carrito.js?v=202610161215"></script>
-    <script src="carrito.js?v=202610161215"></script>
-    <script src="efectos.js?v=202610161215"></script>
-    <script src="copiloto.js?v=202610161215"></script>
+    <script src="plantillas-whatsapp.js?v=202610161717"></script>
+    <script src="ui.js?v=202610161717"></script>
+    <script src="app.js?v=202610161717"></script>
+    <script src="tienda-carrito.js?v=202610161717"></script>
+    <script src="carrito.js?v=202610161717"></script>
+    <script src="efectos.js?v=202610161717"></script>
+    <script src="portafolio.js?v=202610161717"></script>
+    <script src="copiloto.js?v=202610161717"></script>
 
 </body>
 </html>

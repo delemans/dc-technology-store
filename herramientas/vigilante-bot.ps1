@@ -42,7 +42,7 @@ $estado = if (Test-Path $estadoArchivo) { Get-Content $estadoArchivo -Raw | Conv
 function WhatsAppSirve {
     try {
         $r = Invoke-RestMethod "$evo/chat/whatsappNumbers/$inst" -Method Post -Headers @{ apikey = $clave } -ContentType 'application/json' -Body '{"numbers":["573223284622"]}' -TimeoutSec 25
-        return [bool]($r | Where-Object { $_.exists -ne $null })
+        return [bool]($r | Where-Object { $null -ne $_.exists })
     } catch { return $false }
 }
 function ReiniciarEvolution {
@@ -67,6 +67,21 @@ if (WhatsAppSirve) {
         $ok = ReiniciarEvolution
         Anotar ($(if ($ok) { 'Evolution reiniciado: WhatsApp responde' } else { 'Evolution reiniciado pero WhatsApp sigue sin responder: puede requerir volver a vincular el QR' }))
         $estado.fallos = if ($ok) { 0 } else { 2 }
+    }
+}
+# 1b) ¿Entran mensajes? Si lleva horas sin recibir nada (envía pero no recibe), reinicia Evolution (máx. 1 vez cada 6 h) y te avisa
+if ($estado.fallos -eq 0) {
+    $res = & node (Join-Path $raiz 'herramientas\revisar-entrada.mjs') 2>&1 | Out-String
+    if ($LASTEXITCODE -eq 2) {
+        $ultimoReinicio = if ($estado.PSObject.Properties['reinicioEntrada']) { [datetime]$estado.reinicioEntrada } else { [datetime]::MinValue }
+        if (((Get-Date) - $ultimoReinicio).TotalHours -ge 6) {
+            Anotar "Sin mensajes entrantes ($($res.Trim())): reiniciando Evolution"
+            [void](ReiniciarEvolution)
+            $estado | Add-Member -NotePropertyName reinicioEntrada -NotePropertyValue (Get-Date).ToString('o') -Force
+            Start-Sleep -Seconds 120
+        }
+        $res2 = & node (Join-Path $raiz 'herramientas\revisar-entrada.mjs') --avisar 2>&1 | Out-String
+        if ($LASTEXITCODE -eq 2) { Anotar "Sigue sin entrar ningún mensaje: $($res2.Trim() -replace '\s+', ' ')" }
     }
 }
 $estado | ConvertTo-Json | Set-Content $estadoArchivo -Encoding utf8
