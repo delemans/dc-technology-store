@@ -1,6 +1,6 @@
 // n8n/simulador-nodos.js — GENERADO por n8n/generar_flujo_n8n.js (no editar a mano).
 // Código real de los nodos del bot para el simulador del panel (Prueba del sistema). No envía nada.
-window.SimuladorFlujo = { version: "2026-10-16T12:50:23.862Z", config: {"supabase_url":"https://vyqcizwfmjlflncdwzve.supabase.co","evolution_url":"https://TU-EVOLUTION-API","evolution_instancia":"TU-INSTANCIA","url_conocimiento":"https://dctecnology.xyz/bot-conocimiento.json","numero_aviso_admin":"","numero_proveedor":"","webhook_publico":"http://localhost:5678/webhook/dc-whatsapp","canal_compra":"web","anc_url":"https://ancpagos.com","anc_metodo":"nequi","anc_correo":"","anc_nombre":"DC","anc_apellido":"Tecnology","anc_whatsapp":"","palabras_asesor":"asesor,humano,persona,agente,reclamo,reembolso,devolucion,estafa,no me llego"}, nodos: {
+window.SimuladorFlujo = { version: "2026-10-16T12:50:23.862Z", config: {"supabase_url":"https://vyqcizwfmjlflncdwzve.supabase.co","evolution_url":"https://TU-EVOLUTION-API","evolution_instancia":"TU-INSTANCIA","url_conocimiento":"https://dctecnology.xyz/bot-conocimiento.json","numero_aviso_admin":"","numero_proveedor":"","webhook_publico":"http://localhost:5678/webhook/dc-whatsapp","canal_compra":"web","anc_url":"https://ancpagos.com","anc_metodo":"nequi","anc_correo":"","anc_nombre":"DC","anc_apellido":"Tecnology","anc_whatsapp":"","palabras_asesor":"asesor,humano,persona,agente,reclamo,reembolso,devolucion,estafa,no me llego","etiquetas_silencio":"BAENAMORA"}, nodos: {
 "Normalizar mensaje": function ($, $input, $getWorkflowStaticData) {
 const limpiar = (v) => String(v ?? '').replace(/[*_~`]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 120);
 const rellenar = (plantilla, vars) => String(plantilla ?? '').split('\n').map((linea) => {
@@ -74,7 +74,32 @@ const precioDe = (texto) => {
 const cfg = $('Config bot').first().json;
 const evento = $('Webhook Evolution').first().json;
 const b = evento.body ?? evento;
-if (String(b.event ?? '').toLowerCase().replace(/_/g, '.') !== 'messages.upsert') return [];
+const tipoEvento = String(b.event ?? '').toLowerCase().replace(/_/g, '.');
+// Etiquetas de WhatsApp Business (Evolution: labels.association / labels.edit; herramientas/sincronizar-etiquetas.mjs:
+// labels.sync con las actuales). Se recuerdan por chat para no responder en las etiquetas de "etiquetas_silencio".
+if (/^labels\.(association|edit|sync)$/.test(tipoEvento)) {
+    const mem = $getWorkflowStaticData('global');
+    const et = mem.etiquetas = mem.etiquetas ?? { chats: {}, nombres: {} };
+    const dato = Array.isArray(b.data) ? b.data[0] : b.data ?? {};
+    const chatDe = (j) => String(j ?? '').split('@')[0].split(':')[0];
+    if (tipoEvento === 'labels.sync') {
+        et.chats = {};
+        for (const [j, ids] of Object.entries(dato.chats ?? {})) if (chatDe(j) && (ids ?? []).length) et.chats[chatDe(j)] = ids.map(String);
+        et.nombres = Object.fromEntries(Object.entries(dato.nombres ?? {}).map(([id, n]) => [String(id), String(n)]));
+        et.sincronizadas = new Date().toISOString();
+    } else if (tipoEvento === 'labels.edit') {
+        if (dato.id) { if (dato.deleted) delete et.nombres[String(dato.id)]; else et.nombres[String(dato.id)] = String(dato.name ?? ''); }
+    } else {
+        const c = chatDe(dato.chatId), id = String(dato.labelId ?? '');
+        if (c && id) {
+            const actuales = new Set(et.chats[c] ?? []);
+            if (dato.type === 'remove') actuales.delete(id); else actuales.add(id);
+            if (actuales.size) et.chats[c] = [...actuales]; else delete et.chats[c];
+        }
+    }
+    return [];
+}
+if (tipoEvento !== 'messages.upsert') return [];
 const d = Array.isArray(b.data) ? b.data[0] : b.data;
 const key = d?.key ?? {};
 // WhatsApp ya identifica muchos chats con un ID oculto (…@lid): el número real llega aparte
@@ -127,6 +152,11 @@ if (comando && soloDigitos(cfg.numero_aviso_admin) && numero === soloDigitos(cfg
     return [{ json: { ruta: 'triangulacion', origen: 'admin', accion: comando[1].toLowerCase(), referencia: comando[2].toUpperCase(), numero, texto, wamid: key.id ?? null, conMedia: esImagen || esPdf || Boolean(txid) } }];
 }
 
+// Chats con una etiqueta de silencio (por defecto BAENAMORA): el bot no responde nada, los atiendes tú
+const etiquetas = memoria.etiquetas ?? { chats: {}, nombres: {} };
+const silencio = String(cfg.etiquetas_silencio ?? 'BAENAMORA').split(',').map((x) => normalizar(x).trim()).filter(Boolean);
+const delChat = [...new Set([...(etiquetas.chats[numero] ?? []), ...(etiquetas.chats[original.split('@')[0]] ?? [])])];
+if (delChat.some((id) => silencio.includes(normalizar(etiquetas.nombres[id] ?? '').trim()))) return [];
 if (memoria.pausados[numero]) return []; // un asesor (o tú) atiende este chat
 // Anti-abuso: una ráfaga de más de 15 mensajes en 1 minuto del mismo número se ignora (el límite de la IA va al final)
 const recientes = (memoria.ritmo[numero] || []).filter((t) => ahora - t < 60e3);
@@ -304,20 +334,30 @@ if (!r && errorIa) {
 // WO-040 · No es compra (un conocido, un proveedor, otro tema): no se le contesta, el chat queda en pausa para que
 // respondas tú y te llega el aviso con su mensaje
 const noCompra = r.match(/\[NO_COMPRA\]\s*([^\n]*)/i);
+// No es compra: el bot responde automático una vez (cada 6 h por chat) con un mensaje corto y te avisa. No pausa el
+// chat: si después pregunta por la tienda, el bot lo atiende. Los contactos personales se marcan con la etiqueta
+// BAENAMORA (etiquetas_silencio) y ahí el bot no responde nada.
 if (noCompra) {
-    memoria.pausados = memoria.pausados || {};
-    memoria.pausados[msg.numero] = Date.now();
+    memoria.noCompra = memoria.noCompra || {};
+    const ahora = Date.now();
+    for (const [n, t] of Object.entries(memoria.noCompra)) if (ahora - t > 6 * 3600e3) delete memoria.noCompra[n];
+    if (memoria.noCompra[msg.numero]) return [];
+    memoria.noCompra[msg.numero] = ahora;
+    const salida = [{ json: { numero: msg.numero, texto: [
+        '¡Hola! 👋 Recibí tu mensaje.',
+        'Si es sobre la tienda, escribe *menú* y te muestro el catálogo y los precios.',
+        'Si es otro tema, te respondemos personalmente en cuanto podamos 🙏',
+    ].join('\n') } }];
     const aviso = soloDigitos(cfg.numero_aviso_admin);
-    if (!aviso) return [];
-    return [{ json: { numero: aviso, texto: [
+    if (aviso && aviso !== msg.numero) salida.push({ json: { numero: aviso, texto: [
         '💬 *Mensaje que no es de compra*',
         `De: +${msg.numero}${msg.nombre ? ` (${limpiar(msg.nombre)})` : ''}`,
         `Tema: ${limpiar(noCompra[1]) || 'otro asunto'}`,
         `Mensaje: «${String(msg.texto ?? '').slice(0, 300)}»`,
         '',
-        `No le respondí: contéstale tú. El bot queda en pausa ${12} h en ese chat.`,
-        'Si sí era un cliente, escribe #bot en su chat y el bot lo vuelve a atender.',
-    ].join('\n') } }];
+        'Le respondí automático que lo atiendes personalmente. Si es un contacto personal, ponle la etiqueta *BAENAMORA* y el bot no le volverá a escribir.',
+    ].join('\n') } });
+    return salida;
 }
 const pedido = r.match(/^\[ESCALAR\]\s*(.*)$/is);
 if (!r || pedido) return escalar(msg, pedido ? pedido[1] || 'Escalado por el agente' : 'El agente no respondió', cfg, kb.plantillas);

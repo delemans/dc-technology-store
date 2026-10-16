@@ -135,7 +135,32 @@ function normalizarMensaje() {
     const cfg = $('Config bot').first().json;
     const evento = $('Webhook Evolution').first().json;
     const b = evento.body ?? evento;
-    if (String(b.event ?? '').toLowerCase().replace(/_/g, '.') !== 'messages.upsert') return [];
+    const tipoEvento = String(b.event ?? '').toLowerCase().replace(/_/g, '.');
+    // Etiquetas de WhatsApp Business (Evolution: labels.association / labels.edit; herramientas/sincronizar-etiquetas.mjs:
+    // labels.sync con las actuales). Se recuerdan por chat para no responder en las etiquetas de "etiquetas_silencio".
+    if (/^labels\.(association|edit|sync)$/.test(tipoEvento)) {
+        const mem = $getWorkflowStaticData('global');
+        const et = mem.etiquetas = mem.etiquetas ?? { chats: {}, nombres: {} };
+        const dato = Array.isArray(b.data) ? b.data[0] : b.data ?? {};
+        const chatDe = (j) => String(j ?? '').split('@')[0].split(':')[0];
+        if (tipoEvento === 'labels.sync') {
+            et.chats = {};
+            for (const [j, ids] of Object.entries(dato.chats ?? {})) if (chatDe(j) && (ids ?? []).length) et.chats[chatDe(j)] = ids.map(String);
+            et.nombres = Object.fromEntries(Object.entries(dato.nombres ?? {}).map(([id, n]) => [String(id), String(n)]));
+            et.sincronizadas = new Date().toISOString();
+        } else if (tipoEvento === 'labels.edit') {
+            if (dato.id) { if (dato.deleted) delete et.nombres[String(dato.id)]; else et.nombres[String(dato.id)] = String(dato.name ?? ''); }
+        } else {
+            const c = chatDe(dato.chatId), id = String(dato.labelId ?? '');
+            if (c && id) {
+                const actuales = new Set(et.chats[c] ?? []);
+                if (dato.type === 'remove') actuales.delete(id); else actuales.add(id);
+                if (actuales.size) et.chats[c] = [...actuales]; else delete et.chats[c];
+            }
+        }
+        return [];
+    }
+    if (tipoEvento !== 'messages.upsert') return [];
     const d = Array.isArray(b.data) ? b.data[0] : b.data;
     const key = d?.key ?? {};
     // WhatsApp ya identifica muchos chats con un ID oculto (…@lid): el número real llega aparte
@@ -188,6 +213,11 @@ function normalizarMensaje() {
         return [{ json: { ruta: 'triangulacion', origen: 'admin', accion: comando[1].toLowerCase(), referencia: comando[2].toUpperCase(), numero, texto, wamid: key.id ?? null, conMedia: esImagen || esPdf || Boolean(txid) } }];
     }
 
+    // Chats con una etiqueta de silencio (por defecto BAENAMORA): el bot no responde nada, los atiendes tú
+    const etiquetas = memoria.etiquetas ?? { chats: {}, nombres: {} };
+    const silencio = String(cfg.etiquetas_silencio ?? 'BAENAMORA').split(',').map((x) => normalizar(x).trim()).filter(Boolean);
+    const delChat = [...new Set([...(etiquetas.chats[numero] ?? []), ...(etiquetas.chats[original.split('@')[0]] ?? [])])];
+    if (delChat.some((id) => silencio.includes(normalizar(etiquetas.nombres[id] ?? '').trim()))) return [];
     if (memoria.pausados[numero]) return []; // un asesor (o tú) atiende este chat
     // Anti-abuso: una ráfaga de más de 15 mensajes en 1 minuto del mismo número se ignora (el límite de la IA va al final)
     const recientes = (memoria.ritmo[numero] || []).filter((t) => ahora - t < 60e3);
@@ -531,6 +561,25 @@ function armarContexto() {
     const enVivo = baseViva($('Base de conocimiento').first().json);
     const base0 = enVivo && enVivo.prompt_sistema && enVivo.plantillas ? enVivo : __KB__;
     const base = { ...base0, catalogo: aplicarPrecios(base0.catalogo, preciosVivos()) }; // la IA cotiza con los precios de la base
+    // Catálogo para la IA, liviano (antes ~11.000 tokens por mensaje: lento y no cabe en las IA gratuitas): los digitales,
+    // servicios y alquiler completos; de tecnología (180+ físicos) solo los que coinciden con lo que el cliente escribe
+    // ahora o escribió antes en esta charla (máx. 12), más un resumen. El menú y la web siguen mostrando todo.
+    const catalogoTodo = base.catalogo ?? [];
+    const tecnologia = catalogoTodo.filter((p) => p.tipo === 'tecnologia');
+    const VACIAS_IA = new Set(['quiero', 'precio', 'precios', 'cuanto', 'cuesta', 'vale', 'valor', 'tienen', 'tiene', 'hay', 'venden', 'busco', 'necesito',
+        'comprar', 'para', 'una', 'uno', 'unos', 'unas', 'los', 'las', 'del', 'con', 'por', 'favor', 'hola', 'buenas', 'que', 'como', 'cual', 'este', 'ese', 'esa', 'esta',
+        'disponible', 'producto', 'productos', 'original', 'originales', 'bueno', 'buena', 'mejor', 'algo', 'tambien', 'pero', 'muy', 'mas', 'son', 'sus', 'mis', 'tus']);
+    const anteriores = ((($getWorkflowStaticData('global').chatsIa ?? {})[msg.numero]?.m) ?? []).filter((x) => x.role === 'user').slice(-3).map((x) => x.content);
+    const palabrasIa = [...new Set([texto, ...anteriores, ultimoMenu?.texto ?? ''].join(' ').split(/\s+/)
+        .map((w) => normalizar(w).replace(/[^a-z0-9]/g, '')).filter((w) => (w.length >= 3 || /\d/.test(w) && w.length >= 2) && !VACIAS_IA.has(w)))];
+    // Un modelo con número (s9, x8, kms323) pesa más que una palabra suelta; "smartwatch" = "smart watch"
+    const puntaje = (p) => {
+        const n = normalizar(p.nombre), junto = n.replace(/[^a-z0-9]/g, ''), palabrasNombre = n.split(/[^a-z0-9]+/);
+        return palabrasIa.reduce((s, w) => s + (/\d/.test(w) ? (palabrasNombre.includes(w) || (w.length >= 4 && junto.includes(w)) ? 3 : 0)
+            : n.includes(w) || junto.includes(w) || (w.length > 4 && n.includes(w.replace(/(es|s)$/, ''))) ? 1 : 0), 0);
+    };
+    const tecnoIa = tecnologia.map((p) => [p, puntaje(p)]).filter(([, s]) => s > 0).sort((a, b) => b[1] - a[1]).slice(0, 12).map(([p]) => p);
+    const catalogoIa = [...catalogoTodo.filter((p) => p.tipo !== 'tecnologia'), ...tecnoIa];
     const cuentas = $('Metodos de pago').all().map((i) => i.json).filter((m) => m && (m.numero_cuenta || m.url_pago));
     const linea = (c) => {
         if (c.categoria !== 'cripto') {
@@ -579,7 +628,8 @@ function armarContexto() {
         ...(base.reglas_uso ?? []).map((r) => `- ${r}`),
         '',
         'CATÁLOGO (precios en COP, solo estos):',
-        ...(base.catalogo ?? []).map((p) => `- ${p.nombre} [${p.tipo}]: ${(p.variantes ?? []).map((v) => `${v.nombre} ${Number(v.precio) > 0 ? cop(v.precio) : 'a cotizar'}`).join('; ')}`),
+        ...catalogoIa.map((p) => `- ${p.nombre} [${p.tipo}]: ${(p.variantes ?? []).map((v) => `${v.nombre} ${Number(v.precio) > 0 ? cop(v.precio) : 'a cotizar'}`).join('; ')}`),
+        ...(tecnologia.length ? [`- TECNOLOGÍA: ${tecnologia.length} productos físicos (relojes inteligentes, audífonos, diademas, parlantes, power banks, cargadores y cables, soportes, mouse y teclados, luces y trípodes…).${tecnoIa.length ? ' Arriba están los que coinciden con lo que pide el cliente.' : ''} Si pide uno que no aparece arriba, NO inventes precio ni disponibilidad: pídele el modelo o envíalo al menú (opción 1 → Tecnología) o a la web.`] : []),
         '',
         'FORMATO: español de Colombia, máximo 6 líneas, *negrita* de WhatsApp solo para datos clave, sin títulos ni tablas.',
         'PRODUCTOS DIGITALES (venta y soporte completos, sin pasar a un asesor):',
@@ -636,20 +686,30 @@ function revisarRespuesta() {
     // WO-040 · No es compra (un conocido, un proveedor, otro tema): no se le contesta, el chat queda en pausa para que
     // respondas tú y te llega el aviso con su mensaje
     const noCompra = r.match(/\[NO_COMPRA\]\s*([^\n]*)/i);
+    // No es compra: el bot responde automático una vez (cada 6 h por chat) con un mensaje corto y te avisa. No pausa el
+    // chat: si después pregunta por la tienda, el bot lo atiende. Los contactos personales se marcan con la etiqueta
+    // BAENAMORA (etiquetas_silencio) y ahí el bot no responde nada.
     if (noCompra) {
-        memoria.pausados = memoria.pausados || {};
-        memoria.pausados[msg.numero] = Date.now();
+        memoria.noCompra = memoria.noCompra || {};
+        const ahora = Date.now();
+        for (const [n, t] of Object.entries(memoria.noCompra)) if (ahora - t > 6 * 3600e3) delete memoria.noCompra[n];
+        if (memoria.noCompra[msg.numero]) return [];
+        memoria.noCompra[msg.numero] = ahora;
+        const salida = [{ json: { numero: msg.numero, texto: [
+            '¡Hola! 👋 Recibí tu mensaje.',
+            'Si es sobre la tienda, escribe *menú* y te muestro el catálogo y los precios.',
+            'Si es otro tema, te respondemos personalmente en cuanto podamos 🙏',
+        ].join('\n') } }];
         const aviso = soloDigitos(cfg.numero_aviso_admin);
-        if (!aviso) return [];
-        return [{ json: { numero: aviso, texto: [
+        if (aviso && aviso !== msg.numero) salida.push({ json: { numero: aviso, texto: [
             '💬 *Mensaje que no es de compra*',
             `De: +${msg.numero}${msg.nombre ? ` (${limpiar(msg.nombre)})` : ''}`,
             `Tema: ${limpiar(noCompra[1]) || 'otro asunto'}`,
             `Mensaje: «${String(msg.texto ?? '').slice(0, 300)}»`,
             '',
-            `No le respondí: contéstale tú. El bot queda en pausa ${__HORAS_PAUSA__} h en ese chat.`,
-            'Si sí era un cliente, escribe #bot en su chat y el bot lo vuelve a atender.',
-        ].join('\n') } }];
+            'Le respondí automático que lo atiendes personalmente. Si es un contacto personal, ponle la etiqueta *BAENAMORA* y el bot no le volverá a escribir.',
+        ].join('\n') } });
+        return salida;
     }
     const pedido = r.match(/^\[ESCALAR\]\s*(.*)$/is);
     if (!r || pedido) return escalar(msg, pedido ? pedido[1] || 'Escalado por el agente' : 'El agente no respondió', cfg, kb.plantillas);
@@ -1683,7 +1743,7 @@ function motorIa() {
                 detalle = String(j.error?.message ?? j.message ?? j[0]?.error?.message ?? (texto ? '' : 'respuesta vacía')).replace(/\s+/g, ' ').slice(0, 160);
             } catch (err) { detalle = String(err.message ?? err).slice(0, 160); }
             const sinSaldo = [401, 402, 403].includes(codigo) || /insufficient|balance|credit|billing|saldo|per ?day|daily/i.test(detalle);
-            const pausa = sinSaldo ? 6 * 3600e3 : codigo === 429 ? 2 * 60e3 : codigo >= 500 || !codigo ? 60e3 : 10 * 60e3;
+            const pausa = sinSaldo ? 6 * 3600e3 : codigo === 429 || codigo === 413 ? 2 * 60e3 : codigo >= 500 || !codigo ? 60e3 : 10 * 60e3;
             Object.assign(s, { hasta: ahora + pausa, motivo: `${codigo || 'sin respuesta'} ${detalle}`.trim(), sinSaldo });
             fallas.push(`${p.nombre}: ${codigo || ''} ${detalle}`.replace(/\s+/g, ' ').trim());
         }
@@ -1702,7 +1762,7 @@ async function iaBalanceada() {
     const mensajes = [{ role: 'system', content: String(datos.sistema ?? '') }, ...previo, { role: 'user', content: String(datos.texto ?? '') }];
     try {
         // 20 s por IA: si una está lenta (saturada) se pasa a la siguiente sin dejar al cliente esperando
-        const r = await consultarIa(this.helpers, mensajes, { temperatura: 0.3, maxTokens: 500, timeoutMs: 20000 });
+        const r = await consultarIa(this.helpers, mensajes, { temperatura: 0.3, maxTokens: 1500, timeoutMs: 20000 }); // 1500: los modelos que "piensan" gastan parte antes de responder
         const corto = (t) => String(t).slice(0, 900);
         chats[numero] = { at: ahora, m: [...previo, { role: 'user', content: corto(datos.texto ?? '') }, { role: 'assistant', content: corto(r.texto) }].slice(-16) };
         // Solo los 400 chats más recientes
@@ -1867,6 +1927,8 @@ nodo('Config bot', 'n8n-nodes-base.set', 3.4, [220, 0], set({
     anc_apellido: 'Tecnology',
     anc_whatsapp: '',      // vacío = tu número de aviso
     palabras_asesor: kb.escalamiento.palabras_clave.join(','),
+    // Etiquetas de WhatsApp Business en las que el bot NO responde (separadas por coma): contactos personales u otros negocios
+    etiquetas_silencio: 'BAENAMORA',
 }, { incluirEntrada: true }));
 nodoCodigo('Normalizar mensaje', [440, 0], normalizarMensaje, { conUtilidades: true });
 const regla = (valor, salida, campo = 'ruta') => ({
@@ -2214,10 +2276,10 @@ const evolutionApi = (metodo, ruta, cuerpo) => ({
     options: { timeout: 20000, response: { response: { fullResponse: true, neverError: true } } },
 });
 nodo('Webhook Evolution v2', 'n8n-nodes-base.httpRequest', 4.2, [660, -560], evolutionApi('POST', 'set',
-    "={{ JSON.stringify({ webhook: { enabled: true, url: $('Config bot').first().json.webhook_publico, byEvents: false, base64: false, events: ['MESSAGES_UPSERT'] } }) }}"),
+    "={{ JSON.stringify({ webhook: { enabled: true, url: $('Config bot').first().json.webhook_publico, byEvents: false, base64: false, events: ['MESSAGES_UPSERT', 'LABELS_ASSOCIATION', 'LABELS_EDIT'] } }) }}"),
 { onError: 'continueRegularOutput', alwaysOutputData: true });
 nodo('Webhook Evolution v1', 'n8n-nodes-base.httpRequest', 4.2, [880, -560], evolutionApi('POST', 'set',
-    "={{ JSON.stringify({ enabled: true, url: $('Config bot').first().json.webhook_publico, webhook_by_events: false, webhook_base64: false, events: ['MESSAGES_UPSERT'] }) }}"),
+    "={{ JSON.stringify({ enabled: true, url: $('Config bot').first().json.webhook_publico, webhook_by_events: false, webhook_base64: false, events: ['MESSAGES_UPSERT', 'LABELS_ASSOCIATION', 'LABELS_EDIT'] }) }}"),
 { onError: 'continueRegularOutput', alwaysOutputData: true });
 nodo('Leer webhook de Evolution', 'n8n-nodes-base.httpRequest', 4.2, [1100, -560], evolutionApi('GET', 'find', null), { onError: 'continueRegularOutput', alwaysOutputData: true });
 nodoCodigo('Resultado Evolution', [1320, -560], resultadoEvolution);

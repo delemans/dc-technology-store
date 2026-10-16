@@ -18,7 +18,7 @@ async function probar(url, clave, modelo) {
     const t = Date.now();
     try {
         const r = await fetch(`${url}/chat/completions`, { method: 'POST', headers: { Authorization: `Bearer ${clave}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ model: modelo, max_tokens: 40, temperature: 0, messages: [
+            body: JSON.stringify({ model: modelo, max_tokens: 400, temperature: 0, messages: [ // 400: los modelos que "piensan" necesitan espacio (el bot usa 500)
                 { role: 'system', content: 'Eres el asistente de DC Tecnology, tienda colombiana. Responde en español.' },
                 { role: 'user', content: 'Responde solo la palabra: listo' }] }) });
         const j = await r.json().catch(() => ({}));
