@@ -168,8 +168,9 @@ const escalamiento = {
 // Venta y soporte de productos digitales (streaming, licencias, pines, recargas): la IA los atiende completos
 const flujoDigital = [
     'VENTA DIGITAL (sin pasar a un asesor): 1) confirma producto, opción y total (DCTECH2026 solo si el cliente escribe el código; nunca lo apliques por tu cuenta); 2) ofrécele pagar por aquí o en la web (ver "CÓMO PAGA"); si es por aquí, muestra los métodos activos y da los datos del que elija; 3) pide el comprobante: captura con número de referencia, o el hash (TXID) si pagó en cripto.',
-    `Cuando el cliente envía el comprobante: confirma que lo recibiste y que, al validarlo, su pedido sale en máximo ${WA.ENTREGA_MAX_MIN} minutos dentro del horario. Nunca digas que el pago está aprobado: lo valida el equipo.`,
-    'Si pregunta por su pedido ya pagado: dile que el equipo lo está preparando con el proveedor y que los accesos le llegan por este chat apenas estén listos. Si pasaron más de 15 minutos en horario, escala a un asesor.',
+    'Cuando el cliente envía el comprobante: dile que lo recibiste y que estás revisando su pago, y que le escribes por este chat apenas quede confirmado. Nunca digas que el pago está aprobado ni prometas un tiempo: lo confirma el equipo.',
+    'Si pregunta por un pedido cuyo pago aún no está confirmado: dile que estamos revisando su pago y que le avisamos por aquí. Si ya está confirmado: dile que su pedido está en proceso y que se lo enviamos por este chat en los próximos minutos. Si pasaron más de 15 minutos en horario, escala a un asesor.',
+    'CONFIDENCIAL (nunca lo digas ni lo insinúes): de dónde salen las cuentas o los pines, proveedores, nombres como ANC o All Necessary, costos, márgenes de ganancia, o que esperas a un tercero. Para el cliente, todo lo prepara y entrega DC Tecnology. Si pregunta de dónde salen, responde que son productos de DC Tecnology con garantía.',
     'Las cuentas, perfiles, seriales y códigos los envía el sistema por este chat al validar el pago. Tú nunca escribes credenciales ni inventas accesos.',
     'COMBOS: cuando el cliente quiera 2 o más plataformas, cotiza con la marca [COMBO] {"items":[{"producto":"<nombre exacto>","variante":"<opción exacta>"}, ...]} en una línea aparte: el sistema la reemplaza por el desglose exacto (precios del catálogo y descuento vigente). Vuelve a usarla cada vez que menciones el total del combo. Si pide 1 sola plataforma y hay regla de combo, puedes contarle cuánto ahorraría agregando otra (sin presionar).',
     'PAGO DE UN COMBO EN CRIPTO: escribe [MONTO_CRIPTO cop=COMBO moneda=<MONEDA> red=<RED>] en la MISMA respuesta que la marca [COMBO]; el sistema usa el total del combo. En un combo NO uses la marca [PEDIDO_DIGITAL].',
@@ -251,13 +252,13 @@ const faqObligatorias = (horario) => [
         respuesta: 'Esto ocurre cuando alguien dejó una película en pausa o hay mucha demanda en la cuenta. Espera unos 10 a 15 minutos e intenta ingresar de nuevo. Recuerda que tu pantalla es para usar en un solo dispositivo a la vez. ¿Me avisas si te deja entrar después de la espera? 📺',
         pendiente_configurar: false,
     },
-    // WO-039: soporte de posventa (textos del director). El código de hogar y el perfil los resuelve el equipo con el proveedor.
+    // WO-039: soporte de posventa (textos del director). El código de hogar y el perfil los resuelve nuestro equipo.
     {
         id: 'soporte_hogar_netflix',
         pregunta: 'Netflix me pide "Actualizar hogar" o me bloqueó (hogar / IP)',
         palabras_clave: ['actualizar hogar', 'hogar', 'hogar de netflix', 'no es parte del hogar', 'codigo temporal', 'enviar correo', 'bloqueo', 'ip', 'dispositivo no forma parte'],
         respuesta: 'Para quitar el bloqueo, selecciona "Actualizar hogar" o "Enviar correo" directamente en tu pantalla. Apenas lo hagas, escríbeme por aquí para generarte el código o aprobar el enlace de inmediato. ¿Me confirmas cuando ya hayas enviado la solicitud en el TV? 🏠🔒',
-        accion: 'Cuando el cliente confirme que ya envió la solicitud, escala a un asesor: el código o el enlace llega al correo de la cuenta y lo aprueba el equipo con el proveedor (tú no lo tienes).',
+        accion: 'Cuando el cliente confirme que ya envió la solicitud, escala a un asesor: el código o el enlace llega al correo de la cuenta y lo aprueba nuestro equipo (tú no lo tienes).',
         pendiente_configurar: false,
     },
     {
@@ -265,7 +266,7 @@ const faqObligatorias = (horario) => [
         pregunta: 'Alguien cambió el nombre de mi perfil o le puso PIN',
         palabras_clave: ['cambiaron el nombre', 'cambio el nombre', 'le pusieron pin', 'pin', 'perfil ocupado', 'mi perfil', 'otro perfil', 'nombre del perfil', 'bloquearon el perfil'],
         respuesta: `Qué molestia, lo reviso de inmediato. Como son cuentas compartidas, tenemos prohibido modificar nombres o poner PIN. Puedes verificar tu perfil asignado entrando a tu portal de accesos: ${URL_MIS_PEDIDOS}. Si siguen ocupando el tuyo, avísame y lo restauro. ¿Pudiste confirmar tu número de perfil en la web? 🔐`,
-        accion: 'Si el cliente confirma que siguen ocupando su perfil o tiene PIN, escala a un asesor: el perfil lo restaura el equipo con el proveedor (tú no puedes cambiarlo).',
+        accion: 'Si el cliente confirma que siguen ocupando su perfil o tiene PIN, escala a un asesor: el perfil lo restaura nuestro equipo (tú no puedes cambiarlo).',
         pendiente_configurar: false,
     },
     {

@@ -74,6 +74,12 @@ function utilidades() {
         return incompleta ? null : texto.replace(/[ \t]+$/, '');
     }).filter((l) => l !== null).join('\n').replace(/\n{3,}/g, '\n\n').trim();
     const normalizar = (t) => String(t ?? '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+    // Consulta al proveedor por los productos de un pedido (canal manual): sin datos del cliente
+    const consultaProveedor = (cfg, referencia, items) => {
+        if (String(cfg.consultar_proveedor ?? 'si').trim().toLowerCase() === 'no') return null;
+        if (!String(cfg.numero_proveedor ?? '').replace(/\D/g, '')) return null;
+        return ['Hola 👋 ¿Tienen disponible?', ...items.map((x) => `• *${x}*`), '', `Es para el pedido ${referencia}. Gracias 🙏`].join('\n');
+    };
     // Mensajes para pasar al cliente con un asesor (+ aviso al administrador si hay número configurado)
     const escalar = (msg, motivo, cfg, plantillas) => {
         const memoria = $getWorkflowStaticData('global');
@@ -117,8 +123,8 @@ function utilidades() {
     const preciosVivos = () => { try { return $('Precios vivos').all().map((i) => i.json).filter((x) => x && x.producto_id); } catch { return []; } };
     const cop = (v) => `$${Number(v || 0).toLocaleString('es-CO')}`;
     // Triangulación: termina el pedido. El error va a la salida de error del nodo → "Cerrar triangulación"
-    const terminar = (estado, avisoAdmin, avisoCliente) => {
-        throw new Error(`TERMINAR ${JSON.stringify({ estado, avisoAdmin, avisoCliente })}`);
+    const terminar = (estado, avisoAdmin, avisoCliente, avisoProveedor = null) => {
+        throw new Error(`TERMINAR ${JSON.stringify({ estado, avisoAdmin, avisoCliente, avisoProveedor })}`);
     };
     // Precio en un texto libre del proveedor: "$15.000", "15000", "15 mil", "15k"
     const precioDe = (texto) => {
@@ -346,9 +352,9 @@ function comprobanteRecibido() {
     const cfg = $('Config bot').first().json;
     const msg = $input.first().json;
     const salida = [{ json: { numero: msg.numero, texto: [
-        msg.txid ? '🔗 *Hash recibido* · ⚡ *DC TECNOLOGY*' : '🧾 *Comprobante recibido* · ⚡ *DC TECNOLOGY*',
+        msg.txid ? '🔗 *Recibimos tu hash* · ⚡ *DC TECNOLOGY*' : '🧾 *Recibimos tu comprobante* · ⚡ *DC TECNOLOGY*',
         '',
-        `${msg.txid ? 'Estamos verificando tu transacción en la red.' : 'Lo estamos validando.'} Apenas se confirme, tu pedido sale en máximo *${__ENTREGA_MIN__} minutos* (${__HORARIO__}) y te llega por este chat.`,
+        `${msg.txid ? 'Estamos verificando tu transacción.' : 'Estamos revisando tu pago.'} Te escribo por este chat apenas quede confirmado ✅`,
         '',
         'No necesitas enviarlo de nuevo 🙌',
     ].join('\n') } }];
@@ -1022,6 +1028,7 @@ function evaluarCotizacion() {
         if (memoria.ordenesChat?.[t.cliente]?.referencia === t.referencia) Object.assign(memoria.ordenesChat[t.cliente], { plan, costo });
         const comprar = plan ? `*${plan}*${costo !== null ? ` (${cop(costo)})` : ''}${b.respaldo && b.respaldo.disponible === false ? ' ⚠️ agotado en la tienda de ANC' : ''}`
             : `*${producto}* (sin equivalencia en ANC: búscalo por nombre)`;
+        const consulta = consultaProveedor(cfg, t.referencia, [plan ?? producto]);
         terminar('REVISION_MANUAL', [
             t.pagado ? `🛒 *Pedido web PAGADO* · #${t.referencia}` : `🛒 *Pedido nuevo* · #${t.referencia} · ⏳ aún no paga`,
             `👤 +${t.cliente}${t.cliente_nombre ? ` (${t.cliente_nombre})` : ''}`,
@@ -1039,7 +1046,9 @@ function evaluarCotizacion() {
                 `3️⃣ Compra en ANC: ${comprar}. Como WhatsApp pon el del bot: 322 328 4622.`,
                 '4️⃣ Cuando ANC envíe la cuenta, se la entrego al cliente y activo la garantía.',
             ]),
-        ].filter((l) => l !== null).join('\n'), null);
+            consulta ? '' : null,
+            consulta ? '📨 Ya le pregunté a ANC si lo tiene disponible; su respuesta te llega aquí.' : null,
+        ].filter((l) => l !== null).join('\n'), null, consulta);
     }
     if (!b.catalogo_ok && b.respaldo?.leida) {
         const r = b.respaldo;
@@ -1209,6 +1218,11 @@ function comboManual() {
         const e = __ANC_MAPA__.find((m) => normalizar(m.producto) === normalizar(l.producto) && normalizar(m.variante) === normalizar(l.variante));
         return `• ${l.producto} – ${l.variante} (${cop(l.precio_venta)})${e ? ` → ANC: *${e.anc_producto} · ${e.anc_plan}*` : ' → sin equivalencia en ANC'}`;
     });
+    const cfgC = $('Config bot').first().json;
+    const consulta = consultaProveedor(cfgC, t.referencia, t.lineas.map((l) => {
+        const e = __ANC_MAPA__.find((m) => normalizar(m.producto) === normalizar(l.producto) && normalizar(m.variante) === normalizar(l.variante));
+        return e ? `${e.anc_producto} · ${e.anc_plan}` : `${l.producto} – ${l.variante}`;
+    }));
     terminar('REVISION_MANUAL', [
         t.web ? `🧩 *Combo PAGADO · cómpralo ya en ANC* · #${t.referencia}` : `🧩 *Combo nuevo · ⏳ AÚN NO HA PAGADO* · #${t.referencia}`,
         `Cliente: +${t.cliente}${t.cliente_nombre ? ` (${t.cliente_nombre})` : ''} · Total ${cop(t.total ?? t.lineas.reduce((a, l) => a + l.precio_venta, 0))}`,
@@ -1217,7 +1231,8 @@ function comboManual() {
         '*Paso a paso:*',
         ...(t.web ? ['1️⃣ Compra cada plataforma en ANC (WhatsApp del pedido: 322 328 4622).', '2️⃣ Cuando ANC envíe cada cuenta, respóndeme *#entregar* con la referencia de esa línea (DC-XXXXX1, DC-XXXXX2…).']
             : ['1️⃣ Espera su comprobante.', `2️⃣ Revisa el pago y responde *#ok ${t.referencia}1* (y así cada línea) o *#no ... motivo*.`, '3️⃣ Compra en ANC y entrega cada cuenta con *#entregar*.']),
-    ].join('\n'), null);
+        ...(consulta ? ['', '📨 Ya le pregunté a ANC por estas plataformas; su respuesta te llega aquí.'] : []),
+    ].join('\n'), null, consulta);
 }
 
 /* ---------- C-web) Compra en el portal del proveedor (WO-035) ----------
@@ -1665,6 +1680,8 @@ function cerrarCombo() {
     const mensajes = [];
     if (datos.avisoCliente) mensajes.push({ numero: t.cliente, texto: datos.avisoCliente });
     if (datos.avisoAdmin && soloDigitos(cfg.numero_aviso_admin)) mensajes.push({ numero: soloDigitos(cfg.numero_aviso_admin), texto: datos.avisoAdmin });
+    const proveedor = String(cfg.numero_proveedor ?? '').split(/[,;\s]+/).map((x) => soloDigitos(x)).find(Boolean);
+    if (datos.avisoProveedor && proveedor) mensajes.push({ numero: proveedor, texto: datos.avisoProveedor });
     return [{ json: {
         referencia: t.referencia,
         patch: { estado: datos.estado, esperando: null, resume_url: null, notas: String(datos.avisoAdmin ?? '').slice(0, 500) },
@@ -1689,6 +1706,8 @@ function cerrarTriangulacion() {
     const mensajes = [];
     if (datos.avisoCliente) mensajes.push({ numero: t.cliente, texto: datos.avisoCliente });
     if (datos.avisoAdmin && soloDigitos(cfg.numero_aviso_admin)) mensajes.push({ numero: soloDigitos(cfg.numero_aviso_admin), texto: datos.avisoAdmin });
+    const proveedor = String(cfg.numero_proveedor ?? '').split(/[,;\s]+/).map((x) => soloDigitos(x)).find(Boolean);
+    if (datos.avisoProveedor && proveedor) mensajes.push({ numero: proveedor, texto: datos.avisoProveedor });
     return [{ json: { referencia: t.referencia, patch: { estado: datos.estado, esperando: null, resume_url: null, notas: String(datos.avisoAdmin ?? '').slice(0, 500) }, mensajes } }];
 }
 
@@ -1734,7 +1753,7 @@ function enrutarEvento() {
             if (t.estado === 'ESPERANDO_CREDENCIALES') return avisar(msg.numero, `*#${t.referencia}* ya tiene el pago confirmado: falta que ANC envíe la cuenta.`);
             return [
                 { json: { accion: 'panel', rpc: 'entregar_manual', args: { p_referencia: t.referencia, p_estado: 'PEDIDO_REALIZADO', p_clave: null }, referencia: t.referencia } },
-                { json: { accion: 'avisar', numero: t.cliente, texto: ['✅ *¡Pago confirmado!* · ⚡ *DC TECNOLOGY*', '', `Estamos preparando tu ${t.producto}. Te llega por este chat en máximo *15 minutos* 🙌`].join('\n') } },
+                { json: { accion: 'avisar', numero: t.cliente, texto: ['✅ *¡Pago confirmado!* · ⚡ *DC TECNOLOGY*', '', `Gracias${t.cliente_nombre ? `, ${t.cliente_nombre.split(' ')[0]}` : ''} 🙌 Ya estamos procesando tu pedido de *${t.producto}*.`, 'Te lo enviamos por este chat en los próximos minutos.'].join('\n') } },
                 { json: { accion: 'avisar', numero: msg.numero, texto: [`✅ *Pago de #${t.referencia} confirmado* · le avisé al cliente.`, '',
                     `👉 Ahora compra en ANC: *${o.plan ?? `${t.producto} – ${t.variante ?? ''}`}*${o.costo ? ` (costo ${cop(o.costo)})` : ''}.`,
                     'En el pedido de ANC pon como WhatsApp el del bot (322 328 4622).',
@@ -1762,6 +1781,9 @@ function enrutarEvento() {
         const palabras = normalizar(msg.texto).split(/[^a-z0-9]+/).filter((x) => x.length >= 4);
         const porProducto = candidatos.filter((r) => normalizar(r.producto).split(/[^a-z0-9]+/).some((x) => x.length >= 4 && palabras.includes(x)));
         const t = (refTexto2 && candidatos.find((r) => r.referencia === refTexto2)) || (candidatos.length === 1 ? candidatos[0] : null) || (porProducto.length === 1 ? porProducto[0] : null);
+        const consultado = refTexto2 && !candidatos.some((r) => r.referencia === refTexto2) ? abiertas.find((r) => r.referencia === refTexto2) : null;
+        if (consultado) return admin ? avisar(admin, [`📨 *ANC respondió sobre #${consultado.referencia}* (${consultado.producto})`, `«${String(msg.texto).slice(0, 400)}»`, '',
+            consultado.estado === 'REVISION_MANUAL' && !consultado.origen_web ? `El cliente aún no paga. Cuando pague confirma con *#ok ${consultado.referencia}*.` : 'Si es la cuenta, usa *#entregar ' + consultado.referencia + '*.'].join('\n')) : [];
         if (t && msg.texto) return [{ json: { accion: 'entrega_manual', t, texto: msg.texto, numero_admin: admin } }];
         return admin ? avisar(admin, [
             '📨 *Mensaje de ANC*',
@@ -2333,7 +2355,8 @@ nodo('Config bot', 'n8n-nodes-base.set', 3.4, [220, 0], set({
     etiquetas_silencio: 'BAENAMORA',
     // Precio de venta = tienda de ANC + este % (0 = igual que ANC). Se aplica cada 6 h (WO-042)
     anc_margen: '0',
-    bot_responde: 'si',          // 'no' = el bot no le contesta a nadie (tus comandos #ok/#no/#entregar y el proveedor siguen)
+    bot_responde: 'si',
+    consultar_proveedor: 'si',   // 'no' = no le pregunta a ANC por los productos de cada pedido nuevo          // 'no' = el bot no le contesta a nadie (tus comandos #ok/#no/#entregar y el proveedor siguen)
     horas_pausa_humano: '12',    // si escribes a mano en un chat, el bot se calla ahí estas horas (#bot lo reactiva)
 }, { incluirEntrada: true }));
 nodoCodigo('Normalizar mensaje', [440, 0], normalizarMensaje, { conUtilidades: true });

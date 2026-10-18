@@ -278,8 +278,8 @@
         ordenValidada: ({ codigo, total }) => [
             `✅ *Pago validado* · ${FIRMA}`,
             '',
-            `Tu orden *${codigo}* por *$${total}* quedó confirmada y ya está en proceso.`,
-            `⏱️ Entrega: máximo *${ENTREGA_MAX_MIN} minutos* (${HORARIO})`,
+            `Tu orden *${codigo}* por *$${total}* quedó confirmada. Ya estamos procesando tu pedido.`,
+            '📲 Te lo enviamos por WhatsApp en los próximos minutos.',
             '',
             '🔎 Síguela en Mis pedidos: dctecnology.xyz/cliente.html#cuenta',
         ].join('\n'),
