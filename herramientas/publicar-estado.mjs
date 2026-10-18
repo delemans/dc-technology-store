@@ -36,6 +36,12 @@ Register-ScheduledTask -TaskName '${tarea}' -Action $a -Trigger $t -Settings $s 
     process.exit(0);
 }
 
+// Interruptor: los estados solo salen solos si .env tiene ESTADOS_AUTOMATICOS=si (18/10/2026: el director pidió que aún no).
+// --probar siempre funciona; --forzar publica una vez aunque el interruptor esté apagado.
+if (!PROBAR && !args.includes('--forzar') && String(env.ESTADOS_AUTOMATICOS ?? '').toLowerCase() !== 'si') {
+    console.log('Estados automáticos APAGADOS (ESTADOS_AUTOMATICOS=si en .env para activarlos). No se publicó nada.');
+    process.exit(0);
+}
 requerir(env, ['EVOLUTION_URL', 'EVOLUTION_API_KEY', 'EVOLUTION_INSTANCIA']);
 const EVO = env.EVOLUTION_URL.replace(/\/+$/, '');
 const INST = env.EVOLUTION_INSTANCIA;

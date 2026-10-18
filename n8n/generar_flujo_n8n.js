@@ -223,6 +223,8 @@ function normalizarMensaje() {
         return [{ json: { ruta: 'triangulacion', origen: 'admin', accion: comando[1].toLowerCase(), referencia: comando[2].toUpperCase(), numero, texto, wamid: key.id ?? null, conMedia: esImagen || esPdf || Boolean(txid) } }];
     }
 
+    // Interruptor general (Config bot → bot_responde = no): el bot no le contesta a nadie; tus comandos y el proveedor siguen
+    if (String(cfg.bot_responde ?? 'si').trim().toLowerCase() === 'no') return [];
     // Chats con una etiqueta de silencio (por defecto BAENAMORA): el bot no responde nada, los atiendes tú
     const etiquetas = memoria.etiquetas ?? { chats: {}, nombres: {} };
     const silencio = String(cfg.etiquetas_silencio ?? 'BAENAMORA').split(',').map((x) => normalizar(x).trim()).filter(Boolean);
@@ -240,7 +242,7 @@ function normalizarMensaje() {
     const estado = memoria.menu[numero];
     const menuVivo = Boolean(estado && estado.activo && ahora - estado.t < 30 * 60e3);
     const conversando = hace(memoria.conversacion, 72); // el bot habló de compras con este número en los últimos 3 días
-    const salida = { ruta: 'ia', numero, texto: texto.slice(0, 1000), nombre: d.pushName ?? '', wamid: key.id ?? null, txid };
+    const salida = { ruta: 'ia', numero, texto: texto.slice(0, 1000), nombre: d.pushName ?? '', wamid: key.id ?? null, txid, jids: [...new Set([jid, original])] };
 
     if (txid) salida.ruta = 'comprobante';
     else if (esImagen || esPdf) {
@@ -1877,9 +1879,11 @@ function resultadoProveedor() {
     memoria.proveedor = { at: new Date(ahora).toISOString(), fallo, leidos: lectura.leidos ?? 0, actualizados: r.actualizados ?? 0, agotados: r.inactivados ?? 0 };
     const salida = [];
     if (!aviso) return salida;
-    if (fallo && ahora - (memoria.avisoProveedor || 0) > 6 * 3600e3) {
+    // Fallas: una vez al día y nunca de noche (9 p. m. – 7 a. m. en Colombia); la siguiente lectura de día avisa
+    const hora = Number(new Date(ahora).toLocaleString('en-US', { timeZone: 'America/Bogota', hour: 'numeric', hour12: false })) % 24;
+    if (fallo && hora >= 7 && hora < 21 && ahora - (memoria.avisoProveedor || 0) > 24 * 3600e3) {
         memoria.avisoProveedor = ahora;
-        salida.push({ json: { numero: aviso, texto: ['⚠️ *Sincronización con Emprende Red*', fallo, 'Precios y stock quedan como estaban; reintento en 6 horas.'].join('\n') } });
+        salida.push({ json: { numero: aviso, texto: ['⚠️ *Sincronización con Emprende Red*', fallo, 'Precios y stock quedan como estaban; reintento cada 6 horas (este aviso sale máximo una vez al día).'].join('\n') } });
     }
     if (!fallo && lectura.nuevos > 0 && ahora - (memoria.avisoNuevosProveedor || 0) > 7 * 864e5) {
         memoria.avisoNuevosProveedor = ahora;
@@ -1981,6 +1985,39 @@ async function extraerAccesosIa() {
 async function extraerAccesosComboIa() {
     const r = await consultarIa(this.helpers, [{ role: 'user', content: String($input.first().json.prompt ?? '') }], { temperatura: 0, maxTokens: 900, timeoutMs: 60000 });
     return [{ json: { text: r.texto, ia: r.ia } }];
+}
+
+/* ---------- H2) Atención humana: el historial del chat en Evolution decide ----------
+   Los mensajes que envía el bot (API de Evolution) tienen ID "3EB0…"; los que escribes tú desde el celular, otro formato.
+   Si escribiste a mano en este chat en las últimas horas_pausa_humano (12 por defecto), o el bot lo pasó a un asesor en las
+   últimas __HORAS_PAUSA__ h, el bot no responde. "#bot" escrito por ti en el chat lo reactiva desde ese momento.
+   (Si respondes desde WhatsApp Web, tus mensajes también tienen ID "3EB0…": ahí usa la etiqueta BAENAMORA.) */
+function atencionHumana() {
+    const msg = $('Normalizar mensaje').first().json;
+    if (!msg || msg.ruta === 'triangulacion') return [{ json: msg }];
+    const cfg = $('Config bot').first().json;
+    const registros = ['Historial del chat', 'Historial del chat (lid)'].flatMap((nombre) => {
+        try { return $(nombre).all().flatMap((i) => i.json?.messages?.records ?? []); } catch { return []; }
+    });
+    const vistos = new Set();
+    const propios = registros.filter((r) => r?.key?.fromMe && !vistos.has(r.key.id) && vistos.add(r.key.id))
+        .sort((a, b) => Number(b.messageTimestamp) - Number(a.messageTimestamp));
+    const ahora = Date.now() / 1000;
+    const horasHumano = Number(cfg.horas_pausa_humano) > 0 ? Number(cfg.horas_pausa_humano) : 12;
+    const textoDe = (r) => String(r.message?.conversation ?? r.message?.extendedTextMessage?.text ?? '');
+    let motivo = null;
+    for (const r of propios) {
+        const t = textoDe(r), edad = ahora - Number(r.messageTimestamp);
+        const humano = !/^3EB0/i.test(String(r.key.id ?? ''));
+        if (humano && /^#bot\b/i.test(t.trim())) break; // lo reactivaste: lo anterior ya no cuenta
+        if (humano && edad < horasHumano * 3600) { motivo = 'humano'; break; }
+        if (!humano && /Te comunico con un asesor/i.test(t) && edad < __HORAS_PAUSA__ * 3600) { motivo = 'asesor'; break; }
+    }
+    if (!motivo) return [{ json: msg }];
+    const memoria = $getWorkflowStaticData('global');
+    memoria.pausados = memoria.pausados || {};
+    memoria.pausados[msg.numero] = Date.now();
+    return [];
 }
 
 /* ---------- I) Entrega manual (WO-042): accesos que envió ANC → cliente, con la marca DC Tecnology ----------
@@ -2111,7 +2148,8 @@ function resultadoPreciosAnc() {
     const ahora = Date.now();
     if (lectura.error || r0.error) {
         const causa = lectura.error ? `No pude leer la tienda de ANC: ${String(lectura.error.message ?? lectura.error).slice(0, 120)}` : `La base no aceptó los precios: ${String(r0.error.message ?? r0.error).slice(0, 120)} (¿aplicaste wo-042?)`;
-        if (!admin || ahora - (memoria.avisoPreciosAnc || 0) < 24 * 3600e3) return [];
+        const hora = Number(new Date(ahora).toLocaleString('en-US', { timeZone: 'America/Bogota', hour: 'numeric', hour12: false })) % 24;
+        if (!admin || hora < 7 || hora >= 21 || ahora - (memoria.avisoPreciosAnc || 0) < 24 * 3600e3) return [];
         memoria.avisoPreciosAnc = ahora;
         return [{ json: { numero: admin, texto: `⚠️ *Precios de ANC*\n${causa}\nLos precios quedan como estaban; reintento en 6 horas.` } }];
     }
@@ -2291,8 +2329,20 @@ nodo('Config bot', 'n8n-nodes-base.set', 3.4, [220, 0], set({
     etiquetas_silencio: 'BAENAMORA',
     // Precio de venta = tienda de ANC + este % (0 = igual que ANC). Se aplica cada 6 h (WO-042)
     anc_margen: '0',
+    bot_responde: 'si',          // 'no' = el bot no le contesta a nadie (tus comandos #ok/#no/#entregar y el proveedor siguen)
+    horas_pausa_humano: '12',    // si escribes a mano en un chat, el bot se calla ahí estas horas (#bot lo reactiva)
 }, { incluirEntrada: true }));
 nodoCodigo('Normalizar mensaje', [440, 0], normalizarMensaje, { conUtilidades: true });
+const historialChat = (indice) => ({
+    ...evolutionEnviar('Config bot'),
+    url: "={{ $('Config bot').first().json.evolution_url }}/chat/findMessages/{{ $('Config bot').first().json.evolution_instancia }}",
+    jsonBody: `={{ JSON.stringify({ where: { key: { remoteJid: ($('Normalizar mensaje').first().json.jids || [])[${indice}] || ($('Normalizar mensaje').first().json.jids || [])[0] || 'nadie@s.whatsapp.net' }, messageTimestamp: { gte: new Date(Date.now() - 48 * 3600e3).toISOString(), lte: new Date(Date.now() + 60e3).toISOString() } }, offset: 40 }) }}`,
+    options: { timeout: 8000 },
+});
+// Si Evolution no responde, el mensaje sigue normal (nunca se queda un cliente sin respuesta por esta revisión)
+nodo('Historial del chat', 'n8n-nodes-base.httpRequest', 4.2, [550, 160], historialChat(0), { onError: 'continueRegularOutput', alwaysOutputData: true });
+nodo('Historial del chat (lid)', 'n8n-nodes-base.httpRequest', 4.2, [660, 160], historialChat(1), { onError: 'continueRegularOutput', alwaysOutputData: true });
+nodoCodigo('¿Lo atiende una persona?', [770, 160], atencionHumana);
 const regla = (valor, salida, campo = 'ruta') => ({
     conditions: {
         options: { caseSensitive: true, leftValue: '', typeValidation: 'strict', version: 2 },
@@ -2784,7 +2834,10 @@ unir('Marcar despacho', 'Config bot');
 unir('Órdenes por despachar', 'Preparar despacho');
 unir('Preparar despacho', 'Crear triangulación');
 unir('Preparar despacho', 'Crear combo');
-unir('Normalizar mensaje', 'Ruta');
+unir('Normalizar mensaje', 'Historial del chat');
+unir('Historial del chat', 'Historial del chat (lid)');
+unir('Historial del chat (lid)', '¿Lo atiende una persona?');
+unir('¿Lo atiende una persona?', 'Ruta');
 unir('Ruta', 'Registrar baja', 0);
 unir('Ruta', 'Escalar a asesor', 1);
 unir('Ruta', 'Respuesta fija', 2);
