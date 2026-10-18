@@ -34,6 +34,16 @@ const TITULOS = {
     'apps-premium': 'Canva Pro, CapCut Pro, Duolingo y Gemini 🎨',
     'free-fire-diamantes': 'Diamantes de Free Fire desde 100 💎',
     'regala-un-pin': 'Regala un pin: Google Play, Roblox, Netflix 🎁',
+    'antivirus-mcafee': 'McAfee Total Protection desde $45.000 🛡️',
+    'office-365': 'Office 365 u Office vitalicio + instalación 📄',
+    'windows-pro': 'Windows 10 y 11 Pro + instalación 🪟',
+    'mantenimiento-preventivo': '¿PC lento o caliente? Mantenimiento 🧹',
+    'reparacion-computadores': 'Reparación de computadores y repuestos 🛠️',
+    'desarrollo-pos': 'Sistema POS para bares y restaurantes 🍻',
+    'desarrollo-rifas': 'Plataforma de pollas, rifas y juegos 🏆',
+    'desarrollo-finanzas': 'Gestor financiero para tu negocio 💰',
+    'desarrollo-dashboards': 'Dashboards con indicadores en tiempo real 📊',
+    'desarrollo-tienda-bot': 'Tienda web + bot de WhatsApp con IA 🤖',
 };
 const HASHTAGS = {
     base: ['#DCTecnology', '#Colombia'],
@@ -51,12 +61,29 @@ const HASHTAGS = {
     'apps-premium': ['#Canva', '#CapCut', '#Duolingo', '#IA'],
     'free-fire-diamantes': ['#FreeFire', '#Diamantes', '#Gamer'],
     'regala-un-pin': ['#Regalo', '#GooglePlay', '#Roblox'],
+    'antivirus-mcafee': ['#McAfee', '#Antivirus', '#Seguridad'],
+    'office-365': ['#Office', '#Excel', '#Word'],
+    'windows-pro': ['#Windows11', '#Windows10', '#Licencias'],
+    'mantenimiento-preventivo': ['#Mantenimiento', '#SoporteTecnico', '#PC'],
+    'reparacion-computadores': ['#ReparacionDePC', '#SoporteTecnico', '#Repuestos'],
+    'desarrollo-pos': ['#POS', '#Restaurantes', '#Bares', '#Software'],
+    'desarrollo-rifas': ['#Rifas', '#Pollas', '#Eventos'],
+    'desarrollo-finanzas': ['#Finanzas', '#Emprendimiento', '#Software'],
+    'desarrollo-dashboards': ['#Dashboards', '#Indicadores', '#Datos'],
+    'desarrollo-tienda-bot': ['#TiendaOnline', '#Chatbot', '#IA', '#WhatsApp'],
 };
 const etiquetas = (id) => [...HASHTAGS.base, ...(HASHTAGS[id] ?? ['#Tecnologia', '#Streaming'])].join(' ');
 
 // Versiones de voz de un video: "NN-video-<voz>.mp4" (set v4) o los nombres anteriores
-const versionesDe = (id) => fs.readdirSync(path.join(RAIZ, plan.carpeta)).filter((f) => new RegExp(`^(\\d+-)?${id}(-[a-z]+)?\\.mp4$`).test(f)).sort()
-    .filter((f, _, todos) => !todos.some((x) => /-(kore|aoede|charon|puck)\.mp4$/.test(x)) || /-(kore|aoede|charon|puck)\.mp4$/.test(f)); // set v4 primero
+// set.json (lo escribe el estudio) manda: el video vigente de cada id; sin él, la regla de nombres de antes
+const vigentes = (() => { try { return JSON.parse(fs.readFileSync(path.join(RAIZ, plan.carpeta, 'set.json'), 'utf8')).videos ?? []; } catch { return []; } })();
+const versionesDe = (id) => {
+    const archivos = fs.readdirSync(path.join(RAIZ, plan.carpeta));
+    const delSet = vigentes.filter((x) => x.video === id && archivos.includes(x.archivo)).map((x) => x.archivo);
+    if (delSet.length) return delSet;
+    return archivos.filter((f) => new RegExp(`^(\\d+-)?${id}(-[a-z]+)?\\.mp4$`).test(f)).sort()
+        .filter((f, _, todos) => !todos.some((x) => /-(kore|aoede|charon|puck)\.mp4$/.test(x)) || /-(kore|aoede|charon|puck)\.mp4$/.test(f)); // set v4 primero
+};
 const DIAS = Number(process.env.DIAS) > 0 ? Number(process.env.DIAS) : 28;
 
 const inicio = (() => {

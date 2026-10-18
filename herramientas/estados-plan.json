@@ -82,6 +82,46 @@
     {
       "archivo": "regala-un-pin",
       "texto": "🎁 Regala un pin virtual de Google Play, Roblox, Netflix o Disney: el código te llega por WhatsApp."
+    },
+    {
+      "archivo": "antivirus-mcafee",
+      "texto": "🛡️ McAfee Total Protection: licencia de 1 año para 1 o 5 computadores, desde $45.000, con garantía."
+    },
+    {
+      "archivo": "office-365",
+      "texto": "📄 Office 365 por un año (1 o 5 equipos) u Office Pro Plus vitalicio 2016–2024. Si quieres, te lo instalamos."
+    },
+    {
+      "archivo": "windows-pro",
+      "texto": "🪟 Licencias de Windows 10 Pro y 11 Pro, y servicio de instalación con Office y programas básicos."
+    },
+    {
+      "archivo": "mantenimiento-preventivo",
+      "texto": "🧹 Mantenimiento preventivo (optimización y limpieza) y correctivo con cambio de pasta térmica."
+    },
+    {
+      "archivo": "reparacion-computadores",
+      "texto": "🛠️ Reparamos computadores de escritorio y portátiles, y conseguimos tus repuestos. Cotiza por WhatsApp."
+    },
+    {
+      "archivo": "desarrollo-pos",
+      "texto": "🍻 Sistemas POS para bares y restaurantes: mesas en tiempo real, pedidos por mesa, caja, inventario y reportes."
+    },
+    {
+      "archivo": "desarrollo-rifas",
+      "texto": "🏆 Plataformas de pollas, rifas y juegos con usuarios, tabla de posiciones, premios y cuenta regresiva."
+    },
+    {
+      "archivo": "desarrollo-finanzas",
+      "texto": "💰 Gestor financiero: ingresos, gastos, pagos recurrentes, ventas y solicitudes de gasto en un solo tablero."
+    },
+    {
+      "archivo": "desarrollo-dashboards",
+      "texto": "📊 Dashboards con indicadores en tiempo real, cronogramas, gestión por proceso y matrices."
+    },
+    {
+      "archivo": "desarrollo-tienda-bot",
+      "texto": "🤖 Tu tienda web con catálogo, carrito y pagos locales, más un bot de WhatsApp con IA que toma pedidos."
     }
   ],
   "inicio_campanas": "2026-10-19",
@@ -102,17 +142,17 @@
     },
     {
       "id": "tecnologia",
-      "nombre": "Tecnología con garantía",
+      "nombre": "Tecnología, licencias y soporte",
       "videos": [
         "relojes-audifonos",
-        "apps-premium",
-        "comprobante-web",
-        "primera-compra",
-        "pedidos-whatsapp",
-        "soporte-garantia",
-        "bienvenida"
+        "windows-pro",
+        "office-365",
+        "antivirus-mcafee",
+        "mantenimiento-preventivo",
+        "reparacion-computadores",
+        "soporte-garantia"
       ],
-      "promo": "⌚🎧 Semana de la tecnología\nRelojes inteligentes, audífonos, diademas y powerbanks con garantía de 30 días y envío a todo el país.\n🛒 dctecnology.xyz"
+      "promo": "🪟 Semana de licencias y soporte técnico\nWindows, Office y McAfee originales, mantenimiento y reparación de computadores.\nRelojes y audífonos con garantía de 30 días.\n🛒 dctecnology.xyz"
     },
     {
       "id": "recargas",
@@ -121,10 +161,10 @@
         "pines-recargas",
         "free-fire-diamantes",
         "regala-un-pin",
-        "primera-compra",
+        "apps-premium",
         "comprobante-web",
-        "por-que-dc",
-        "pedidos-whatsapp"
+        "pedidos-whatsapp",
+        "primera-compra"
       ],
       "promo": "📱 Semana de recargas y pines\nClaro, Movistar, Tigo, Wom, ETB y Éxito, diamantes de Free Fire y pines de Google Play, Roblox y más.\n🎁 Primera compra: 10% con DCTECH2026\n💬 322 328 4622"
     },
@@ -132,13 +172,13 @@
       "id": "negocios",
       "nombre": "Soluciones para tu negocio",
       "videos": [
-        "desarrollos-completo",
-        "servicio-tecnico",
-        "licencias",
-        "apps-premium",
+        "desarrollo-tienda-bot",
+        "desarrollo-pos",
+        "desarrollo-dashboards",
+        "desarrollo-finanzas",
+        "desarrollo-rifas",
         "alquiler-equipos",
-        "soporte-garantia",
-        "bienvenida"
+        "desarrollos-completo"
       ],
       "promo": "🤖 Semana de soluciones para tu negocio\nMantenimiento y reparación de equipos, licencias, alquiler de portátiles, catálogos web y automatizaciones con IA.\nCotiza sin compromiso: 💬 322 328 4622"
     }

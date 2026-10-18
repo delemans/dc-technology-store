@@ -75,9 +75,14 @@ function duracionMp4(archivo) {
 // Versiones de cada video (≤ 60 s): "NN-video-<voz>.mp4" (set v4) o los nombres anteriores, en orden alfabético
 const archivosMp4 = fs.readdirSync(carpeta).filter((f) => f.endsWith('.mp4')).sort();
 const V4 = /-(kore|aoede|charon|puck)\.mp4$/; // set v4 (marca "Di Si Tecnólogi"): si existe, reemplaza a las versiones anteriores
-const versionesDe = (id) => archivosMp4.filter((f) => new RegExp(`^(\\d+-)?${id}(-[a-z]+)?\\.mp4$`).test(f))
-    .filter((f, _, todos) => !todos.some((x) => V4.test(x)) || V4.test(f))
-    .map((f) => path.join(carpeta, f)).filter((f) => (duracionMp4(f) ?? 99) <= 60);
+// set.json (lo escribe el estudio): el video vigente de cada id manda; sin él, la regla de nombres de antes
+const vigentes = (() => { try { return JSON.parse(fs.readFileSync(path.join(carpeta, 'set.json'), 'utf8')).videos ?? []; } catch { return []; } })();
+const versionesDe = (id) => {
+    const delSet = vigentes.filter((x) => x.video === id && archivosMp4.includes(x.archivo)).map((x) => x.archivo);
+    const lista = delSet.length ? delSet : archivosMp4.filter((f) => new RegExp(`^(\\d+-)?${id}(-[a-z]+)?\\.mp4$`).test(f))
+        .filter((f, _, todos) => !todos.some((x) => V4.test(x)) || V4.test(f));
+    return lista.map((f) => path.join(carpeta, f)).filter((f) => (duracionMp4(f) ?? 99) <= 60);
+};
 const textoDe = (id) => plan.videos.find((v) => v.archivo === id)?.texto ?? '';
 
 // Campaña de la semana (lunes a domingo, en orden desde inicio_campanas) y video del día
