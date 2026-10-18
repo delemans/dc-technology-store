@@ -11,6 +11,7 @@
 const fs = require('fs');
 const path = require('path');
 const WA = require('../plantillas-whatsapp.js');
+const { generarGuias } = require('./generar_guias.js');
 
 const RAIZ = path.resolve(__dirname, '..');
 const SITIO = 'https://dctecnology.xyz';
@@ -205,7 +206,7 @@ ${detalles ? `<section class="bloque"><h2>Detalles del producto</h2><p style="co
 <section class="bloque"><h2>Reglas y garantía</h2><ul>${REGLAS[grupoReglas(p.tipo)].map((x) => `<li>${esc(x)}</li>`).join('')}</ul></section>
 ${relacionados.length ? `<section><h2 style="font-size:18px">También en ${esc(categoria)}</h2><div class="rel">${relacionados.map((r) => `<a href="${SITIO}/p/${r.id}.html"><img src="${esc(r.imagen)}" alt="" width="44" height="44" loading="lazy">${esc(r.nombre)}</a>`).join('')}</div></section>` : ''}
 </main>
-<footer><div class="envoltura">© ${new Date().getFullYear()} DC Tecnology · ${esc(WA.HORARIO)} · <a href="${SITIO}/portal.html">Rastrear mi pedido</a> · <a href="${SITIO}/">Tienda</a></div></footer>
+<footer><div class="envoltura">© ${new Date().getFullYear()} DC Tecnology · ${esc(WA.HORARIO)} · <a href="${SITIO}/portal.html">Rastrear mi pedido</a> · <a href="${SITIO}/">Tienda</a><br><a href="${SITIO}/legal/terminos.html">Términos</a> · <a href="${SITIO}/legal/privacidad.html">Datos personales</a> · <a href="${SITIO}/legal/garantias.html">Garantías y devoluciones</a> · Las marcas de terceros pertenecen a sus titulares.</div></footer>
 </body>
 </html>
 `;
@@ -296,7 +297,7 @@ ${ld.map((o) => `<script type="application/ld+json">${jsonSeguro(o)}</script>`).
 <div class="grilla">${lista.map((p) => { const d = datosDe(p).desde; return `<a href="${urlProducto(p)}"><div class="vitrina"><img src="${esc(p.imagen)}" alt="${esc(p.nombre)}" width="200" height="200" loading="lazy" decoding="async"></div><b>${esc(p.nombre)}</b>${d ? `<span>${COTIZABLES.includes(p.tipo) ? 'Desde ' : (p.variantes ?? []).length > 1 ? 'Desde ' : ''}${cop(d)}</span>` : '<span>A cotizar</span>'}</a>`; }).join('')}</div>
 <section class="bloque"><h2>Preguntas frecuentes</h2>${faq.map(([q, a]) => `<details><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join('')}</section>
 </main>
-<footer><div class="envoltura">© ${new Date().getFullYear()} DC Tecnology · ${esc(WA.HORARIO)} · <a href="${SITIO}/portal.html">Rastrear mi pedido</a> · <a href="${SITIO}/">Tienda</a></div></footer>
+<footer><div class="envoltura">© ${new Date().getFullYear()} DC Tecnology · ${esc(WA.HORARIO)} · <a href="${SITIO}/portal.html">Rastrear mi pedido</a> · <a href="${SITIO}/">Tienda</a><br><a href="${SITIO}/legal/terminos.html">Términos</a> · <a href="${SITIO}/legal/privacidad.html">Datos personales</a> · <a href="${SITIO}/legal/garantias.html">Garantías y devoluciones</a> · Las marcas de terceros pertenecen a sus titulares.</div></footer>
 </body>
 </html>
 `;
@@ -321,9 +322,12 @@ const tiposConProductos = Object.keys(CATEGORIAS).filter((t) => productos.some((
 for (const f of fs.readdirSync(carpetaC)) if (f.endsWith('.html') && !tiposConProductos.includes(f.slice(0, -5))) fs.unlinkSync(path.join(carpetaC, f));
 for (const t of tiposConProductos) fs.writeFileSync(path.join(carpetaC, `${t}.html`), paginaCategoria(t, productos.filter((p) => p.tipo === t)), 'utf8');
 
+// 1c) Guías (búsquedas informativas)
+const urlsGuias = generarGuias();
+
 // 2) sitemap.xml
 const hoy = new Date().toISOString().slice(0, 10);
-const urls = [[`${SITIO}/`, '1.0', 'daily'], [`${SITIO}/cliente.html`, '0.7', 'weekly'], [`${SITIO}/portal.html`, '0.4', 'monthly'], ...tiposConProductos.map((t) => [urlCategoria(t), '0.9', 'daily']), ...productos.map((p) => [urlProducto(p), '0.8', 'weekly'])];
+const urls = [[`${SITIO}/`, '1.0', 'daily'], [`${SITIO}/cliente.html`, '0.7', 'weekly'], [`${SITIO}/portal.html`, '0.4', 'monthly'], ...tiposConProductos.map((t) => [urlCategoria(t), '0.9', 'daily']), ...urlsGuias.map((u) => [u, '0.7', 'weekly']), ...['terminos', 'privacidad', 'garantias', 'cookies'].map((l) => [`${SITIO}/legal/${l}.html`, '0.3', 'monthly']), ...productos.map((p) => [urlProducto(p), '0.8', 'weekly'])];
 fs.writeFileSync(path.join(RAIZ, 'sitemap.xml'), `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urls.map(([u, pr, f]) => `  <url><loc>${u}</loc><lastmod>${hoy}</lastmod><changefreq>${f}</changefreq><priority>${pr}</priority></url>`).join('\n')}
@@ -347,9 +351,12 @@ const indexRuta = path.join(RAIZ, 'index.html');
 const index = fs.readFileSync(indexRuta, 'utf8');
 const porCategoria = Object.entries(CATEGORIAS).map(([tipo, nombre]) => [nombre, productos.filter((p) => p.tipo === tipo)]).filter(([, l]) => l.length);
 const directorio = `<!-- SEO:DIRECTORIO (generado por herramientas/generar_seo.js, no editar a mano) -->
-        <nav aria-label="Todos los productos" class="max-w-7xl mx-auto px-4 mt-8 pt-6 border-t border-white/5 grid gap-6 sm:grid-cols-2 lg:grid-cols-4 text-xs text-neutral-500">
+        <details class="max-w-7xl mx-auto px-4 mt-8 pt-6 border-t border-white/5 text-xs text-neutral-500">
+        <summary class="cursor-pointer min-h-[44px] inline-flex items-center font-bold uppercase tracking-wider text-neutral-400 hover:text-white">Ver todos los productos (${productos.length})</summary>
+        <nav aria-label="Todos los productos" class="mt-4 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
 ${porCategoria.map(([nombre, lista]) => `            <div><p class="font-bold uppercase tracking-wider text-neutral-400 mb-2"><a href="c/${Object.keys(CATEGORIAS).find((t) => CATEGORIAS[t] === nombre)}.html" class="hover:text-white">${esc(nombre)}</a></p><ul class="space-y-1">${lista.map((p) => `<li><a href="p/${p.id}.html" class="hover:text-white">${esc(p.nombre)}</a></li>`).join('')}</ul></div>`).join('\n')}
         </nav>
+        </details>
         <!-- /SEO:DIRECTORIO -->`;
 const marca = /<!-- SEO:DIRECTORIO[\s\S]*?<!-- \/SEO:DIRECTORIO -->/;
 if (!marca.test(index)) throw new Error('Falta el marcador <!-- SEO:DIRECTORIO --><!-- /SEO:DIRECTORIO --> en index.html');

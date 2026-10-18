@@ -258,6 +258,10 @@ function normalizarMensaje() {
     }
     // "NO" solo da de baja si le llegó una solicitud de reseña en los últimos 7 días
     else if (limpio === 'no' && hace(memoria.resenas, 168)) salida.ruta = 'baja';
+    // Habeas data (Ley 1581): "DATOS" o "borrar mis datos" → pasa a ti con el plazo legal (lo anuncia legal/privacidad.html)
+    else if (/^(datos|mis datos|datos personales|borrar mis datos|eliminar mis datos|borren mis datos|eliminen mis datos)$/.test(limpio)) {
+        Object.assign(salida, { ruta: 'asesor', motivo: 'Solicitud sobre datos personales (Ley 1581): consulta → responder en máx. 10 días hábiles; reclamo/borrado → 15 días hábiles' });
+    }
     else {
         // Menú con números (WO-040): opciones del último menú (30 min), saludos y atajos de una o dos palabras
         const elegido = /^(?:opcion |la |el |numero |num )?(\d{1,2})$/.exec(limpio);

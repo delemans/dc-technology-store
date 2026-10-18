@@ -165,7 +165,8 @@ function fondoLimpio(src) {
 
 // La imagen queda oculta hasta tener su versión limpia (o 1,5 s como máximo): sin destello del cuadro blanco
 function prepararImagen(img, src) {
-    if (!src || src.startsWith('data:') || src.includes('ui-avatars.com')) return;
+    // emprendered.com.co no permite CORS: el recorte fallaría siempre (doble descarga y error en consola); se muestra tal cual
+    if (!src || src.startsWith('data:') || src.includes('ui-avatars.com') || src.includes('emprendered.com.co')) return;
     img.classList.add('limpiando');
     const mostrar = (limpia) => {
         if (!img.classList.contains('limpiando')) return;

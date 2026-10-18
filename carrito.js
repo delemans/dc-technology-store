@@ -153,6 +153,7 @@
                 <label class="block"><span class="etiqueta">Tu nombre</span><input class="campo" name="nombre" autocomplete="name" maxlength="40" value="${escaparHTML(datos.nombre ?? '')}"></label>
                 <label class="block"><span class="etiqueta">Tu WhatsApp</span><input class="campo" name="whatsapp" inputmode="tel" autocomplete="tel" placeholder="300 123 4567" value="${escaparHTML(datos.whatsapp ?? '')}" required></label>
                 <p class="text-[11px] text-red-300" data-error></p>
+                <p class="text-[11px] text-neutral-500">Al continuar aceptas los <a href="legal/terminos.html" class="underline">Términos</a> y autorizas el tratamiento de tus datos según la <a href="legal/privacidad.html" class="underline">Política de datos</a>.</p>
                 <div class="flex gap-2 pt-2"><button type="button" class="btn-s" data-atras><i class="fa-solid fa-arrow-left"></i></button>
                 <button type="submit" class="btn-p flex-1">Elegir cómo pagar <i class="fa-solid fa-arrow-right"></i></button></div>
             </form>`;

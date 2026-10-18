@@ -120,6 +120,7 @@
                         </label>
                         <p class="text-xs text-red-300 min-h-[1rem]" data-error></p>
                         <button type="submit" class="btn-p w-full"><i class="fa-solid fa-paper-plane"></i> Enviarme el código</button>
+                        <p class="text-[11px] text-neutral-500">Al continuar aceptas los <a href="legal/terminos.html" class="underline">Términos</a> y autorizas el tratamiento de tus datos según la <a href="legal/privacidad.html" class="underline">Política de datos</a>.</p>
                     </form>
                     <ul class="ventajas">
                         <li><i class="fa-solid fa-clock-rotate-left"></i> Todos tus pedidos</li>

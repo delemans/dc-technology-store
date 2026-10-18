@@ -208,6 +208,28 @@ const faqObligatorias = (horario) => [
         respuesta: 'Sí: si llevas varias plataformas distintas en un mismo pedido te aplicamos el descuento por combo vigente; dime cuáles quieres y te doy el total exacto. También puedes armarlo en dctecnology.xyz/cliente.html#combos. El descuento de combo no se acumula con cupones.',
         pendiente_configurar: false,
     },
+    // Legal (18/10/2026): mismos textos que dctecnology.xyz/legal/ (herramientas/generar_legal.js)
+    {
+        id: 'datos_personales',
+        pregunta: '¿Qué hacen con mis datos?',
+        palabras_clave: ['mis datos', 'datos personales', 'privacidad', 'habeas data', 'borrar mis datos', 'eliminar mis datos', 'politica de datos', 'tratamiento de datos'],
+        respuesta: 'Usamos tu nombre, tu WhatsApp y los datos de tus pedidos solo para gestionarlos, validar pagos, entregarte y darte soporte y garantía (Ley 1581 de 2012). No vendemos tus datos. Puedes consultarlos, corregirlos o pedir que se borren escribiendo DATOS por este chat. Política completa: https://dctecnology.xyz/legal/privacidad.html',
+        pendiente_configurar: false,
+    },
+    {
+        id: 'devoluciones_retracto',
+        pregunta: '¿Puedo devolver o cancelar mi compra?',
+        palabras_clave: ['devolucion', 'devolver', 'reembolso', 'retracto', 'cancelar compra', 'me devuelven', 'devuelvan la plata', 'devuelvan el dinero'],
+        respuesta: 'Tecnología: tienes 5 días hábiles desde la entrega para retractarte, devolviendo el producto como lo recibiste (el envío de vuelta corre por tu cuenta). Cuentas, licencias, pines y recargas ya entregados no tienen retracto por ley (Ley 1480, art. 47), pero sí garantía: si algo falla, te ayudo a resolverlo. Si pagaste y no podemos entregar, eliges otro producto o la devolución del dinero. Detalles: https://dctecnology.xyz/legal/garantias.html',
+        pendiente_configurar: false,
+    },
+    {
+        id: 'terminos',
+        pregunta: '¿Dónde veo los términos y condiciones?',
+        palabras_clave: ['terminos', 'condiciones', 'politicas', 'reglas de compra', 'legal'],
+        respuesta: 'Aquí están: términos https://dctecnology.xyz/legal/terminos.html · garantías y devoluciones https://dctecnology.xyz/legal/garantias.html · datos personales https://dctecnology.xyz/legal/privacidad.html',
+        pendiente_configurar: false,
+    },
     {
         id: 'pago_cripto',
         pregunta: '¿Puedo pagar con criptomonedas?',
