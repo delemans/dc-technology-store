@@ -30,6 +30,10 @@ const TITULOS = {
     'soporte-garantia': '¿Algo falla? Soporte de personas reales',
     'alquiler-equipos': 'Alquiler de portátiles para empresas y eventos 💻',
     'desarrollos-completo': 'Automatizamos tu negocio: POS, dashboards y bots con IA 🤖',
+    'renueva-tu-plan': 'Renueva tu plan sin cortes: te avisamos antes ⏰',
+    'apps-premium': 'Canva Pro, CapCut Pro, Duolingo y Gemini 🎨',
+    'free-fire-diamantes': 'Diamantes de Free Fire desde 100 💎',
+    'regala-un-pin': 'Regala un pin: Google Play, Roblox, Netflix 🎁',
 };
 const HASHTAGS = {
     base: ['#DCTecnology', '#Colombia'],
@@ -43,6 +47,10 @@ const HASHTAGS = {
     'licencias': ['#Windows', '#Office', '#Software'],
     'desarrollos-completo': ['#Automatizacion', '#IA', '#Emprendimiento', '#Negocios'],
     'alquiler-equipos': ['#AlquilerDeEquipos', '#Empresas'],
+    'renueva-tu-plan': ['#Streaming', '#Netflix', '#Suscripcion'],
+    'apps-premium': ['#Canva', '#CapCut', '#Duolingo', '#IA'],
+    'free-fire-diamantes': ['#FreeFire', '#Diamantes', '#Gamer'],
+    'regala-un-pin': ['#Regalo', '#GooglePlay', '#Roblox'],
 };
 const etiquetas = (id) => [...HASHTAGS.base, ...(HASHTAGS[id] ?? ['#Tecnologia', '#Streaming'])].join(' ');
 

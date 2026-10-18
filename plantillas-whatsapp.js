@@ -351,6 +351,18 @@
             '¿Algo no funciona? Responde *SOPORTE* 🛠️',
         ].filter((l) => l !== null).join('\n'),
 
+        // WO-044 · Renovación: 3 días antes de que venza el plan (la respuesta RENOVAR deja el mismo plan listo para pagar)
+        renovacion: ({ producto, variante, vence }) => [
+            `⏰ *Tu plan vence pronto* · ${FIRMA}`,
+            '',
+            `🛒 ${producto}`,
+            `📦 Plan: ${variante}`,
+            `📅 Vence: *${vence}*`,
+            '',
+            'Renueva antes y sigue sin cortes 🙌',
+            'Responde *RENOVAR* y te dejo el mismo plan listo para pagar.',
+        ].join('\n'),
+
         // Pines virtuales (Google Play, Roblox, Disney…): un código para canjear, sin usuario ni clave
         entregaPin: ({ pedido, producto, pin }) => [
             `🎁 *¡Tu PIN está listo!* · ${FIRMA}`,

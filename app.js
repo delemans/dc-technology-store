@@ -234,7 +234,9 @@ const esCotizable = (prod) => prod.tipo === 'servicios' || prod.tipo === 'alquil
 function insignias(prod) {
     const lista = [];
     const variantes = (prod.variantes || []).map((v) => (v.nombre || '').toLowerCase()).join(' ');
-    if (moduloDe(prod.tipo) === 'digitales') lista.push({ icono: 'fa-bolt', texto: 'Entrega ≤ 15 min', clase: 'text-amber-300 ring-amber-500/30 bg-amber-500/10' });
+    // Pin en stock propio: sale apenas se confirma el pago
+    if (prod.tipo === 'pines' && estado.conStock?.has(prod.id)) lista.push({ icono: 'fa-bolt', texto: 'Entrega inmediata', clase: 'text-emerald-300 ring-emerald-500/30 bg-emerald-500/10' });
+    else if (moduloDe(prod.tipo) === 'digitales') lista.push({ icono: 'fa-bolt', texto: 'Entrega ≤ 15 min', clase: 'text-amber-300 ring-amber-500/30 bg-amber-500/10' });
     if (prod.tipo === 'streaming') {
         if (/pantalla|perfil/.test(variantes)) lista.push({ icono: 'fa-user', texto: 'Perfil / pantalla', clase: 'text-sky-300 ring-sky-500/30 bg-sky-500/10' });
         if (/cuenta completa/.test(variantes)) lista.push({ icono: 'fa-users', texto: 'Cuenta completa', clase: 'text-sky-300 ring-sky-500/30 bg-sky-500/10' });
@@ -261,11 +263,16 @@ async function cargarCatalogo() {
             <div class="skeleton h-5 w-3/4 rounded"></div><div class="skeleton h-12 rounded-2xl"></div>
         </div>`).join('');
 
+    // Pines con stock propio (wo-043): solo si hay o no, nunca los códigos. Sin la función, la tienda sigue igual
+    const stockPublico = supabaseTienda
+        ? Promise.race([supabaseTienda.rpc('stock_publico').then(({ data, error }) => (error ? [] : data ?? [])), new Promise((r) => setTimeout(() => r([]), 2500))]).catch(() => [])
+        : Promise.resolve([]);
     try {
         const respuesta = await fetch('productos.json', { cache: 'no-cache' }); // revalida: nunca el catálogo viejo del navegador
         if (!respuesta.ok) throw new Error(`HTTP ${respuesta.status}`);
         const datos = await respuesta.json();
         estado.productos = await aplicarPreciosBase(datos.map((p) => ({ ...p, tipo: clasificarCategoria(p) })));
+        estado.conStock = new Set((await stockPublico).map((x) => x.producto_id));
     } catch (error) {
         console.error('Error al cargar productos.json', error);
         grid.innerHTML = `<p class="col-span-full rounded-3xl bg-red-500/10 ring-1 ring-red-500/30 p-6 text-center text-sm text-red-200">No pudimos cargar el catálogo. Recarga la página o escríbenos por WhatsApp.</p>`;

@@ -2,6 +2,14 @@
 // Logos REALES del catálogo (productos.json: streaming, licencias y pines, uno por marca) en una pista que avanza sola;
 // cada logo abre la página del producto. Contador con los totales reales del catálogo. Sin librerías.
 // "Reducir movimiento": la pista queda quieta y se desliza con el dedo; el contador muestra el número final.
+// "Así se compra": el video se reproduce solo cuando está en pantalla (ahorra datos); con "reducir movimiento" queda la portada
+(() => {
+    const v = document.querySelector('video[data-asi]');
+    if (!v) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)) { v.controls = true; return; }
+    new IntersectionObserver(([e]) => { if (e.isIntersecting) v.play().catch(() => { v.controls = true; }); else v.pause(); }, { threshold: 0.35 }).observe(v);
+})();
+
 (() => {
     const seccion = document.getElementById('plataformas');
     const pista = document.getElementById('plataformas-pista');

@@ -223,6 +223,10 @@ function normalizarMensaje() {
     if (proveedores.includes(numero)) {
         return [{ json: { ruta: 'triangulacion', origen: 'proveedor', numero, texto: texto.slice(0, 2000), wamid: key.id ?? null, citado, conMedia: esImagen || esPdf || Boolean(txid) } }];
     }
+    // #stock (WO-043): cargar códigos de pines comprados por lote o ver el stock. Solo desde tu número de aviso
+    if (/^#stock\b/i.test(texto) && soloDigitos(cfg.numero_aviso_admin) && numero === soloDigitos(cfg.numero_aviso_admin)) {
+        return [{ json: { ruta: 'triangulacion', origen: 'admin', accion: 'stock', referencia: null, numero, texto: texto.slice(0, 4000), wamid: key.id ?? null } }];
+    }
     // #pago/#aprobar/#cancelar (compra automática) · #ok / #no (pago del cliente) · #entregar (accesos de ANC)
     const comando = /^#(pago|aprobar|cancelar|ok|no|entregar)\s+(DC-[A-Z0-9]{4,8})\b/i.exec(texto);
     if (comando && soloDigitos(cfg.numero_aviso_admin) && numero === soloDigitos(cfg.numero_aviso_admin)) {
@@ -264,6 +268,11 @@ function normalizarMensaje() {
     }
     // "NO" solo da de baja si le llegó una solicitud de reseña en los últimos 7 días
     else if (limpio === 'no' && hace(memoria.resenas, 168)) salida.ruta = 'baja';
+    // WO-044: respuesta al aviso de renovación (vale 10 días)
+    else if (/^(renovar|renuevo|quiero renovar|si renovar|si quiero renovar|renovar plan)$/.test(limpio) && memoria.renovaciones?.[numero] && ahora - memoria.renovaciones[numero].t < 10 * 864e5) {
+        const ren = memoria.renovaciones[numero];
+        Object.assign(salida, { ruta: 'ia', texto: `Quiero renovar ${ren.producto}${ren.variante ? ` – ${ren.variante}` : ''}. ¿Cuál es el total y cómo pago?` });
+    }
     // Habeas data (Ley 1581): "DATOS" o "borrar mis datos" → pasa a ti con el plazo legal (lo anuncia legal/privacidad.html)
     else if (/^(datos|mis datos|datos personales|borrar mis datos|eliminar mis datos|borren mis datos|eliminen mis datos)$/.test(limpio)) {
         Object.assign(salida, { ruta: 'asesor', motivo: 'Solicitud sobre datos personales (Ley 1581): consulta → responder en máx. 10 días hábiles; reclamo/borrado → 15 días hábiles' });
@@ -921,6 +930,11 @@ function recordarResena() {
         const memoria = $getWorkflowStaticData('global');
         memoria.resenas = memoria.resenas || {};
         memoria.resenas[n.destino] = Date.now();
+    }
+    if (n.tipo === 'RENOVACION') {
+        const memoria = $getWorkflowStaticData('global');
+        memoria.renovaciones = memoria.renovaciones || {};
+        memoria.renovaciones[n.destino] = { producto: n.variables?.producto, variante: n.variables?.variante, t: Date.now() };
     }
     return $input.all();
 }
@@ -1738,8 +1752,50 @@ function enrutarEvento() {
     if (faltaSql && ((msg.origen === 'admin' && ['ok', 'no', 'entregar'].includes(msg.accion)) || (msg.origen === 'proveedor' && manual))) {
         return admin ? avisar(admin, '⚠️ Para usar *#ok*, *#no*, *#entregar* y la entrega automática, aplica en Supabase → SQL Editor el archivo *supabase/wo-042-pedidos-whatsapp.sql* (una sola vez).') : [];
     }
+    // WO-043 · Pines con stock propio: el producto del pedido en el catálogo (solo tipo "pines")
+    const deStock = (t) => {
+        const p = (__KB__.catalogo ?? []).find((x) => x.tipo === 'pines' && normalizar(x.nombre) === normalizar(t.producto));
+        const v = p?.variantes?.find((x) => normalizar(x.nombre) === normalizar(t.variante ?? ''));
+        return p && v ? { producto_id: p.id, variante: v.nombre } : null;
+    };
+    if (msg.origen === 'admin' && msg.accion === 'stock') {
+        const sinPuntos = (x) => normalizar(x).replace(/(\d)[.,](\d{3})/g, '$1$2');
+        const lineas = String(msg.texto ?? '').split(/\r?\n/).map((x) => x.trim());
+        const cabeza = lineas[0].replace(/^#stock\b/i, '').trim();
+        if (!cabeza) return [{ json: { accion: 'panel', rpc: 'stock_resumen', args: {}, tipo: 'stock_resumen', numero: msg.numero } }];
+        const q = sinPuntos(cabeza).split(/[^a-z0-9]+/).filter(Boolean);
+        const numeros = q.filter((w) => /^\d+$/.test(w));
+        const palabras = q.filter((w) => !/^\d+$/.test(w) && w.length >= 3 && !['pin', 'pines', 'virtual', 'del'].includes(w));
+        const opciones = [];
+        for (const p of (__KB__.catalogo ?? []).filter((x) => x.tipo === 'pines')) {
+            for (const v of p.variantes ?? []) {
+                const nombre = sinPuntos(p.nombre);
+                const valores = sinPuntos(v.nombre).match(/\d+/g) ?? [];
+                if (palabras.length && !palabras.every((w) => nombre.includes(w))) continue;
+                if (numeros.length && !numeros.some((n) => valores.includes(n))) continue;
+                opciones.push({ id: p.id, producto: p.nombre, variante: v.nombre });
+            }
+        }
+        const codigos = lineas.slice(1).flatMap((l) => l.split(/[,;]/)).map((x) => x.trim()).filter((x) => x.length >= 6);
+        if (opciones.length !== 1) {
+            return avisar(msg.numero, [opciones.length ? '¿Cuál de estos? Sé más específico:' : `No encontré un pin que coincida con «${cabeza.slice(0, 60)}».`,
+                ...opciones.slice(0, 12).map((o) => `• ${o.producto} · ${o.variante}`), '',
+                'Ejemplo:', '*#stock roblox 25000*', 'CODIGO-1', 'CODIGO-2', '', 'Para ver lo que tienes: *#stock*'].join('\n'));
+        }
+        const o = opciones[0];
+        if (!codigos.length) return avisar(msg.numero, `Para *${o.producto} · ${o.variante}* pega los códigos debajo de *#stock*, uno por línea.`);
+        return [{ json: { accion: 'panel', rpc: 'cargar_stock', args: { p_producto_id: o.id, p_variante: o.variante, p_codigos: codigos, p_costo: null, p_origen: 'whatsapp' },
+            tipo: 'cargar_stock', numero: msg.numero, producto: `${o.producto} · ${o.variante}` } }];
+    }
     if (msg.origen === 'admin' && (msg.accion === 'ok' || msg.accion === 'no')) {
         const t = abiertas.find((r) => r.referencia === msg.referencia);
+        // Pin de un pedido web ya validado: con #ok se entrega de una vez desde tu stock (si no hay, te digo qué comprar)
+        const stockWeb = t && t.origen_web && msg.accion === 'ok' && t.estado === 'REVISION_MANUAL' ? deStock(t) : null;
+        if (stockWeb) {
+            return [{ json: { accion: 'panel', rpc: 'entregar_desde_stock', args: { p_referencia: t.referencia, p_producto_id: stockWeb.producto_id, p_variante: stockWeb.variante },
+                tipo: 'entregar_desde_stock', referencia: t.referencia, cliente: t.cliente, cliente_nombre: t.cliente_nombre, producto: `${t.producto}${t.variante ? ` – ${t.variante}` : ''}`, numero: msg.numero,
+                sin_stock: `Compra en ANC: *${ordenDe(t.referencia).plan ?? `${t.producto} – ${t.variante ?? ''}`}* (WhatsApp del pedido: 322 328 4622) y cuando llegue el código se lo entrego.` } }];
+        }
         if (t && t.origen_web && msg.accion === 'ok') return avisar(msg.numero, `*#${t.referencia}* es un pedido web y su pago ya está validado. Cuando ANC envíe la cuenta se la entrego al cliente (o usa *#entregar ${t.referencia}*).`);
         // Pedido por chat: el pago lo confirmas tú (lo viste en tu Nequi/Daviplata)
         if (t && !t.origen_web) {
@@ -1751,6 +1807,13 @@ function enrutarEvento() {
                 ];
             }
             if (t.estado === 'ESPERANDO_CREDENCIALES') return avisar(msg.numero, `*#${t.referencia}* ya tiene el pago confirmado: falta que ANC envíe la cuenta.`);
+            const confirmado = { json: { accion: 'avisar', numero: t.cliente, texto: ['✅ *¡Pago confirmado!* · ⚡ *DC TECNOLOGY*', '', `Gracias${t.cliente_nombre ? `, ${t.cliente_nombre.split(' ')[0]}` : ''} 🙌 Ya estamos procesando tu pedido de *${t.producto}*.`, 'Te lo enviamos por este chat en los próximos minutos.'].join('\n') } };
+            const stock = deStock(t);
+            if (stock) {
+                return [confirmado, { json: { accion: 'panel', rpc: 'entregar_desde_stock', args: { p_referencia: t.referencia, p_producto_id: stock.producto_id, p_variante: stock.variante },
+                    tipo: 'entregar_desde_stock', referencia: t.referencia, cliente: t.cliente, cliente_nombre: t.cliente_nombre, producto: `${t.producto}${t.variante ? ` – ${t.variante}` : ''}`, numero: msg.numero,
+                    sin_stock: `Compra en ANC: *${o.plan ?? `${t.producto} – ${t.variante ?? ''}`}*${o.costo ? ` (costo ${cop(o.costo)})` : ''} con el WhatsApp del bot (322 328 4622); cuando llegue el código se lo entrego.` } }];
+            }
             return [
                 { json: { accion: 'panel', rpc: 'entregar_manual', args: { p_referencia: t.referencia, p_estado: 'PEDIDO_REALIZADO', p_clave: null }, referencia: t.referencia } },
                 { json: { accion: 'avisar', numero: t.cliente, texto: ['✅ *¡Pago confirmado!* · ⚡ *DC TECNOLOGY*', '', `Gracias${t.cliente_nombre ? `, ${t.cliente_nombre.split(' ')[0]}` : ''} 🙌 Ya estamos procesando tu pedido de *${t.producto}*.`, 'Te lo enviamos por este chat en los próximos minutos.'].join('\n') } },
@@ -2046,6 +2109,35 @@ function atencionHumana() {
     return [];
 }
 
+/* ---------- H3) Renovaciones (WO-044): avisa 3 días antes de que venza el plan ----------
+   Duración: "N días" en la variante, "N mes(es)" × 30, "año" × 365; streaming sin duración = 30 días. Solo cuentas
+   de streaming y licencias/apps con duración. Horario: lunes a sábado, 9 a. m. a 7 p. m. (Colombia). */
+function renovaciones() {
+    const ahora = Date.now();
+    const local = new Date(new Date(ahora).toLocaleString('en-US', { timeZone: 'America/Bogota' }));
+    if (local.getDay() === 0 || local.getHours() < 9 || local.getHours() >= 19) return [];
+    const filas = $input.all().map((i) => i.json).filter((x) => x && x.referencia && x.entregado_at);
+    const cat = __KB__.catalogo ?? [];
+    const salida = [];
+    for (const f of filas) {
+        const p = cat.find((x) => normalizar(x.nombre) === normalizar(f.producto));
+        if (!p || !['streaming', 'licencias'].includes(p.tipo)) continue;
+        const v = normalizar(f.variante ?? '');
+        let dias = null;
+        const d = /(\d+)\s*dias?\b/.exec(v), m = /(\d+)\s*mes(es)?\b/.exec(v);
+        if (d) dias = Number(d[1]); else if (m) dias = Number(m[1]) * 30; else if (/\bano\b|anual/.test(v)) dias = 365;
+        else if (/\bmes\b|mensual/.test(v)) dias = 30;
+        else if (p.tipo === 'streaming') dias = 30;
+        if (!dias || dias < 7) continue;
+        const vence = new Date(f.entregado_at).getTime() + dias * 864e5;
+        const faltan = (vence - ahora) / 864e5;
+        if (faltan > 3 || faltan < -1) continue;
+        const texto = new Date(vence).toLocaleDateString('es-CO', { timeZone: 'America/Bogota', weekday: 'long', day: 'numeric', month: 'long' });
+        salida.push({ json: { args: { p_referencia: f.referencia, p_vence: texto } } });
+    }
+    return salida.slice(0, 20); // máx. 20 por ronda: la cola los envía de a uno con pausa
+}
+
 /* ---------- I) Entrega manual (WO-042): accesos que envió ANC → cliente, con la marca DC Tecnology ----------
    Solo entrega si el usuario y la clave aparecen TEXTUALES en el mensaje y la confianza es ≥ 0,9 (si no, te pregunta). */
 async function entregaManual() {
@@ -2127,7 +2219,32 @@ function resultadoPanel() {
     const cfg = $('Config bot').first().json;
     const admin = soloDigitos(cfg.numero_aviso_admin);
     const pedido = $('Salida al panel').first().json;
-    const r = $input.first().json;
+    const filas = $input.all().map((i) => i.json);
+    const r = filas[0] ?? {};
+    // WO-043 · Stock de pines
+    if (pedido.tipo === 'stock_resumen') {
+        if (r.error) return admin ? [{ json: { numero: admin, texto: `⚠️ No pude leer el stock (${String(r.error.message ?? r.error).slice(0, 120)}). ¿Aplicaste supabase/wo-043-stock-pines.sql?` } }] : [];
+        const nombres = Object.fromEntries((__KB__.catalogo ?? []).map((p) => [p.id, p.nombre]));
+        const lista = filas.filter((x) => x && x.producto_id);
+        return [{ json: { numero: pedido.numero, texto: lista.length
+            ? ['📦 *Tu stock de pines*', ...lista.map((x) => `${x.disponibles <= 2 ? '⚠️' : '•'} ${nombres[x.producto_id] ?? x.producto_id} · ${x.variante}: *${x.disponibles}* (entregados en 30 días: ${x.entregados_30d})`), '', 'Cargar: *#stock roblox 25000* y los códigos debajo, uno por línea.'].join('\n')
+            : '📦 Aún no tienes pines en stock. Cárgalos así:\n*#stock roblox 25000*\nCODIGO-1\nCODIGO-2' } }];
+    }
+    if (pedido.tipo === 'cargar_stock') {
+        if (r.error) return [{ json: { numero: pedido.numero, texto: `⚠️ No cargué los códigos (${String(r.error.message ?? r.error).slice(0, 120)}). ¿Aplicaste supabase/wo-043-stock-pines.sql?` } }];
+        return [{ json: { numero: pedido.numero, texto: [`✅ *Stock cargado* · ${pedido.producto}`, `Nuevos: *${r.cargados ?? 0}*${r.repetidos ? ` · repetidos ignorados: ${r.repetidos}` : ''}`, `Disponibles ahora: *${r.disponibles ?? '?'}*`, '', 'Cuando confirmes un pago con *#ok*, el código sale solo al cliente.'].join('\n') } }];
+    }
+    if (pedido.tipo === 'entregar_desde_stock') {
+        if (!r.error && r.ok && r.codigo) {
+            const texto = String(__KB__.plantillas.entrega_pin).replace('{pin}', () => r.codigo).replace('{pedido}', () => pedido.referencia).replace('{producto}', () => limpiar(pedido.producto));
+            return [
+                { json: { numero: pedido.cliente, texto } },
+                ...(admin ? [{ json: { numero: admin, texto: [`⚡ *#${pedido.referencia} entregado desde tu stock* a +${pedido.cliente}${pedido.cliente_nombre ? ` (${limpiar(pedido.cliente_nombre)})` : ''}`, `📦 ${pedido.producto}`,
+                    r.quedan <= 2 ? `⚠️ Te quedan *${r.quedan}*: recarga el stock (*#stock*).` : `Quedan ${r.quedan} en stock.`].join('\n') } }] : []),
+            ];
+        }
+        if (!r.error && r.mensaje === 'SIN_STOCK') return admin ? [{ json: { numero: admin, texto: [`📦 *#${pedido.referencia}*: no hay ${pedido.producto} en tu stock. El pago quedó confirmado.`, `👉 ${pedido.sin_stock}`].join('\n') } }] : [];
+    }
     const fila = Array.isArray(r) ? r[0] : r;
     if (!r.error && fila?.ok !== false) return [];
     return admin ? [{ json: { numero: admin, texto: `⚠️ El panel no registró *#${pedido.referencia ?? ''}* (${String(r.error?.message ?? fila?.mensaje ?? 'sin respuesta').slice(0, 140)}). Márcalo a mano; si dice que no existe la función, aplica supabase/wo-042-pedidos-whatsapp.sql.` } }] : [];
@@ -2713,6 +2830,10 @@ nodo('Salida entrega', 'n8n-nodes-base.switch', 3.2, [1780, -880], {
 nodo('Salida al panel', 'n8n-nodes-base.noOp', 1, [2000, -980], {});
 nodo('RPC del panel', 'n8n-nodes-base.httpRequest', 4.2, [2220, -980], rpcPanel('{{ $json.rpc }}', '={{ JSON.stringify($json.args) }}'), { onError: 'continueRegularOutput', alwaysOutputData: true });
 nodoCodigo('Resultado del panel', [2440, -980], resultadoPanel, { conUtilidades: true });
+// WO-044 · Renovaciones (rama de salud, cada 30 min)
+nodo('Entregas para renovar', 'n8n-nodes-base.httpRequest', 4.2, [660, 1500], rpcPanel('entregas_para_renovar', '={{ JSON.stringify({ p_dias: 400 }) }}'), { onError: 'continueRegularOutput', alwaysOutputData: true });
+nodoCodigo('Renovaciones', [880, 1500], renovaciones, { conUtilidades: true }, { executeOnce: true });
+nodo('Encolar renovación', 'n8n-nodes-base.httpRequest', 4.2, [1100, 1500], rpcPanel('encolar_renovacion', '={{ JSON.stringify($json.args) }}'), { onError: 'continueRegularOutput' });
 
 /* ---------- J) WO-042: precios de ANC (misma rama "cada 6 horas" que Emprende Red) ---------- */
 nodoCodigo('Leer precios ANC', [440, 1080], leerPreciosAnc, { conUtilidades: true }, { onError: 'continueRegularOutput' });
@@ -2836,6 +2957,9 @@ unir('Origen', 'Webhook Evolution v2', 3);
 unir('Origen', 'Leer Emprende Red', 4);
 unir('Origen', 'Revisar salud', 5);
 unir('Revisar salud', 'Enviar respuesta');
+unir('Origen', 'Entregas para renovar', 5);
+unir('Entregas para renovar', 'Renovaciones');
+unir('Renovaciones', 'Encolar renovación');
 unir('Origen', 'Normalizar mensaje', 6);
 unir('Origen', 'Latido bot', 6);
 unir('Configurar Evolution', 'Marcar configuración Evolution');

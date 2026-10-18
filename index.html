@@ -57,14 +57,14 @@
     <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","@id":"https://dctecnology.xyz/#sitio","name":"DC Tecnology","url":"https://dctecnology.xyz/","inLanguage":"es-CO","publisher":{"@id":"https://dctecnology.xyz/#organizacion"}}</script>
 
     <!-- Estilos compilados con Tailwind (npm run css): sin CDN de desarrollo -->
-    <link rel="stylesheet" href="estilos/tailwind.css?v=202610181541">
+    <link rel="stylesheet" href="estilos/tailwind.css?v=202610181755">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" integrity="sha384-iw3OoTErCYJJB9mCa8LNS2hbsQ7M3C0EpIsO/H5+EGAkPGc6rk+V8i04oW/K5xq0" crossorigin="anonymous" referrerpolicy="no-referrer">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;700;800;900&display=swap" rel="stylesheet">
     <!-- Tema claro/oscuro (antes de pintar, sin destello) -->
-    <script src="tema.js?v=202610181541"></script>
-    <link rel="stylesheet" href="tema.css?v=202610181541">
+    <script src="tema.js?v=202610181755"></script>
+    <link rel="stylesheet" href="tema.css?v=202610181755">
     <!-- Carrito, combos y pago web: mismos estilos que el portal (carrito.js) -->
-    <link rel="stylesheet" href="estilos/cliente.css?v=202610181541">
+    <link rel="stylesheet" href="estilos/cliente.css?v=202610181755">
     <style>
         html { -webkit-tap-highlight-color: transparent; }
         [hidden] { display: none !important; }
@@ -251,8 +251,8 @@
         }
     </style>
     <!-- Estilo corporativo (va de último: recalibra colores y apaga efectos neón) -->
-    <link rel="stylesheet" href="estilos/profesional.css?v=202610181541">
-    <link rel="stylesheet" href="estilos/corriente.css?v=202610181541">
+    <link rel="stylesheet" href="estilos/profesional.css?v=202610181755">
+    <link rel="stylesheet" href="estilos/corriente.css?v=202610181755">
 </head>
 <body class="bg-dcDarkBg text-white min-h-screen flex flex-col font-sans antialiased selection:bg-dcRed/40">
     <div class="mesh" aria-hidden="true"><span></span><span></span><span></span></div>
@@ -370,6 +370,31 @@
                 </dl>
             </div>
             <div id="plataformas-pista" class="plataformas__pista"></div>
+        </section>
+
+        <!-- Así se compra: grabación real del portal (orden de demostración), video liviano sin sonido -->
+        <section id="asi-se-compra" class="asi max-w-7xl mx-auto px-4 pb-12" aria-labelledby="asi-titulo">
+            <div class="asi__marco">
+                <div class="asi__texto">
+                    <p class="asi__eyebrow">Así de fácil</p>
+                    <h2 id="asi-titulo" class="asi__titulo">Compra en <span>3 toques</span></h2>
+                    <ol class="asi__pasos">
+                        <li><b>Elige</b><span>Tu plataforma y tu plan en el catálogo.</span></li>
+                        <li><b>Paga</b><span>Con Nequi, Daviplata o Llave Bre-B, desde tu app.</span></li>
+                        <li><b>Recibe</b><span>Tus accesos por WhatsApp apenas validamos el pago, con garantía.</span></li>
+                    </ol>
+                    <div class="asi__acciones">
+                        <a href="#catalogo" class="asi__btn asi__btn--p"><i class="fa-solid fa-bolt" aria-hidden="true"></i> Ver catálogo</a>
+                        <a href="cliente.html#catalogo" class="asi__btn"><i class="fa-solid fa-mobile-screen" aria-hidden="true"></i> Abrir el portal</a>
+                    </div>
+                </div>
+                <figure class="asi__video">
+                    <video data-asi muted loop playsinline preload="none" poster="img/videos/compra-3-toques.jpg" aria-label="Grabación de una compra en el portal de clientes de DC Tecnology" width="432" height="768">
+                        <source src="img/videos/compra-3-toques.mp4" type="video/mp4">
+                    </video>
+                    <figcaption>Grabación real del portal · orden de demostración</figcaption>
+                </figure>
+            </div>
         </section>
 
         <!-- Catálogo tri-módulo -->
@@ -837,15 +862,15 @@
     <div id="toasts" class="fixed z-[60] left-4 right-24 sm:right-auto bottom-[max(1rem,env(safe-area-inset-bottom))] flex flex-col items-start gap-2 pointer-events-none" aria-live="polite"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js" integrity="sha384-Rj26LVGvoeRVR6+mwQmFfcR3QOBEwT+ZmuCWpuiqeTzJpCs0ER4ITAWGb4Hiy3Ok" crossorigin="anonymous"></script>
-    <script src="plantillas-whatsapp.js?v=202610181541"></script>
-    <script src="ui.js?v=202610181541"></script>
-    <script src="app.js?v=202610181541"></script>
-    <script src="tienda-carrito.js?v=202610181541"></script>
-    <script src="carrito.js?v=202610181541"></script>
-    <script src="efectos.js?v=202610181541"></script>
-    <script src="marcas.js?v=202610181541"></script>
-    <script src="portafolio.js?v=202610181541"></script>
-    <script src="copiloto.js?v=202610181541"></script>
+    <script src="plantillas-whatsapp.js?v=202610181755"></script>
+    <script src="ui.js?v=202610181755"></script>
+    <script src="app.js?v=202610181755"></script>
+    <script src="tienda-carrito.js?v=202610181755"></script>
+    <script src="carrito.js?v=202610181755"></script>
+    <script src="efectos.js?v=202610181755"></script>
+    <script src="marcas.js?v=202610181755"></script>
+    <script src="portafolio.js?v=202610181755"></script>
+    <script src="copiloto.js?v=202610181755"></script>
 
 </body>
 </html>

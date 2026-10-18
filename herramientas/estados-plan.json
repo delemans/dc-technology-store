@@ -66,6 +66,22 @@
     {
       "archivo": "alquiler-equipos",
       "texto": "💻 Alquiler de portátiles y equipos de cómputo para empresas, eventos y proyectos."
+    },
+    {
+      "archivo": "renueva-tu-plan",
+      "texto": "⏰ ¿Tu plan está por vencer? Te avisamos 3 días antes: responde RENOVAR y te lo dejamos listo para pagar."
+    },
+    {
+      "archivo": "apps-premium",
+      "texto": "🎨 Canva Pro, CapCut Pro, Duolingo Super y Gemini IA Pro, con garantía de 30 días."
+    },
+    {
+      "archivo": "free-fire-diamantes",
+      "texto": "💎 Diamantes de Free Fire desde 100, directo a tu cuenta."
+    },
+    {
+      "archivo": "regala-un-pin",
+      "texto": "🎁 Regala un pin virtual de Google Play, Roblox, Netflix o Disney: el código te llega por WhatsApp."
     }
   ],
   "inicio_campanas": "2026-10-19",
@@ -78,9 +94,9 @@
         "combo-ahorra",
         "compra-3-toques",
         "primera-compra",
-        "por-que-dc",
         "tutorial-compra-entrega",
-        "bienvenida"
+        "por-que-dc",
+        "renueva-tu-plan"
       ],
       "promo": "📺 Semana del entretenimiento\nNetflix, Disney, Max, Prime Video y más con 30 días de garantía.\nArma tu combo: 2 plataformas -10%, 3 o más -15%.\n🛒 dctecnology.xyz"
     },
@@ -89,7 +105,7 @@
       "nombre": "Tecnología con garantía",
       "videos": [
         "relojes-audifonos",
-        "por-que-dc",
+        "apps-premium",
         "comprobante-web",
         "primera-compra",
         "pedidos-whatsapp",
@@ -103,12 +119,12 @@
       "nombre": "Recarga y juega",
       "videos": [
         "pines-recargas",
-        "compra-3-toques",
+        "free-fire-diamantes",
+        "regala-un-pin",
         "primera-compra",
         "comprobante-web",
         "por-que-dc",
-        "pedidos-whatsapp",
-        "tutorial-compra-entrega"
+        "pedidos-whatsapp"
       ],
       "promo": "📱 Semana de recargas y pines\nClaro, Movistar, Tigo, Wom, ETB y Éxito, diamantes de Free Fire y pines de Google Play, Roblox y más.\n🎁 Primera compra: 10% con DCTECH2026\n💬 322 328 4622"
     },
@@ -119,9 +135,9 @@
         "desarrollos-completo",
         "servicio-tecnico",
         "licencias",
+        "apps-premium",
         "alquiler-equipos",
         "soporte-garantia",
-        "por-que-dc",
         "bienvenida"
       ],
       "promo": "🤖 Semana de soluciones para tu negocio\nMantenimiento y reparación de equipos, licencias, alquiler de portátiles, catálogos web y automatizaciones con IA.\nCotiza sin compromiso: 💬 322 328 4622"
