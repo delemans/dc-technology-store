@@ -102,9 +102,20 @@ function jsonLd(p) {
         ? { '@type': 'Service', name: p.nombre, serviceType: categoria, areaServed: { '@type': 'Country', name: 'Colombia' }, provider: { '@id': `${SITIO}/#organizacion` }, image: p.imagen, url: urlProducto(p) }
         : { '@type': 'Product', name: p.nombre, image: [p.imagen], brand: { '@type': 'Brand', name: p.marca || 'DC Tecnology' }, category: categoria, url: urlProducto(p), description: descripcionMeta(p) };
     if (desde) {
-        item.offers = precios.length === 1
-            ? { '@type': 'Offer', price: desde, priceCurrency: 'COP', url: urlProducto(p), seller: { '@id': `${SITIO}/#organizacion` } }
-            : { '@type': 'AggregateOffer', lowPrice: desde, highPrice: Math.max(...precios), offerCount: precios.length, priceCurrency: 'COP', url: urlProducto(p) };
+        // Una oferta por plan, con la política de devolución real (legal/garantias.html): tecnología 5 días hábiles de
+        // retracto (envío de vuelta a cargo del cliente); digitales entregados sin devolución (art. 47, Ley 1480).
+        // Envío: los digitales llegan por WhatsApp sin costo; el costo de envío de tecnología no se publica (se coordina).
+        const devolucion = p.tipo === 'tecnologia'
+            ? { '@type': 'MerchantReturnPolicy', applicableCountry: 'CO', returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow', merchantReturnDays: 5,
+                returnMethod: 'https://schema.org/ReturnByMail', returnFees: 'https://schema.org/ReturnShippingFees', merchantReturnLink: `${SITIO}/legal/garantias.html` }
+            : { '@type': 'MerchantReturnPolicy', applicableCountry: 'CO', returnPolicyCategory: 'https://schema.org/MerchantReturnNotPermitted', merchantReturnLink: `${SITIO}/legal/garantias.html` };
+        const envio = DIGITALES.includes(p.tipo) ? { '@type': 'OfferShippingDetails', shippingDestination: { '@type': 'DefinedRegion', addressCountry: 'CO' },
+            shippingRate: { '@type': 'MonetaryAmount', value: 0, currency: 'COP' },
+            deliveryTime: { '@type': 'ShippingDeliveryTime', handlingTime: { '@type': 'QuantitativeValue', minValue: 0, maxValue: 0, unitCode: 'DAY' }, transitTime: { '@type': 'QuantitativeValue', minValue: 0, maxValue: 0, unitCode: 'DAY' } } } : null;
+        item.offers = (p.variantes ?? []).filter((v) => Number(v.precio) > 0).map((v) => ({
+            '@type': 'Offer', name: v.nombre, price: Number(v.precio), priceCurrency: 'COP', url: urlProducto(p), availability: 'https://schema.org/InStock',
+            itemCondition: 'https://schema.org/NewCondition', seller: { '@id': `${SITIO}/#organizacion` }, hasMerchantReturnPolicy: devolucion, ...(envio ? { shippingDetails: envio } : {}),
+        }));
     }
     return [
         { '@context': 'https://schema.org', ...item },

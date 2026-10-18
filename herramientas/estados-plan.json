@@ -1,33 +1,132 @@
 {
-  "_nota": "Rotación de estados de WhatsApp (herramientas/publicar-estado.mjs). Cada día publica el siguiente video de la lista. Los textos solo usan hechos del negocio (CONTEXT.md): nada de descuentos ni disponibilidad inventados. Los videos viven en docs/videos-estados/mp4 (no van a git).",
+  "_nota": "Esquema de campañas (herramientas/publicar-estado.mjs y generar_redes.js). Cada semana (lunes a domingo) corre UNA campaña; rotan en orden desde inicio_campanas. Cada día sale el video del día de esa campaña, alternando las versiones de voz; los lunes, además, la promo de la campaña en texto. Los textos solo usan hechos del negocio (nada de descuentos ni disponibilidad inventados). Videos de más de 60 s no van a estados (WhatsApp los corta): se usa el siguiente de la lista.",
   "carpeta": "docs/videos-estados/mp4",
   "pie": "🛒 dctecnology.xyz · 💬 322 328 4622",
-  "promo_semanal": {
-    "dia": 1,
-    "fondo": "#C8102E",
-    "textos": [
-      "🎁 ¿Primera compra? Usa el cupón DCTECH2026 y obtén 10% de descuento.\n🛒 dctecnology.xyz",
-      "📺 Arma tu combo de streaming: 2 plataformas -10%, 3 o más -15%.\n🛒 dctecnology.xyz",
-      "⚡ Streaming, licencias, pines y recargas con entrega por WhatsApp en máximo 15 minutos tras validar tu pago.\n💬 322 328 4622",
-      "🛡️ Todas nuestras cuentas tienen 30 días de garantía. Soporte de personas reales.\n🛒 dctecnology.xyz"
-    ]
-  },
   "videos": [
-    { "archivo": "bienvenida", "texto": "Somos DC Tecnology: streaming, licencias, pines, recargas, tecnología y servicio técnico. Trabajamos para darte el mejor servicio." },
-    { "archivo": "streaming-desde", "texto": "📺 Netflix, Disney, Max, Prime Video y más, con garantía de 30 días. Elige tu plan en la tienda." },
-    { "archivo": "compra-3-toques", "texto": "Comprar es así de fácil: eliges, pagas con Nequi, Daviplata o Llave Bre-B y te llega por WhatsApp." },
-    { "archivo": "primera-compra", "texto": "🎁 Tu primera compra con 10% de descuento: cupón DCTECH2026." },
-    { "archivo": "relojes-audifonos", "texto": "⌚🎧 Relojes inteligentes, audífonos y más, con garantía de 30 días y envío a todo el país." },
-    { "archivo": "combo-ahorra", "texto": "Arma tu combo: 2 plataformas -10%, 3 o más -15%." },
-    { "archivo": "pines-recargas", "texto": "📱 Recargas Claro, Movistar, Tigo, Wom, ETB y Éxito, diamantes de Free Fire y pines virtuales." },
-    { "archivo": "desarrollos-completo", "texto": "🤖 Automatizamos tu negocio: dashboards, POS, inventarios, catálogos web y bots de WhatsApp con IA. Cotiza sin compromiso." },
-    { "archivo": "tutorial-compra-entrega", "texto": "Así funciona una compra, paso a paso, desde que eliges hasta que recibes." },
-    { "archivo": "servicio-tecnico", "texto": "🛠️ Mantenimiento, reparación de computadores y repuestos. Cotiza por WhatsApp." },
-    { "archivo": "por-que-dc", "texto": "Entrega rápida, garantía de 30 días, pagos locales y personas reales. Compra con confianza." },
-    { "archivo": "licencias", "texto": "🔑 Windows, Office y antivirus. Y si quieres, te lo instalamos." },
-    { "archivo": "comprobante-web", "texto": "Paga directo en la página y sube tu comprobante: te avisamos por WhatsApp." },
-    { "archivo": "pedidos-whatsapp", "texto": "Mira tus pedidos y tu garantía sin contraseñas, solo con tu WhatsApp." },
-    { "archivo": "soporte-garantia", "texto": "¿Algo falla? Repórtalo desde Mis pedidos y te atiende una persona real." },
-    { "archivo": "alquiler-equipos", "texto": "💻 Alquiler de portátiles y equipos de cómputo para empresas, eventos y proyectos." }
-  ]
+    {
+      "archivo": "bienvenida",
+      "texto": "Somos DC Tecnology: streaming, licencias, pines, recargas, tecnología y servicio técnico. Trabajamos para darte el mejor servicio."
+    },
+    {
+      "archivo": "streaming-desde",
+      "texto": "📺 Netflix, Disney, Max, Prime Video y más, con garantía de 30 días. Elige tu plan en la tienda."
+    },
+    {
+      "archivo": "compra-3-toques",
+      "texto": "Comprar es así de fácil: eliges, pagas con Nequi, Daviplata o Llave Bre-B y te llega por WhatsApp."
+    },
+    {
+      "archivo": "primera-compra",
+      "texto": "🎁 Tu primera compra con 10% de descuento: cupón DCTECH2026."
+    },
+    {
+      "archivo": "relojes-audifonos",
+      "texto": "⌚🎧 Relojes inteligentes, audífonos y más, con garantía de 30 días y envío a todo el país."
+    },
+    {
+      "archivo": "combo-ahorra",
+      "texto": "Arma tu combo: 2 plataformas -10%, 3 o más -15%."
+    },
+    {
+      "archivo": "pines-recargas",
+      "texto": "📱 Recargas Claro, Movistar, Tigo, Wom, ETB y Éxito, diamantes de Free Fire y pines virtuales."
+    },
+    {
+      "archivo": "desarrollos-completo",
+      "texto": "🤖 Automatizamos tu negocio: dashboards, POS, inventarios, catálogos web y bots de WhatsApp con IA. Cotiza sin compromiso."
+    },
+    {
+      "archivo": "tutorial-compra-entrega",
+      "texto": "Así funciona una compra, paso a paso, desde que eliges hasta que recibes."
+    },
+    {
+      "archivo": "servicio-tecnico",
+      "texto": "🛠️ Mantenimiento, reparación de computadores y repuestos. Cotiza por WhatsApp."
+    },
+    {
+      "archivo": "por-que-dc",
+      "texto": "Entrega rápida, garantía de 30 días, pagos locales y personas reales. Compra con confianza."
+    },
+    {
+      "archivo": "licencias",
+      "texto": "🔑 Windows, Office y antivirus. Y si quieres, te lo instalamos."
+    },
+    {
+      "archivo": "comprobante-web",
+      "texto": "Paga directo en la página y sube tu comprobante: te avisamos por WhatsApp."
+    },
+    {
+      "archivo": "pedidos-whatsapp",
+      "texto": "Mira tus pedidos y tu garantía sin contraseñas, solo con tu WhatsApp."
+    },
+    {
+      "archivo": "soporte-garantia",
+      "texto": "¿Algo falla? Repórtalo desde Mis pedidos y te atiende una persona real."
+    },
+    {
+      "archivo": "alquiler-equipos",
+      "texto": "💻 Alquiler de portátiles y equipos de cómputo para empresas, eventos y proyectos."
+    }
+  ],
+  "inicio_campanas": "2026-10-19",
+  "campanas": [
+    {
+      "id": "entretenimiento",
+      "nombre": "Entretenimiento en casa",
+      "videos": [
+        "streaming-desde",
+        "combo-ahorra",
+        "compra-3-toques",
+        "primera-compra",
+        "por-que-dc",
+        "tutorial-compra-entrega",
+        "bienvenida"
+      ],
+      "promo": "📺 Semana del entretenimiento\nNetflix, Disney, Max, Prime Video y más con 30 días de garantía.\nArma tu combo: 2 plataformas -10%, 3 o más -15%.\n🛒 dctecnology.xyz"
+    },
+    {
+      "id": "tecnologia",
+      "nombre": "Tecnología con garantía",
+      "videos": [
+        "relojes-audifonos",
+        "por-que-dc",
+        "comprobante-web",
+        "primera-compra",
+        "pedidos-whatsapp",
+        "soporte-garantia",
+        "bienvenida"
+      ],
+      "promo": "⌚🎧 Semana de la tecnología\nRelojes inteligentes, audífonos, diademas y powerbanks con garantía de 30 días y envío a todo el país.\n🛒 dctecnology.xyz"
+    },
+    {
+      "id": "recargas",
+      "nombre": "Recarga y juega",
+      "videos": [
+        "pines-recargas",
+        "compra-3-toques",
+        "primera-compra",
+        "comprobante-web",
+        "por-que-dc",
+        "pedidos-whatsapp",
+        "tutorial-compra-entrega"
+      ],
+      "promo": "📱 Semana de recargas y pines\nClaro, Movistar, Tigo, Wom, ETB y Éxito, diamantes de Free Fire y pines de Google Play, Roblox y más.\n🎁 Primera compra: 10% con DCTECH2026\n💬 322 328 4622"
+    },
+    {
+      "id": "negocios",
+      "nombre": "Soluciones para tu negocio",
+      "videos": [
+        "desarrollos-completo",
+        "servicio-tecnico",
+        "licencias",
+        "alquiler-equipos",
+        "soporte-garantia",
+        "por-que-dc",
+        "bienvenida"
+      ],
+      "promo": "🤖 Semana de soluciones para tu negocio\nMantenimiento y reparación de equipos, licencias, alquiler de portátiles, catálogos web y automatizaciones con IA.\nCotiza sin compromiso: 💬 322 328 4622"
+    }
+  ],
+  "promo_dia": 1,
+  "promo_fondo": "#C8102E"
 }

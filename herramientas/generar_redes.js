@@ -4,7 +4,7 @@
 //
 // Sale: herramientas/salida/redes-plan.json (para una futura publicación por API) y "PUBLICAR EN REDES.txt" en la
 // carpeta del Escritorio "Anuncios DC Tecnology" (listo para copiar y pegar al programar en Meta Business Suite,
-// YouTube Studio y TikTok). 2 videos por semana (lunes y jueves, 12:30 p. m.) durante 8 semanas, alternando voz.
+// YouTube Studio y TikTok). Un video diario (12:30 p. m.) con el esquema de campañas de estados-plan.json, alternando voces.
 // Los textos salen de herramientas/estados-plan.json (mismos hechos: nada de descuentos ni disponibilidad inventados).
 
 const fs = require('fs');
@@ -46,7 +46,10 @@ const HASHTAGS = {
 };
 const etiquetas = (id) => [...HASHTAGS.base, ...(HASHTAGS[id] ?? ['#Tecnologia', '#Streaming'])].join(' ');
 
-const archivoDe = (id, hombre) => fs.readdirSync(path.join(RAIZ, plan.carpeta)).find((f) => f.replace(/^\d+-/, '') === `${id}${hombre ? '-hombre' : ''}.mp4`) ?? null;
+// Versiones de voz de un video: "NN-video-<voz>.mp4" (set v4) o los nombres anteriores
+const versionesDe = (id) => fs.readdirSync(path.join(RAIZ, plan.carpeta)).filter((f) => new RegExp(`^(\\d+-)?${id}(-[a-z]+)?\\.mp4$`).test(f)).sort()
+    .filter((f, _, todos) => !todos.some((x) => /-(kore|aoede|charon|puck)\.mp4$/.test(x)) || /-(kore|aoede|charon|puck)\.mp4$/.test(f)); // set v4 primero
+const DIAS = Number(process.env.DIAS) > 0 ? Number(process.env.DIAS) : 28;
 
 const inicio = (() => {
     if (process.argv[2]) return new Date(`${process.argv[2]}T12:30:00-05:00`);
@@ -56,15 +59,27 @@ const inicio = (() => {
 })();
 const fechaTexto = (d) => d.toLocaleDateString('es-CO', { timeZone: 'America/Bogota', weekday: 'long', day: 'numeric', month: 'long' });
 
-const publicaciones = plan.videos.map((v, i) => {
-    const semana = Math.floor(i / 2), jueves = i % 2 === 1;
-    const fecha = new Date(inicio.getTime() + (semana * 7 + (jueves ? 3 : 0)) * 864e5);
-    const hombre = i % 4 === 1 || i % 4 === 2; // alterna la voz entre publicaciones
-    const archivo = archivoDe(v.archivo, hombre) ?? archivoDe(v.archivo, !hombre);
-    const texto = `${v.texto}\n\n🛒 dctecnology.xyz\n💬 WhatsApp 322 328 4622`;
-    return { fecha: fecha.toISOString(), video: v.archivo, archivo, titulo: TITULOS[v.archivo] ?? v.archivo,
-        youtube: { titulo: `${TITULOS[v.archivo] ?? v.archivo} #Shorts`.slice(0, 100), descripcion: `${texto}\n\n${etiquetas(v.archivo)}` },
-        instagram_facebook: `${texto}\n\n${etiquetas(v.archivo)}`, tiktok: `${v.texto} ${etiquetas(v.archivo)}`.slice(0, 2200) };
+// Un video diario durante DIAS (28 = las 4 campañas): la campaña de cada semana sale de estados-plan.json
+const textoDe = (id) => plan.videos.find((v) => v.archivo === id)?.texto ?? '';
+const desdeInicio = Math.round((inicio.getTime() - Date.parse(`${plan.inicio_campanas}T12:30:00-05:00`)) / 864e5);
+const publicaciones = Array.from({ length: DIAS }, (_, d) => {
+    const n = Math.max(0, desdeInicio + d), semana = Math.floor(n / 7), dia = n % 7;
+    const campana = plan.campanas[semana % plan.campanas.length];
+    const id = campana.videos[dia];
+    const versiones = versionesDe(id);
+    const archivo = versiones.length ? versiones[(semana + dia) % versiones.length] : null;
+    const fecha = new Date(inicio.getTime() + d * 864e5);
+    const texto = `${textoDe(id)}
+
+🛒 dctecnology.xyz
+💬 WhatsApp 322 328 4622`;
+    return { fecha: fecha.toISOString(), campana: campana.nombre, video: id, archivo, titulo: TITULOS[id] ?? id,
+        youtube: { titulo: `${TITULOS[id] ?? id} #Shorts`.slice(0, 100), descripcion: `${texto}
+
+${etiquetas(id)}` },
+        instagram_facebook: `${texto}
+
+${etiquetas(id)}`, tiktok: `${textoDe(id)} ${etiquetas(id)}`.slice(0, 2200) };
 });
 
 fs.mkdirSync(path.join(RAIZ, 'herramientas', 'salida'), { recursive: true });
@@ -72,16 +87,16 @@ fs.writeFileSync(path.join(RAIZ, 'herramientas', 'salida', 'redes-plan.json'), J
 const txt = [
     'PUBLICAR EN REDES · DC Tecnology',
     '==================================',
-    `${publicaciones.length} publicaciones · lunes y jueves a las 12:30 p. m. · desde el ${fechaTexto(inicio)}.`,
+    `${publicaciones.length} publicaciones · una diaria a las 12:30 p. m. · desde el ${fechaTexto(inicio)} · 4 campañas semanales (${plan.campanas.map((c) => c.nombre).join(' → ')}).`,
     '',
-    'CÓMO PROGRAMARLAS (una sola vez para las 8 semanas):',
+    'CÓMO PROGRAMARLAS (una sola vez para las 4 semanas):',
     '1) Instagram y Facebook: business.facebook.com → Planificador → Crear reel → sube el video, pega el texto, elige fecha y hora.',
     '2) YouTube: studio.youtube.com → Crear → Subir video → título y descripción de abajo → Visibilidad: Programar.',
     '3) TikTok: tiktok.com/upload en el computador → pega el texto → "Programar" (hasta 10 días antes; repite cada semana).',
     'Los videos de más de 60 s (desarrollos-completo) van como Reel/Short largo; en estados de WhatsApp se omiten.',
     '',
     ...publicaciones.flatMap((p, i) => [
-        `---------------- ${i + 1}. ${fechaTexto(new Date(p.fecha))} · 12:30 p. m. ----------------`,
+        `---------------- ${i + 1}. ${fechaTexto(new Date(p.fecha))} · 12:30 p. m. · campaña: ${p.campana} ----------------`,
         `VIDEO: ${p.archivo ?? '(falta el archivo)'}`,
         `TÍTULO YOUTUBE: ${p.youtube.titulo}`,
         'TEXTO (Instagram, Facebook y descripción de YouTube):',

@@ -72,20 +72,26 @@ function duracionMp4(archivo) {
     return escala ? dur / escala : null;
 }
 
-// Videos disponibles (≤ 60 s), en el orden del plan
-const disponibles = plan.videos.flatMap((v) => {
-    // Nombres "NN-video.mp4" (voz de mujer) y "NN-video-hombre.mp4"
-    const versiones = ['', '-hombre'].map((suf) => fs.readdirSync(carpeta).find((f) => f.replace(/^\d+-/, '') === `${v.archivo}${suf}.mp4`))
-        .filter(Boolean).map((f) => path.join(carpeta, f)).filter((f) => (duracionMp4(f) ?? 99) <= 60);
-    return versiones.length ? [{ ...v, versiones }] : [];
-});
-if (!disponibles.length) { console.error(`No hay videos en ${carpeta}.`); process.exit(1); }
+// Versiones de cada video (≤ 60 s): "NN-video-<voz>.mp4" (set v4) o los nombres anteriores, en orden alfabético
+const archivosMp4 = fs.readdirSync(carpeta).filter((f) => f.endsWith('.mp4')).sort();
+const V4 = /-(kore|aoede|charon|puck)\.mp4$/; // set v4 (marca "Di Si Tecnólogi"): si existe, reemplaza a las versiones anteriores
+const versionesDe = (id) => archivosMp4.filter((f) => new RegExp(`^(\\d+-)?${id}(-[a-z]+)?\\.mp4$`).test(f))
+    .filter((f, _, todos) => !todos.some((x) => V4.test(x)) || V4.test(f))
+    .map((f) => path.join(carpeta, f)).filter((f) => (duracionMp4(f) ?? 99) <= 60);
+const textoDe = (id) => plan.videos.find((v) => v.archivo === id)?.texto ?? '';
 
+// Campaña de la semana (lunes a domingo, en orden desde inicio_campanas) y video del día
+const dias = Math.floor((Date.parse(`${hoy}T12:00:00-05:00`) - Date.parse(`${plan.inicio_campanas}T12:00:00-05:00`)) / 864e5);
+const semana = Math.floor(Math.max(0, dias) / 7), diaCampana = ((dias % 7) + 7) % 7;
+const campana = plan.campanas[semana % plan.campanas.length];
+const candidatos = [...campana.videos.slice(diaCampana), ...campana.videos.slice(0, diaCampana)].filter((id) => versionesDe(id).length);
+if (!candidatos.length) { console.error(`No hay videos de la campaña "${campana.nombre}" en ${carpeta}.`); process.exit(1); }
+const elegidoId = candidatos[0];
+const versiones = versionesDe(elegidoId);
+const archivo = versiones[(semana + diaCampana) % versiones.length]; // la voz cambia de un día a otro y de una semana a otra
 const yaHoy = registro.publicados.some((p) => p.fecha === hoy && p.tipo === 'video');
-const elegido = disponibles[registro.indice % disponibles.length];
-const archivo = elegido.versiones[Math.floor(registro.indice / disponibles.length) % elegido.versiones.length] ?? elegido.versiones[0];
-const leyenda = `${elegido.texto}\n\n${plan.pie}`;
-const promo = diaSemana === plan.promo_semanal.dia ? plan.promo_semanal.textos[Math.floor(Date.now() / (7 * 864e5)) % plan.promo_semanal.textos.length] : null;
+const leyenda = `${textoDe(elegidoId)}\n\n${plan.pie}`;
+const promo = diaSemana === plan.promo_dia ? campana.promo : null;
 const promoHoy = registro.publicados.some((p) => p.fecha === hoy && p.tipo === 'promo');
 
 // Contactos reales (con nombre, número de WhatsApp; sin grupos ni @lid)
@@ -98,8 +104,8 @@ if (!lista.length) { console.error('Evolution no devolvió contactos: no se publ
 if (PROBAR) {
     console.log(`Hoy (${hoy}) publicaría: ${yaHoy ? '(video ya publicado hoy)' : path.basename(archivo)} → ${lista.length} contactos`);
     console.log(`Texto: ${leyenda.replace(/\n/g, ' / ')}`);
-    if (promo) console.log(`Promo semanal${promoHoy ? ' (ya publicada hoy)' : ''}: ${promo.replace(/\n/g, ' / ')}`);
-    console.log(`Rotación: ${disponibles.length} videos (${disponibles.map((v) => v.archivo).join(', ')})`);
+    console.log(`Campaña de la semana: ${campana.nombre} (día ${diaCampana + 1} de 7) · versiones de voz: ${versiones.map((f) => path.basename(f)).join(', ')}`);
+    if (promo) console.log(`Promo de la campaña${promoHoy ? ' (ya publicada hoy)' : ''}: ${promo.replace(/\n/g, ' / ')}`);
     process.exit(0);
 }
 
@@ -124,7 +130,7 @@ if (!yaHoy) {
     } finally { servidor.close(); }
 }
 if (promo && !promoHoy) {
-    await evo(`/message/sendStatus/${INST}`, { type: 'text', content: promo, backgroundColor: plan.promo_semanal.fondo, font: 1, statusJidList: lista });
+    await evo(`/message/sendStatus/${INST}`, { type: 'text', content: promo, backgroundColor: plan.promo_fondo, font: 1, statusJidList: lista });
     registro.publicados.push({ fecha: hoy, tipo: 'promo', contactos: lista.length });
     console.log('Promo semanal publicada.');
 }

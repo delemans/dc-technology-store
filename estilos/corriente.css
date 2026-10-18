@@ -203,3 +203,24 @@ main > section { scroll-margin-top: 96px; }
 .visor img { display: block; max-width: 100%; max-height: 92vh; object-fit: contain; }
 .visor__cerrar { position: absolute; top: 10px; right: 10px; width: 40px; height: 40px; border-radius: 50%; border: 0; cursor: pointer; color: #fff; background: rgb(0 0 0 / .6); font-size: 18px; }
 @media (prefers-reduced-motion: reduce) { .proyecto, .proyecto__pantalla img, .desarrollos__cta, .hero-dc__tambien a { transition: none; } }
+
+/* ---------- Plataformas disponibles (marcas.js) ---------- */
+.plataformas__cabecera { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 16px 32px; margin-bottom: 18px; }
+.plataformas__titulo { margin: 0; font: 800 clamp(22px, 3.2vw, 30px)/1.15 Inter, system-ui, sans-serif; letter-spacing: -.02em; text-wrap: balance; }
+.plataformas__titulo span { color: #E03445; }
+.plataformas__cifras { display: flex; gap: 22px; margin: 0; }
+.plataformas__cifras div { display: flex; flex-direction: column-reverse; }
+.plataformas__cifras dt { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; opacity: .65; }
+.plataformas__cifras dd { margin: 0; font: 800 28px/1 Inter, system-ui, sans-serif; font-variant-numeric: tabular-nums; color: #E03445; }
+.plataformas__pista { position: relative; overflow: hidden; border-radius: 22px; padding: 14px 0;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); }
+.plataformas__fila { display: flex; gap: 14px; width: max-content; animation: plataformas-avanza var(--duracion, 60s) linear infinite; }
+.plataformas__pista:hover .plataformas__fila, .plataformas__pista:focus-within .plataformas__fila { animation-play-state: paused; }
+@keyframes plataformas-avanza { to { transform: translateX(calc(-50% - 7px)); } }
+.plataformas__logo { flex: none; display: grid; place-items: center; width: 132px; height: 76px; border-radius: 16px;
+    background: radial-gradient(120% 90% at 50% 0%, #FFFFFF 0%, #EEF0F3 60%, #DDE1E7 100%); box-shadow: inset 0 0 0 1px rgb(15 17 26 / .08), 0 10px 24px -18px rgb(0 0 0 / .6);
+    transition: transform .25s ease, box-shadow .25s ease; }
+.plataformas__logo img { width: 78%; height: 70%; object-fit: contain; }
+.plataformas__logo:hover, .plataformas__logo:focus-visible { transform: translateY(-3px) scale(1.04); box-shadow: inset 0 0 0 1px rgb(224 52 69 / .5), 0 16px 30px -18px rgb(224 52 69 / .7); }
+@media (prefers-reduced-motion: reduce) { .plataformas__pista { overflow-x: auto; -webkit-mask-image: none; mask-image: none; } .plataformas__fila { animation: none; } }
+@media (max-width: 520px) { .plataformas__cifras { gap: 16px; } .plataformas__cifras dd { font-size: 22px; } .plataformas__logo { width: 112px; height: 66px; } }
