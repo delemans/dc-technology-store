@@ -53,7 +53,7 @@ const GUIAS = [
         categoria: 'streaming',
         secciones: [
             ['Cómo funciona el descuento', '<ul><li><b>2 plataformas distintas:</b> 10 % de descuento sobre el combo.</li><li><b>3 o más:</b> 15 % de descuento.</li></ul><p>El total con descuento aparece al instante y pagas todo en un solo pago. El cupón de primera compra no se acumula con el descuento del combo.</p>'],
-            ['Paso a paso', `<ol><li>Entra a <a href="${SITIO}/cliente.html#combos">Arma tu combo</a> en el portal de clientes.</li><li>Elige las plataformas (por ejemplo ${deTipo('streaming').slice(0, 3).map(enlace).join(', ')}).</li><li>Revisa el total con descuento, paga y envía el comprobante.</li><li>Recibes cada acceso por WhatsApp.</li></ol>`],
+            ['Paso a paso', `<ol><li>Entra a <a href="${SITIO}/#combos">Arma tu combo</a> en el portal de clientes.</li><li>Elige las plataformas (por ejemplo ${deTipo('streaming').slice(0, 3).map(enlace).join(', ')}).</li><li>Revisa el total con descuento, paga y envía el comprobante.</li><li>Recibes cada acceso por WhatsApp.</li></ol>`],
         ],
         faq: [
             ['¿Puedo repetir la misma plataforma en un combo?', 'El descuento cuenta plataformas distintas.'],
@@ -97,7 +97,7 @@ const GUIAS = [
         categoria: 'streaming',
         secciones: [
             ['Qué cubre', '<p>30 días desde la entrega, siempre que se respeten las reglas de uso (no cambiar contraseña, correo ni facturación; usar solo tu perfil; no compartir el acceso).</p>'],
-            ['Cómo reclamarla', `<ol><li>Entra a <a href="${SITIO}/cliente.html#cuenta">Mis pedidos</a> con tu número de WhatsApp: te llega un código.</li><li>En el pedido, toca <b>Reportar falla</b> y sigue los pasos sencillos.</li><li>Si sigue fallando, queda registrado y lo atiende una persona con tu garantía activa.</li></ol>`],
+            ['Cómo reclamarla', `<ol><li>Entra a <a href="${SITIO}/#cuenta">Mis pedidos</a> con tu número de WhatsApp: te llega un código.</li><li>En el pedido, toca <b>Reportar falla</b> y sigue los pasos sencillos.</li><li>Si sigue fallando, queda registrado y lo atiende una persona con tu garantía activa.</li></ol>`],
             ['Más información', `<p>Lee la política completa de <a href="${SITIO}/legal/garantias.html">garantías, retracto y devoluciones</a>.</p>`],
         ],
         faq: [

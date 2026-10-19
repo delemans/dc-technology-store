@@ -1,7 +1,7 @@
 // tienda-carrito.js — La tienda (index.html) usa el MISMO carrito, combos y pago web del portal (carrito.js).
 // Este archivo solo arma window.DC, la API que carrito.js espera, con lo que ya carga app.js
 // (productos con precios de la base). Va después de app.js y antes de carrito.js.
-// La verificación por WhatsApp (OTP) queda para "Mis pedidos" y soporte, en cliente.html.
+// Mis pedidos (OTP) y soporte también viven aquí desde el 19/10/2026 (sesion.js, soporte.js, pedidos-tienda.js).
 
 (() => {
     const T = window.DCTienda;
@@ -75,7 +75,17 @@
     window.DC = {
         estado, sb, WA, abrirHoja, cerrarHoja, tarjetaProducto, abrirProducto: (p) => T.abrirProducto(p.id),
         precioCOP, desdeDe, leerLocal, guardarLocal, COTIZABLES,
-        rutaPedidos: 'cliente.html#cuenta', // el seguimiento con OTP vive en el portal
+        rutaPedidos: '#cuenta', // Mis pedidos vive en la misma tienda (19/10/2026)
+        ESTADOS_TEXTO: {
+            PENDIENTE_PAGO: ['Esperando pago', 'fa-hourglass-half', 'text-amber-300'],
+            ESPERANDO_PROVEEDOR: ['Pago validado · en preparación', 'fa-gears', 'text-sky-300'],
+            PEDIDO_REALIZADO: ['En preparación', 'fa-gears', 'text-sky-300'],
+            RECIBIDA: ['Listo para entregar', 'fa-box', 'text-sky-300'],
+            ENTREGADO: ['Entregado', 'fa-circle-check', 'text-emerald-300'],
+            ENTREGADO_INMEDIATO: ['Entregado', 'fa-circle-check', 'text-emerald-300'],
+            FALLIDA: ['Con novedad · te contactamos', 'fa-triangle-exclamation', 'text-red-300'],
+            CANCELADA: ['Cancelado', 'fa-ban', 'text-neutral-400'],
+        },
     };
 
     // Formas de pago activas y descuentos por combo (mismas RPC públicas que el portal)

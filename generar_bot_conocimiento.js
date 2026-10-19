@@ -15,7 +15,7 @@ const WA = require('./plantillas-whatsapp.js');
 
 const RUTA_SALIDA = path.join(__dirname, 'bot-conocimiento.json');
 // Portal del cliente: historial, accesos, garantía y reportes de falla (entra con un código por WhatsApp)
-const URL_MIS_PEDIDOS = 'https://dctecnology.xyz/cliente.html#cuenta';
+const URL_MIS_PEDIDOS = 'https://dctecnology.xyz/#cuenta';
 const URL_TIENDA = 'https://dctecnology.xyz';
 const productos = JSON.parse(fs.readFileSync(path.join(__dirname, 'productos.json'), 'utf8'));
 const anterior = fs.existsSync(RUTA_SALIDA) ? JSON.parse(fs.readFileSync(RUTA_SALIDA, 'utf8')) : {};
@@ -208,7 +208,7 @@ const faqObligatorias = (horario) => [
         id: 'combos',
         pregunta: '¿Tienen combos o descuento por llevar varias plataformas?',
         palabras_clave: ['combo', 'combos', 'varias plataformas', 'paquete', 'dos plataformas', 'tres plataformas', 'descuento por varias'],
-        respuesta: 'Sí: si llevas varias plataformas distintas en un mismo pedido te aplicamos el descuento por combo vigente; dime cuáles quieres y te doy el total exacto. También puedes armarlo en dctecnology.xyz/cliente.html#combos. El descuento de combo no se acumula con cupones.',
+        respuesta: 'Sí: si llevas varias plataformas distintas en un mismo pedido te aplicamos el descuento por combo vigente; dime cuáles quieres y te doy el total exacto. También puedes armarlo en dctecnology.xyz/#combos. El descuento de combo no se acumula con cupones.',
         pendiente_configurar: false,
     },
     // Legal (18/10/2026): mismos textos que dctecnology.xyz/legal/ (herramientas/generar_legal.js)
@@ -577,7 +577,7 @@ const resultado = {
         regla: 'se aplica la regla activa con el mayor mínimo de plataformas que alcance el combo',
         cupon: 'no se acumula: el cupón solo aplica a productos fuera del combo',
         marca: '[COMBO] {"items":[{"producto":"…","variante":"…"}]} → la reemplaza el nodo "Revisar respuesta" de n8n',
-        portal: 'https://dctecnology.xyz/cliente.html#combos',
+        portal: 'https://dctecnology.xyz/#combos',
     },
     menu,
     plantillas,

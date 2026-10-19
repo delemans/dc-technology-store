@@ -249,3 +249,8 @@ main > section { scroll-margin-top: 96px; }
 .asi__video video { display: block; width: 100%; height: auto; aspect-ratio: 9 / 16; border-radius: 26px; background: #0B0F19;
     box-shadow: 0 0 0 1px rgb(255 255 255 / .1), 0 40px 80px -36px rgb(0 0 0 / .9), 0 0 90px -40px rgb(224 52 69 / .6); }
 .asi__video figcaption { margin-top: 10px; text-align: center; font-size: 12px; opacity: .6; }
+
+/* ---------- Mis pedidos dentro de la tienda (19/10/2026) ---------- */
+.cuenta-tienda { display: grid; gap: 24px; align-items: start; }
+@media (min-width: 900px) { .cuenta-tienda { grid-template-columns: 1.1fr .9fr; } }
+#cuenta, #soporte { scroll-margin-top: 96px; }

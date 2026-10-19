@@ -281,7 +281,7 @@
             `Tu orden *${codigo}* por *$${total}* quedó confirmada. Ya estamos procesando tu pedido.`,
             '📲 Te lo enviamos por WhatsApp en los próximos minutos.',
             '',
-            '🔎 Síguela en Mis pedidos: dctecnology.xyz/cliente.html#cuenta',
+            '🔎 Síguela en Mis pedidos: dctecnology.xyz/#cuenta',
         ].join('\n'),
         ordenRechazada: ({ codigo, motivo }) => [
             `⚠️ *No pudimos validar tu pago* · ${FIRMA}`,
@@ -289,7 +289,7 @@
             `📦 Orden: *${codigo}*`,
             `📝 Motivo: ${motivo}`,
             '',
-            'Sube otro comprobante en Mis pedidos (dctecnology.xyz/cliente.html#cuenta) o respóndeme por aquí y te ayudo.',
+            'Sube otro comprobante en Mis pedidos (dctecnology.xyz/#cuenta) o respóndeme por aquí y te ayudo.',
         ].join('\n'),
         reporteResuelto: ({ producto, nota }) => [
             `🛠️ *Tu reporte fue atendido* · ${FIRMA}`,
