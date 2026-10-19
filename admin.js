@@ -1190,7 +1190,7 @@ const CLASES_NAV_ACTIVA = ['bg-dcRed/15', 'ring-dcRed/40', 'text-white', 'font-b
 const CLASES_NAV_INACTIVA = ['ring-transparent', 'text-neutral-400', 'hover:text-white', 'hover:bg-white/5', 'font-semibold'];
 
 function mostrarVista(vista) {
-    if (!['pedidos', 'pagos-bot', 'productos'].includes(vista)) return;
+    if (!['pedidos', 'pagos-bot', 'productos', 'finanzas'].includes(vista)) return;
     const cambio = ui.vista !== vista;
     ui.vista = vista;
     document.getElementById('vista-pedidos').hidden = vista !== 'pedidos';
@@ -1198,6 +1198,8 @@ function mostrarVista(vista) {
     if (vista === 'pagos-bot') { cargarComprobantesWeb(); cargarCombosPorValidar(); cargarReportesFalla(); }
     document.getElementById('vista-productos').hidden = vista !== 'productos';
     if (vista === 'productos') { cargarPromociones(); cargarReglasCombo(); cargarPrecios(); }
+    document.getElementById('vista-finanzas').hidden = vista !== 'finanzas';
+    if (vista === 'finanzas') cargarFinanzas();
     pintarNavegacion();
     window.scrollTo({ top: 0, behavior: 'smooth' });
     document.getElementById('zona-pedidos').scrollTo({ top: 0, behavior: 'smooth' });
@@ -1208,6 +1210,17 @@ function mostrarVista(vista) {
         );
     }
 }
+
+/* ==================== FINANZAS (finanzas.js · wo-046) ==================== */
+
+let periodoFinanzas = '30d';
+function cargarFinanzas() {
+    const caja = document.getElementById('finanzas-contenido');
+    if (!caja || !window.Finanzas) return;
+    document.querySelectorAll('[data-fin-periodo]').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.finPeriodo === periodoFinanzas)));
+    window.Finanzas.cargar(supabaseClient, caja, periodoFinanzas);
+}
+document.querySelectorAll('[data-fin-periodo]').forEach((b) => b.addEventListener('click', () => { periodoFinanzas = b.dataset.finPeriodo; cargarFinanzas(); }));
 
 /* ==================== PROMOCIONES DEL DÍA (public.promociones_dia · wo-025) ==================== */
 

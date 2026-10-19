@@ -12,12 +12,12 @@
     <link rel="apple-touch-icon" href="img/logo-dc-512.png">
     <title>DC TECNOLOGY | Panel Admin</title>
     <!-- Estilos compilados con Tailwind (npm run css): sin CDN de desarrollo -->
-    <link rel="stylesheet" href="estilos/tailwind.css?v=202610190032">
+    <link rel="stylesheet" href="estilos/tailwind.css?v=202610190039">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" integrity="sha384-iw3OoTErCYJJB9mCa8LNS2hbsQ7M3C0EpIsO/H5+EGAkPGc6rk+V8i04oW/K5xq0" crossorigin="anonymous" referrerpolicy="no-referrer">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@700;800;900&display=swap" rel="stylesheet">
     <!-- Tema claro/oscuro (antes de pintar, sin destello) -->
-    <script src="tema.js?v=202610190032"></script>
-    <link rel="stylesheet" href="tema.css?v=202610190032">
+    <script src="tema.js?v=202610190039"></script>
+    <link rel="stylesheet" href="tema.css?v=202610190039">
     <style>
         html { -webkit-tap-highlight-color: transparent; }
         [hidden] { display: none !important; } /* que 'hidden' gane a clases como flex/grid */
@@ -97,7 +97,7 @@
         }
     </style>
     <!-- Estilo corporativo (va de último: recalibra colores y apaga efectos neón) -->
-    <link rel="stylesheet" href="estilos/profesional.css?v=202610190032">
+    <link rel="stylesheet" href="estilos/profesional.css?v=202610190039">
 </head>
 <body class="bg-dcDarkBg text-white min-h-screen font-sans antialiased selection:bg-dcRed/40">
     <div class="mesh" aria-hidden="true"><span></span><span></span><span></span></div>
@@ -169,6 +169,9 @@
                     <button type="button" data-vista="pagos-bot" class="w-full flex items-center gap-3 px-4 min-h-[48px] rounded-xl ring-1 text-xs transition-colors">
                         <i class="fa-solid fa-robot w-4"></i> Pagos &amp; Agente Bot
                         <span data-contador-verificar class="ml-auto px-1.5 py-0.5 rounded-md bg-sky-500/15 text-sky-300 text-[10px] font-bold" hidden>0</span>
+                    </button>
+                    <button type="button" data-vista="finanzas" class="w-full flex items-center gap-3 px-4 min-h-[48px] rounded-xl ring-1 text-xs transition-colors">
+                        <i class="fa-solid fa-sack-dollar w-4"></i> Finanzas
                     </button>
                     <button type="button" data-vista="productos" class="w-full flex items-center gap-3 px-4 min-h-[48px] rounded-xl ring-1 text-xs transition-colors">
                         <i class="fa-solid fa-fire w-4"></i> Promociones del día
@@ -457,6 +460,23 @@
                 </div>
               </div>
 
+              <!-- ============ VISTA: FINANZAS (finanzas.js · wo-046) ============ -->
+              <div id="vista-finanzas" hidden>
+                <div class="flex flex-wrap items-end justify-between gap-4 mb-6">
+                    <div>
+                        <p class="text-[10px] font-bold uppercase tracking-[0.3em] text-neutral-500 mb-2">Control de la empresa</p>
+                        <h2 class="font-tech text-2xl sm:text-3xl font-black uppercase tracking-wider">Centro <span class="text-dcRed dc-text-glow">financiero</span></h2>
+                    </div>
+                    <div class="fin-periodos" role="tablist" aria-label="Periodo">
+                        <button type="button" role="tab" data-fin-periodo="hoy">Hoy</button>
+                        <button type="button" role="tab" data-fin-periodo="7d">7 días</button>
+                        <button type="button" role="tab" data-fin-periodo="30d" aria-selected="true">30 días</button>
+                        <button type="button" role="tab" data-fin-periodo="mes">Este mes</button>
+                    </div>
+                </div>
+                <div id="finanzas-contenido"></div>
+              </div>
+
               <!-- ============ VISTA: PRODUCTOS / PROMOCIONES DEL DÍA ============ -->
               <div id="vista-productos" hidden>
                 <div class="flex flex-wrap items-end justify-between gap-4 mb-6">
@@ -511,7 +531,7 @@
 
         <!-- Dock flotante (móvil) -->
         <nav class="md:hidden fixed z-30 inset-x-3 bottom-[max(.75rem,env(safe-area-inset-bottom))] rounded-3xl bg-black/60 backdrop-blur-xl ring-1 ring-white/10 shadow-2xl shadow-black/70" aria-label="Navegación principal">
-            <div class="grid grid-cols-5 items-center px-1">
+            <div class="grid grid-cols-6 items-center px-1">
                 <button type="button" data-vista-dock="pedidos" class="flex flex-col items-center justify-center gap-1 min-h-[64px] text-dcRed">
                     <i class="fa-solid fa-truck-fast text-lg"></i><span class="text-[9px] font-bold uppercase tracking-wider">Pedidos</span>
                 </button>
@@ -525,6 +545,9 @@
                         <i class="fa-solid fa-plus"></i>
                     </button>
                 </div>
+                <button type="button" data-vista-dock="finanzas" class="flex flex-col items-center justify-center gap-1 min-h-[64px] text-neutral-400">
+                    <i class="fa-solid fa-sack-dollar text-lg"></i><span class="text-[9px] font-bold uppercase tracking-wider">Finanzas</span>
+                </button>
                 <button type="button" data-vista-dock="productos" class="flex flex-col items-center justify-center gap-1 min-h-[64px] text-neutral-400">
                     <i class="fa-solid fa-fire text-lg"></i><span class="text-[9px] font-bold uppercase tracking-wider">Promos</span>
                 </button>
@@ -790,9 +813,10 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js" integrity="sha384-Rj26LVGvoeRVR6+mwQmFfcR3QOBEwT+ZmuCWpuiqeTzJpCs0ER4ITAWGb4Hiy3Ok" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" integrity="sha384-3zSEDfvllQohrq0PHL1fOXJuC/jSOO34H46t6UQfobFOmxE5BpjjaIJY5F2/bMnU" crossorigin="anonymous"></script>
-    <script src="plantillas-whatsapp.js?v=202610190032"></script>
-    <script src="ui.js?v=202610190032"></script>
-    <script src="admin.js?v=202610190032"></script>
-    <script src="admin-prueba.js?v=202610190032"></script>
+    <script src="plantillas-whatsapp.js?v=202610190039"></script>
+    <script src="ui.js?v=202610190039"></script>
+    <script src="finanzas.js?v=202610190039"></script>
+    <script src="admin.js?v=202610190039"></script>
+    <script src="admin-prueba.js?v=202610190039"></script>
 </body>
 </html>

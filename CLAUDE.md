@@ -9,9 +9,9 @@ Contexto de negocio e invariantes: `CONTEXT.md`. Responder siempre en español.
 ## Dónde está cada cosa
 | Área | Archivos |
 |---|---|
-| Tienda (vitrina + carrito) | `index.html`, `app.js`, `tienda-carrito.js` (puente → `carrito.js`) |
-| Portal de clientes | `cliente.html`, `cliente.js`, `carrito.js` (carrito, combos, pago web), `sesion.js` (OTP, Mis pedidos), `soporte.js` |
-| Panel admin | `admin.html`, `admin.js`, `admin-prueba.js` (Prueba del sistema) |
+| Tienda (una sola página desde el 19/10/2026) | `index.html`, `app.js`, `tienda-carrito.js` (puente → `carrito.js`), `sesion.js` + `soporte.js` + `pedidos-tienda.js` (Mis pedidos en #cuenta y Soporte en #soporte, dentro de la tienda, con el bot). `cliente.html` solo redirige (redirigir-portal.js) a la sección equivalente conservando ?pedido= |
+| Portal de clientes (retirado) | Su código vive en la tienda: `carrito.js`, `sesion.js`, `soporte.js`. `cliente.js` ya no se carga (queda de referencia). `portal.html` (rastreo por código desde los avisos de WhatsApp) sigue activo |
+| Panel admin | `admin.html`, `admin.js`, `admin-prueba.js` (Prueba del sistema), `finanzas.js` (vista Finanzas: ventas cobradas, costo, margen, por entregar, por cobrar, inventario de pines, ventas por día, por categoría/canal/producto y CSV; datos de `finanzas_panel()` de wo-046, solo administradores) |
 | Textos de WhatsApp | `plantillas-whatsapp.js` (fuente única) |
 | Catálogo | `productos.json` (los PRECIOS mandan desde la base: `catalogo_precios`) |
 | Bot (IA) | `generar_bot_conocimiento.js` → `bot-conocimiento.json` (n8n lo lee en vivo desde el sitio): prompt, FAQ y textos del menú |
@@ -41,7 +41,7 @@ Contexto de negocio e invariantes: `CONTEXT.md`. Responder siempre en español.
 | Herramientas | `herramientas/`: `sincronizar-n8n.mjs` (lleva el flujo al n8n en vivo), `configurar-ias.mjs` + `proveedores-ia.mjs` (IA balanceada), `configurar-n8n.js`, `configurar-evolution.js`, `iniciar-bot.ps1`, `comparar_ancpagos.mjs`, `nombres_ancpagos.mjs`, `generar_seo.js` |
 
 ## Orden de los SQL
-wo-011 → 012 → 014 → 015 (o 015b) → 015a → 027 → 028 → 029 → 030 → 024 → 026 → 031 → 032 → 033 → 034 (→ 034b tras publicar) → 035 → 036 → 037 → 038 → 041 (Emprende Red; se regenera con el script) → 042 (pedidos por WhatsApp: #ok/#no/#entregar, entrega automática y precios de ANC) → 043 (stock de pines) → 044 (renovaciones) → 045 (permisos de medios de pago). Todo junto: supabase/APLICAR-PENDIENTES.sql. Pendiente aparte: 025 (promociones del día; la tienda la llama y hoy da 404).
+wo-011 → 012 → 014 → 015 (o 015b) → 015a → 027 → 028 → 029 → 030 → 024 → 026 → 031 → 032 → 033 → 034 (→ 034b tras publicar) → 035 → 036 → 037 → 038 → 041 (Emprende Red; se regenera con el script) → 042 (pedidos por WhatsApp: #ok/#no/#entregar, entrega automática y precios de ANC) → 043 (stock de pines) → 044 (renovaciones) → 045 (permisos de medios de pago) → 046 (centro financiero). Todo junto: supabase/APLICAR-PENDIENTES.sql. Pendiente aparte: 025 (promociones del día; la tienda la llama y hoy da 404).
 
 ## Comandos
 - `npm run css` tras cambiar clases (Tailwind compilado); `npm run seo` tras cambiar `productos.json`.

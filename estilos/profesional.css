@@ -154,3 +154,36 @@ header[class*="backdrop-blur"], .cab { background-color: rgb(var(--fondo)) !impo
 /* Logos oficiales de los medios de pago (img/pagos/): siempre sobre blanco, en ambos temas */
 .pago-logo { display: inline-grid; place-items: center; flex: none; aspect-ratio: 2.4 / 1; padding: 3px 7px; border-radius: 8px; background: #fff; box-shadow: inset 0 0 0 1px rgb(16 24 40 / .08); }
 .pago-logo img { display: block; width: 100%; height: 100%; object-fit: contain; }
+
+/* ---------- Centro financiero (admin · finanzas.js) ---------- */
+.fin-periodos { display: inline-flex; gap: 4px; padding: 4px; border-radius: 14px; background: rgb(var(--tarjeta)); box-shadow: inset 0 0 0 1px rgb(var(--borde)); }
+.fin-periodos button { min-height: 40px; padding: 0 14px; border-radius: 10px; font-size: 12px; font-weight: 700; color: rgb(var(--tinta, 243 244 246) / .7); }
+.fin-periodos button[aria-selected="true"] { background: var(--acento); color: #fff; }
+.fin-tiles { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 210px), 1fr)); margin-bottom: 16px; }
+.fin-tile { padding: 16px 18px; border-radius: 18px; background: rgb(var(--tarjeta)); box-shadow: inset 0 0 0 1px rgb(var(--borde)); }
+.fin-tile-t { font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; opacity: .6; }
+.fin-tile-v { margin-top: 6px; font: 800 26px/1.1 Inter, system-ui, sans-serif; font-variant-numeric: tabular-nums; }
+.fin-tile-d { margin-top: 6px; font-size: 12px; opacity: .7; }
+.fin-tile.fin-bien .fin-tile-v { color: #16A34A; } .fin-tile.fin-mal .fin-tile-v { color: var(--acento); }
+.fin-tile.fin-aviso { box-shadow: inset 0 0 0 1px rgb(217 119 6 / .5); }
+.fin-bloque { margin-bottom: 16px; padding: 16px 18px; border-radius: 18px; background: rgb(var(--tarjeta)); box-shadow: inset 0 0 0 1px rgb(var(--borde)); min-width: 0; }
+.fin-bloque h3 { margin: 0 0 12px; font-size: 14px; font-weight: 800; }
+.fin-columnas { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); }
+.fin-columnas .fin-bloque { margin-bottom: 0; } .fin-columnas { margin-bottom: 16px; }
+.fin-grafico { position: relative; overflow-x: auto; }
+.fin-svg { display: block; max-width: none; }
+.fin-tip[hidden] { display: none; }
+.fin-barra { fill: var(--acento); } .fin-svg g:hover .fin-barra { opacity: .8; }
+.fin-base { stroke: rgb(var(--borde)); stroke-width: 1; }
+.fin-eje { font-size: 11px; fill: currentColor; opacity: .55; font-variant-numeric: tabular-nums; }
+.fin-tip { position: absolute; top: 4px; display: grid; gap: 2px; padding: 8px 12px; border-radius: 10px; font-size: 12px; pointer-events: none;
+    background: rgb(var(--fondo)); box-shadow: 0 0 0 1px rgb(var(--borde)), 0 12px 24px -12px rgb(0 0 0 / .5); font-variant-numeric: tabular-nums; }
+.fin-tabla { width: 100%; border-collapse: collapse; font-size: 13px; font-variant-numeric: tabular-nums; }
+.fin-tabla th { text-align: right; font-size: 11px; font-weight: 700; opacity: .6; padding: 0 0 8px; }
+.fin-tabla td { text-align: right; padding: 8px 0; border-top: 1px solid rgb(var(--borde)); }
+.fin-tabla th:first-child, .fin-tabla td:first-child { text-align: left; }
+.fin-tabla td + td, .fin-tabla th + th { padding-left: 12px; }
+.fin-vacio, .fin-cargando { padding: 18px; border-radius: 14px; font-size: 13px; opacity: .8; background: rgb(var(--tarjeta)); box-shadow: inset 0 0 0 1px rgb(var(--borde)); }
+.fin-acciones { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.fin-btn { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px; border-radius: 12px; font-size: 13px; font-weight: 700; background: rgb(var(--tarjeta)); box-shadow: inset 0 0 0 1px rgb(var(--borde)); }
+.fin-nota { font-size: 12px; opacity: .6; max-width: 70ch; }
