@@ -254,3 +254,12 @@ main > section { scroll-margin-top: 96px; }
 .cuenta-tienda { display: grid; gap: 24px; align-items: start; }
 @media (min-width: 900px) { .cuenta-tienda { grid-template-columns: 1.1fr .9fr; } }
 #cuenta, #soporte { scroll-margin-top: 96px; }
+
+/* ---------- Aprende antes de comprar (guías) ---------- */
+.aprende { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr)); }
+.aprende__tarjeta { display: grid; gap: 8px; align-content: start; padding: 20px; border-radius: 20px; text-decoration: none;
+    background: rgb(var(--tarjeta, 21 25 32)); box-shadow: inset 0 0 0 1px rgb(var(--borde, 44 50 60)); transition: transform .2s ease, box-shadow .2s ease; }
+.aprende__tarjeta i { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 12px; color: #fff; background: linear-gradient(150deg, #E03445, #A80C26); }
+.aprende__tarjeta b { font-size: 16px; line-height: 1.3; }
+.aprende__tarjeta span { font-size: 13px; opacity: .7; }
+.aprende__tarjeta:hover { transform: translateY(-3px); box-shadow: inset 0 0 0 1px rgb(224 52 69 / .6), 0 18px 34px -24px rgb(224 52 69 / .8); }

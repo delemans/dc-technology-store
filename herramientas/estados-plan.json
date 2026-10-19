@@ -122,6 +122,26 @@
     {
       "archivo": "desarrollo-tienda-bot",
       "texto": "🤖 Tu tienda web con catálogo, carrito y pagos locales, más un bot de WhatsApp con IA que toma pedidos."
+    },
+    {
+      "archivo": "tip-mantenimiento",
+      "texto": "🧰 ¿Cada cuánto hacerle mantenimiento a tu PC? Lo recomendable es 1 vez al año (o cada 6 meses con polvo o uso diario). Preventivo desde $50.000."
+    },
+    {
+      "archivo": "tip-office",
+      "texto": "📄 Office 365 vs vitalicio: 365 se paga por año y siempre está al día; el vitalicio es un solo pago y se queda en su versión."
+    },
+    {
+      "archivo": "tip-windows",
+      "texto": "🪟 Windows 10 no recibe actualizaciones de seguridad gratuitas desde octubre de 2025. Pásate a Windows 11 (si tu equipo es compatible): licencia + instalación."
+    },
+    {
+      "archivo": "tip-antivirus",
+      "texto": "🛡️ 4 consejos: programas solo de sitios oficiales, cuidado con enlaces que piden datos, copias de seguridad y antivirus actualizado."
+    },
+    {
+      "archivo": "tip-pantalla-vs-cuenta",
+      "texto": "📺 ¿Pantalla o cuenta completa? Pantalla = un perfil en un dispositivo a la vez. Cuenta completa = todos los perfiles para tu hogar."
     }
   ],
   "inicio_campanas": "2026-10-19",
@@ -131,11 +151,11 @@
       "nombre": "Entretenimiento en casa",
       "videos": [
         "streaming-desde",
+        "tip-pantalla-vs-cuenta",
         "combo-ahorra",
         "compra-3-toques",
         "primera-compra",
         "tutorial-compra-entrega",
-        "por-que-dc",
         "renueva-tu-plan"
       ],
       "promo": "📺 Semana del entretenimiento\nNetflix, Disney, Max, Prime Video y más con 30 días de garantía.\nArma tu combo: 2 plataformas -10%, 3 o más -15%.\n🛒 dctecnology.xyz"
@@ -144,13 +164,13 @@
       "id": "tecnologia",
       "nombre": "Tecnología, licencias y soporte",
       "videos": [
-        "relojes-audifonos",
+        "tip-mantenimiento",
         "windows-pro",
+        "tip-windows",
         "office-365",
-        "antivirus-mcafee",
+        "tip-office",
         "mantenimiento-preventivo",
-        "reparacion-computadores",
-        "soporte-garantia"
+        "tip-antivirus"
       ],
       "promo": "🪟 Semana de licencias y soporte técnico\nWindows, Office y McAfee originales, mantenimiento y reparación de computadores.\nRelojes y audífonos con garantía de 30 días.\n🛒 dctecnology.xyz"
     },
@@ -162,8 +182,8 @@
         "free-fire-diamantes",
         "regala-un-pin",
         "apps-premium",
+        "relojes-audifonos",
         "comprobante-web",
-        "pedidos-whatsapp",
         "primera-compra"
       ],
       "promo": "📱 Semana de recargas y pines\nClaro, Movistar, Tigo, Wom, ETB y Éxito, diamantes de Free Fire y pines de Google Play, Roblox y más.\n🎁 Primera compra: 10% con DCTECH2026\n💬 322 328 4622"
@@ -176,9 +196,9 @@
         "desarrollo-pos",
         "desarrollo-dashboards",
         "desarrollo-finanzas",
-        "desarrollo-rifas",
-        "alquiler-equipos",
-        "desarrollos-completo"
+        "reparacion-computadores",
+        "antivirus-mcafee",
+        "alquiler-equipos"
       ],
       "promo": "🤖 Semana de soluciones para tu negocio\nMantenimiento y reparación de equipos, licencias, alquiler de portátiles, catálogos web y automatizaciones con IA.\nCotiza sin compromiso: 💬 322 328 4622"
     }

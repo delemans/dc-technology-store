@@ -44,6 +44,11 @@ const TITULOS = {
     'desarrollo-finanzas': 'Gestor financiero para tu negocio 💰',
     'desarrollo-dashboards': 'Dashboards con indicadores en tiempo real 📊',
     'desarrollo-tienda-bot': 'Tienda web + bot de WhatsApp con IA 🤖',
+    'tip-mantenimiento': '¿Cada cuánto hacerle mantenimiento a tu PC? 🧰',
+    'tip-office': 'Office 365 vs vitalicio: ¿cuál te conviene? 📄',
+    'tip-windows': 'Windows 10 ya no tiene soporte: ¿y ahora? 🪟',
+    'tip-antivirus': '4 consejos para no perder tu información 🛡️',
+    'tip-pantalla-vs-cuenta': '¿Pantalla o cuenta completa? 📺',
 };
 const HASHTAGS = {
     base: ['#DCTecnology', '#Colombia'],
@@ -71,6 +76,11 @@ const HASHTAGS = {
     'desarrollo-finanzas': ['#Finanzas', '#Emprendimiento', '#Software'],
     'desarrollo-dashboards': ['#Dashboards', '#Indicadores', '#Datos'],
     'desarrollo-tienda-bot': ['#TiendaOnline', '#Chatbot', '#IA', '#WhatsApp'],
+    'tip-mantenimiento': ['#TipsTecnologia', '#Mantenimiento', '#PC'],
+    'tip-office': ['#Office', '#Microsoft365', '#Tips'],
+    'tip-windows': ['#Windows11', '#Windows10', '#Seguridad'],
+    'tip-antivirus': ['#Ciberseguridad', '#Tips', '#Antivirus'],
+    'tip-pantalla-vs-cuenta': ['#Streaming', '#Netflix', '#Tips'],
 };
 const etiquetas = (id) => [...HASHTAGS.base, ...(HASHTAGS[id] ?? ['#Tecnologia', '#Streaming'])].join(' ');
 

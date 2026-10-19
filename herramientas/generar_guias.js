@@ -105,6 +105,71 @@ const GUIAS = [
             ['¿Qué anula la garantía?', 'Cambiar la contraseña, el correo o la facturación, usar otro perfil o compartir el acceso.'],
         ],
     },
+    // Informativas (19/10/2026): mismas que los videos de consejos; recomendaciones generales, sin cifras inventadas
+    {
+        id: 'cada-cuanto-hacer-mantenimiento-al-computador',
+        titulo: '¿Cada cuánto hacerle mantenimiento a un computador?',
+        descripcion: 'Lo recomendable es una vez al año, o cada 6 meses si hay polvo o se usa todo el día. Señales de alerta y qué incluye un mantenimiento preventivo y correctivo.',
+        categoria: 'servicios',
+        secciones: [
+            ['La frecuencia recomendada', '<p><b>Una vez al año</b> para un uso normal, y <b>cada seis meses</b> si el equipo está en un lugar con polvo, con mascotas o se usa todo el día (trabajo, juegos, diseño).</p>'],
+            ['Señales de que lo necesita', '<ul><li>Se pone lento al encender o al abrir programas.</li><li>El ventilador suena fuerte o todo el tiempo.</li><li>Se calienta más de lo normal o se apaga solo.</li></ul>'],
+            ['Qué pasa si no se hace', '<p>El polvo tapa la ventilación y la pasta térmica se seca: el procesador trabaja más caliente, baja el rendimiento y las piezas se desgastan antes.</p>'],
+            ['Qué incluye en DC Tecnology', `<ul><li><b>Preventivo:</b> optimización del sistema y limpieza.</li><li><b>Correctivo:</b> incluye cambio de pasta térmica.</li></ul><p>Cotiza en la <a href="${SITIO}/#cotizador">tienda</a> o por WhatsApp; el valor final se confirma tras el diagnóstico.</p>`],
+        ],
+        faq: [
+            ['¿Cada cuánto se limpia un portátil?', 'Una vez al año con uso normal; cada seis meses si hay polvo o uso intensivo.'],
+            ['¿El mantenimiento borra mis archivos?', 'El mantenimiento físico (limpieza y pasta térmica) no toca tus archivos. Si hay que reinstalar el sistema, te avisamos antes para respaldarlos.'],
+        ],
+    },
+    {
+        id: 'office-365-o-vitalicio-cual-conviene',
+        titulo: 'Office 365 o Office vitalicio: ¿cuál te conviene?',
+        descripcion: 'Office 365 se paga por año y siempre está actualizado; el vitalicio es un solo pago y se queda en su versión. Ventajas, desventajas y para quién es cada uno.',
+        categoria: 'licencias',
+        secciones: [
+            ['Office 365 (suscripción)', '<ul><li><b>Ventaja:</b> siempre tienes la versión más reciente.</li><li><b>Desventaja:</b> se renueva cada año.</li></ul>'],
+            ['Office vitalicio (Pro Plus 2016–2024)', '<ul><li><b>Ventaja:</b> un solo pago.</li><li><b>Desventaja:</b> se queda en esa versión, sin las funciones nuevas.</li></ul>'],
+            ['¿Cuál elegir?', '<p>Si lo usas todos los días para trabajar o estudiar, conviene 365. Si solo necesitas lo básico (Word, Excel, PowerPoint), el vitalicio.</p>'],
+            ['Precios', `<p>Mira los planes vigentes en <a href="${SITIO}/c/licencias.html">licencias y apps</a>. Si quieres, también te lo instalamos.</p>`],
+        ],
+        faq: [
+            ['¿Office vitalicio recibe actualizaciones?', 'Recibe correcciones de su versión, pero no las funciones nuevas de las versiones siguientes.'],
+            ['¿Puedo instalarlo en varios equipos?', 'Depende del plan: Office 365 tiene planes para 1 o 5 equipos; revisa el plan antes de comprar.'],
+        ],
+    },
+    {
+        id: 'windows-10-fin-del-soporte-que-hacer',
+        titulo: 'Windows 10 ya no tiene soporte: qué hacer',
+        descripcion: 'Desde octubre de 2025 Windows 10 no recibe actualizaciones de seguridad gratuitas. Qué significa y cómo pasar a Windows 11 si tu equipo es compatible.',
+        categoria: 'licencias',
+        secciones: [
+            ['Qué pasó', '<p>Microsoft terminó el soporte de Windows 10 en <b>octubre de 2025</b>: ya no recibe actualizaciones de seguridad gratuitas.</p>'],
+            ['Por qué importa', '<p>Sin parches de seguridad, las fallas nuevas que se descubran no se corrigen, y el equipo queda más expuesto a virus y robos de información.</p>'],
+            ['Qué hacer', '<ol><li>Revisa si tu equipo es compatible con Windows 11.</li><li>Haz una copia de seguridad de tus archivos.</li><li>Instala Windows 11 con una licencia original.</li></ol>'],
+            ['Te ayudamos', `<p>Licencias de Windows 10 y 11 Pro y el servicio de instalación con Office y programas básicos: <a href="${SITIO}/c/licencias.html">ver licencias</a>.</p>`],
+        ],
+        faq: [
+            ['¿Windows 10 deja de funcionar?', 'No: sigue funcionando, pero sin actualizaciones de seguridad gratuitas.'],
+            ['¿Todos los equipos pueden tener Windows 11?', 'No todos: Windows 11 pide requisitos de hardware. Revisamos tu equipo antes de instalar.'],
+        ],
+    },
+    {
+        id: 'consejos-para-no-perder-tu-informacion',
+        titulo: '4 consejos para no perder tu información',
+        descripcion: 'Programas solo de sitios oficiales, cuidado con los enlaces que piden datos, copias de seguridad y antivirus actualizado: lo básico para proteger tu equipo.',
+        categoria: 'licencias',
+        secciones: [
+            ['1. Programas solo de sitios oficiales', '<p>Los programas "gratis" de páginas desconocidas suelen traer virus o publicidad oculta.</p>'],
+            ['2. Cuidado con los enlaces', '<p>Desconfía de mensajes por WhatsApp o correo que piden tus datos, claves o códigos. Nosotros nunca te pedimos claves bancarias ni códigos.</p>'],
+            ['3. Copias de seguridad', '<p>Guarda tus archivos importantes en un disco externo o en la nube, por si el equipo falla.</p>'],
+            ['4. Antivirus actualizado', `<p>Un antivirus con licencia vigente bloquea amenazas nuevas. Mira <a href="${SITIO}/p/mcafee-antivirus.html">McAfee Total Protection</a>.</p>`],
+        ],
+        faq: [
+            ['¿Windows ya trae antivirus?', 'Trae protección básica; un antivirus completo agrega más capas, como protección web y de identidad, según el plan.'],
+            ['¿Cada cuánto hago copias de seguridad?', 'Lo ideal es cada vez que guardes algo importante, o al menos una vez por semana.'],
+        ],
+    },
 ];
 
 const CSS = `
@@ -124,7 +189,7 @@ details{padding:10px 0;border-bottom:1px solid var(--b)}details:last-child{borde
 footer{margin-top:36px;padding:22px 0;border-top:1px solid var(--b);color:var(--m);font-size:13px}
 `;
 const urlGuia = (g) => `${SITIO}/guias/${g.id}.html`;
-const NOMBRES_CAT = { streaming: 'Streaming', recargas: 'Recargas' };
+const NOMBRES_CAT = { streaming: 'Streaming', recargas: 'Recargas', licencias: 'licencias', servicios: 'servicios' };
 
 function pagina(g) {
     const ld = [
