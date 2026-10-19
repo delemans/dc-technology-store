@@ -1,7 +1,7 @@
 {
  "_nota": "Esquema de campañas (herramientas/publicar-estado.mjs y generar_redes.js). Cada semana (lunes a domingo) corre UNA campaña; rotan en orden desde inicio_campanas. Cada día sale el video del día de esa campaña, alternando las versiones de voz; los lunes, además, la promo de la campaña en texto. Los textos solo usan hechos del negocio (nada de descuentos ni disponibilidad inventados). Videos de más de 60 s no van a estados (WhatsApp los corta): se usa el siguiente de la lista.",
  "carpeta": "docs/videos-estados/mp4",
- "pie": "🛒 dctecnology.xyz · 💬 322 328 4622",
+ "pie": "🛒 www.dctecnology.xyz · 💬 322 328 4622",
  "videos": [
   {
    "archivo": "bienvenida",
@@ -212,7 +212,7 @@
     "tutorial-compra-entrega",
     "renueva-tu-plan"
    ],
-   "promo": "📺 Semana del entretenimiento\nNetflix, Disney, Max, Prime Video y más con 30 días de garantía.\nArma tu combo: 2 plataformas -10%, 3 o más -15%.\n🛒 dctecnology.xyz"
+   "promo": "📺 Semana del entretenimiento\nNetflix, Disney, Max, Prime Video y más con 30 días de garantía.\nArma tu combo: 2 plataformas -10%, 3 o más -15%.\n🛒 www.dctecnology.xyz"
   },
   {
    "id": "tecnologia",
@@ -226,7 +226,7 @@
     "mantenimiento-preventivo",
     "tip-antivirus"
    ],
-   "promo": "🪟 Semana de licencias y soporte técnico\nWindows, Office y McAfee originales, mantenimiento y reparación de computadores.\nRelojes y audífonos con garantía de 30 días.\n🛒 dctecnology.xyz"
+   "promo": "🪟 Semana de licencias y soporte técnico\nWindows, Office y McAfee originales, mantenimiento y reparación de computadores.\nRelojes y audífonos con garantía de 30 días.\n🛒 www.dctecnology.xyz"
   },
   {
    "id": "recargas",

@@ -510,7 +510,7 @@ function responderMenu() {
         }
         if (id.startsWith('web:')) {
             const p = catalogo.find((x) => String(x.id) === id.slice(4));
-            const url = p ? `https://dctecnology.xyz/?producto=${encodeURIComponent(p.id)}` : 'https://dctecnology.xyz';
+            const url = p ? `https://www.dctecnology.xyz/?producto=${encodeURIComponent(p.id)}` : 'https://www.dctecnology.xyz';
             return { lineas: [...M.compra_web.map((l) => l.replace('{url}', url)), '', T.volver_menu], opciones: [], atras: 'principal' };
         }
         if (id === 'soporte') {

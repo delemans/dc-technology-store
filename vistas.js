@@ -66,6 +66,8 @@
         const { vista } = destinoDe(hash);
         if (!vista) return;
         e.preventDefault();
+        if (a.closest('.menu-modulos')) navigator.vibrate?.(8); // toque con vibración suave, como una app
+        raiz.classList.remove('ocultar-menu');
         const antes = actual;
         ir(hash);
         if (actual !== antes) history.pushState({ vista: actual }, '', limpia());
@@ -75,7 +77,7 @@
     const limpiar = () => { if (location.hash) history.replaceState({ vista: actual }, '', limpia()); };
     // El logo lleva al inicio (sus 6 toques al panel siguen igual)
     document.getElementById('secret-admin-logo')?.addEventListener('click', () => {
-        const destino = raiz.classList.contains('kiosko') ? 'catalogo' : 'inicio'; // en el kiosko el logo lleva al catálogo
+        const destino = 'inicio';
         if (actual !== destino) { mostrar(destino); history.pushState({ vista: destino }, '', limpia()); }
     });
     // Un # puesto por el código (p. ej. "Ir a Soporte") abre su módulo y la dirección se limpia

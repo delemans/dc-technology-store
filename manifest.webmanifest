@@ -1,22 +1,87 @@
 {
   "name": "DC Tecnology — Tienda",
   "short_name": "DC Tecnology",
-  "description": "Streaming, licencias, pines, tecnología y soporte. Compra en 3 toques y recibe por WhatsApp.",
+  "description": "Streaming, licencias, pines, tecnología y soporte. Compra en 3 toques y recibe por WhatsApp. www.dctecnology.xyz",
   "lang": "es-CO",
-  "start_url": "/?app=1",
+  "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "background_color": "#0D1015",
   "theme_color": "#0D1015",
-  "categories": ["shopping", "entertainment", "utilities"],
+  "categories": [
+    "shopping",
+    "entertainment",
+    "utilities"
+  ],
   "icons": [
-    { "src": "/img/logo-dc-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "/img/logo-dc-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "/img/logo-dc-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    {
+      "src": "/img/logo-dc-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/img/logo-dc-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/img/logo-dc-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ],
   "shortcuts": [
-    { "name": "Mis pedidos", "url": "/#cuenta" },
-    { "name": "Soporte", "url": "/#soporte" },
-    { "name": "Catálogo", "url": "/#catalogo" }
+    {
+      "name": "Catálogo",
+      "short_name": "Catálogo",
+      "url": "/#catalogo"
+    },
+    {
+      "name": "Mis pedidos",
+      "short_name": "Pedidos",
+      "url": "/#cuenta"
+    },
+    {
+      "name": "Soporte",
+      "short_name": "Soporte",
+      "url": "/#soporte"
+    },
+    {
+      "name": "Servicios técnicos",
+      "short_name": "Servicios",
+      "url": "/#servicios"
+    }
+  ],
+  "id": "/",
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
+  "orientation": "any",
+  "screenshots": [
+    {
+      "src": "/img/app/celular-1.webp",
+      "sizes": "780x1688",
+      "type": "image/webp",
+      "form_factor": "narrow",
+      "label": "Inicio de la tienda en el celular"
+    },
+    {
+      "src": "/img/app/celular-2.webp",
+      "sizes": "780x1688",
+      "type": "image/webp",
+      "form_factor": "narrow",
+      "label": "Catálogo con filtros y orden por precio"
+    },
+    {
+      "src": "/img/app/pc-1.webp",
+      "sizes": "1280x800",
+      "type": "image/webp",
+      "form_factor": "wide",
+      "label": "Tienda en el computador"
+    }
   ]
 }

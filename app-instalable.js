@@ -26,9 +26,33 @@
         botonesInstalar().forEach((b) => { b.hidden = true; });
     });
     // iPhone no tiene botón de instalar: se explica cómo hacerlo (solo en Safari y si no está instalada)
-    const esIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    const esIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
     const instalada = matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+    if (instalada) document.documentElement.classList.add('app-instalada');
     if (esIOS && !instalada) { const p = document.getElementById('ayuda-ios'); if (p) p.hidden = false; }
+
+    // Aviso para instalar (una vez por visita, a los 12 s, y no se repite en 14 días si lo cierran)
+    const hasta = Number(leer('dc_app_aviso')) || 0;
+    const puedeAvisar = () => !instalada && Date.now() > hasta && !sessionStorage.getItem('dc_app_aviso_visto') && window.top === window;
+    function mostrarAviso(ios) {
+        if (!puedeAvisar() || document.querySelector('.aviso-app')) return;
+        try { sessionStorage.setItem('dc_app_aviso_visto', '1'); } catch { /* nada */ }
+        const caja = document.createElement('div');
+        caja.className = 'aviso-app';
+        caja.setAttribute('role', 'dialog');
+        caja.setAttribute('aria-label', 'Instalar la app');
+        caja.innerHTML = `<img src="img/logo-dc-192.png" alt="" width="44" height="44">
+            <div><b>Instala la app DC Tecnology</b><span>${ios ? 'Toca <i class="fa-solid fa-arrow-up-from-bracket" aria-hidden="true"></i> Compartir y luego «Agregar a inicio».' : 'Abre más rápido y tus pedidos a un toque. Gratis, sin tienda de apps.'}</span></div>
+            ${ios ? '' : '<button type="button" class="aviso-app__si" data-instalar>Instalar</button>'}
+            <button type="button" class="aviso-app__no" aria-label="Ahora no"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>`;
+        document.body.appendChild(caja);
+        requestAnimationFrame(() => caja.classList.add('ver'));
+        const cerrar = (recordar) => { caja.classList.remove('ver'); setTimeout(() => caja.remove(), 300); if (recordar) guardar('dc_app_aviso', String(Date.now() + 14 * 864e5)); };
+        caja.querySelector('.aviso-app__no').addEventListener('click', () => cerrar(true));
+        caja.querySelector('[data-instalar]')?.addEventListener('click', () => setTimeout(() => cerrar(false), 200));
+    }
+    addEventListener('beforeinstallprompt', () => setTimeout(() => mostrarAviso(false), 12000));
+    if (esIOS && /safari/i.test(navigator.userAgent) && !/crios|fxios/i.test(navigator.userAgent)) setTimeout(() => mostrarAviso(true), 12000);
 
     /* ---------- Música de fondo (Web Audio) ---------- */
     const VOLUMEN = 0.05;

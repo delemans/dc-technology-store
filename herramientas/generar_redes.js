@@ -136,7 +136,7 @@ const publicaciones = Array.from({ length: DIAS }, (_, d) => {
     const fecha = new Date(inicio.getTime() + d * 864e5);
     const texto = `${textoDe(id)}
 
-🛒 dctecnology.xyz
+🛒 www.dctecnology.xyz
 💬 WhatsApp 322 328 4622`;
     return { fecha: fecha.toISOString(), campana: campana.nombre, video: id, archivo, titulo: TITULOS[id] ?? id,
         youtube: { titulo: `${TITULOS[id] ?? id} #Shorts`.slice(0, 100), descripcion: `${texto}

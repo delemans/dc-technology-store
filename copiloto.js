@@ -56,7 +56,7 @@
     const esperar = (ms) => new Promise((r) => setTimeout(r, reducirMovimiento ? 0 : ms));
 
     function cargarFAQ() {
-        cargaFAQ ??= fetch('bot-conocimiento.json', { cache: 'no-store' })
+        cargaFAQ ??= fetch('bot-conocimiento.json', { cache: 'no-cache' })
             .then((r) => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
             .then((datos) => {
                 faq = (datos.faq ?? []).filter((f) => !f.pendiente_configurar && f.respuesta);

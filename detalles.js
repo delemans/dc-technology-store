@@ -22,12 +22,16 @@
         document.getElementById('searchInput')?.focus({ preventScroll: true });
     });
     let pendiente = false;
+    let ultimaY = scrollY;
     const medir = () => {
         pendiente = false;
         const alto = raiz.scrollHeight - innerHeight;
         barra.style.transform = `scaleX(${alto > 0 ? Math.min(1, scrollY / alto) : 0})`;
         arriba.hidden = scrollY < innerHeight * 1.5;
         raiz.classList.toggle('bajando', scrollY > 120);
+        // Menú inferior: se esconde al bajar (más espacio para ver productos) y vuelve al subir o al llegar al final
+        const y = scrollY, final = y + innerHeight >= raiz.scrollHeight - 40;
+        if (Math.abs(y - ultimaY) > 8) { raiz.classList.toggle('ocultar-menu', y > ultimaY && y > 220 && !final); ultimaY = y; }
     };
     addEventListener('scroll', () => { if (!pendiente) { pendiente = true; requestAnimationFrame(medir); } }, { passive: true });
     addEventListener('resize', medir, { passive: true });

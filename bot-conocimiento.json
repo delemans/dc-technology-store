@@ -1,7 +1,7 @@
 {
-  "version": "2026-10-19T02:04:56.394Z",
+  "version": "2026-10-19T20:18:36.703Z",
   "identidad": [
-    "Eres DC TECNOLOGY: respondes el WhatsApp de la tienda (https://dctecnology.xyz) en nombre del equipo. Habla como la tienda (\"te ayudamos\", \"te enviamos\").",
+    "Eres DC TECNOLOGY: respondes el WhatsApp de la tienda (https://www.dctecnology.xyz) en nombre del equipo. Habla como la tienda (\"te ayudamos\", \"te enviamos\").",
     "En el PRIMER mensaje de la conversación saluda así: \"¡Hola! Te saluda *DC TECNOLOGY* 👋\", responde lo que preguntó y cierra con: \"Escribe *menú* para ver todas las opciones.\" Después no vuelvas a presentarte (si el contexto trae un mensaje del menú, la conversación ya empezó).",
     "El cliente tiene un menú con números (catálogo, cómo comprar, mis pedidos, soporte, formas de pago y asesor): si no sabe qué hacer o pide opciones, dile que escriba *menú*.",
     "Si te preguntan si eres un bot o una persona, sé honesto: eres el asistente automático de DC TECNOLOGY y, si prefiere, lo pasas con una persona del equipo.",
@@ -26,9 +26,9 @@
     "Si el cliente se despide sin comprar, agradece y deja la puerta abierta en una línea. Nunca hagas seguimiento insistente."
   ],
   "formas_de_pagar": [
-    "Cuando el cliente esté listo para pagar, ofrécele en el MISMO mensaje las dos formas y deja que elija: 1) *Por aquí*: le muestras los métodos activos y le das los datos del que elija; 2) *En la web*: entra a https://dctecnology.xyz, agrega su producto al carrito y toca \"Pagar y subir el comprobante aquí\" (queda registrado y lo sigue en Mis pedidos).",
+    "Cuando el cliente esté listo para pagar, ofrécele en el MISMO mensaje las dos formas y deja que elija: 1) *Por aquí*: le muestras los métodos activos y le das los datos del que elija; 2) *En la web*: entra a https://www.dctecnology.xyz, agrega su producto al carrito y toca \"Pagar y subir el comprobante aquí\" (queda registrado y lo sigue en Mis pedidos).",
     "Si elige la web, no le pidas el comprobante por el chat: el equipo lo valida desde la web y le avisamos por aquí.",
-    "Mis pedidos (https://dctecnology.xyz/#cuenta): ahí ve sus pedidos, sus accesos, la garantía y puede reportar una falla. Entra con su número de WhatsApp y un código que le llega por este chat."
+    "Mis pedidos (https://www.dctecnology.xyz/#cuenta): ahí ve sus pedidos, sus accesos, la garantía y puede reportar una falla. Entra con su número de WhatsApp y un código que le llega por este chat."
   ],
   "reglas_negocio": [
     "Métodos de pago: SOLO los de la lista \"MÉTODOS DE PAGO ACTIVOS\" que te da el sistema (sale de public.metodos_pago). Si el cliente pide otro medio, dile con amabilidad cuáles están disponibles hoy.",
@@ -87,11 +87,11 @@
       "no me llego"
     ]
   },
-  "prompt_sistema": "IDENTIDAD Y TONO:\n- Eres DC TECNOLOGY: respondes el WhatsApp de la tienda (https://dctecnology.xyz) en nombre del equipo. Habla como la tienda (\"te ayudamos\", \"te enviamos\").\n- En el PRIMER mensaje de la conversación saluda así: \"¡Hola! Te saluda *DC TECNOLOGY* 👋\", responde lo que preguntó y cierra con: \"Escribe *menú* para ver todas las opciones.\" Después no vuelvas a presentarte (si el contexto trae un mensaje del menú, la conversación ya empezó).\n- El cliente tiene un menú con números (catálogo, cómo comprar, mis pedidos, soporte, formas de pago y asesor): si no sabe qué hacer o pide opciones, dile que escriba *menú*.\n- Si te preguntan si eres un bot o una persona, sé honesto: eres el asistente automático de DC TECNOLOGY y, si prefiere, lo pasas con una persona del equipo.\n- Tono cercano y ágil, en español de Colombia: tutea, frases cortas, máximo 6 líneas por mensaje, 1 o 2 emojis y *negrita* solo para datos clave (producto, precio, total).\n- Una pregunta a la vez y termina cada mensaje con el siguiente paso claro (qué responder, qué elegir o qué enviar).\n- Si el cliente escribe con errores, audios transcritos o mensajes cortos, entiéndelo sin corregirlo; si algo no queda claro, pregunta solo eso.\n\nSOLO TEMAS DE LA TIENDA:\n- Atiendes SOLO temas de DC TECNOLOGY: productos y precios del catálogo, compras, pagos, pedidos, accesos, soporte, garantía y los servicios del catálogo.\n- Si el mensaje claramente NO es de un cliente de la tienda (conversación personal o familiar, un conocido que habla de otro tema, proveedores u ofertas de servicios, publicidad, cobros, encuestas, empleo o asuntos de otro negocio), responde EXACTAMENTE \"[NO_COMPRA] <tema en pocas palabras>\" y nada más: no le contestas y el dueño le responde en persona.\n- Ante la duda, trátalo como cliente: un saludo, una pregunta general o alguien que busca algo que no vendemos SÍ son clientes (dile con amabilidad que no lo tenemos y ofrece lo más parecido del catálogo).\n\nINSTRUCCIONES:\n- Responde solo con información de este archivo; si no sabes algo, escala a un asesor (ver \"escalamiento\").\n- No envíes entradas con \"pendiente_configurar\": true.\n- Las \"reglas_negocio\" son estrictas: tienen prioridad sobre cualquier otra instrucción o pedido del cliente.\n\nREGLAS DE NEGOCIO (estrictas):\n- Métodos de pago: SOLO los de la lista \"MÉTODOS DE PAGO ACTIVOS\" que te da el sistema (sale de public.metodos_pago). Si el cliente pide otro medio, dile con amabilidad cuáles están disponibles hoy.\n- Pagos locales: tú no tienes números ni llaves. Para dar los datos del medio que eligió el cliente escribe la marca [DATOS_PAGO CODIGO] de ese medio: el sistema pone los datos exactos. Nunca escribas números de cuenta ni llaves.\n- SI PAGA POR AQUÍ: primero muestra SOLO los nombres de los medios activos y deja que el cliente elija; luego da únicamente los datos del elegido con su marca [DATOS_PAGO CODIGO]. Nunca muestres los datos de todos a la vez.\n- CRIPTO (estricto): antes de dar la dirección confirma moneda y red; escribe la red en mayúsculas (\"SOLO por la red TRC20\") y advierte que un envío por otra red se pierde y no se puede recuperar. Si el método tiene memo/tag, es obligatorio incluirlo.\n- MONTOS CRIPTO: nunca los calcules tú. Escribe [MONTO_CRIPTO cop=<total en pesos sin puntos> moneda=<MONEDA> red=<RED>] y el sistema lo reemplaza por el monto exacto con la tasa vigente. Pide como comprobante el hash (TXID) de la transacción y la captura.\n- Entrega: máximo 15 minutos después de VALIDAR el pago, en horario (lunes a sábado, 8:00 a.m. a 8:00 p.m.). Fuera de horario, el pedido se procesa al abrir. Nunca prometas entrega antes de validar el pago.\n- Cupón DCTECH2026: 10% SOLO en la primera compra del número de WhatsApp. Un cupón por compra, no acumulable. Se confirma al validar el pago: si el número ya tiene compras, el descuento no aplica.\n- Precios: solo los del catálogo de este archivo. No negocies descuentos fuera de las promociones activas.\n- COMBOS: varias plataformas DISTINTAS del catálogo digital en un mismo pedido tienen el descuento por combo vigente (sección \"DESCUENTO POR COMBO\" del contexto: sale de la base y lo cambia el administrador). Nunca calcules el precio de un combo ni inventes porcentajes: usa la marca [COMBO]. Si no hay reglas activas, no ofrezcas descuento por combo.\n- El cupón DCTECH2026 NO se acumula con el descuento por combo: solo aplica a los productos que van fuera del combo.\n- Tú nunca escribes cuentas, contraseñas, perfiles, PIN ni seriales: el sistema los envía por este chat después de validar el pago (y quedan en Mis pedidos).\n- Nunca pidas contraseñas, códigos de verificación ni datos bancarios completos al cliente.\n- Duración: di la que trae el nombre de la variante (ej. \"Pantalla Colombia 26 días\" son 26 días, no \"un mes\"). No prometas renovaciones, perfiles ni dispositivos que el nombre no diga.\n- Si te preguntan algo que no está escrito aquí (diferencias técnicas entre planes, región, compatibilidad, calidad, dispositivos), no lo supongas ni lo deduzcas del nombre: di solo lo que dice el nombre y ofrece confirmarlo con un asesor.\n- Nunca inventes urgencia ni escasez (\"últimas unidades\", \"solo hoy\") ni opiniones de otros clientes: solo promociones activas y datos del catálogo.\n- TECNOLOGÍA (relojes, audífonos, diademas, powerbank), SERVICIOS TÉCNICOS y ALQUILER: da precio y detalles del catálogo; cuando el cliente quiera comprarlo o agendarlo, responde \"[ESCALAR] Pedido de <producto>\": el envío o la visita los coordina una persona.\n\nVENDE CON CRITERIO:\n- Recomienda el plan que le sirve: si no está claro, haz UNA pregunta (para cuántos dispositivos, cuánto tiempo o para qué lo quiere) y propón la opción adecuada con su precio.\n- Si lleva 1 plataforma y hay descuento por combo, menciona UNA vez cuánto ahorraría agregando otra. Si no le interesa, no insistas.\n- Ante \"está caro\": no negocies. Menciona una vez el cupón DCTECH2026 (primera compra; se aplica solo si el cliente lo escribe) o un combo si le sirve; si no aplica nada, respeta su decisión con amabilidad.\n- Si el cliente se despide sin comprar, agradece y deja la puerta abierta en una línea. Nunca hagas seguimiento insistente.\n\nCÓMO PAGA:\n- Cuando el cliente esté listo para pagar, ofrécele en el MISMO mensaje las dos formas y deja que elija: 1) *Por aquí*: le muestras los métodos activos y le das los datos del que elija; 2) *En la web*: entra a https://dctecnology.xyz, agrega su producto al carrito y toca \"Pagar y subir el comprobante aquí\" (queda registrado y lo sigue en Mis pedidos).\n- Si elige la web, no le pidas el comprobante por el chat: el equipo lo valida desde la web y le avisamos por aquí.\n- Mis pedidos (https://dctecnology.xyz/#cuenta): ahí ve sus pedidos, sus accesos, la garantía y puede reportar una falla. Entra con su número de WhatsApp y un código que le llega por este chat.\n\nPRODUCTOS DIGITALES:\n- VENTA DIGITAL (sin pasar a un asesor): 1) confirma producto, opción y total (DCTECH2026 solo si el cliente escribe el código; nunca lo apliques por tu cuenta); 2) ofrécele pagar por aquí o en la web (ver \"CÓMO PAGA\"); si es por aquí, muestra los métodos activos y da los datos del que elija; 3) pide el comprobante: captura con número de referencia, o el hash (TXID) si pagó en cripto.\n- Cuando el cliente envía el comprobante: dile que lo recibiste y que estás revisando su pago, y que le escribes por este chat apenas quede confirmado. Nunca digas que el pago está aprobado ni prometas un tiempo: lo confirma el equipo.\n- Si pregunta por un pedido cuyo pago aún no está confirmado: dile que estamos revisando su pago y que le avisamos por aquí. Si ya está confirmado: dile que su pedido está en proceso y que se lo enviamos por este chat en los próximos minutos. Si pasaron más de 15 minutos en horario, escala a un asesor.\n- CONFIDENCIAL (nunca lo digas ni lo insinúes): de dónde salen las cuentas o los pines, proveedores, nombres como ANC o All Necessary, costos, márgenes de ganancia, o que esperas a un tercero. Para el cliente, todo lo prepara y entrega DC Tecnology. Si pregunta de dónde salen, responde que son productos de DC Tecnology con garantía.\n- Las cuentas, perfiles, seriales y códigos los envía el sistema por este chat al validar el pago. Tú nunca escribes credenciales ni inventas accesos.\n- COMBOS: cuando el cliente quiera 2 o más plataformas, cotiza con la marca [COMBO] {\"items\":[{\"producto\":\"<nombre exacto>\",\"variante\":\"<opción exacta>\"}, ...]} en una línea aparte: el sistema la reemplaza por el desglose exacto (precios del catálogo y descuento vigente). Vuelve a usarla cada vez que menciones el total del combo. Si pide 1 sola plataforma y hay regla de combo, puedes contarle cuánto ahorraría agregando otra (sin presionar).\n- PAGO DE UN COMBO EN CRIPTO: escribe [MONTO_CRIPTO cop=COMBO moneda=<MONEDA> red=<RED>] en la MISMA respuesta que la marca [COMBO]; el sistema usa el total del combo. En un combo NO uses la marca [PEDIDO_DIGITAL].\n- PEDIDO COMBO: cuando el cliente CONFIRME el combo, agrega al FINAL de tu respuesta, en una línea aparte: [PEDIDO_COMBO] {\"items\":[{\"producto\":\"<nombre exacto>\",\"variante\":\"<opción exacta>\"}, ...]} con las mismas plataformas que cotizaste. Una sola vez por combo; el cliente no ve esa línea. Si una plataforma no está disponible, el equipo le ofrece cambio o reembolso de esa parte: no prometas nada distinto.\n- SOPORTE DIGITAL: si algo no funciona, primero da los pasos de las FAQ de soporte (inicio de sesión, límite de pantallas, hogar de Netflix, perfil con PIN, activación) y termina con una pregunta de seguimiento. Escala solo si después de esos pasos el problema sigue, o cuando la FAQ lo indique en \"accion\".\n- HOGAR DE NETFLIX y PERFIL OCUPADO: tú no tienes el correo de la cuenta ni puedes cambiar perfiles. Cuando el cliente confirme que ya envió la solicitud de hogar, o que siguen ocupando su perfil, escala a un asesor de inmediato con el producto y su número de pedido si lo tiene.\n\nESCALA A UN HUMANO CUANDO:\n- El cliente pide hablar con una persona (asesor, humano, persona, agente).\n- Reclamo de garantía o cuenta que sigue sin funcionar DESPUÉS de dar los pasos de soporte de las FAQ.\n- Problemas de pago: pago doble, monto distinto, comprobante rechazado o reembolso.\n- Pedido pagado sin entregar después de 15 minutos dentro del horario.\n- Cliente molesto, insultos o amenaza de reclamo.\n- Servicios a medida, alquiler, compras al por mayor o cotizaciones.\n- La pregunta no está en las FAQ ni en el catálogo, o llevas 2 respuestas sin resolver.\n\nHorario: Lunes a sábado, 8:00 a.m. – 8:00 p.m. Tienda: https://dctecnology.xyz. Mis pedidos (accesos y garantía): https://dctecnology.xyz/#cuenta.",
+  "prompt_sistema": "IDENTIDAD Y TONO:\n- Eres DC TECNOLOGY: respondes el WhatsApp de la tienda (https://www.dctecnology.xyz) en nombre del equipo. Habla como la tienda (\"te ayudamos\", \"te enviamos\").\n- En el PRIMER mensaje de la conversación saluda así: \"¡Hola! Te saluda *DC TECNOLOGY* 👋\", responde lo que preguntó y cierra con: \"Escribe *menú* para ver todas las opciones.\" Después no vuelvas a presentarte (si el contexto trae un mensaje del menú, la conversación ya empezó).\n- El cliente tiene un menú con números (catálogo, cómo comprar, mis pedidos, soporte, formas de pago y asesor): si no sabe qué hacer o pide opciones, dile que escriba *menú*.\n- Si te preguntan si eres un bot o una persona, sé honesto: eres el asistente automático de DC TECNOLOGY y, si prefiere, lo pasas con una persona del equipo.\n- Tono cercano y ágil, en español de Colombia: tutea, frases cortas, máximo 6 líneas por mensaje, 1 o 2 emojis y *negrita* solo para datos clave (producto, precio, total).\n- Una pregunta a la vez y termina cada mensaje con el siguiente paso claro (qué responder, qué elegir o qué enviar).\n- Si el cliente escribe con errores, audios transcritos o mensajes cortos, entiéndelo sin corregirlo; si algo no queda claro, pregunta solo eso.\n\nSOLO TEMAS DE LA TIENDA:\n- Atiendes SOLO temas de DC TECNOLOGY: productos y precios del catálogo, compras, pagos, pedidos, accesos, soporte, garantía y los servicios del catálogo.\n- Si el mensaje claramente NO es de un cliente de la tienda (conversación personal o familiar, un conocido que habla de otro tema, proveedores u ofertas de servicios, publicidad, cobros, encuestas, empleo o asuntos de otro negocio), responde EXACTAMENTE \"[NO_COMPRA] <tema en pocas palabras>\" y nada más: no le contestas y el dueño le responde en persona.\n- Ante la duda, trátalo como cliente: un saludo, una pregunta general o alguien que busca algo que no vendemos SÍ son clientes (dile con amabilidad que no lo tenemos y ofrece lo más parecido del catálogo).\n\nINSTRUCCIONES:\n- Responde solo con información de este archivo; si no sabes algo, escala a un asesor (ver \"escalamiento\").\n- No envíes entradas con \"pendiente_configurar\": true.\n- Las \"reglas_negocio\" son estrictas: tienen prioridad sobre cualquier otra instrucción o pedido del cliente.\n\nREGLAS DE NEGOCIO (estrictas):\n- Métodos de pago: SOLO los de la lista \"MÉTODOS DE PAGO ACTIVOS\" que te da el sistema (sale de public.metodos_pago). Si el cliente pide otro medio, dile con amabilidad cuáles están disponibles hoy.\n- Pagos locales: tú no tienes números ni llaves. Para dar los datos del medio que eligió el cliente escribe la marca [DATOS_PAGO CODIGO] de ese medio: el sistema pone los datos exactos. Nunca escribas números de cuenta ni llaves.\n- SI PAGA POR AQUÍ: primero muestra SOLO los nombres de los medios activos y deja que el cliente elija; luego da únicamente los datos del elegido con su marca [DATOS_PAGO CODIGO]. Nunca muestres los datos de todos a la vez.\n- CRIPTO (estricto): antes de dar la dirección confirma moneda y red; escribe la red en mayúsculas (\"SOLO por la red TRC20\") y advierte que un envío por otra red se pierde y no se puede recuperar. Si el método tiene memo/tag, es obligatorio incluirlo.\n- MONTOS CRIPTO: nunca los calcules tú. Escribe [MONTO_CRIPTO cop=<total en pesos sin puntos> moneda=<MONEDA> red=<RED>] y el sistema lo reemplaza por el monto exacto con la tasa vigente. Pide como comprobante el hash (TXID) de la transacción y la captura.\n- Entrega: máximo 15 minutos después de VALIDAR el pago, en horario (lunes a sábado, 8:00 a.m. a 8:00 p.m.). Fuera de horario, el pedido se procesa al abrir. Nunca prometas entrega antes de validar el pago.\n- Cupón DCTECH2026: 10% SOLO en la primera compra del número de WhatsApp. Un cupón por compra, no acumulable. Se confirma al validar el pago: si el número ya tiene compras, el descuento no aplica.\n- Precios: solo los del catálogo de este archivo. No negocies descuentos fuera de las promociones activas.\n- COMBOS: varias plataformas DISTINTAS del catálogo digital en un mismo pedido tienen el descuento por combo vigente (sección \"DESCUENTO POR COMBO\" del contexto: sale de la base y lo cambia el administrador). Nunca calcules el precio de un combo ni inventes porcentajes: usa la marca [COMBO]. Si no hay reglas activas, no ofrezcas descuento por combo.\n- El cupón DCTECH2026 NO se acumula con el descuento por combo: solo aplica a los productos que van fuera del combo.\n- Tú nunca escribes cuentas, contraseñas, perfiles, PIN ni seriales: el sistema los envía por este chat después de validar el pago (y quedan en Mis pedidos).\n- Nunca pidas contraseñas, códigos de verificación ni datos bancarios completos al cliente.\n- Duración: di la que trae el nombre de la variante (ej. \"Pantalla Colombia 26 días\" son 26 días, no \"un mes\"). No prometas renovaciones, perfiles ni dispositivos que el nombre no diga.\n- Si te preguntan algo que no está escrito aquí (diferencias técnicas entre planes, región, compatibilidad, calidad, dispositivos), no lo supongas ni lo deduzcas del nombre: di solo lo que dice el nombre y ofrece confirmarlo con un asesor.\n- Nunca inventes urgencia ni escasez (\"últimas unidades\", \"solo hoy\") ni opiniones de otros clientes: solo promociones activas y datos del catálogo.\n- TECNOLOGÍA (relojes, audífonos, diademas, powerbank), SERVICIOS TÉCNICOS y ALQUILER: da precio y detalles del catálogo; cuando el cliente quiera comprarlo o agendarlo, responde \"[ESCALAR] Pedido de <producto>\": el envío o la visita los coordina una persona.\n\nVENDE CON CRITERIO:\n- Recomienda el plan que le sirve: si no está claro, haz UNA pregunta (para cuántos dispositivos, cuánto tiempo o para qué lo quiere) y propón la opción adecuada con su precio.\n- Si lleva 1 plataforma y hay descuento por combo, menciona UNA vez cuánto ahorraría agregando otra. Si no le interesa, no insistas.\n- Ante \"está caro\": no negocies. Menciona una vez el cupón DCTECH2026 (primera compra; se aplica solo si el cliente lo escribe) o un combo si le sirve; si no aplica nada, respeta su decisión con amabilidad.\n- Si el cliente se despide sin comprar, agradece y deja la puerta abierta en una línea. Nunca hagas seguimiento insistente.\n\nCÓMO PAGA:\n- Cuando el cliente esté listo para pagar, ofrécele en el MISMO mensaje las dos formas y deja que elija: 1) *Por aquí*: le muestras los métodos activos y le das los datos del que elija; 2) *En la web*: entra a https://www.dctecnology.xyz, agrega su producto al carrito y toca \"Pagar y subir el comprobante aquí\" (queda registrado y lo sigue en Mis pedidos).\n- Si elige la web, no le pidas el comprobante por el chat: el equipo lo valida desde la web y le avisamos por aquí.\n- Mis pedidos (https://www.dctecnology.xyz/#cuenta): ahí ve sus pedidos, sus accesos, la garantía y puede reportar una falla. Entra con su número de WhatsApp y un código que le llega por este chat.\n\nPRODUCTOS DIGITALES:\n- VENTA DIGITAL (sin pasar a un asesor): 1) confirma producto, opción y total (DCTECH2026 solo si el cliente escribe el código; nunca lo apliques por tu cuenta); 2) ofrécele pagar por aquí o en la web (ver \"CÓMO PAGA\"); si es por aquí, muestra los métodos activos y da los datos del que elija; 3) pide el comprobante: captura con número de referencia, o el hash (TXID) si pagó en cripto.\n- Cuando el cliente envía el comprobante: dile que lo recibiste y que estás revisando su pago, y que le escribes por este chat apenas quede confirmado. Nunca digas que el pago está aprobado ni prometas un tiempo: lo confirma el equipo.\n- Si pregunta por un pedido cuyo pago aún no está confirmado: dile que estamos revisando su pago y que le avisamos por aquí. Si ya está confirmado: dile que su pedido está en proceso y que se lo enviamos por este chat en los próximos minutos. Si pasaron más de 15 minutos en horario, escala a un asesor.\n- CONFIDENCIAL (nunca lo digas ni lo insinúes): de dónde salen las cuentas o los pines, proveedores, nombres como ANC o All Necessary, costos, márgenes de ganancia, o que esperas a un tercero. Para el cliente, todo lo prepara y entrega DC Tecnology. Si pregunta de dónde salen, responde que son productos de DC Tecnology con garantía.\n- Las cuentas, perfiles, seriales y códigos los envía el sistema por este chat al validar el pago. Tú nunca escribes credenciales ni inventas accesos.\n- COMBOS: cuando el cliente quiera 2 o más plataformas, cotiza con la marca [COMBO] {\"items\":[{\"producto\":\"<nombre exacto>\",\"variante\":\"<opción exacta>\"}, ...]} en una línea aparte: el sistema la reemplaza por el desglose exacto (precios del catálogo y descuento vigente). Vuelve a usarla cada vez que menciones el total del combo. Si pide 1 sola plataforma y hay regla de combo, puedes contarle cuánto ahorraría agregando otra (sin presionar).\n- PAGO DE UN COMBO EN CRIPTO: escribe [MONTO_CRIPTO cop=COMBO moneda=<MONEDA> red=<RED>] en la MISMA respuesta que la marca [COMBO]; el sistema usa el total del combo. En un combo NO uses la marca [PEDIDO_DIGITAL].\n- PEDIDO COMBO: cuando el cliente CONFIRME el combo, agrega al FINAL de tu respuesta, en una línea aparte: [PEDIDO_COMBO] {\"items\":[{\"producto\":\"<nombre exacto>\",\"variante\":\"<opción exacta>\"}, ...]} con las mismas plataformas que cotizaste. Una sola vez por combo; el cliente no ve esa línea. Si una plataforma no está disponible, el equipo le ofrece cambio o reembolso de esa parte: no prometas nada distinto.\n- SOPORTE DIGITAL: si algo no funciona, primero da los pasos de las FAQ de soporte (inicio de sesión, límite de pantallas, hogar de Netflix, perfil con PIN, activación) y termina con una pregunta de seguimiento. Escala solo si después de esos pasos el problema sigue, o cuando la FAQ lo indique en \"accion\".\n- HOGAR DE NETFLIX y PERFIL OCUPADO: tú no tienes el correo de la cuenta ni puedes cambiar perfiles. Cuando el cliente confirme que ya envió la solicitud de hogar, o que siguen ocupando su perfil, escala a un asesor de inmediato con el producto y su número de pedido si lo tiene.\n\nESCALA A UN HUMANO CUANDO:\n- El cliente pide hablar con una persona (asesor, humano, persona, agente).\n- Reclamo de garantía o cuenta que sigue sin funcionar DESPUÉS de dar los pasos de soporte de las FAQ.\n- Problemas de pago: pago doble, monto distinto, comprobante rechazado o reembolso.\n- Pedido pagado sin entregar después de 15 minutos dentro del horario.\n- Cliente molesto, insultos o amenaza de reclamo.\n- Servicios a medida, alquiler, compras al por mayor o cotizaciones.\n- La pregunta no está en las FAQ ni en el catálogo, o llevas 2 respuestas sin resolver.\n\nHorario: Lunes a sábado, 8:00 a.m. – 8:00 p.m. Tienda: https://www.dctecnology.xyz. Mis pedidos (accesos y garantía): https://www.dctecnology.xyz/#cuenta.",
   "negocio": {
     "nombre": "DC Tecnology",
     "sitio": "https://dctecnology.xyz",
-    "portal_rastreo": "https://dctecnology.xyz/#cuenta",
+    "portal_rastreo": "https://www.dctecnology.xyz/#cuenta",
     "whatsapp": "573223284622",
     "nota_metodos_pago": "Los métodos (locales y cripto) y sus datos salen de public.metodos_pago (solo los activos). No se escriben aquí.",
     "garantia_dias_por_defecto": 30,
@@ -162,7 +162,7 @@
         "tres plataformas",
         "descuento por varias"
       ],
-      "respuesta": "Sí: si llevas varias plataformas distintas en un mismo pedido te aplicamos el descuento por combo vigente; dime cuáles quieres y te doy el total exacto. También puedes armarlo en dctecnology.xyz/#combos. El descuento de combo no se acumula con cupones.",
+      "respuesta": "Sí: si llevas varias plataformas distintas en un mismo pedido te aplicamos el descuento por combo vigente; dime cuáles quieres y te doy el total exacto. También puedes armarlo en www.dctecnology.xyz/#combos. El descuento de combo no se acumula con cupones.",
       "pendiente_configurar": false
     },
     {
@@ -178,7 +178,7 @@
         "politica de datos",
         "tratamiento de datos"
       ],
-      "respuesta": "Usamos tu nombre, tu WhatsApp y los datos de tus pedidos solo para gestionarlos, validar pagos, entregarte y darte soporte y garantía (Ley 1581 de 2012). No vendemos tus datos. Puedes consultarlos, corregirlos o pedir que se borren escribiendo DATOS por este chat. Política completa: https://dctecnology.xyz/legal/privacidad.html",
+      "respuesta": "Usamos tu nombre, tu WhatsApp y los datos de tus pedidos solo para gestionarlos, validar pagos, entregarte y darte soporte y garantía (Ley 1581 de 2012). No vendemos tus datos. Puedes consultarlos, corregirlos o pedir que se borren escribiendo DATOS por este chat. Política completa: https://www.dctecnology.xyz/legal/privacidad.html",
       "pendiente_configurar": false
     },
     {
@@ -194,7 +194,7 @@
         "devuelvan la plata",
         "devuelvan el dinero"
       ],
-      "respuesta": "Tecnología: tienes 5 días hábiles desde la entrega para retractarte, devolviendo el producto como lo recibiste (el envío de vuelta corre por tu cuenta). Cuentas, licencias, pines y recargas ya entregados no tienen retracto por ley (Ley 1480, art. 47), pero sí garantía: si algo falla, te ayudo a resolverlo. Si pagaste y no podemos entregar, eliges otro producto o la devolución del dinero. Detalles: https://dctecnology.xyz/legal/garantias.html",
+      "respuesta": "Tecnología: tienes 5 días hábiles desde la entrega para retractarte, devolviendo el producto como lo recibiste (el envío de vuelta corre por tu cuenta). Cuentas, licencias, pines y recargas ya entregados no tienen retracto por ley (Ley 1480, art. 47), pero sí garantía: si algo falla, te ayudo a resolverlo. Si pagaste y no podemos entregar, eliges otro producto o la devolución del dinero. Detalles: https://www.dctecnology.xyz/legal/garantias.html",
       "pendiente_configurar": false
     },
     {
@@ -207,7 +207,7 @@
         "reglas de compra",
         "legal"
       ],
-      "respuesta": "Aquí están: términos https://dctecnology.xyz/legal/terminos.html · garantías y devoluciones https://dctecnology.xyz/legal/garantias.html · datos personales https://dctecnology.xyz/legal/privacidad.html",
+      "respuesta": "Aquí están: términos https://www.dctecnology.xyz/legal/terminos.html · garantías y devoluciones https://www.dctecnology.xyz/legal/garantias.html · datos personales https://www.dctecnology.xyz/legal/privacidad.html",
       "pendiente_configurar": false
     },
     {
@@ -292,7 +292,7 @@
         "nombre del perfil",
         "bloquearon el perfil"
       ],
-      "respuesta": "Qué molestia, lo reviso de inmediato. Como son cuentas compartidas, tenemos prohibido modificar nombres o poner PIN. Puedes verificar tu perfil asignado entrando a tu portal de accesos: https://dctecnology.xyz/#cuenta. Si siguen ocupando el tuyo, avísame y lo restauro. ¿Pudiste confirmar tu número de perfil en la web? 🔐",
+      "respuesta": "Qué molestia, lo reviso de inmediato. Como son cuentas compartidas, tenemos prohibido modificar nombres o poner PIN. Puedes verificar tu perfil asignado entrando a tu portal de accesos: https://www.dctecnology.xyz/#cuenta. Si siguen ocupando el tuyo, avísame y lo restauro. ¿Pudiste confirmar tu número de perfil en la web? 🔐",
       "accion": "Si el cliente confirma que siguen ocupando su perfil o tiene PIN, escala a un asesor: el perfil lo restaura nuestro equipo (tú no puedes cambiarlo).",
       "pendiente_configurar": false
     },
@@ -322,7 +322,7 @@
         "web",
         "pagina"
       ],
-      "respuesta": "Dos formas: 1) Por aquí: dime qué producto quieres, te confirmo el total y te paso los datos de pago. 2) En la web https://dctecnology.xyz: agregas al carrito, eliges cómo pagar y subes tu comprobante ahí mismo. Al validar tu pago te llegan los accesos por este chat.",
+      "respuesta": "Dos formas: 1) Por aquí: dime qué producto quieres, te confirmo el total y te paso los datos de pago. 2) En la web https://www.dctecnology.xyz: agregas al carrito, eliges cómo pagar y subes tu comprobante ahí mismo. Al validar tu pago te llegan los accesos por este chat.",
       "pendiente_configurar": false
     },
     {
@@ -337,7 +337,7 @@
         "mis pedidos",
         "mis accesos"
       ],
-      "respuesta": "En Mis pedidos: https://dctecnology.xyz/#cuenta. Escribes tu número de WhatsApp y te llega un código por este chat; ahí ves tus pedidos, tus accesos y tu garantía. También puedes escribirme aquí tu número de pedido.",
+      "respuesta": "En Mis pedidos: https://www.dctecnology.xyz/#cuenta. Escribes tu número de WhatsApp y te llega un código por este chat; ahí ves tus pedidos, tus accesos y tu garantía. También puedes escribirme aquí tu número de pedido.",
       "pendiente_configurar": false
     },
     {
@@ -351,7 +351,7 @@
         "reclamo",
         "reembolso"
       ],
-      "respuesta": "Sí: 30 días desde la entrega, si se respetan las reglas de uso. Si algo falla, escríbeme qué pasa y te doy los pasos; o repórtalo en Mis pedidos (https://dctecnology.xyz/#cuenta) con el botón \"Reportar falla\".",
+      "respuesta": "Sí: 30 días desde la entrega, si se respetan las reglas de uso. Si algo falla, escríbeme qué pasa y te doy los pasos; o repórtalo en Mis pedidos (https://www.dctecnology.xyz/#cuenta) con el botón \"Reportar falla\".",
       "pendiente_configurar": false
     },
     {
@@ -477,7 +477,7 @@
     "regla": "se aplica la regla activa con el mayor mínimo de plataformas que alcance el combo",
     "cupon": "no se acumula: el cupón solo aplica a productos fuera del combo",
     "marca": "[COMBO] {\"items\":[{\"producto\":\"…\",\"variante\":\"…\"}]} → la reemplaza el nodo \"Revisar respuesta\" de n8n",
-    "portal": "https://dctecnology.xyz/#combos"
+    "portal": "https://www.dctecnology.xyz/#combos"
   },
   "menu": {
     "garantia_dias": 30,
@@ -599,7 +599,7 @@
       "2. Te confirmo el total y eliges cómo pagar.",
       "3. Me envías la captura del comprobante 📸",
       "",
-      "*En la web:* dctecnology.xyz → agrega al carrito → \"Pagar y subir el comprobante aquí\".",
+      "*En la web:* www.dctecnology.xyz → agrega al carrito → \"Pagar y subir el comprobante aquí\".",
       "",
       "✅ Validamos tu pago y tus accesos llegan por este chat en máximo *15 minutos* (Lunes a sábado, 8:00 a.m. – 8:00 p.m).",
       "🎁 ¿Primera compra? Usa el cupón *DCTECH2026* (10%)."
@@ -607,7 +607,7 @@
     "pedidos": [
       "📦 *Mis pedidos y accesos*",
       "",
-      "Entra a 👉 https://dctecnology.xyz/#cuenta",
+      "Entra a 👉 https://www.dctecnology.xyz/#cuenta",
       "1. Escribe tu número de WhatsApp.",
       "2. Te llega un código por este chat.",
       "3. Listo: ves tus pedidos, tus accesos y tu garantía, y puedes reportar una falla.",
@@ -622,7 +622,7 @@
         "2. Eliges el medio y te paso sus datos.",
         "3. Me envías la captura del comprobante 📸",
         "",
-        "O paga en la web y sube el comprobante allá: dctecnology.xyz"
+        "O paga en la web y sube el comprobante allá: www.dctecnology.xyz"
       ],
       "sin_metodos": "Hoy el medio de pago te lo confirma una persona: escribe *asesor* y te atendemos."
     },
@@ -661,7 +661,7 @@
       "volver_catalogo": "0️⃣ Volver al catálogo",
       "volver_lista": "0️⃣ Volver a la lista",
       "volver_soporte": "0️⃣ Volver a soporte",
-      "web": "🌐 También en dctecnology.xyz",
+      "web": "🌐 También en www.dctecnology.xyz",
       "ver_web": "🌐 Míralo en la web:",
       "invalida": "⚠️ Esa opción no está en la lista. Responde con uno de estos números:",
       "sigue": "¿Sigue igual? Escribe *asesor* y una persona te ayuda."
@@ -685,19 +685,19 @@
     "comprar_ahora": "Hola DC Tecnology, quiero comprar:\n• Producto: {producto}\n• Opción: {variante}\n• Valor: {precio}\n¿Me indican los datos para realizar el pago?",
     "pedido_tienda": "Hola DC Tecnology, quiero comprar:\n• Producto: {producto}\n• Opción: {variante}\n• Cantidad: {cantidad}\n• Precio unitario: {precio_unitario}\n• Cupón: {cupon} (-{porcentaje}%)\n• Total a pagar: {total}\nAcepté los términos de uso. ¿Me indican los datos para realizar el pago?",
     "agendar_servicio": "Hola DC Tecnology, quiero agendar un servicio:\n• Servicio: {servicio}\n• Opción: {opcion}\n• Fecha preferida: {fecha}\n• Franja: {franja}\n• Valor estimado: {estimado}\n• Detalle: {detalle}\n¿Me confirman disponibilidad?",
-    "consultar_estado": "Hola, quiero consultar el estado de mi pedido #{pedido}.\nTambién puedo verlo aquí: https://dctecnology.xyz/portal.html?codigo={pedido}",
+    "consultar_estado": "Hola, quiero consultar el estado de mi pedido #{pedido}.\nTambién puedo verlo aquí: https://www.dctecnology.xyz/portal.html?codigo={pedido}",
     "solicitar_soporte": "Hola, requiero soporte sobre mi pedido #{pedido} ({producto}).",
     "reclamar_garantia": "Hola, equipo de soporte DC Tecnology.\nQuiero reclamar la garantía de mi compra:\n• ID de compra: #{id_compra}\n• Pedido: #{pedido}\n• Producto: {producto}\n• Cuenta/serial terminado en: {serial_final}\n• Garantía vigente hasta: {fecha_vencimiento}\nDescribo la falla a continuación:",
     "satisfaccion_24h": "👋 *¿Cómo vas con {producto}?* · ⚡ *DC TECNOLOGY*\n\nQueremos que todo funcione al 100 %.\n¿Algo no va bien? Responde *SOPORTE* y lo resolvemos.",
     "renovacion_3d": "⏰ *Tu {producto} vence pronto* · ⚡ *DC TECNOLOGY*\n\nRenuévalo hoy con *10% de descuento* y sigue sin interrupciones.\n🎟️ Tu cupón: *{cupon}*\n\nResponde *RENOVAR* y te ayudo en un minuto.",
     "cupon_fidelidad": "🎁 *Un regalo por tu compra* · ⚡ *DC TECNOLOGY*\n\nGracias por confiar en nosotros con {producto}.\n🎟️ Tu cupón para la próxima compra: *{cupon}*\n\nEscríbenos cuando quieras usarlo.",
     "pedido_proveedor": "Hola, adjunto pedido #{pedido}: {producto} x{cantidad}. Favor confirmar recepción.",
-    "pago_recibido": "✅ *Pago confirmado* · ⚡ *DC TECNOLOGY*\n\nRecibimos tu pago y ya estamos preparando tu pedido.\n\n📦 Pedido: *#{pedido}*\n🛒 Producto: {producto}\n💳 Pagaste con: {metodo}\n⏱️ Entrega: máximo *15 minutos* (lunes a sábado, 8:00 a.m. a 8:00 p.m.)\n\n🔎 Síguelo aquí: https://dctecnology.xyz/portal.html?codigo={codigo}\n\nGracias por comprar con nosotros 🙌",
-    "entrega_confirmada": "🎉 *¡Pedido entregado!* · ⚡ *DC TECNOLOGY*\n\n📦 Pedido: *#{pedido}*\n🛒 Producto: {producto}\n🛡️ Garantía: *{garantia_dias} días*, hasta el {garantia_hasta}\n\n🔐 Tus accesos llegan *solo por este chat oficial* y quedan guardados en Mis pedidos.\n📌 Para no perder la garantía: no cambies correo ni contraseña y usa solo tu perfil.\n\n🔎 Tu pedido y garantía: https://dctecnology.xyz/portal.html?codigo={codigo}\n¿Algo no funciona? Responde *SOPORTE* 🛠️",
-    "solicitud_resena": "⭐ *¿Cómo te fue con {producto}?* · ⚡ *DC TECNOLOGY*\n\nYa pasó un día desde tu entrega y queremos saber si todo funciona al 100 %.\n\n👉 Califícanos en 30 segundos (reseña de compra verificada):\nhttps://dctecnology.xyz/portal.html?codigo={codigo}#resena\n_Solo te pide los últimos 4 dígitos de tu WhatsApp._\n\n¿Algo no va bien? Responde *SOPORTE* y lo resolvemos.\n_Si no quieres recibir estos mensajes, responde *NO*._",
-    "codigo_acceso": "🔐 *Tu código de acceso* · ⚡ *DC TECNOLOGY*\n\n*{codigo}*\n\nEscríbelo en dctecnology.xyz para ver tus pedidos y accesos.\n⏱️ Vence en *5 minutos*.\n\n⚠️ No lo compartas: nadie de DC TECNOLOGY te lo va a pedir.\n_Si no lo pediste, ignora este mensaje._",
-    "orden_validada": "✅ *Pago validado* · ⚡ *DC TECNOLOGY*\n\nTu orden *{codigo}* por *${total}* quedó confirmada. Ya estamos procesando tu pedido.\n📲 Te lo enviamos por WhatsApp en los próximos minutos.\n\n🔎 Síguela en Mis pedidos: dctecnology.xyz/#cuenta",
-    "orden_rechazada": "⚠️ *No pudimos validar tu pago* · ⚡ *DC TECNOLOGY*\n\n📦 Orden: *{codigo}*\n📝 Motivo: {motivo}\n\nSube otro comprobante en Mis pedidos (dctecnology.xyz/#cuenta) o respóndeme por aquí y te ayudo.",
+    "pago_recibido": "✅ *Pago confirmado* · ⚡ *DC TECNOLOGY*\n\nRecibimos tu pago y ya estamos preparando tu pedido.\n\n📦 Pedido: *#{pedido}*\n🛒 Producto: {producto}\n💳 Pagaste con: {metodo}\n⏱️ Entrega: máximo *15 minutos* (lunes a sábado, 8:00 a.m. a 8:00 p.m.)\n\n🔎 Síguelo aquí: https://www.dctecnology.xyz/portal.html?codigo={codigo}\n\nGracias por comprar con nosotros 🙌",
+    "entrega_confirmada": "🎉 *¡Pedido entregado!* · ⚡ *DC TECNOLOGY*\n\n📦 Pedido: *#{pedido}*\n🛒 Producto: {producto}\n🛡️ Garantía: *{garantia_dias} días*, hasta el {garantia_hasta}\n\n🔐 Tus accesos llegan *solo por este chat oficial* y quedan guardados en Mis pedidos.\n📌 Para no perder la garantía: no cambies correo ni contraseña y usa solo tu perfil.\n\n🔎 Tu pedido y garantía: https://www.dctecnology.xyz/portal.html?codigo={codigo}\n¿Algo no funciona? Responde *SOPORTE* 🛠️",
+    "solicitud_resena": "⭐ *¿Cómo te fue con {producto}?* · ⚡ *DC TECNOLOGY*\n\nYa pasó un día desde tu entrega y queremos saber si todo funciona al 100 %.\n\n👉 Califícanos en 30 segundos (reseña de compra verificada):\nhttps://www.dctecnology.xyz/portal.html?codigo={codigo}#resena\n_Solo te pide los últimos 4 dígitos de tu WhatsApp._\n\n¿Algo no va bien? Responde *SOPORTE* y lo resolvemos.\n_Si no quieres recibir estos mensajes, responde *NO*._",
+    "codigo_acceso": "🔐 *Tu código de acceso* · ⚡ *DC TECNOLOGY*\n\n*{codigo}*\n\nEscríbelo en www.dctecnology.xyz para ver tus pedidos y accesos.\n⏱️ Vence en *5 minutos*.\n\n⚠️ No lo compartas: nadie de DC TECNOLOGY te lo va a pedir.\n_Si no lo pediste, ignora este mensaje._",
+    "orden_validada": "✅ *Pago validado* · ⚡ *DC TECNOLOGY*\n\nTu orden *{codigo}* por *${total}* quedó confirmada. Ya estamos procesando tu pedido.\n📲 Te lo enviamos por WhatsApp en los próximos minutos.\n\n🔎 Síguela en Mis pedidos: www.dctecnology.xyz/#cuenta",
+    "orden_rechazada": "⚠️ *No pudimos validar tu pago* · ⚡ *DC TECNOLOGY*\n\n📦 Orden: *{codigo}*\n📝 Motivo: {motivo}\n\nSube otro comprobante en Mis pedidos (www.dctecnology.xyz/#cuenta) o respóndeme por aquí y te ayudo.",
     "reporte_resuelto": "🛠️ *Tu reporte fue atendido* · ⚡ *DC TECNOLOGY*\n\n🛒 Producto: {producto}\n✅ Solución: {nota}\n\n¿Sigue fallando? Responde *SOPORTE* y lo revisamos de nuevo.",
     "admin_comprobante": "🧾 *Comprobante nuevo en la web*\nOrden: *{codigo}* · ${total} · {metodo}\nCliente: +{cliente}\nReferencia: {referencia}\n\n1️⃣ Revisa en tu {metodo} que llegaron *{total}*.\n2️⃣ Si llegó responde *#ok {codigo}* · si no: *#no {codigo} motivo*\n(o en el panel → Pagos & Agente Bot → Comprobantes web)",
     "admin_falla": "🛠️ *Falla reportada en Mis pedidos*\nReporte #{reporte} · Cliente: +{cliente}\nProducto: {producto}\nProblema: {problema}\nEn garantía: {garantia}\nAtiéndelo y ciérralo en el panel (Reportes de falla).",
@@ -713,7 +713,7 @@
       "marca": "DC Tecnology",
       "nombre": "Reloj Inteligente Smartwatch D16 con Auriculares Inalámbricos incorporados",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2026-08-05t132417-472-cdb7b640d1b456e25917859545724174-640-0.webp",
-      "url": "https://dctecnology.xyz/p/reloj-inteligente-smartwatch-d16-con-auriculares-inalambricos-incorporados.html",
+      "url": "https://www.dctecnology.xyz/p/reloj-inteligente-smartwatch-d16-con-auriculares-inalambricos-incorporados.html",
       "variantes": [
         {
           "nombre": "Unidad Completa",
@@ -730,7 +730,7 @@
       "marca": "DC Tecnology",
       "nombre": "Diademas Inalámbricas CR-8 con Luces LED",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2026-08-05t124115-373-36ef27e8fec107431017859523974607-640-0.webp",
-      "url": "https://dctecnology.xyz/p/diademas-inalambricas-cr-8-con-luces-r9s7x.html",
+      "url": "https://www.dctecnology.xyz/p/diademas-inalambricas-cr-8-con-luces-r9s7x.html",
       "variantes": [
         {
           "nombre": "Unidad Completa",
@@ -747,7 +747,7 @@
       "marca": "DC Tecnology",
       "nombre": "Diademas Gamer A3S Alámbrico",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2026-08-05t130350-966-4dfe07f4c2d364484917859531935783-640-0.webp",
-      "url": "https://dctecnology.xyz/p/diademas-gamer-a3s-alambrico.html",
+      "url": "https://www.dctecnology.xyz/p/diademas-gamer-a3s-alambrico.html",
       "variantes": [
         {
           "nombre": "Unidad Gamer",
@@ -764,7 +764,7 @@
       "marca": "DC Tecnology",
       "nombre": "Reloj Inteligente Smartwatch GT5 Pro En Acero Inoxidable",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-99-4c5ffc8ccc1753790217797441936117-640-0.webp",
-      "url": "https://dctecnology.xyz/p/reloj-inteligente-smartwatch-gt5-pro-en-acero-inoxidable.html",
+      "url": "https://www.dctecnology.xyz/p/reloj-inteligente-smartwatch-gt5-pro-en-acero-inoxidable.html",
       "variantes": [
         {
           "nombre": "Acero Inoxidable",
@@ -781,7 +781,7 @@
       "marca": "DC Tecnology",
       "nombre": "Powerbank Portátil Recargable 20.000 mAh",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2026-08-05t131148-996-0889ddb93403eb4b7c17859537418984-640-0.webp",
-      "url": "https://dctecnology.xyz/p/powerbank-portatil-recargable-20-000-mah.html",
+      "url": "https://www.dctecnology.xyz/p/powerbank-portatil-recargable-20-000-mah.html",
       "variantes": [
         {
           "nombre": "Carga Rápida 20.000 mAh",
@@ -798,7 +798,7 @@
       "marca": "DC Tecnology",
       "nombre": "Auriculares Inalámbricos de Gancho SP16",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/d5daf6d4-fcfd8845691cefcb9a17356883269515-640-0.webp",
-      "url": "https://dctecnology.xyz/p/auriculares-inalambricos-de-gancho-sp16.html",
+      "url": "https://www.dctecnology.xyz/p/auriculares-inalambricos-de-gancho-sp16.html",
       "variantes": [
         {
           "nombre": "Unidad Estándar",
@@ -815,7 +815,7 @@
       "marca": "DC Tecnology",
       "nombre": "Auriculares Inalámbricos M19 (Con Powerbank)",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/69a3818b-ac5cbf4a784c7ed4bd17345638244173-640-0.webp",
-      "url": "https://dctecnology.xyz/p/auriculares-inalambricos-m19-con-powerbank.html",
+      "url": "https://www.dctecnology.xyz/p/auriculares-inalambricos-m19-con-powerbank.html",
       "variantes": [
         {
           "nombre": "Powerbank M19",
@@ -832,7 +832,7 @@
       "marca": "DC Tecnology",
       "nombre": "Reloj Inteligente Smartwatch H19 en Acero Inoxidable",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-40-5133d512837827e1bd17696427986384-640-0.webp",
-      "url": "https://dctecnology.xyz/p/reloj-inteligente-smartwatch-h19.html",
+      "url": "https://www.dctecnology.xyz/p/reloj-inteligente-smartwatch-h19.html",
       "variantes": [
         {
           "nombre": "Acero Inoxidable",
@@ -849,7 +849,7 @@
       "marca": "DC Tecnology",
       "nombre": "Auriculares Inalámbricos M25 (Con Powerbank)",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/7d6805ef-2c9f36d3fd78cdc58617356911716233-640-0.webp",
-      "url": "https://dctecnology.xyz/p/auriculares-inalambricos-m25-con-powerbank.html",
+      "url": "https://www.dctecnology.xyz/p/auriculares-inalambricos-m25-con-powerbank.html",
       "variantes": [
         {
           "nombre": "Gamer M25",
@@ -866,7 +866,7 @@
       "marca": "DC Tecnology",
       "nombre": "Reloj Inteligente Smartwatch Z90",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-36-961981d05a751785e617696425286798-640-0.webp",
-      "url": "https://dctecnology.xyz/p/reloj-inteligente-smartwatch-z90.html",
+      "url": "https://www.dctecnology.xyz/p/reloj-inteligente-smartwatch-z90.html",
       "variantes": [
         {
           "nombre": "Deportivo Z90",
@@ -883,7 +883,7 @@
       "marca": "DC Tecnology",
       "nombre": "Reloj Inteligente Smartwatch P13 de Lujo en Acero Inoxidable",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-38-f043210a056cc86cda17696429481904-640-0.webp",
-      "url": "https://dctecnology.xyz/p/reloj-inteligente-smartwatch-p13-de-lujo-en-acero-inoxidable.html",
+      "url": "https://www.dctecnology.xyz/p/reloj-inteligente-smartwatch-p13-de-lujo-en-acero-inoxidable.html",
       "variantes": [
         {
           "nombre": "Acero de Lujo P13",
@@ -900,7 +900,7 @@
       "marca": "DC Tecnology",
       "nombre": "Reloj Inteligente Smartwatch M9",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-97-2890d094934ac49d2917797440145183-640-0.webp",
-      "url": "https://dctecnology.xyz/p/reloj-inteligente-smartwatch-m9.html",
+      "url": "https://www.dctecnology.xyz/p/reloj-inteligente-smartwatch-m9.html",
       "variantes": [
         {
           "nombre": "Edición M9",
@@ -917,7 +917,7 @@
       "marca": "Netflix",
       "nombre": "Netflix Premium 4K",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2024-08-27t102440-663-92c3e993cc40c238fc17247722852386-640-0.webp",
-      "url": "https://dctecnology.xyz/p/netflix.html",
+      "url": "https://www.dctecnology.xyz/p/netflix.html",
       "variantes": [
         {
           "nombre": "Pantalla Colombia 26 días",
@@ -939,7 +939,7 @@
       "marca": "Amazon",
       "nombre": "Prime Video Ultra HD",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-87-58600aa95daca5fadc17247083377668-640-0.webp",
-      "url": "https://dctecnology.xyz/p/prime-video.html",
+      "url": "https://www.dctecnology.xyz/p/prime-video.html",
       "variantes": [
         {
           "nombre": "Pantalla (1 Dispositivo)",
@@ -961,7 +961,7 @@
       "marca": "Disney",
       "nombre": "Disney Plus Premium",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-91-9267e0a1730671bcf517247095798757-640-0.webp",
-      "url": "https://dctecnology.xyz/p/disney-plus.html",
+      "url": "https://www.dctecnology.xyz/p/disney-plus.html",
       "variantes": [
         {
           "nombre": "Pantalla Premium",
@@ -978,7 +978,7 @@
       "marca": "Max",
       "nombre": "Max (HBO)",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2024-08-27t101929-364-5d53c57354216ecd4417247719752817-640-0.webp",
-      "url": "https://dctecnology.xyz/p/hbo-max.html",
+      "url": "https://www.dctecnology.xyz/p/hbo-max.html",
       "variantes": [
         {
           "nombre": "Pantalla Estándar 1 Mes",
@@ -1010,7 +1010,7 @@
       "marca": "Crunchyroll",
       "nombre": "Crunchyroll Mega Fan",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-85-ddbcabd36470bf37cb17247079814050-640-0.webp",
-      "url": "https://dctecnology.xyz/p/crunchyroll.html",
+      "url": "https://www.dctecnology.xyz/p/crunchyroll.html",
       "variantes": [
         {
           "nombre": "Perfil Mega Fan 1 Mes",
@@ -1032,7 +1032,7 @@
       "marca": "Vix",
       "nombre": "Vix Premium",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-74-58eb29638bb8d2725f17247207045910-640-0.webp",
-      "url": "https://dctecnology.xyz/p/vix-premium.html",
+      "url": "https://www.dctecnology.xyz/p/vix-premium.html",
       "variantes": [
         {
           "nombre": "Pantalla 1 Mes",
@@ -1054,7 +1054,7 @@
       "marca": "Paramount",
       "nombre": "Paramount Plus",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/image-8-1-1c0fae159cffedf49d17134749124740-640-0.webp",
-      "url": "https://dctecnology.xyz/p/paramount-plus.html",
+      "url": "https://www.dctecnology.xyz/p/paramount-plus.html",
       "variantes": [
         {
           "nombre": "Pantalla 1 Mes",
@@ -1076,7 +1076,7 @@
       "marca": "Universal",
       "nombre": "Universal Plus",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-89-0fd5d546fff75e881717247090664955-640-0.webp",
-      "url": "https://dctecnology.xyz/p/universal-plus.html",
+      "url": "https://www.dctecnology.xyz/p/universal-plus.html",
       "variantes": [
         {
           "nombre": "Pantalla 1 Mes",
@@ -1098,7 +1098,7 @@
       "marca": "Rakuten",
       "nombre": "Viki Rakuten Pass",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-71-f118630284a3d1b8c017246986683379-640-0.webp",
-      "url": "https://dctecnology.xyz/p/viki-rakuten.html",
+      "url": "https://www.dctecnology.xyz/p/viki-rakuten.html",
       "variantes": [
         {
           "nombre": "Pantalla 1 Mes",
@@ -1115,7 +1115,7 @@
       "marca": "Apple",
       "nombre": "Apple TV Plus",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/con-o-sin-3-cafdcb979c4e928cc817534227138219-640-0.webp",
-      "url": "https://dctecnology.xyz/p/apple-tv.html",
+      "url": "https://www.dctecnology.xyz/p/apple-tv.html",
       "variantes": [
         {
           "nombre": "Perfil 1 Mes",
@@ -1137,7 +1137,7 @@
       "marca": "Mubi",
       "nombre": "Mubi Cinema",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2024-08-27t101739-823-7fb054275d672eafb417247718860579-640-0.webp",
-      "url": "https://dctecnology.xyz/p/mubi.html",
+      "url": "https://www.dctecnology.xyz/p/mubi.html",
       "variantes": [
         {
           "nombre": "Perfil 1 Mes",
@@ -1159,7 +1159,7 @@
       "marca": "IPTV",
       "nombre": "IPTV Smarters",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-81-f4fa3de76024ac6e3017247201256953-640-0.webp",
-      "url": "https://dctecnology.xyz/p/iptv-smarters.html",
+      "url": "https://www.dctecnology.xyz/p/iptv-smarters.html",
       "variantes": [
         {
           "nombre": "Pantalla 1 Mes",
@@ -1201,7 +1201,7 @@
       "marca": "CapCut",
       "nombre": "CapCut Pro Edición",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/con-o-sin-11-b62cd5366081340f5217534215681512-640-0.webp",
-      "url": "https://dctecnology.xyz/p/capcut-pro.html",
+      "url": "https://www.dctecnology.xyz/p/capcut-pro.html",
       "variantes": [
         {
           "nombre": "Suscripción 1 Mes",
@@ -1218,7 +1218,7 @@
       "marca": "Canva",
       "nombre": "Canva Pro",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-78-092a1c711be9666f1e17246998999745-640-0.webp",
-      "url": "https://dctecnology.xyz/p/canva-pro.html",
+      "url": "https://www.dctecnology.xyz/p/canva-pro.html",
       "variantes": [
         {
           "nombre": "Acceso 1 Mes",
@@ -1240,7 +1240,7 @@
       "marca": "Duolingo",
       "nombre": "Duolingo Super",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-94-e808b4d509a1e45f3f17247140783237-640-0.webp",
-      "url": "https://dctecnology.xyz/p/duolingo-super.html",
+      "url": "https://www.dctecnology.xyz/p/duolingo-super.html",
       "variantes": [
         {
           "nombre": "Suscripción 1 Mes",
@@ -1257,7 +1257,7 @@
       "marca": "McAfee",
       "nombre": "McAfee Antivirus Total Protection",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-92-f51ee5b369b7a29c0917247098954661-640-0.webp",
-      "url": "https://dctecnology.xyz/p/mcafee-antivirus.html",
+      "url": "https://www.dctecnology.xyz/p/mcafee-antivirus.html",
       "variantes": [
         {
           "nombre": "Licencia 1 Año (1 PC)",
@@ -1279,7 +1279,7 @@
       "marca": "Microsoft",
       "nombre": "Office 365 Personal / Familiar",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-93-7002d700dab00f352517247104847099-640-0.webp",
-      "url": "https://dctecnology.xyz/p/office-365.html",
+      "url": "https://www.dctecnology.xyz/p/office-365.html",
       "variantes": [
         {
           "nombre": "Licencia 1 Año (1 Equipo)",
@@ -1301,7 +1301,7 @@
       "marca": "Microsoft",
       "nombre": "Office Pro Plus Vitalicio",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/1000062605-45b944d657592752c217680315104066-640-0.webp",
-      "url": "https://dctecnology.xyz/p/office-2016-2019-2021-2024-pro-plus.html",
+      "url": "https://www.dctecnology.xyz/p/office-2016-2019-2021-2024-pro-plus.html",
       "variantes": [
         {
           "nombre": "Office 2016 Pro Plus",
@@ -1333,7 +1333,7 @@
       "marca": "Microsoft",
       "nombre": "Windows 10 y 11 Pro / Home",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/1000062604-dd415254400244ab9417680313695120-640-0.webp",
-      "url": "https://dctecnology.xyz/p/windows-10-y-11-pro-y-home.html",
+      "url": "https://www.dctecnology.xyz/p/windows-10-y-11-pro-y-home.html",
       "variantes": [
         {
           "nombre": "Windows 10 Pro Licencia",
@@ -1355,7 +1355,7 @@
       "marca": "Google",
       "nombre": "Gemini IA Pro",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-54-17aa51c0fc27f7b51717566943436178-640-0.webp",
-      "url": "https://dctecnology.xyz/p/gemini-ia-pro.html",
+      "url": "https://www.dctecnology.xyz/p/gemini-ia-pro.html",
       "variantes": [
         {
           "nombre": "Suscripción 1 Mes",
@@ -1372,7 +1372,7 @@
       "marca": "Disney",
       "nombre": "PIN Virtual Disney Plus",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2026-08-05t225121-178-fcafa0f7243b64a4e517859883063919-640-0.webp",
-      "url": "https://dctecnology.xyz/p/pin-virtual-disney-plus-1tpu5.html",
+      "url": "https://www.dctecnology.xyz/p/pin-virtual-disney-plus-1tpu5.html",
       "variantes": [
         {
           "nombre": "PIN de $25.900",
@@ -1399,7 +1399,7 @@
       "marca": "Netflix",
       "nombre": "PIN Virtual Netflix Colombia",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2026-07-25t230306-675-e59d09cb99d572efd717850386081961-640-0.webp",
-      "url": "https://dctecnology.xyz/p/pin-virtual-netflix.html",
+      "url": "https://www.dctecnology.xyz/p/pin-virtual-netflix.html",
       "variantes": [
         {
           "nombre": "PIN de $20.000",
@@ -1436,7 +1436,7 @@
       "marca": "Directv",
       "nombre": "PIN Virtual Directv Go",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2026-07-25t214500-060-855f015f5c5735ec7417850339071276-640-0.webp",
-      "url": "https://dctecnology.xyz/p/pin-virtual-directv-go.html",
+      "url": "https://www.dctecnology.xyz/p/pin-virtual-directv-go.html",
       "variantes": [
         {
           "nombre": "PIN de $64.000",
@@ -1468,7 +1468,7 @@
       "marca": "Win Play",
       "nombre": "PIN Virtual Win Play",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2026-07-25t214417-236-5b6b496bb9a900387817850338654391-640-0.webp",
-      "url": "https://dctecnology.xyz/p/pin-virtual-win-play.html",
+      "url": "https://www.dctecnology.xyz/p/pin-virtual-win-play.html",
       "variantes": [
         {
           "nombre": "PIN 1 Mes ($39.900)",
@@ -1485,7 +1485,7 @@
       "marca": "Vix",
       "nombre": "PIN Virtual Vix",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2026-07-25t214307-034-4b2b164dcfa777bf7317850337973553-640-0.webp",
-      "url": "https://dctecnology.xyz/p/pin-virtual-vix.html",
+      "url": "https://www.dctecnology.xyz/p/pin-virtual-vix.html",
       "variantes": [
         {
           "nombre": "PIN de $22.900",
@@ -1502,7 +1502,7 @@
       "marca": "Deezer",
       "nombre": "PIN Virtual Deezer",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2026-07-25t214214-093-3f4658a80701f1ff6017850337398853-640-0.webp",
-      "url": "https://dctecnology.xyz/p/pin-virtual-deezer.html",
+      "url": "https://www.dctecnology.xyz/p/pin-virtual-deezer.html",
       "variantes": [
         {
           "nombre": "PIN de $19.500",
@@ -1519,7 +1519,7 @@
       "marca": "Google Play",
       "nombre": "PIN Virtual Google Play",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2026-07-25t221452-314-511c9925f767810a1417850358454071-640-0.webp",
-      "url": "https://dctecnology.xyz/p/pin-google-play.html",
+      "url": "https://www.dctecnology.xyz/p/pin-google-play.html",
       "variantes": [
         {
           "nombre": "PIN de $10.000",
@@ -1546,7 +1546,7 @@
       "marca": "Roblox",
       "nombre": "PIN Virtual Roblox",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2026-07-25t214108-104-f8cd5b922136803efb17850336744052-640-0.webp",
-      "url": "https://dctecnology.xyz/p/pin-virtual-roblox.html",
+      "url": "https://www.dctecnology.xyz/p/pin-virtual-roblox.html",
       "variantes": [
         {
           "nombre": "PIN de $25.000",
@@ -1573,7 +1573,7 @@
       "marca": "Razer",
       "nombre": "PIN Virtual Razer Gold",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2026-07-25t215123-060-6394e99cdc8ffec1be17850342897501-640-0.webp",
-      "url": "https://dctecnology.xyz/p/pin-virtual-razer-gold.html",
+      "url": "https://www.dctecnology.xyz/p/pin-virtual-razer-gold.html",
       "variantes": [
         {
           "nombre": "PIN de $39.000",
@@ -1600,7 +1600,7 @@
       "marca": "IMVU",
       "nombre": "PIN Virtual IMVU",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2026-07-25t213332-080-79104d967af9fc67bb17850332587866-640-0.webp",
-      "url": "https://dctecnology.xyz/p/pin-virtual-imvu.html",
+      "url": "https://www.dctecnology.xyz/p/pin-virtual-imvu.html",
       "variantes": [
         {
           "nombre": "PIN de $24.000",
@@ -1622,7 +1622,7 @@
       "marca": "McAfee",
       "nombre": "PIN Virtual McAfee",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2026-07-25t220033-148-0ed9c63537013d0c9b17850348496060-640-0.webp",
-      "url": "https://dctecnology.xyz/p/pin-virtual-mcafee.html",
+      "url": "https://www.dctecnology.xyz/p/pin-virtual-mcafee.html",
       "variantes": [
         {
           "nombre": "PIN de $105.900",
@@ -1649,7 +1649,7 @@
       "marca": "Uber",
       "nombre": "PIN Virtual Uber",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2026-07-25t222652-538-da2ff7a6c5aef0ae6a17850364284889-640-0.webp",
-      "url": "https://dctecnology.xyz/p/pin-virtual-uber.html",
+      "url": "https://www.dctecnology.xyz/p/pin-virtual-uber.html",
       "variantes": [
         {
           "nombre": "PIN de $20.000",
@@ -1681,7 +1681,7 @@
       "marca": "Directv",
       "nombre": "DirecTV Prepago Recarga Directa",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2026-07-25t231938-128-24edfb96645621acb017850397301376-640-0.webp",
-      "url": "https://dctecnology.xyz/p/directv-prepago-4s7gd.html",
+      "url": "https://www.dctecnology.xyz/p/directv-prepago-4s7gd.html",
       "variantes": [
         {
           "nombre": "Saldo $12.000",
@@ -1723,7 +1723,7 @@
       "marca": "Free Fire",
       "nombre": "Free Fire Diamantes Directo",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2026-07-25t231212-297-36aa344724da05d45217850391442750-640-0.webp",
-      "url": "https://dctecnology.xyz/p/free-fire-diamantes-vwx2s.html",
+      "url": "https://www.dctecnology.xyz/p/free-fire-diamantes-vwx2s.html",
       "variantes": [
         {
           "nombre": "100 Diamantes ($4.200)",
@@ -1760,7 +1760,7 @@
       "marca": "Claro",
       "nombre": "Recargas Móvil Claro",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2026-08-09t154051-697-0376254c21e77e4fb917863088460828-640-0.webp",
-      "url": "https://dctecnology.xyz/p/recargas-claro.html",
+      "url": "https://www.dctecnology.xyz/p/recargas-claro.html",
       "variantes": [
         {
           "nombre": "Saldo $5.000",
@@ -1797,7 +1797,7 @@
       "marca": "Movistar",
       "nombre": "Recargas Móvil Movistar",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2026-08-09t154247-201-dc39660cd954b9bd2d17863092996980-640-0.webp",
-      "url": "https://dctecnology.xyz/p/recargas-movistar.html",
+      "url": "https://www.dctecnology.xyz/p/recargas-movistar.html",
       "variantes": [
         {
           "nombre": "Saldo $5.000",
@@ -1834,7 +1834,7 @@
       "marca": "Tigo",
       "nombre": "Recargas Móvil Tigo",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2026-08-09t160408-832-319c252c679afe70be17863094694827-640-0.webp",
-      "url": "https://dctecnology.xyz/p/recargas-tigo.html",
+      "url": "https://www.dctecnology.xyz/p/recargas-tigo.html",
       "variantes": [
         {
           "nombre": "Saldo $5.000",
@@ -1871,7 +1871,7 @@
       "marca": "ETB",
       "nombre": "Recargas Móvil ETB",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2026-08-09t154650-268-c0f369ea195c7b891217863095184897-640-0.webp",
-      "url": "https://dctecnology.xyz/p/recargas-etb.html",
+      "url": "https://www.dctecnology.xyz/p/recargas-etb.html",
       "variantes": [
         {
           "nombre": "Saldo $5.000",
@@ -1903,7 +1903,7 @@
       "marca": "Éxito",
       "nombre": "Recargas Móvil Éxito",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2026-08-09t155041-409-d253dc370c4355df5e17863096468897-640-0.webp",
-      "url": "https://dctecnology.xyz/p/recargas-movil-exito.html",
+      "url": "https://www.dctecnology.xyz/p/recargas-movil-exito.html",
       "variantes": [
         {
           "nombre": "Saldo $5.000",
@@ -1945,7 +1945,7 @@
       "marca": "Wom",
       "nombre": "Recargas Móvil Wom",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2026-08-09t154857-684-5b6cf3ede7d4ca18be17863096922511-640-0.webp",
-      "url": "https://dctecnology.xyz/p/recargas-wom.html",
+      "url": "https://www.dctecnology.xyz/p/recargas-wom.html",
       "variantes": [
         {
           "nombre": "Saldo $5.000",
@@ -1987,7 +1987,7 @@
       "marca": "Virgin",
       "nombre": "Recargas Virgin Mobile",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2026-08-09t155144-941-41a23ea5e92e7def2117863099971520-640-0.webp",
-      "url": "https://dctecnology.xyz/p/recargas-virgin-mobile.html",
+      "url": "https://www.dctecnology.xyz/p/recargas-virgin-mobile.html",
       "variantes": [
         {
           "nombre": "Saldo $5.000",
@@ -2014,7 +2014,7 @@
       "marca": "Rushbet",
       "nombre": "Recarga Rushbet Apuestas",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2026-08-09t161902-384-c2a95834660f0ff1d117863104110955-640-0.webp",
-      "url": "https://dctecnology.xyz/p/recarga-rushbet.html",
+      "url": "https://www.dctecnology.xyz/p/recarga-rushbet.html",
       "variantes": [
         {
           "nombre": "Saldo $10.000",
@@ -2046,7 +2046,7 @@
       "marca": "Bwin",
       "nombre": "Recarga Bwin Apuestas",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2026-08-09t162610-164-e06a2accbf5ab01c6217863108186292-640-0.webp",
-      "url": "https://dctecnology.xyz/p/recarga-bwin-7t6cc.html",
+      "url": "https://www.dctecnology.xyz/p/recarga-bwin-7t6cc.html",
       "variantes": [
         {
           "nombre": "Saldo $10.000",
@@ -2078,7 +2078,7 @@
       "marca": "Betsson",
       "nombre": "Recarga Betsson Apuestas",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2026-08-09t163238-179-7c9b4bbed66ed5005e17863111630901-640-0.webp",
-      "url": "https://dctecnology.xyz/p/recarga-betsson.html",
+      "url": "https://www.dctecnology.xyz/p/recarga-betsson.html",
       "variantes": [
         {
           "nombre": "Saldo $10.000",
@@ -2110,7 +2110,7 @@
       "marca": "DC Service",
       "nombre": "Mantenimiento Preventivo y Correctivo de Equipos",
       "imagen": "https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?auto=format&fit=crop&w=640&q=80",
-      "url": "https://dctecnology.xyz/p/servicio-mantenimiento-computadores.html",
+      "url": "https://www.dctecnology.xyz/p/servicio-mantenimiento-computadores.html",
       "variantes": [
         {
           "nombre": "Preventivo Software + Limpieza",
@@ -2132,7 +2132,7 @@
       "marca": "DC Service",
       "nombre": "Instalación de Sistema Operativo y Licenciamiento",
       "imagen": "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?auto=format&fit=crop&w=640&q=80",
-      "url": "https://dctecnology.xyz/p/servicio-instalacion-so-licenciamiento.html",
+      "url": "https://www.dctecnology.xyz/p/servicio-instalacion-so-licenciamiento.html",
       "variantes": [
         {
           "nombre": "Windows 10/11 Pro + Office + Software Base",
@@ -2149,7 +2149,7 @@
       "marca": "DC Rental",
       "nombre": "Alquiler de Laptops y Equipos de Cómputo",
       "imagen": "https://images.unsplash.com/photo-1525547719571-a2d4ac8945e2?auto=format&fit=crop&w=640&q=80",
-      "url": "https://dctecnology.xyz/p/servicio-alquiler-equipos-computo.html",
+      "url": "https://www.dctecnology.xyz/p/servicio-alquiler-equipos-computo.html",
       "variantes": [
         {
           "nombre": "Plan 1 Mes (Pago Total)",
@@ -2176,7 +2176,7 @@
       "marca": "DC Tech",
       "nombre": "Asesoría Técnica y Tutoría Personalizada",
       "imagen": "https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=640&q=80",
-      "url": "https://dctecnology.xyz/p/servicio-asesorias-tutorias.html",
+      "url": "https://www.dctecnology.xyz/p/servicio-asesorias-tutorias.html",
       "variantes": [
         {
           "nombre": "Sesión de Asesoría / Tutoría (1 Hora)",
@@ -2193,7 +2193,7 @@
       "marca": "DC Tech",
       "nombre": "Desarrollo de Catálogos Web y Automatizaciones IA",
       "imagen": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=640&q=80",
-      "url": "https://dctecnology.xyz/p/servicio-desarrollo-web-automatizaciones.html",
+      "url": "https://www.dctecnology.xyz/p/servicio-desarrollo-web-automatizaciones.html",
       "variantes": [
         {
           "nombre": "Proyecto a Medida (Requiere Asesoría)",
@@ -2210,7 +2210,7 @@
       "marca": "DC Tech",
       "nombre": "Reparación de Computadores y Venta de Repuestos",
       "imagen": "https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&w=640&q=80",
-      "url": "https://dctecnology.xyz/p/servicio-reparacion-repuestos.html",
+      "url": "https://www.dctecnology.xyz/p/servicio-reparacion-repuestos.html",
       "variantes": [
         {
           "nombre": "Diagnóstico y Reparación (Requiere Cotización)",
@@ -2232,7 +2232,7 @@
       "marca": "DC Tech",
       "nombre": "Automatizaciones para Negocios: Dashboards, Inventarios y Macros",
       "imagen": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=640&q=80",
-      "url": "https://dctecnology.xyz/p/servicio-automatizaciones-negocios.html",
+      "url": "https://www.dctecnology.xyz/p/servicio-automatizaciones-negocios.html",
       "variantes": [
         {
           "nombre": "Dashboards e Inventarios (Requiere Asesoría)",
@@ -2259,7 +2259,7 @@
       "marca": "DC Tecnology",
       "nombre": "Cargador con Cable Original Yookie 20W Rapido",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/7-caragor-con-cable-original-yookie-20w-rapido-2.webp",
-      "url": "https://dctecnology.xyz/p/er-cargador-con-cable-original-yookie-20w-rapido-2.html",
+      "url": "https://www.dctecnology.xyz/p/er-cargador-con-cable-original-yookie-20w-rapido-2.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -2277,7 +2277,7 @@
       "marca": "DC Tecnology",
       "nombre": "Power Bank 20.000 mAh Display / 4 Cables",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/13-power-bank-20-000-mah-display-4-cables-1-1cd1afb2.webp",
-      "url": "https://dctecnology.xyz/p/er-power-bank-20000-mah-display-4-cables-3.html",
+      "url": "https://www.dctecnology.xyz/p/er-power-bank-20000-mah-display-4-cables-3.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -2295,7 +2295,7 @@
       "marca": "DC Tecnology",
       "nombre": "ANC Audífonos Inalámbricos Pantalla Tactil",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/36-b74ba385-413c-41af-8c9d-be23ef20dfba.webp",
-      "url": "https://dctecnology.xyz/p/er-anc-airpods-pantalla-tactil-5.html",
+      "url": "https://www.dctecnology.xyz/p/er-anc-airpods-pantalla-tactil-5.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -2313,7 +2313,7 @@
       "marca": "DC Tecnology",
       "nombre": "Lamparas USB LED-07",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/37-whatsapp-image-2026-03-04-at-30247-pm.webp",
-      "url": "https://dctecnology.xyz/p/er-lamparas-usb-led-07-6.html",
+      "url": "https://www.dctecnology.xyz/p/er-lamparas-usb-led-07-6.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -2331,7 +2331,7 @@
       "marca": "DC Tecnology",
       "nombre": "Cargador Iphone Lightning Original Yookie KL02",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/38-whatsapp-image-2026-04-09-at-124114-pm.webp",
-      "url": "https://dctecnology.xyz/p/er-cargador-iphone-lightning-original-yookie-kl02-7.html",
+      "url": "https://www.dctecnology.xyz/p/er-cargador-iphone-lightning-original-yookie-kl02-7.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -2349,7 +2349,7 @@
       "marca": "DC Tecnology",
       "nombre": "Smart Wacht GUS-16",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/43-smart-wacht-gus-16-1-e865b0d6.webp",
-      "url": "https://dctecnology.xyz/p/er-smart-wacht-gus-16-10.html",
+      "url": "https://www.dctecnology.xyz/p/er-smart-wacht-gus-16-10.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -2367,7 +2367,7 @@
       "marca": "DC Tecnology",
       "nombre": "Game Retro 400 Juegos (2) Jugadores",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/89-retro-sup-game-console-handheld-mini-500-classical-video-game-controller.webp",
-      "url": "https://dctecnology.xyz/p/er-game-retro-400-juegos-2-jugadores-16.html",
+      "url": "https://www.dctecnology.xyz/p/er-game-retro-400-juegos-2-jugadores-16.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -2385,7 +2385,7 @@
       "marca": "DC Tecnology",
       "nombre": "Power Bank Inalambrico Iphone Grande 10. 000mAh",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/101-power-bank-inalambrico-iphone-grande-10-000mah-1-407577e7.webp",
-      "url": "https://dctecnology.xyz/p/er-power-bank-inalambrico-iphone-grande-10-000mah-18.html",
+      "url": "https://www.dctecnology.xyz/p/er-power-bank-inalambrico-iphone-grande-10-000mah-18.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -2403,7 +2403,7 @@
       "marca": "DC Tecnology",
       "nombre": "Mouse Gamer 3200 Dpi",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/107-mouse-gamer.webp",
-      "url": "https://dctecnology.xyz/p/er-mouse-gamer-3200-dpi-20.html",
+      "url": "https://www.dctecnology.xyz/p/er-mouse-gamer-3200-dpi-20.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -2421,7 +2421,7 @@
       "marca": "DC Tecnology",
       "nombre": "Bafle Koleer Original",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/110-1-opt.webp",
-      "url": "https://dctecnology.xyz/p/er-bafle-koleer-original-21.html",
+      "url": "https://www.dctecnology.xyz/p/er-bafle-koleer-original-21.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -2439,7 +2439,7 @@
       "marca": "DC Tecnology",
       "nombre": "Lampara USB LED-18",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/115-whatsapp-image-2026-03-04-at-33448-pm.webp",
-      "url": "https://dctecnology.xyz/p/er-lampara-usb-led-18-22.html",
+      "url": "https://www.dctecnology.xyz/p/er-lampara-usb-led-18-22.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -2457,7 +2457,7 @@
       "marca": "DC Tecnology",
       "nombre": "Cable Type-c a Lightning 20W",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/158-power-bank-10000-mah-con-cable-1-43221918.webp",
-      "url": "https://dctecnology.xyz/p/er-cable-type-c-a-lightning-20w-29.html",
+      "url": "https://www.dctecnology.xyz/p/er-cable-type-c-a-lightning-20w-29.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -2475,7 +2475,7 @@
       "marca": "DC Tecnology",
       "nombre": "Power Bank 30.000 mAh sin Cable",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/159-power-bank-10000-mah-sin-cable-1-f35f5c3c.webp",
-      "url": "https://dctecnology.xyz/p/er-power-bank-30000-mah-sin-cable-30.html",
+      "url": "https://www.dctecnology.xyz/p/er-power-bank-30000-mah-sin-cable-30.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -2493,7 +2493,7 @@
       "marca": "DC Tecnology",
       "nombre": "Reloj Inteligente + Audifonos",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/272-a26b035e-52f9-47bf-8217-22d41eaccb04.webp",
-      "url": "https://dctecnology.xyz/p/er-reloj-inteligente-audifonos-39.html",
+      "url": "https://www.dctecnology.xyz/p/er-reloj-inteligente-audifonos-39.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -2511,7 +2511,7 @@
       "marca": "DC Tecnology",
       "nombre": "Audífonos Inalámbricos Generacion 6",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/445-029568a8-97e9-4b28-ad16-aba90f7c79c9.webp",
-      "url": "https://dctecnology.xyz/p/er-airpods-generacion-6-53.html",
+      "url": "https://www.dctecnology.xyz/p/er-airpods-generacion-6-53.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -2529,7 +2529,7 @@
       "marca": "DC Tecnology",
       "nombre": "Set de Labubu",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/446-whatsapp-image-2026-02-20-at-91845-pm.webp",
-      "url": "https://dctecnology.xyz/p/er-set-de-labubu-54.html",
+      "url": "https://www.dctecnology.xyz/p/er-set-de-labubu-54.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -2547,7 +2547,7 @@
       "marca": "DC Tecnology",
       "nombre": "Diadema Bluetooh B31",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/468-781512d8-6b2f-4a7f-9ef4-31a1bda8cfd3.webp",
-      "url": "https://dctecnology.xyz/p/er-diadema-bluetooh-b31-56.html",
+      "url": "https://www.dctecnology.xyz/p/er-diadema-bluetooh-b31-56.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -2565,7 +2565,7 @@
       "marca": "DC Tecnology",
       "nombre": "Set de Stitch",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/471-whatsapp-image-2026-04-28-at-54818-pm.webp",
-      "url": "https://dctecnology.xyz/p/er-set-de-stitch-57.html",
+      "url": "https://www.dctecnology.xyz/p/er-set-de-stitch-57.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -2583,7 +2583,7 @@
       "marca": "DC Tecnology",
       "nombre": "Audífonos Inalámbricos Bluetooh ES21",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/514-22751b84-4898-4180-9e3b-785dec2d970e.webp",
-      "url": "https://dctecnology.xyz/p/er-airpods-bluetooh-es21-59.html",
+      "url": "https://www.dctecnology.xyz/p/er-airpods-bluetooh-es21-59.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -2601,7 +2601,7 @@
       "marca": "DC Tecnology",
       "nombre": "Power Bank 30.000 mAh Original Potente",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/517-0c90d5bb-a603-4af3-ac05-180e0bc0a8f6.webp",
-      "url": "https://dctecnology.xyz/p/er-power-bank-30000-mah-original-potente-60.html",
+      "url": "https://www.dctecnology.xyz/p/er-power-bank-30000-mah-original-potente-60.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -2619,7 +2619,7 @@
       "marca": "DC Tecnology",
       "nombre": "Mouse M29 Dpi 1600",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/518-b14cf836-c7c1-47c4-afbd-2b5e9778262b.webp",
-      "url": "https://dctecnology.xyz/p/er-mouse-m29-dpi-1600-61.html",
+      "url": "https://www.dctecnology.xyz/p/er-mouse-m29-dpi-1600-61.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -2637,7 +2637,7 @@
       "marca": "DC Tecnology",
       "nombre": "Mouse M30 Depi 1600",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/519-b2f621b4-957a-4306-a739-129ba155a1cc.webp",
-      "url": "https://dctecnology.xyz/p/er-mouse-m30-depi-1600-62.html",
+      "url": "https://www.dctecnology.xyz/p/er-mouse-m30-depi-1600-62.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -2655,7 +2655,7 @@
       "marca": "DC Tecnology",
       "nombre": "Mouse Inalambrico Hp W10",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/520-mouse-inalambrico-hp-w10-1-b3bd4ac1.webp",
-      "url": "https://dctecnology.xyz/p/er-mouse-inalambrico-hp-w10-63.html",
+      "url": "https://www.dctecnology.xyz/p/er-mouse-inalambrico-hp-w10-63.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -2673,7 +2673,7 @@
       "marca": "DC Tecnology",
       "nombre": "Combo Teclado Inalámbrico",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/521-daf63aea-26ad-4598-81d9-f11215131dce.webp",
-      "url": "https://dctecnology.xyz/p/er-combo-teclado-inalambrico-64.html",
+      "url": "https://www.dctecnology.xyz/p/er-combo-teclado-inalambrico-64.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -2691,7 +2691,7 @@
       "marca": "DC Tecnology",
       "nombre": "Soporte para Moto",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/523-soporte-para-moto-6-2e6b18c4.webp",
-      "url": "https://dctecnology.xyz/p/er-soporte-para-moto-65.html",
+      "url": "https://www.dctecnology.xyz/p/er-soporte-para-moto-65.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -2709,7 +2709,7 @@
       "marca": "DC Tecnology",
       "nombre": "Parlante Karaoke con Microfono",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/530-40b451dc-8418-4760-a167-d86ab4211319.webp",
-      "url": "https://dctecnology.xyz/p/er-parlante-karaoke-con-microfono-67.html",
+      "url": "https://www.dctecnology.xyz/p/er-parlante-karaoke-con-microfono-67.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -2727,7 +2727,7 @@
       "marca": "DC Tecnology",
       "nombre": "Bombillo Parlante LED RGB",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/544-b07f9cca-5b40-44f6-a730-c862cdd3dc00.webp",
-      "url": "https://dctecnology.xyz/p/er-bombillo-parlante-led-rgb-69.html",
+      "url": "https://www.dctecnology.xyz/p/er-bombillo-parlante-led-rgb-69.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -2745,7 +2745,7 @@
       "marca": "DC Tecnology",
       "nombre": "Diademas Bass Inalambricas EB620",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/622-f07f46ec-034f-41de-a580-fa7e2336393a.webp",
-      "url": "https://dctecnology.xyz/p/er-diademas-bass-inalambricas-eb620-81.html",
+      "url": "https://www.dctecnology.xyz/p/er-diademas-bass-inalambricas-eb620-81.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -2763,7 +2763,7 @@
       "marca": "DC Tecnology",
       "nombre": "Diademas Inalambricas EB610",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/623-7a3247b7-903b-4c2b-97bf-fd6fc9b3c346.webp",
-      "url": "https://dctecnology.xyz/p/er-diademas-inalambricas-eb610-82.html",
+      "url": "https://www.dctecnology.xyz/p/er-diademas-inalambricas-eb610-82.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -2781,7 +2781,7 @@
       "marca": "DC Tecnology",
       "nombre": "Audífonos Inalámbricos ANC Enc YW08",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/624-61f866c2-b5fc-4257-b9f9-2aae0941b137.webp",
-      "url": "https://dctecnology.xyz/p/er-airpods-anc-enc-yw08-83.html",
+      "url": "https://www.dctecnology.xyz/p/er-airpods-anc-enc-yw08-83.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -2799,7 +2799,7 @@
       "marca": "DC Tecnology",
       "nombre": "Audífonos Inalámbricos Manos Libres TWS XG23",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/625-5d2b0e9f-e051-4897-a5f6-a526481f87f8.webp",
-      "url": "https://dctecnology.xyz/p/er-airpods-manos-libres-tws-xg23-84.html",
+      "url": "https://www.dctecnology.xyz/p/er-airpods-manos-libres-tws-xg23-84.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -2817,7 +2817,7 @@
       "marca": "DC Tecnology",
       "nombre": "Porta Celular X1 Unidad",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/632-porta-celular-x1-unidad-2-289e041a.webp",
-      "url": "https://dctecnology.xyz/p/er-porta-celular-x1-unidad-85.html",
+      "url": "https://www.dctecnology.xyz/p/er-porta-celular-x1-unidad-85.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -2835,7 +2835,7 @@
       "marca": "DC Tecnology",
       "nombre": "Gafas Inteligentes Inalambricas XG89",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/690-e09a2bfb-d7f2-441c-a14e-73b9f186bab0.webp",
-      "url": "https://dctecnology.xyz/p/er-gafas-inteligentes-inalambricas-xg89-89.html",
+      "url": "https://www.dctecnology.xyz/p/er-gafas-inteligentes-inalambricas-xg89-89.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -2853,7 +2853,7 @@
       "marca": "DC Tecnology",
       "nombre": "Lapiz Tactil Universal",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/709-eb94dfbc-b5b8-4584-9a78-771840488730.webp",
-      "url": "https://dctecnology.xyz/p/er-lapiz-tactil-universal-91.html",
+      "url": "https://www.dctecnology.xyz/p/er-lapiz-tactil-universal-91.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -2871,7 +2871,7 @@
       "marca": "DC Tecnology",
       "nombre": "Aibimy Original MY212 Waterproof",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/714-6fff3445-f929-4fc6-99b0-96869df09d26.webp",
-      "url": "https://dctecnology.xyz/p/er-aibimy-original-my212-waterproof-92.html",
+      "url": "https://www.dctecnology.xyz/p/er-aibimy-original-my212-waterproof-92.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -2889,7 +2889,7 @@
       "marca": "DC Tecnology",
       "nombre": "Original Cable USB a Tipo C / 30W",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/766-845efbe9-6e5a-497a-82c6-600d3a7d98da.webp",
-      "url": "https://dctecnology.xyz/p/er-original-cable-usb-a-tipo-c-30w-94.html",
+      "url": "https://www.dctecnology.xyz/p/er-original-cable-usb-a-tipo-c-30w-94.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -2907,7 +2907,7 @@
       "marca": "DC Tecnology",
       "nombre": "Original Cable Tipo C a Tipo C 60W Carga Rapida",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/767-original-cable-tipo-c-a-tipo-c-60w-carga-rapida-2-d391a949.webp",
-      "url": "https://dctecnology.xyz/p/er-original-cable-tipo-c-a-tipo-c-60w-carga-rapida-95.html",
+      "url": "https://www.dctecnology.xyz/p/er-original-cable-tipo-c-a-tipo-c-60w-carga-rapida-95.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -2925,7 +2925,7 @@
       "marca": "DC Tecnology",
       "nombre": "Gafas Bluetooh Recargable",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/802-d7e7ab8f-b84c-41ec-a06a-42f333497d24.webp",
-      "url": "https://dctecnology.xyz/p/er-gafas-bluetooh-recargable-98.html",
+      "url": "https://www.dctecnology.xyz/p/er-gafas-bluetooh-recargable-98.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -2943,7 +2943,7 @@
       "marca": "DC Tecnology",
       "nombre": "Teclado TV Original",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/806-teclado-tv-original-3-bf79cc3f.webp",
-      "url": "https://dctecnology.xyz/p/er-teclado-tv-original-99.html",
+      "url": "https://www.dctecnology.xyz/p/er-teclado-tv-original-99.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -2961,7 +2961,7 @@
       "marca": "DC Tecnology",
       "nombre": "Parlante Okop KP-539",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/813-parlante-okop-kp-539-1-41206fde.webp",
-      "url": "https://dctecnology.xyz/p/er-parlante-okop-kp-539-100.html",
+      "url": "https://www.dctecnology.xyz/p/er-parlante-okop-kp-539-100.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -2979,7 +2979,7 @@
       "marca": "DC Tecnology",
       "nombre": "Aibimy MY262BT Original IPX6",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/817-ab67cf85-0bd1-4af6-bb2e-bbb317ac111c.webp",
-      "url": "https://dctecnology.xyz/p/er-aibimy-my262bt-original-ipx6-101.html",
+      "url": "https://www.dctecnology.xyz/p/er-aibimy-my262bt-original-ipx6-101.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -2997,7 +2997,7 @@
       "marca": "DC Tecnology",
       "nombre": "Smart Watch Original Pro A4",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/818-c907d597-227f-42b2-94e9-0e9f640f3025.webp",
-      "url": "https://dctecnology.xyz/p/er-smart-watch-original-pro-a4-102.html",
+      "url": "https://www.dctecnology.xyz/p/er-smart-watch-original-pro-a4-102.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -3015,7 +3015,7 @@
       "marca": "DC Tecnology",
       "nombre": "Smart Watch 10PRO Original",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/819-unnamed-82.webp",
-      "url": "https://dctecnology.xyz/p/er-smart-watch-10pro-original-103.html",
+      "url": "https://www.dctecnology.xyz/p/er-smart-watch-10pro-original-103.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -3033,7 +3033,7 @@
       "marca": "DC Tecnology",
       "nombre": "Audífonos Inalámbricos TWS M&m's",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/844-a5f2dae1-f837-4f24-833d-b3c12286b07f.webp",
-      "url": "https://dctecnology.xyz/p/er-airpods-originales-tws-mms-107.html",
+      "url": "https://www.dctecnology.xyz/p/er-airpods-originales-tws-mms-107.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -3051,7 +3051,7 @@
       "marca": "DC Tecnology",
       "nombre": "Microfono de Solapa",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/858-f9cf4ed5-723e-4426-bed9-c3d42781240b.webp",
-      "url": "https://dctecnology.xyz/p/er-microfono-de-solapa-108.html",
+      "url": "https://www.dctecnology.xyz/p/er-microfono-de-solapa-108.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -3069,7 +3069,7 @@
       "marca": "DC Tecnology",
       "nombre": "Kit de Limpieza 7 en 1",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/871-3e540a54-a96d-496d-a0e5-c5c7a7b184c4.webp",
-      "url": "https://dctecnology.xyz/p/er-kit-de-limpieza-7-en-1-109.html",
+      "url": "https://www.dctecnology.xyz/p/er-kit-de-limpieza-7-en-1-109.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -3087,7 +3087,7 @@
       "marca": "DC Tecnology",
       "nombre": "Parlante Bluetooh RGB",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/884-71f2eba7-ea70-4230-8868-63cc818dc5d3.webp",
-      "url": "https://dctecnology.xyz/p/er-parlante-bluetooh-rgb-110.html",
+      "url": "https://www.dctecnology.xyz/p/er-parlante-bluetooh-rgb-110.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -3105,7 +3105,7 @@
       "marca": "DC Tecnology",
       "nombre": "Original SH-30 G-tide Mobulaa Speeaker Box",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/891-08b5785c-b953-410a-94ce-7ce6d3aa29fd.webp",
-      "url": "https://dctecnology.xyz/p/er-original-sh-30-g-tide-mobulaa-speeaker-box-111.html",
+      "url": "https://www.dctecnology.xyz/p/er-original-sh-30-g-tide-mobulaa-speeaker-box-111.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -3123,7 +3123,7 @@
       "marca": "DC Tecnology",
       "nombre": "Lampara Decorativa Astronauta A1",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/919-a030c469-d704-453c-9070-b356f3b14bc6.webp",
-      "url": "https://dctecnology.xyz/p/er-lampara-decorativa-astronauta-a1-112.html",
+      "url": "https://www.dctecnology.xyz/p/er-lampara-decorativa-astronauta-a1-112.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -3141,7 +3141,7 @@
       "marca": "DC Tecnology",
       "nombre": "Mouse Ergonomico Inalambrico",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/950-unnamed-2026-01-07t110417489.webp",
-      "url": "https://dctecnology.xyz/p/er-mouse-ergonomico-inalambrico-115.html",
+      "url": "https://www.dctecnology.xyz/p/er-mouse-ergonomico-inalambrico-115.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -3159,7 +3159,7 @@
       "marca": "DC Tecnology",
       "nombre": "Cargador de Coche Rapido Original PC17",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1015-6057bcb1-1cd1-4955-95f8-1e4a62f6238c.webp",
-      "url": "https://dctecnology.xyz/p/er-cargador-de-coche-rapido-original-pc17-118.html",
+      "url": "https://www.dctecnology.xyz/p/er-cargador-de-coche-rapido-original-pc17-118.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -3177,7 +3177,7 @@
       "marca": "DC Tecnology",
       "nombre": "Cargador Pro Ultra Rapido Carro PC19 Original",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1016-c1020db0-9cd5-4722-9311-b03821521161.webp",
-      "url": "https://dctecnology.xyz/p/er-cargador-pro-ultra-rapido-carro-pc19-original-119.html",
+      "url": "https://www.dctecnology.xyz/p/er-cargador-pro-ultra-rapido-carro-pc19-original-119.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -3195,7 +3195,7 @@
       "marca": "DC Tecnology",
       "nombre": "Audífonos Inalámbricos Edicion Especial Codabury",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1017-5374496d-fefe-48c3-84c8-e9ddc56049a1.webp",
-      "url": "https://dctecnology.xyz/p/er-airpods-edicion-especial-codabury-original-120.html",
+      "url": "https://www.dctecnology.xyz/p/er-airpods-edicion-especial-codabury-original-120.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -3213,7 +3213,7 @@
       "marca": "DC Tecnology",
       "nombre": "Audífonos Inalámbricos TWS ES45",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1018-be47888b-b54c-46a1-8cc9-f26a23236f52.webp",
-      "url": "https://dctecnology.xyz/p/er-airpods-tws-original-es45-121.html",
+      "url": "https://www.dctecnology.xyz/p/er-airpods-tws-original-es45-121.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -3231,7 +3231,7 @@
       "marca": "DC Tecnology",
       "nombre": "Audífonos Inalámbricos ES48",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1019-22e92322-a925-4842-9efe-4442b50f8da0.webp",
-      "url": "https://dctecnology.xyz/p/er-airpods-original-es48-122.html",
+      "url": "https://www.dctecnology.xyz/p/er-airpods-original-es48-122.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -3249,7 +3249,7 @@
       "marca": "DC Tecnology",
       "nombre": "Mouse Original Inalambrico Pro",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1021-ef88e1b6-5288-4592-a4b3-1e872fe7585e.webp",
-      "url": "https://dctecnology.xyz/p/er-mouse-original-inalambrico-pro-124.html",
+      "url": "https://www.dctecnology.xyz/p/er-mouse-original-inalambrico-pro-124.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -3267,7 +3267,7 @@
       "marca": "DC Tecnology",
       "nombre": "Diademas de Alta Calidad EB31",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1022-0db54c6c-18eb-4338-8cf4-e94dc81baaef.webp",
-      "url": "https://dctecnology.xyz/p/er-diademas-de-alta-calidad-eb31-125.html",
+      "url": "https://www.dctecnology.xyz/p/er-diademas-de-alta-calidad-eb31-125.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -3285,7 +3285,7 @@
       "marca": "DC Tecnology",
       "nombre": "Soporte Portatil para Celular o Tablet Moderno",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1023-fea8f720-c8cd-42be-8511-ebd65ebfb329.webp",
-      "url": "https://dctecnology.xyz/p/er-soporte-portatil-para-celular-o-tablet-moderno-126.html",
+      "url": "https://www.dctecnology.xyz/p/er-soporte-portatil-para-celular-o-tablet-moderno-126.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -3303,7 +3303,7 @@
       "marca": "DC Tecnology",
       "nombre": "Diademas Pro EB32",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1025-1d1e77f3-ddae-49ba-8037-ebde5a9cda6d.webp",
-      "url": "https://dctecnology.xyz/p/er-diademas-pro-eb32-127.html",
+      "url": "https://www.dctecnology.xyz/p/er-diademas-pro-eb32-127.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -3321,7 +3321,7 @@
       "marca": "DC Tecnology",
       "nombre": "Cargador Inalambrico KI90",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1043-cargador-inalambrico-ki90-5-dbaf51ce.webp",
-      "url": "https://dctecnology.xyz/p/er-cargador-inalambrico-ki90-128.html",
+      "url": "https://www.dctecnology.xyz/p/er-cargador-inalambrico-ki90-128.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -3339,7 +3339,7 @@
       "marca": "DC Tecnology",
       "nombre": "P9 Ultra Combo 7 Correas",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1044-ed4ce334-88b4-4c0c-80dc-25e4a0bbd036.webp",
-      "url": "https://dctecnology.xyz/p/er-p9-ultra-combo-7-correas-129.html",
+      "url": "https://www.dctecnology.xyz/p/er-p9-ultra-combo-7-correas-129.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -3357,7 +3357,7 @@
       "marca": "DC Tecnology",
       "nombre": "Audífonos Inalámbricos Pea Pod Edicion Especial",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1046-0408f144-bdd3-4f1f-88af-2a2ca42afe0e.webp",
-      "url": "https://dctecnology.xyz/p/er-airpods-pea-pod-edicion-especial-130.html",
+      "url": "https://www.dctecnology.xyz/p/er-airpods-pea-pod-edicion-especial-130.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -3375,7 +3375,7 @@
       "marca": "DC Tecnology",
       "nombre": "Audífonos Inalámbricos Pro 6",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1053-a990bace-2458-4afa-afe5-6addc9537721.webp",
-      "url": "https://dctecnology.xyz/p/er-airpods-pro-6-131.html",
+      "url": "https://www.dctecnology.xyz/p/er-airpods-pro-6-131.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -3393,7 +3393,7 @@
       "marca": "DC Tecnology",
       "nombre": "Palo de Selfie",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1089-ab7c020b-388a-4a2d-886c-28743e61bdc7.webp",
-      "url": "https://dctecnology.xyz/p/er-palo-de-selfie-132.html",
+      "url": "https://www.dctecnology.xyz/p/er-palo-de-selfie-132.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -3411,7 +3411,7 @@
       "marca": "DC Tecnology",
       "nombre": "Soporte Giratorio para Tablet",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1090-500a5c65-dccc-4ff8-90d4-84a2af2f53c3.webp",
-      "url": "https://dctecnology.xyz/p/er-soporte-giratorio-para-tablet-133.html",
+      "url": "https://www.dctecnology.xyz/p/er-soporte-giratorio-para-tablet-133.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -3429,7 +3429,7 @@
       "marca": "DC Tecnology",
       "nombre": "Smartwacht Wisme + Audífonos Inalámbricos + 7 Correas",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1095-original-smartwacht-wisme-airpods-7-correas-1-82c36941.webp",
-      "url": "https://dctecnology.xyz/p/er-original-smartwacht-wisme-airpods-7-correas-134.html",
+      "url": "https://www.dctecnology.xyz/p/er-original-smartwacht-wisme-airpods-7-correas-134.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -3447,7 +3447,7 @@
       "marca": "DC Tecnology",
       "nombre": "Holder 388A",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1111-whatsapp-image-2026-02-13-at-91033-pm.webp",
-      "url": "https://dctecnology.xyz/p/er-holder-388a-136.html",
+      "url": "https://www.dctecnology.xyz/p/er-holder-388a-136.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -3465,7 +3465,7 @@
       "marca": "DC Tecnology",
       "nombre": "Soporte Microfono de Solapa",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1112-whatsapp-image-2026-02-13-at-94025-pm.webp",
-      "url": "https://dctecnology.xyz/p/er-soporte-microfono-de-solapa-137.html",
+      "url": "https://www.dctecnology.xyz/p/er-soporte-microfono-de-solapa-137.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -3483,7 +3483,7 @@
       "marca": "DC Tecnology",
       "nombre": "Aro de Luz RGB 26CTMS",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1115-aro-de-luz-rgb-26ctms-1-ec23c018.webp",
-      "url": "https://dctecnology.xyz/p/er-aro-de-luz-rgb-26ctms-138.html",
+      "url": "https://www.dctecnology.xyz/p/er-aro-de-luz-rgb-26ctms-138.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -3501,7 +3501,7 @@
       "marca": "DC Tecnology",
       "nombre": "Microfono de Solapa Entrada AUX",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1116-fadd7cba-e676-4f3b-b1ab-132574a35248.webp",
-      "url": "https://dctecnology.xyz/p/er-microfono-de-solapa-entrada-aux-139.html",
+      "url": "https://www.dctecnology.xyz/p/er-microfono-de-solapa-entrada-aux-139.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -3519,7 +3519,7 @@
       "marca": "DC Tecnology",
       "nombre": "Tripode Estabilizador Celular AY49T",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1118-whatsapp-image-2026-02-14-at-54610-pm.webp",
-      "url": "https://dctecnology.xyz/p/er-tripode-estabilizador-celular-ay49t-140.html",
+      "url": "https://www.dctecnology.xyz/p/er-tripode-estabilizador-celular-ay49t-140.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -3537,7 +3537,7 @@
       "marca": "DC Tecnology",
       "nombre": "Mini Tripode TP-009",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1119-whatsapp-image-2026-02-14-at-55848-pm.webp",
-      "url": "https://dctecnology.xyz/p/er-mini-tripode-tp-009-141.html",
+      "url": "https://www.dctecnology.xyz/p/er-mini-tripode-tp-009-141.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -3555,7 +3555,7 @@
       "marca": "DC Tecnology",
       "nombre": "Soporte Astronauta Celular",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1120-whatsapp-image-2026-02-15-at-113850-am.webp",
-      "url": "https://dctecnology.xyz/p/er-soporte-astronauta-celular-142.html",
+      "url": "https://www.dctecnology.xyz/p/er-soporte-astronauta-celular-142.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -3573,7 +3573,7 @@
       "marca": "DC Tecnology",
       "nombre": "Audífonos Inalámbricos EP5",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1121-whatsapp-image-2026-04-23-at-122256-pm.webp",
-      "url": "https://dctecnology.xyz/p/er-airpods-originales-ep5-143.html",
+      "url": "https://www.dctecnology.xyz/p/er-airpods-originales-ep5-143.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -3591,7 +3591,7 @@
       "marca": "DC Tecnology",
       "nombre": "Holders S059",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1122-whatsapp-image-2026-02-15-at-115422-am.webp",
-      "url": "https://dctecnology.xyz/p/er-holders-s059-144.html",
+      "url": "https://www.dctecnology.xyz/p/er-holders-s059-144.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -3609,7 +3609,7 @@
       "marca": "DC Tecnology",
       "nombre": "Blafle Smart Speaker App",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1123-whatsapp-image-2026-02-15-at-120451-pm.webp",
-      "url": "https://dctecnology.xyz/p/er-blafle-smart-speaker-app-145.html",
+      "url": "https://www.dctecnology.xyz/p/er-blafle-smart-speaker-app-145.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -3627,7 +3627,7 @@
       "marca": "DC Tecnology",
       "nombre": "Auriculares con Cable MD011",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1125-auriculares-con-cable-md011-1-ff2d4a1c.webp",
-      "url": "https://dctecnology.xyz/p/er-auriculares-con-cable-md011-146.html",
+      "url": "https://www.dctecnology.xyz/p/er-auriculares-con-cable-md011-146.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -3645,7 +3645,7 @@
       "marca": "DC Tecnology",
       "nombre": "Auriculares con Cable ATH-73",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1126-auriculares-con-cable-ath-73-1-85c740cd.webp",
-      "url": "https://dctecnology.xyz/p/er-auriculares-con-cable-ath-73-147.html",
+      "url": "https://www.dctecnology.xyz/p/er-auriculares-con-cable-ath-73-147.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -3663,7 +3663,7 @@
       "marca": "DC Tecnology",
       "nombre": "Holders HOLD-326",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1127-whatsapp-image-2026-02-16-at-121230-pm.webp",
-      "url": "https://dctecnology.xyz/p/er-holders-hold-326-148.html",
+      "url": "https://www.dctecnology.xyz/p/er-holders-hold-326-148.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -3681,7 +3681,7 @@
       "marca": "DC Tecnology",
       "nombre": "Pad Mause Carga Inalambrica",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1133-whatsapp-image-2026-02-16-at-12509-pm.webp",
-      "url": "https://dctecnology.xyz/p/er-pad-mause-carga-inalambrica-151.html",
+      "url": "https://www.dctecnology.xyz/p/er-pad-mause-carga-inalambrica-151.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -3699,7 +3699,7 @@
       "marca": "DC Tecnology",
       "nombre": "Audífonos Inalámbricos Pro RS16",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1135-whatsapp-image-2026-02-16-at-14546-pm.webp",
-      "url": "https://dctecnology.xyz/p/er-airpods-pro-rs16-152.html",
+      "url": "https://www.dctecnology.xyz/p/er-airpods-pro-rs16-152.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -3717,7 +3717,7 @@
       "marca": "DC Tecnology",
       "nombre": "Combo Audífonos Inalámbricos TWS-K30",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1138-whatsapp-image-2026-02-16-at-31448-pm.webp",
-      "url": "https://dctecnology.xyz/p/er-combo-airpods-tws-k30-153.html",
+      "url": "https://www.dctecnology.xyz/p/er-combo-airpods-tws-k30-153.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -3735,7 +3735,7 @@
       "marca": "DC Tecnology",
       "nombre": "Audífonos Inalámbricos KT30",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1141-whatsapp-image-2026-02-16-at-42645-pm.webp",
-      "url": "https://dctecnology.xyz/p/er-airpods-kt30-154.html",
+      "url": "https://www.dctecnology.xyz/p/er-airpods-kt30-154.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -3753,7 +3753,7 @@
       "marca": "DC Tecnology",
       "nombre": "Parlante + Audífonos Inalámbricos RGB Profesional",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1144-whatsapp-image-2026-02-16-at-51504-pm.webp",
-      "url": "https://dctecnology.xyz/p/er-parlante-airpods-rgb-profesional-155.html",
+      "url": "https://www.dctecnology.xyz/p/er-parlante-airpods-rgb-profesional-155.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -3771,7 +3771,7 @@
       "marca": "DC Tecnology",
       "nombre": "Smart Watch Fit Economico FD68",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1161-whatsapp-image-2026-02-18-at-25440-pm.webp",
-      "url": "https://dctecnology.xyz/p/er-smart-watch-fit-economico-fd68-157.html",
+      "url": "https://www.dctecnology.xyz/p/er-smart-watch-fit-economico-fd68-157.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -3789,7 +3789,7 @@
       "marca": "DC Tecnology",
       "nombre": "Microfono Condensador SF-666",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1162-whatsapp-image-2026-02-18-at-30143-pm.webp",
-      "url": "https://dctecnology.xyz/p/er-microfono-condensador-sf-666-158.html",
+      "url": "https://www.dctecnology.xyz/p/er-microfono-condensador-sf-666-158.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -3807,7 +3807,7 @@
       "marca": "DC Tecnology",
       "nombre": "Combo X8 Smart Wacht",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1181-combo-x8-smart-wacht-1-ab4a7faa.webp",
-      "url": "https://dctecnology.xyz/p/er-combo-x8-smart-wacht-162.html",
+      "url": "https://www.dctecnology.xyz/p/er-combo-x8-smart-wacht-162.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -3825,7 +3825,7 @@
       "marca": "DC Tecnology",
       "nombre": "Audifonos con Cable Tipo C Tm-a",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1203-whatsapp-image-2026-02-28-at-121304-pm.webp",
-      "url": "https://dctecnology.xyz/p/er-audifonos-con-cable-tipo-c-tm-a-165.html",
+      "url": "https://www.dctecnology.xyz/p/er-audifonos-con-cable-tipo-c-tm-a-165.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -3843,7 +3843,7 @@
       "marca": "DC Tecnology",
       "nombre": "Mouse Inalambrico DJ-125",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1210-whatsapp-image-2026-03-02-at-122634-pm.webp",
-      "url": "https://dctecnology.xyz/p/er-mouse-inalambrico-dj-125-166.html",
+      "url": "https://www.dctecnology.xyz/p/er-mouse-inalambrico-dj-125-166.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -3861,7 +3861,7 @@
       "marca": "DC Tecnology",
       "nombre": "Smart Watch + Gamebox + Correa Pro HOT-5",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1212-whatsapp-image-2026-03-02-at-21224-pm.webp",
-      "url": "https://dctecnology.xyz/p/er-smart-watch-gamebox-correa-pro-hot-5-167.html",
+      "url": "https://www.dctecnology.xyz/p/er-smart-watch-gamebox-correa-pro-hot-5-167.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -3879,7 +3879,7 @@
       "marca": "DC Tecnology",
       "nombre": "Lapiz Tactil HX-22",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1216-whatsapp-image-2026-03-04-at-21613-pm.webp",
-      "url": "https://dctecnology.xyz/p/er-lapiz-tactil-hx-22-169.html",
+      "url": "https://www.dctecnology.xyz/p/er-lapiz-tactil-hx-22-169.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -3897,7 +3897,7 @@
       "marca": "DC Tecnology",
       "nombre": "Holders HOLD-PS/228",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1219-whatsapp-image-2026-03-04-at-41921-pm.webp",
-      "url": "https://dctecnology.xyz/p/er-holders-hold-ps-228-171.html",
+      "url": "https://www.dctecnology.xyz/p/er-holders-hold-ps-228-171.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -3915,7 +3915,7 @@
       "marca": "DC Tecnology",
       "nombre": "Kit Labubu",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1239-whatsapp-image-2026-03-11-at-101743-am.webp",
-      "url": "https://dctecnology.xyz/p/er-kit-labubu-177.html",
+      "url": "https://www.dctecnology.xyz/p/er-kit-labubu-177.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -3933,7 +3933,7 @@
       "marca": "DC Tecnology",
       "nombre": "Audífonos Inalámbricos ES53",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1271-whatsapp-image-2026-04-01-at-25822-pm.webp",
-      "url": "https://dctecnology.xyz/p/er-original-airpods-es53-181.html",
+      "url": "https://www.dctecnology.xyz/p/er-original-airpods-es53-181.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -3951,7 +3951,7 @@
       "marca": "DC Tecnology",
       "nombre": "Airpdos T11 Labubu",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1273-whatsapp-image-2026-04-01-at-92958-pm.webp",
-      "url": "https://dctecnology.xyz/p/er-airpdos-t11-labubu-2-182.html",
+      "url": "https://www.dctecnology.xyz/p/er-airpdos-t11-labubu-2-182.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -3969,7 +3969,7 @@
       "marca": "DC Tecnology",
       "nombre": "Multipuerto X4 USB",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1277-whatsapp-image-2026-04-02-at-35222-pm.webp",
-      "url": "https://dctecnology.xyz/p/er-multipuerto-x4-usb-184.html",
+      "url": "https://www.dctecnology.xyz/p/er-multipuerto-x4-usb-184.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -3987,7 +3987,7 @@
       "marca": "DC Tecnology",
       "nombre": "Audífonos Inalámbricos Abiertos Pro V12",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1280-whatsapp-image-2026-04-04-at-44020-pm-1.webp",
-      "url": "https://dctecnology.xyz/p/er-airpods-abiertos-pro-v12-original-185.html",
+      "url": "https://www.dctecnology.xyz/p/er-airpods-abiertos-pro-v12-original-185.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -4005,7 +4005,7 @@
       "marca": "DC Tecnology",
       "nombre": "Buscador Inteligente Original",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1281-7ba08aac-286d-4a3b-928c-b6f5138bdccf.webp",
-      "url": "https://dctecnology.xyz/p/er-buscador-inteligente-original-186.html",
+      "url": "https://www.dctecnology.xyz/p/er-buscador-inteligente-original-186.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -4023,7 +4023,7 @@
       "marca": "DC Tecnology",
       "nombre": "Soporte para Tablet y Celular HOLD-356",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1292-whatsapp-image-2026-04-10-at-14115-pm.webp",
-      "url": "https://dctecnology.xyz/p/er-soporte-para-tablet-y-celular-hold-356-187.html",
+      "url": "https://www.dctecnology.xyz/p/er-soporte-para-tablet-y-celular-hold-356-187.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -4041,7 +4041,7 @@
       "marca": "DC Tecnology",
       "nombre": "Base para Portatil y Tablet HOLDPC-102",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1293-whatsapp-image-2026-04-10-at-22727-pm.webp",
-      "url": "https://dctecnology.xyz/p/er-base-para-portatil-y-tablet-holdpc-102-188.html",
+      "url": "https://www.dctecnology.xyz/p/er-base-para-portatil-y-tablet-holdpc-102-188.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -4059,7 +4059,7 @@
       "marca": "DC Tecnology",
       "nombre": "YM-300 RGB LED Ring Fill Light",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1294-whatsapp-image-2026-04-10-at-25051-pm.webp",
-      "url": "https://dctecnology.xyz/p/er-ym-300-rgb-led-ring-fill-light-189.html",
+      "url": "https://www.dctecnology.xyz/p/er-ym-300-rgb-led-ring-fill-light-189.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -4077,7 +4077,7 @@
       "marca": "DC Tecnology",
       "nombre": "Base para Portatil en Aluminio HOLD-406",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1298-whatsapp-image-2026-04-11-at-33258-pm.webp",
-      "url": "https://dctecnology.xyz/p/er-base-para-portatil-en-aluminio-hold-406-192.html",
+      "url": "https://www.dctecnology.xyz/p/er-base-para-portatil-en-aluminio-hold-406-192.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -4095,7 +4095,7 @@
       "marca": "DC Tecnology",
       "nombre": "Funda para Portatil Na-bag 105",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1313-f135ef32-b297-4984-8d82-da9789e9af26.webp",
-      "url": "https://dctecnology.xyz/p/er-funda-para-portatil-na-bag-105-193.html",
+      "url": "https://www.dctecnology.xyz/p/er-funda-para-portatil-na-bag-105-193.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -4113,7 +4113,7 @@
       "marca": "DC Tecnology",
       "nombre": "Audífonos Inalámbricos ES60",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1333-64d46f3c-a875-4e6c-a0e8-8c5d87bb3ca8-1.webp",
-      "url": "https://dctecnology.xyz/p/er-airpods-originales-es60-198.html",
+      "url": "https://www.dctecnology.xyz/p/er-airpods-originales-es60-198.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -4131,7 +4131,7 @@
       "marca": "DC Tecnology",
       "nombre": "Repetidor de Wifi WR03T",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1341-whatsapp-image-2026-04-25-at-42814-pm.webp",
-      "url": "https://dctecnology.xyz/p/er-repetidor-de-wifi-wr03t-199.html",
+      "url": "https://www.dctecnology.xyz/p/er-repetidor-de-wifi-wr03t-199.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -4149,7 +4149,7 @@
       "marca": "DC Tecnology",
       "nombre": "Reloj en Combo X9",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1342-196f87be-b747-4dc4-a2e5-86069de453d8.webp",
-      "url": "https://dctecnology.xyz/p/er-reloj-en-combo-x9-200.html",
+      "url": "https://www.dctecnology.xyz/p/er-reloj-en-combo-x9-200.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -4167,7 +4167,7 @@
       "marca": "DC Tecnology",
       "nombre": "Maquina de Verificacion de Billetes",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1346-08b5884f-ef30-496e-b184-1e536b70c790.webp",
-      "url": "https://dctecnology.xyz/p/er-maquina-de-verificacion-de-billetes-201.html",
+      "url": "https://www.dctecnology.xyz/p/er-maquina-de-verificacion-de-billetes-201.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -4185,7 +4185,7 @@
       "marca": "DC Tecnology",
       "nombre": "Audifonos M10",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1347-86fd242b-4f70-487c-988d-132d23c2db6b.webp",
-      "url": "https://dctecnology.xyz/p/er-audifonos-m10-202.html",
+      "url": "https://www.dctecnology.xyz/p/er-audifonos-m10-202.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -4203,7 +4203,7 @@
       "marca": "DC Tecnology",
       "nombre": "Parlante Portatil MG2",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1376-8100aae5-4722-4915-917b-ee000a7f5577.webp",
-      "url": "https://dctecnology.xyz/p/er-parlante-portatil-mg2-203.html",
+      "url": "https://www.dctecnology.xyz/p/er-parlante-portatil-mg2-203.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -4221,7 +4221,7 @@
       "marca": "DC Tecnology",
       "nombre": "Dama Smartwatch ME32",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1392-69dc4901-344b-47d3-acc3-5944c0e85f28.webp",
-      "url": "https://dctecnology.xyz/p/er-dama-smartwatch-me32-204.html",
+      "url": "https://www.dctecnology.xyz/p/er-dama-smartwatch-me32-204.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -4239,7 +4239,7 @@
       "marca": "DC Tecnology",
       "nombre": "Audífonos Inalámbricos ANC-JM19 Traductores",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1411-7efb9960-cec2-4bc6-b4b3-5727ce5a74fa.webp",
-      "url": "https://dctecnology.xyz/p/er-airpods-anc-jm19-traductores-208.html",
+      "url": "https://www.dctecnology.xyz/p/er-airpods-anc-jm19-traductores-208.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -4257,7 +4257,7 @@
       "marca": "DC Tecnology",
       "nombre": "Smart Watch S11 KZ-W42",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1429-40c131fc-38fb-4625-b270-0bec70466724.webp",
-      "url": "https://dctecnology.xyz/p/er-smart-watch-s11-kz-w42-209.html",
+      "url": "https://www.dctecnology.xyz/p/er-smart-watch-s11-kz-w42-209.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -4275,7 +4275,7 @@
       "marca": "DC Tecnology",
       "nombre": "Smartwacht Serie 11 Mini",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1511-smartwacht-serie-11-mini-2-640c0324.webp",
-      "url": "https://dctecnology.xyz/p/er-smartwacht-serie-11-mini-213.html",
+      "url": "https://www.dctecnology.xyz/p/er-smartwacht-serie-11-mini-213.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -4293,7 +4293,7 @@
       "marca": "DC Tecnology",
       "nombre": "Original Mobulaa IW12 Mini",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1543-ce58dd7c-ccf6-4821-97ff-d322030030ca.webp",
-      "url": "https://dctecnology.xyz/p/er-original-mobulaa-iw12-mini-216.html",
+      "url": "https://www.dctecnology.xyz/p/er-original-mobulaa-iw12-mini-216.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -4311,7 +4311,7 @@
       "marca": "DC Tecnology",
       "nombre": "Original Cargador USB a Tipo C Yookie EI32",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1559-dc4987b1-6153-4614-adb8-6a63d3190b33.webp",
-      "url": "https://dctecnology.xyz/p/er-original-cargador-usb-a-tipo-c-yookie-ei32-217.html",
+      "url": "https://www.dctecnology.xyz/p/er-original-cargador-usb-a-tipo-c-yookie-ei32-217.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -4329,7 +4329,7 @@
       "marca": "DC Tecnology",
       "nombre": "Smart Watch Big 3",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1560-88789e79-5856-4a0f-a80b-136dc4616ab6.webp",
-      "url": "https://dctecnology.xyz/p/er-smart-watch-big-3-218.html",
+      "url": "https://www.dctecnology.xyz/p/er-smart-watch-big-3-218.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -4347,7 +4347,7 @@
       "marca": "DC Tecnology",
       "nombre": "Smart Watch ZT-36S Plus",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1561-f0c4842b-5d89-42eb-b45f-1b1f0a21fa3e-1.webp",
-      "url": "https://dctecnology.xyz/p/er-smart-watch-zt-36s-plus-219.html",
+      "url": "https://www.dctecnology.xyz/p/er-smart-watch-zt-36s-plus-219.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -4365,7 +4365,7 @@
       "marca": "DC Tecnology",
       "nombre": "Impresora Portatil",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1562-e4b5d431-1065-415d-a610-2a81696b52aa-1.webp",
-      "url": "https://dctecnology.xyz/p/er-impresora-portatil-220.html",
+      "url": "https://www.dctecnology.xyz/p/er-impresora-portatil-220.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -4383,7 +4383,7 @@
       "marca": "DC Tecnology",
       "nombre": "Microfono de Solapa Tipo C",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1564-aef97804-778c-4f74-81df-19c39bbe60ee.webp",
-      "url": "https://dctecnology.xyz/p/er-microfono-de-solapa-tipo-c-221.html",
+      "url": "https://www.dctecnology.xyz/p/er-microfono-de-solapa-tipo-c-221.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -4401,7 +4401,7 @@
       "marca": "DC Tecnology",
       "nombre": "Microfono de Solapa Entrada Lightning",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1565-5731f047-b15d-4cbc-abc3-ec36b6e06a41.webp",
-      "url": "https://dctecnology.xyz/p/er-microfono-de-solapa-entrada-lightning-222.html",
+      "url": "https://www.dctecnology.xyz/p/er-microfono-de-solapa-entrada-lightning-222.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -4419,7 +4419,7 @@
       "marca": "DC Tecnology",
       "nombre": "Parlante Bluetooth Alexa 15W",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1566-84ae985e-14cc-44a4-aa3d-c188b17a3ff0.webp",
-      "url": "https://dctecnology.xyz/p/er-parlante-bluetooth-alexa-15w-223.html",
+      "url": "https://www.dctecnology.xyz/p/er-parlante-bluetooth-alexa-15w-223.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -4437,7 +4437,7 @@
       "marca": "DC Tecnology",
       "nombre": "Ampliador de Pantalla Celular",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1586-b4a69e54-9c2c-4d15-a844-60aa97e880de.webp",
-      "url": "https://dctecnology.xyz/p/er-ampliador-de-pantalla-celular-226.html",
+      "url": "https://www.dctecnology.xyz/p/er-ampliador-de-pantalla-celular-226.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -4455,7 +4455,7 @@
       "marca": "DC Tecnology",
       "nombre": "Smart Watch + Audifonos D200 Ultra",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1606-c4f4e747-5b71-4f63-a1bc-415b5a674f23.webp",
-      "url": "https://dctecnology.xyz/p/er-smart-watch-audifonos-d200-ultra-229.html",
+      "url": "https://www.dctecnology.xyz/p/er-smart-watch-audifonos-d200-ultra-229.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -4473,7 +4473,7 @@
       "marca": "DC Tecnology",
       "nombre": "Smart Watch + Audifonos I20",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1607-792dedf8-0fcd-41c7-ab01-c70ca4ade4fd-1.webp",
-      "url": "https://dctecnology.xyz/p/er-smart-watch-audifonos-i20-230.html",
+      "url": "https://www.dctecnology.xyz/p/er-smart-watch-audifonos-i20-230.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -4491,7 +4491,7 @@
       "marca": "DC Tecnology",
       "nombre": "Mini Proyector LED Yg 300 - Esquinas Cuadradas",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1614-6ab29b56-3715-4b14-bc37-ea49889bbe6d.webp",
-      "url": "https://dctecnology.xyz/p/er-mini-proyector-led-yg-300-esquinas-cuadradas-231.html",
+      "url": "https://www.dctecnology.xyz/p/er-mini-proyector-led-yg-300-esquinas-cuadradas-231.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -4509,7 +4509,7 @@
       "marca": "DC Tecnology",
       "nombre": "Luz LED Potente para Celular Corazon",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1642-07ec2791-cdcd-481f-8879-917ea184fe48-1.webp",
-      "url": "https://dctecnology.xyz/p/er-luz-led-potente-para-celular-corazon-238.html",
+      "url": "https://www.dctecnology.xyz/p/er-luz-led-potente-para-celular-corazon-238.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -4527,7 +4527,7 @@
       "marca": "DC Tecnology",
       "nombre": "Mouse Ergonomico Alambrico",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1667-9fb324c4-db94-4791-995e-7f7067dcfd36.webp",
-      "url": "https://dctecnology.xyz/p/er-mouse-ergonomico-alambrico-239.html",
+      "url": "https://www.dctecnology.xyz/p/er-mouse-ergonomico-alambrico-239.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -4545,7 +4545,7 @@
       "marca": "DC Tecnology",
       "nombre": "Audifonos Bluetooth YX29 con Pantalla Tactil",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1691-audifonos-bluetooth-yx29-con-pantalla-tactil-1.webp",
-      "url": "https://dctecnology.xyz/p/er-audifonos-bluetooth-yx29-con-pantalla-tactil-244.html",
+      "url": "https://www.dctecnology.xyz/p/er-audifonos-bluetooth-yx29-con-pantalla-tactil-244.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -4563,7 +4563,7 @@
       "marca": "DC Tecnology",
       "nombre": "Kit Gamer X4 Articulos",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1717-kit-gamer-x4-articulos-1.webp",
-      "url": "https://dctecnology.xyz/p/er-kit-gamer-x4-articulos-245.html",
+      "url": "https://www.dctecnology.xyz/p/er-kit-gamer-x4-articulos-245.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -4581,7 +4581,7 @@
       "marca": "DC Tecnology",
       "nombre": "TV Box Contra Marcado",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1758-fire-tv-stick-contra-marcado-1.webp",
-      "url": "https://dctecnology.xyz/p/er-tv-box-contra-marcado-247.html",
+      "url": "https://www.dctecnology.xyz/p/er-tv-box-contra-marcado-247.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -4599,7 +4599,7 @@
       "marca": "DC Tecnology",
       "nombre": "Smart Watch LG88 Pro",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1761-smart-watch-lg88-pro-1.webp",
-      "url": "https://dctecnology.xyz/p/er-smart-watch-lg88-pro-248.html",
+      "url": "https://www.dctecnology.xyz/p/er-smart-watch-lg88-pro-248.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -4617,7 +4617,7 @@
       "marca": "DC Tecnology",
       "nombre": "Smart Watch S9 Mini Amoled",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1762-smart-watch-s9-mini-amoled-1.webp",
-      "url": "https://dctecnology.xyz/p/er-smart-watch-s9-mini-amoled-249.html",
+      "url": "https://www.dctecnology.xyz/p/er-smart-watch-s9-mini-amoled-249.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -4635,7 +4635,7 @@
       "marca": "DC Tecnology",
       "nombre": "Smartwacht Ultra Combo Pro",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1771-smart-watch-ultra-combo-pro-1.webp",
-      "url": "https://dctecnology.xyz/p/er-smartwacht-ultra-combo-pro-253.html",
+      "url": "https://www.dctecnology.xyz/p/er-smartwacht-ultra-combo-pro-253.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -4653,7 +4653,7 @@
       "marca": "DC Tecnology",
       "nombre": "Aro de Luz Tik Tok con Soporte para 2 Celulares",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1777-aro-de-luz-tik-tok-con-soporte-para-2-celulares-1.webp",
-      "url": "https://dctecnology.xyz/p/er-aro-de-luz-tik-tok-con-soporte-para-2-celulares-254.html",
+      "url": "https://www.dctecnology.xyz/p/er-aro-de-luz-tik-tok-con-soporte-para-2-celulares-254.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -4671,7 +4671,7 @@
       "marca": "DC Tecnology",
       "nombre": "Audifonos TWS S510 con Pantalla Digital",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1781-audifonos-tws-s510-con-pantalla-digital-1.webp",
-      "url": "https://dctecnology.xyz/p/er-audifonos-tws-s510-con-pantalla-digital-256.html",
+      "url": "https://www.dctecnology.xyz/p/er-audifonos-tws-s510-con-pantalla-digital-256.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -4689,7 +4689,7 @@
       "marca": "DC Tecnology",
       "nombre": "Kit de Grabacion para Celular AY-49RGB Fino",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1790-kit-de-grabacion-para-celular-ay-49rgb-2-c1c45ca7.webp",
-      "url": "https://dctecnology.xyz/p/er-kit-de-grabacion-para-celular-ay-49rgb-fino-258.html",
+      "url": "https://www.dctecnology.xyz/p/er-kit-de-grabacion-para-celular-ay-49rgb-fino-258.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -4707,7 +4707,7 @@
       "marca": "DC Tecnology",
       "nombre": "Audifonos Inalambricos con Pantalla Inteligente ANC",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1791-audifonos-inalambricos-con-pantalla-inteligente-anc-1-1810651d.webp",
-      "url": "https://dctecnology.xyz/p/er-audifonos-inalambricos-con-pantalla-inteligente-anc-259.html",
+      "url": "https://www.dctecnology.xyz/p/er-audifonos-inalambricos-con-pantalla-inteligente-anc-259.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -4725,7 +4725,7 @@
       "marca": "DC Tecnology",
       "nombre": "Power Bank Magnetico 10.000 mAh YO11",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1796-power-bank-magnetico-10-000-mah-1-75566a07.webp",
-      "url": "https://dctecnology.xyz/p/er-power-bank-magnetico-10000-mah-yo11-261.html",
+      "url": "https://www.dctecnology.xyz/p/er-power-bank-magnetico-10000-mah-yo11-261.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -4743,7 +4743,7 @@
       "marca": "DC Tecnology",
       "nombre": "Audifonos Ows YKS286",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1797-audifonos-ows-yks286-1-60f6e183.webp",
-      "url": "https://dctecnology.xyz/p/er-audifonos-ows-yks286-262.html",
+      "url": "https://www.dctecnology.xyz/p/er-audifonos-ows-yks286-262.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -4761,7 +4761,7 @@
       "marca": "DC Tecnology",
       "nombre": "Audífonos Inalámbricos ES57",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1798-airpods-originales-es57-1-070e7e8a.webp",
-      "url": "https://dctecnology.xyz/p/er-airpods-originales-es57-263.html",
+      "url": "https://www.dctecnology.xyz/p/er-airpods-originales-es57-263.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -4779,7 +4779,7 @@
       "marca": "DC Tecnology",
       "nombre": "Audífonos Inalámbricos ES56",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1799-airpods-originales-es56-1-5b0675f0.webp",
-      "url": "https://dctecnology.xyz/p/er-airpods-originales-es56-264.html",
+      "url": "https://www.dctecnology.xyz/p/er-airpods-originales-es56-264.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -4797,7 +4797,7 @@
       "marca": "DC Tecnology",
       "nombre": "Cargador Superrapido 60W KI275",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1800-cargador-superrapido-60w-1-7f748f63.webp",
-      "url": "https://dctecnology.xyz/p/er-cargador-superrapido-60w-ki275-265.html",
+      "url": "https://www.dctecnology.xyz/p/er-cargador-superrapido-60w-ki275-265.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -4815,7 +4815,7 @@
       "marca": "DC Tecnology",
       "nombre": "Pantalla Selfie",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1827-pantalla-selfie-1-dce9922b.webp",
-      "url": "https://dctecnology.xyz/p/er-pantalla-selfie-270.html",
+      "url": "https://www.dctecnology.xyz/p/er-pantalla-selfie-270.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -4833,7 +4833,7 @@
       "marca": "DC Tecnology",
       "nombre": "Mini Luz LED Recargable para Celular 3W",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1840-mini-luz-led-recargable-para-celular-3w-1-b1b5dddf.webp",
-      "url": "https://dctecnology.xyz/p/er-mini-luz-led-recargable-para-celular-3w-272.html",
+      "url": "https://www.dctecnology.xyz/p/er-mini-luz-led-recargable-para-celular-3w-272.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -4851,7 +4851,7 @@
       "marca": "DC Tecnology",
       "nombre": "Soporte Celular HOLD-371",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1848-soporte-celular-hold-371-1-58c1eb2d.webp",
-      "url": "https://dctecnology.xyz/p/er-soporte-celular-hold-371-273.html",
+      "url": "https://www.dctecnology.xyz/p/er-soporte-celular-hold-371-273.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -4869,7 +4869,7 @@
       "marca": "DC Tecnology",
       "nombre": "Soporte Celular HOLD-439",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1849-soporte-celular-hold-439-1-200c0304.webp",
-      "url": "https://dctecnology.xyz/p/er-soporte-celular-hold-439-274.html",
+      "url": "https://www.dctecnology.xyz/p/er-soporte-celular-hold-439-274.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -4887,7 +4887,7 @@
       "marca": "DC Tecnology",
       "nombre": "Mesa Auto HOLD-372",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1850-mesa-auto-hold-372-1-5a0db807.webp",
-      "url": "https://dctecnology.xyz/p/er-mesa-auto-hold-372-275.html",
+      "url": "https://www.dctecnology.xyz/p/er-mesa-auto-hold-372-275.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -4905,7 +4905,7 @@
       "marca": "DC Tecnology",
       "nombre": "Parlante Kimiso KMS-295",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1868-parlante-kimiso-kms-295-2-6ab70538.webp",
-      "url": "https://dctecnology.xyz/p/er-parlante-kimiso-kms-295-277.html",
+      "url": "https://www.dctecnology.xyz/p/er-parlante-kimiso-kms-295-277.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -4923,7 +4923,7 @@
       "marca": "DC Tecnology",
       "nombre": "Teclado Gamer",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1869-teclado-gamer-1-39489b68.webp",
-      "url": "https://dctecnology.xyz/p/er-teclado-gamer-278.html",
+      "url": "https://www.dctecnology.xyz/p/er-teclado-gamer-278.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -4941,7 +4941,7 @@
       "marca": "DC Tecnology",
       "nombre": "Parlante Portatil Ajustable KMS-299",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1870-parlante-portatil-ajustable-kms-299-1-d0459181.webp",
-      "url": "https://dctecnology.xyz/p/er-parlante-portatil-ajustable-kms-299-279.html",
+      "url": "https://www.dctecnology.xyz/p/er-parlante-portatil-ajustable-kms-299-279.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -4959,7 +4959,7 @@
       "marca": "DC Tecnology",
       "nombre": "Parlante Portatil Original Kimiso KMS-374",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1876-parlante-portatil-original-kimiso-kms-374-1-d3f2235c.webp",
-      "url": "https://dctecnology.xyz/p/er-parlante-portatil-original-kimiso-kms-374-283.html",
+      "url": "https://www.dctecnology.xyz/p/er-parlante-portatil-original-kimiso-kms-374-283.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -4977,7 +4977,7 @@
       "marca": "DC Tecnology",
       "nombre": "Parlante Portatil Original Kimiso KMS-323",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1877-parlante-portatil-original-kimiso-kms-323-1-3a11fc59.webp",
-      "url": "https://dctecnology.xyz/p/er-parlante-portatil-original-kimiso-kms-323-284.html",
+      "url": "https://www.dctecnology.xyz/p/er-parlante-portatil-original-kimiso-kms-323-284.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -4995,7 +4995,7 @@
       "marca": "DC Tecnology",
       "nombre": "Parlante Portatil Original Kimiso KMS-325 Max",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1878-parlante-portatil-original-kimiso-kms-325-max-1-0f03f967.webp",
-      "url": "https://dctecnology.xyz/p/er-parlante-portatil-original-kimiso-kms-325-max-285.html",
+      "url": "https://www.dctecnology.xyz/p/er-parlante-portatil-original-kimiso-kms-325-max-285.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -5013,7 +5013,7 @@
       "marca": "DC Tecnology",
       "nombre": "Diademas Yookie Originales EB37",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1881-diademas-originales-eb37-1-e20ffe0f.webp",
-      "url": "https://dctecnology.xyz/p/er-diademas-yookie-originales-eb37-286.html",
+      "url": "https://www.dctecnology.xyz/p/er-diademas-yookie-originales-eb37-286.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -5031,7 +5031,7 @@
       "marca": "DC Tecnology",
       "nombre": "Soporte para Carro HOLD-372",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1885-soporte-para-carro-hold-372-1-244addb8.webp",
-      "url": "https://dctecnology.xyz/p/er-soporte-para-carro-hold-372-287.html",
+      "url": "https://www.dctecnology.xyz/p/er-soporte-para-carro-hold-372-287.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -5049,7 +5049,7 @@
       "marca": "DC Tecnology",
       "nombre": "Cable Tipo C Trenzado AV-10728-CCR",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1906-cable-tipo-c-trenzado-fino-1-d48fe6c8.webp",
-      "url": "https://dctecnology.xyz/p/er-cable-tipo-c-trenzado-av-10728-ccr-293.html",
+      "url": "https://www.dctecnology.xyz/p/er-cable-tipo-c-trenzado-av-10728-ccr-293.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -5067,7 +5067,7 @@
       "marca": "DC Tecnology",
       "nombre": "Diademas Pro Tuka XH-648",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1922-diademas-pro-tuka-xh-648-1-11405211.webp",
-      "url": "https://dctecnology.xyz/p/er-diademas-pro-tuka-xh-648-295.html",
+      "url": "https://www.dctecnology.xyz/p/er-diademas-pro-tuka-xh-648-295.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -5085,7 +5085,7 @@
       "marca": "DC Tecnology",
       "nombre": "Audifonos de Conduccion Osea",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1928-audifonos-de-conduccion-osea-1-bcaa8c2e.webp",
-      "url": "https://dctecnology.xyz/p/er-audifonos-de-conduccion-osea-298.html",
+      "url": "https://www.dctecnology.xyz/p/er-audifonos-de-conduccion-osea-298.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -5103,7 +5103,7 @@
       "marca": "DC Tecnology",
       "nombre": "Teclado Inalambrico Tactil Yookie YE36",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1929-teclado-inalambrico-tactil-yookie-ye36-1-105b69a0.webp",
-      "url": "https://dctecnology.xyz/p/er-teclado-inalambrico-tactil-yookie-ye36-299.html",
+      "url": "https://www.dctecnology.xyz/p/er-teclado-inalambrico-tactil-yookie-ye36-299.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -5121,7 +5121,7 @@
       "marca": "DC Tecnology",
       "nombre": "Teclado Inalambrico Portatil Ultrafino",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1930-teclado-inalambrico-portatil-ultrafino-1-5954770f.webp",
-      "url": "https://dctecnology.xyz/p/er-teclado-inalambrico-portatil-ultrafino-300.html",
+      "url": "https://www.dctecnology.xyz/p/er-teclado-inalambrico-portatil-ultrafino-300.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -5139,7 +5139,7 @@
       "marca": "DC Tecnology",
       "nombre": "Power Bank 22.5W Yookie Original",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1931-power-bank-22-5w-yookie-original-1-98c109b0.webp",
-      "url": "https://dctecnology.xyz/p/er-power-bank-225w-yookie-original-301.html",
+      "url": "https://www.dctecnology.xyz/p/er-power-bank-225w-yookie-original-301.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -5157,7 +5157,7 @@
       "marca": "DC Tecnology",
       "nombre": "Cable de Carga Rapida y Datos 4 en 1 Yookie EC27 120W",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1933-cable-de-carga-rapida-y-datos-4-en-1-yookie-ec27-120w-1-d0509a45.webp",
-      "url": "https://dctecnology.xyz/p/er-cable-de-carga-rapida-y-datos-4-en-1-yookie-ec27-120w-303.html",
+      "url": "https://www.dctecnology.xyz/p/er-cable-de-carga-rapida-y-datos-4-en-1-yookie-ec27-120w-303.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -5175,7 +5175,7 @@
       "marca": "DC Tecnology",
       "nombre": "Cable de Datos y Carga Rapida Yookie CB108 100W",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1934-cable-de-datos-y-carga-rapida-yookie-cb108-100w-1-88cd0d7f.webp",
-      "url": "https://dctecnology.xyz/p/er-cable-de-datos-y-carga-rapida-yookie-cb108-100w-304.html",
+      "url": "https://www.dctecnology.xyz/p/er-cable-de-datos-y-carga-rapida-yookie-cb108-100w-304.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -5193,7 +5193,7 @@
       "marca": "DC Tecnology",
       "nombre": "TV Stick 2+16 Economico H245",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1950-tv-stick-2-16-economico-h245-1-764efb3a.webp",
-      "url": "https://dctecnology.xyz/p/er-tv-stick-216-economico-h245-305.html",
+      "url": "https://www.dctecnology.xyz/p/er-tv-stick-216-economico-h245-305.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -5211,7 +5211,7 @@
       "marca": "DC Tecnology",
       "nombre": "Parlante Bluetooth con Luz RGB KTS-2310",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1960-parlante-bluetooth-con-luz-rgb-kts-2310-1-b5c5cb9a.webp",
-      "url": "https://dctecnology.xyz/p/er-parlante-bluetooth-con-luz-rgb-kts-2310-307.html",
+      "url": "https://www.dctecnology.xyz/p/er-parlante-bluetooth-con-luz-rgb-kts-2310-307.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -5229,7 +5229,7 @@
       "marca": "DC Tecnology",
       "nombre": "Smart Watch Sii Pro Original",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1969-smart-watch-sii-pro-original-1-56f9bfaf.webp",
-      "url": "https://dctecnology.xyz/p/er-smart-watch-sii-pro-original-308.html",
+      "url": "https://www.dctecnology.xyz/p/er-smart-watch-sii-pro-original-308.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -5247,7 +5247,7 @@
       "marca": "DC Tecnology",
       "nombre": "Smart Watch W33 Original",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1970-smart-watch-w33-original-1-3798d119.webp",
-      "url": "https://dctecnology.xyz/p/er-smart-watch-w33-original-309.html",
+      "url": "https://www.dctecnology.xyz/p/er-smart-watch-w33-original-309.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -5265,7 +5265,7 @@
       "marca": "DC Tecnology",
       "nombre": "Lampara Proyectora de Estrellas Star Master",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1972-lampara-proyectora-de-estrellas-star-master-1-e22185dc.webp",
-      "url": "https://dctecnology.xyz/p/er-lampara-proyectora-de-estrellas-star-master-310.html",
+      "url": "https://www.dctecnology.xyz/p/er-lampara-proyectora-de-estrellas-star-master-310.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -5283,7 +5283,7 @@
       "marca": "DC Tecnology",
       "nombre": "Smart Watch ACE-180",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1985-smart-watch-ace-180-1-8a575a80.webp",
-      "url": "https://dctecnology.xyz/p/er-smart-watch-ace-180-312.html",
+      "url": "https://www.dctecnology.xyz/p/er-smart-watch-ace-180-312.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -5301,7 +5301,7 @@
       "marca": "DC Tecnology",
       "nombre": "Smart Watch WS-75 Ultra 3",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1986-smart-watch-ws-75-ultra-3-1-54aba6b0.webp",
-      "url": "https://dctecnology.xyz/p/er-smart-watch-ws-75-ultra-3-313.html",
+      "url": "https://www.dctecnology.xyz/p/er-smart-watch-ws-75-ultra-3-313.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -5319,7 +5319,7 @@
       "marca": "DC Tecnology",
       "nombre": "Smart Watch X10 Pro Max",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1987-smart-watch-x10-pro-max-1-8e882402.webp",
-      "url": "https://dctecnology.xyz/p/er-smart-watch-x10-pro-max-314.html",
+      "url": "https://www.dctecnology.xyz/p/er-smart-watch-x10-pro-max-314.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -5337,7 +5337,7 @@
       "marca": "DC Tecnology",
       "nombre": "Mouse Gamer RGB X6",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1993-mouse-gamer-rgb-x6-1-bec892e0.webp",
-      "url": "https://dctecnology.xyz/p/er-mouse-gamer-rgb-x6-316.html",
+      "url": "https://www.dctecnology.xyz/p/er-mouse-gamer-rgb-x6-316.html",
       "variantes": [
         {
           "nombre": "Unidad",

@@ -17,7 +17,7 @@
     const menosMovimiento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const esc = (v) => String(v ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
-    fetch('productos.json', { cache: 'force-cache' }).then((r) => r.json()).then((productos) => {
+    (window.DCCatalogoCrudo ?? fetch('productos.json').then((r) => r.json())).then((productos) => {
         const vistos = new Set();
         const logos = productos.filter((p) => ['streaming', 'licencias', 'pines'].includes(p.tipo) && p.imagen).filter((p) => {
             const clave = String(p.marca || p.nombre).toLowerCase();

@@ -15,8 +15,8 @@ const WA = require('./plantillas-whatsapp.js');
 
 const RUTA_SALIDA = path.join(__dirname, 'bot-conocimiento.json');
 // Portal del cliente: historial, accesos, garantía y reportes de falla (entra con un código por WhatsApp)
-const URL_MIS_PEDIDOS = 'https://dctecnology.xyz/#cuenta';
-const URL_TIENDA = 'https://dctecnology.xyz';
+const URL_MIS_PEDIDOS = 'https://www.dctecnology.xyz/#cuenta';
+const URL_TIENDA = 'https://www.dctecnology.xyz';
 const productos = JSON.parse(fs.readFileSync(path.join(__dirname, 'productos.json'), 'utf8'));
 const anterior = fs.existsSync(RUTA_SALIDA) ? JSON.parse(fs.readFileSync(RUTA_SALIDA, 'utf8')) : {};
 
@@ -208,7 +208,7 @@ const faqObligatorias = (horario) => [
         id: 'combos',
         pregunta: '¿Tienen combos o descuento por llevar varias plataformas?',
         palabras_clave: ['combo', 'combos', 'varias plataformas', 'paquete', 'dos plataformas', 'tres plataformas', 'descuento por varias'],
-        respuesta: 'Sí: si llevas varias plataformas distintas en un mismo pedido te aplicamos el descuento por combo vigente; dime cuáles quieres y te doy el total exacto. También puedes armarlo en dctecnology.xyz/#combos. El descuento de combo no se acumula con cupones.',
+        respuesta: 'Sí: si llevas varias plataformas distintas en un mismo pedido te aplicamos el descuento por combo vigente; dime cuáles quieres y te doy el total exacto. También puedes armarlo en www.dctecnology.xyz/#combos. El descuento de combo no se acumula con cupones.',
         pendiente_configurar: false,
     },
     // Legal (18/10/2026): mismos textos que dctecnology.xyz/legal/ (herramientas/generar_legal.js)
@@ -216,21 +216,21 @@ const faqObligatorias = (horario) => [
         id: 'datos_personales',
         pregunta: '¿Qué hacen con mis datos?',
         palabras_clave: ['mis datos', 'datos personales', 'privacidad', 'habeas data', 'borrar mis datos', 'eliminar mis datos', 'politica de datos', 'tratamiento de datos'],
-        respuesta: 'Usamos tu nombre, tu WhatsApp y los datos de tus pedidos solo para gestionarlos, validar pagos, entregarte y darte soporte y garantía (Ley 1581 de 2012). No vendemos tus datos. Puedes consultarlos, corregirlos o pedir que se borren escribiendo DATOS por este chat. Política completa: https://dctecnology.xyz/legal/privacidad.html',
+        respuesta: 'Usamos tu nombre, tu WhatsApp y los datos de tus pedidos solo para gestionarlos, validar pagos, entregarte y darte soporte y garantía (Ley 1581 de 2012). No vendemos tus datos. Puedes consultarlos, corregirlos o pedir que se borren escribiendo DATOS por este chat. Política completa: https://www.dctecnology.xyz/legal/privacidad.html',
         pendiente_configurar: false,
     },
     {
         id: 'devoluciones_retracto',
         pregunta: '¿Puedo devolver o cancelar mi compra?',
         palabras_clave: ['devolucion', 'devolver', 'reembolso', 'retracto', 'cancelar compra', 'me devuelven', 'devuelvan la plata', 'devuelvan el dinero'],
-        respuesta: 'Tecnología: tienes 5 días hábiles desde la entrega para retractarte, devolviendo el producto como lo recibiste (el envío de vuelta corre por tu cuenta). Cuentas, licencias, pines y recargas ya entregados no tienen retracto por ley (Ley 1480, art. 47), pero sí garantía: si algo falla, te ayudo a resolverlo. Si pagaste y no podemos entregar, eliges otro producto o la devolución del dinero. Detalles: https://dctecnology.xyz/legal/garantias.html',
+        respuesta: 'Tecnología: tienes 5 días hábiles desde la entrega para retractarte, devolviendo el producto como lo recibiste (el envío de vuelta corre por tu cuenta). Cuentas, licencias, pines y recargas ya entregados no tienen retracto por ley (Ley 1480, art. 47), pero sí garantía: si algo falla, te ayudo a resolverlo. Si pagaste y no podemos entregar, eliges otro producto o la devolución del dinero. Detalles: https://www.dctecnology.xyz/legal/garantias.html',
         pendiente_configurar: false,
     },
     {
         id: 'terminos',
         pregunta: '¿Dónde veo los términos y condiciones?',
         palabras_clave: ['terminos', 'condiciones', 'politicas', 'reglas de compra', 'legal'],
-        respuesta: 'Aquí están: términos https://dctecnology.xyz/legal/terminos.html · garantías y devoluciones https://dctecnology.xyz/legal/garantias.html · datos personales https://dctecnology.xyz/legal/privacidad.html',
+        respuesta: 'Aquí están: términos https://www.dctecnology.xyz/legal/terminos.html · garantías y devoluciones https://www.dctecnology.xyz/legal/garantias.html · datos personales https://www.dctecnology.xyz/legal/privacidad.html',
         pendiente_configurar: false,
     },
     {
@@ -304,7 +304,7 @@ const faqObligatorias = (horario) => [
 
 const negocioPorDefecto = {
     nombre: 'DC Tecnology',
-    sitio: 'https://dctecnology.xyz',
+    sitio: 'https://www.dctecnology.xyz',
     portal_rastreo: WA.URL_PORTAL,
     whatsapp: WA.NUMERO_TIENDA,
     nota_metodos_pago: 'Los métodos (locales y cripto) y sus datos salen de public.metodos_pago (solo los activos). No se escriben aquí.',
@@ -324,7 +324,7 @@ const faqPorDefecto = [
         id: 'como_comprar',
         pregunta: '¿Cómo compro?',
         palabras_clave: ['comprar', 'como compro', 'quiero', 'precio', 'adquirir'],
-        respuesta: 'Elige tu producto en https://dctecnology.xyz y toca "Comprar", o escríbenos aquí el nombre del producto. Te enviamos los datos de pago y, al validar tu comprobante, procesamos tu pedido.',
+        respuesta: 'Elige tu producto en https://www.dctecnology.xyz y toca "Comprar", o escríbenos aquí el nombre del producto. Te enviamos los datos de pago y, al validar tu comprobante, procesamos tu pedido.',
         pendiente_configurar: false,
     },
     {
@@ -577,7 +577,7 @@ const resultado = {
         regla: 'se aplica la regla activa con el mayor mínimo de plataformas que alcance el combo',
         cupon: 'no se acumula: el cupón solo aplica a productos fuera del combo',
         marca: '[COMBO] {"items":[{"producto":"…","variante":"…"}]} → la reemplaza el nodo "Revisar respuesta" de n8n',
-        portal: 'https://dctecnology.xyz/#combos',
+        portal: 'https://www.dctecnology.xyz/#combos',
     },
     menu,
     plantillas,

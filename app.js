@@ -3,6 +3,9 @@
 // prueba social con datos reales, reseñas verificadas y datos estructurados para Google.
 
 const SUPABASE_URL = 'https://vyqcizwfmjlflncdwzve.supabase.co';
+// Catálogo: UNA sola descarga para toda la página (la franja de marcas la reutiliza); empieza de una vez
+window.DCCatalogoCrudo = fetch('productos.json', { cache: 'no-cache' }) // revalida: nunca el catálogo viejo del navegador
+    .then((r) => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); });
 const SUPABASE_CLAVE_PUBLICA = 'sb_publishable_GvQiv6M7iSrlwsA90lXsOQ_5OfSYBwy';
 // La tienda funciona aunque Supabase no responda: solo se pierden cupones, reseñas y contadores
 const supabaseTienda = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_CLAVE_PUBLICA) : null;
@@ -177,7 +180,11 @@ function fondoLimpio(src) {
 
 // La imagen queda oculta hasta tener su versión limpia (o 1,5 s como máximo): sin destello del cuadro blanco
 function prepararImagen(img, src) {
-    // emprendered.com.co no permite CORS: el recorte fallaría siempre (doble descarga y error en consola); se muestra tal cual
+    // 19/10/2026: el recorte automático del blanco dañaba fotos con zonas blancas (portátiles, mesas, fondos de
+    // estudio): borraba partes del producto. Ahora TODAS las fotos van tal cual sobre la vitrina clara (tarjeta y
+    // ficha), sin procesar nada en el navegador (más rápido). quitarFondoBlanco() queda solo de referencia.
+    return;
+    // eslint-disable-next-line no-unreachable
     if (!src || src.startsWith('data:') || src.includes('ui-avatars.com') || src.includes('emprendered.com.co')) return;
     img.classList.add('limpiando');
     const mostrar = (limpia) => {
@@ -280,9 +287,7 @@ async function cargarCatalogo() {
         ? Promise.race([supabaseTienda.rpc('stock_publico').then(({ data, error }) => (error ? [] : data ?? [])), new Promise((r) => setTimeout(() => r([]), 2500))]).catch(() => [])
         : Promise.resolve([]);
     try {
-        const respuesta = await fetch('productos.json', { cache: 'no-cache' }); // revalida: nunca el catálogo viejo del navegador
-        if (!respuesta.ok) throw new Error(`HTTP ${respuesta.status}`);
-        const datos = await respuesta.json();
+        const datos = await window.DCCatalogoCrudo;
         estado.productos = await aplicarPreciosBase(datos.map((p) => ({ ...p, tipo: clasificarCategoria(p) })));
         estado.conStock = new Set((await stockPublico).map((x) => x.producto_id));
     } catch (error) {

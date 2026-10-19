@@ -7,7 +7,7 @@
     else raiz.PlantillasWA = plantillas;
 })(typeof self !== 'undefined' ? self : this, function () {
     const NUMERO_TIENDA = '573223284622';
-    const URL_PORTAL = 'https://dctecnology.xyz/portal.html';
+    const URL_PORTAL = 'https://www.dctecnology.xyz/portal.html';
     const DESCUENTO_RENOVACION = 10; // % prometido en el recordatorio de renovación
     const ENTREGA_MAX_MIN = 15;      // minutos máximos de entrega tras validar el pago (en horario)
     const HORARIO = 'lunes a sábado, 8:00 a.m. a 8:00 p.m.';
@@ -281,7 +281,7 @@
             `Tu orden *${codigo}* por *$${total}* quedó confirmada. Ya estamos procesando tu pedido.`,
             '📲 Te lo enviamos por WhatsApp en los próximos minutos.',
             '',
-            '🔎 Síguela en Mis pedidos: dctecnology.xyz/#cuenta',
+            '🔎 Síguela en Mis pedidos: www.dctecnology.xyz/#cuenta',
         ].join('\n'),
         ordenRechazada: ({ codigo, motivo }) => [
             `⚠️ *No pudimos validar tu pago* · ${FIRMA}`,
@@ -289,7 +289,7 @@
             `📦 Orden: *${codigo}*`,
             `📝 Motivo: ${motivo}`,
             '',
-            'Sube otro comprobante en Mis pedidos (dctecnology.xyz/#cuenta) o respóndeme por aquí y te ayudo.',
+            'Sube otro comprobante en Mis pedidos (www.dctecnology.xyz/#cuenta) o respóndeme por aquí y te ayudo.',
         ].join('\n'),
         reporteResuelto: ({ producto, nota }) => [
             `🛠️ *Tu reporte fue atendido* · ${FIRMA}`,
@@ -323,7 +323,7 @@
             '',
             `*${codigo}*`,
             '',
-            'Escríbelo en dctecnology.xyz para ver tus pedidos y accesos.',
+            'Escríbelo en www.dctecnology.xyz para ver tus pedidos y accesos.',
             '⏱️ Vence en *5 minutos*.',
             '',
             '⚠️ No lo compartas: nadie de DC TECNOLOGY te lo va a pedir.',
