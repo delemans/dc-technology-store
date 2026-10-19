@@ -2,7 +2,7 @@
 // Páginas y datos: primero la red (siempre lo último publicado); la copia guardada solo si no hay red.
 // Estilos, scripts e imágenes propios: copia guardada y se refresca por detrás (llevan ?v=<fecha>).
 // Nunca guarda Supabase, n8n ni nada de otro dominio.
-const CACHE = 'dc-tienda-v1';
+const CACHE = 'dc-tienda-v2'; // cambiar el número borra lo guardado en los celulares
 const BASICOS = ['/', '/index.html', '/img/logo-dc-192.png'];
 
 self.addEventListener('install', (e) => {

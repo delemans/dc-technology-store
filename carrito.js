@@ -299,6 +299,13 @@
         const enviar = cuerpo.querySelector('[data-enviar]');
         let archivo = null;
         let vista = null;
+        // En el kiosko de la tienda física: la cámara de la tableta le toma la foto a la confirmación en el celular del cliente
+        if (document.documentElement.classList.contains('kiosko')) {
+            form.archivo.setAttribute('capture', 'environment');
+            form.archivo.setAttribute('accept', 'image/*');
+            const b = cuerpo.querySelector('[data-vista-previa] b');
+            if (b) b.textContent = 'Toca aquí y toma una foto de la confirmación de pago en tu celular';
+        }
         form.archivo.addEventListener('change', () => {
             const f = form.archivo.files?.[0];
             error.textContent = '';
@@ -359,6 +366,8 @@
             </div>`);
         document.querySelector('#hoja [data-ir-pedidos]')?.addEventListener('click', cerrarHoja);
         mostrarToast('Comprobante enviado ✅', 'ok');
+        // Modo kiosko (kiosko.js): pantalla de gracias y reinicio para el siguiente cliente
+        document.dispatchEvent(new CustomEvent('dc:comprobante-enviado', { detail: { codigo: orden.codigo, total: orden.total } }));
     }
 
     // Mensaje de pedido completo (mismo formato que entiende el bot) y WhatsApp

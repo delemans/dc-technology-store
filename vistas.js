@@ -1,7 +1,9 @@
 // vistas.js — La tienda por módulos (como el portal): Inicio · Catálogo · Servicios · Pedidos · Soporte.
 // Cada <section data-vista="…"> pertenece a un módulo y solo se ve el módulo activo. Menú inferior con íconos en
 // celular (.menu-modulos) y pestañas en PC (.modulos-nav). Cualquier enlace #id (o un scrollIntoView del código)
-// abre primero el módulo que contiene esa sección. Dentro de un iframe (estudio de videos) se ve todo, como antes.
+// abre primero el módulo que contiene esa sección. La dirección queda SIEMPRE limpia (dctecnology.xyz, sin #catalogo):
+// el módulo se guarda en el historial (Atrás funciona) y los enlaces viejos con # se limpian al entrar.
+// Dentro de un iframe (estudio de videos) se ve todo, como antes.
 (() => {
     'use strict';
     if (window.top !== window) return;
@@ -64,22 +66,28 @@
         const { vista } = destinoDe(hash);
         if (!vista) return;
         e.preventDefault();
-        if (location.hash !== hash) history.pushState(null, '', hash);
+        const antes = actual;
         ir(hash);
-        // Los demás módulos del sitio (Mis pedidos, Soporte) escuchan el cambio de dirección
-        window.dispatchEvent(new HashChangeEvent('hashchange'));
+        if (actual !== antes) history.pushState({ vista: actual }, '', limpia());
     });
+    // Dirección limpia: solo la ruta (y ?pedido= si vino de un aviso de WhatsApp), nunca el #
+    const limpia = () => location.pathname.replace(/index.html$/, '') + location.search;
+    const limpiar = () => { if (location.hash) history.replaceState({ vista: actual }, '', limpia()); };
     // El logo lleva al inicio (sus 6 toques al panel siguen igual)
     document.getElementById('secret-admin-logo')?.addEventListener('click', () => {
-        if (location.hash) history.pushState(null, '', location.pathname + location.search);
-        mostrar('inicio');
+        const destino = raiz.classList.contains('kiosko') ? 'catalogo' : 'inicio'; // en el kiosko el logo lleva al catálogo
+        if (actual !== destino) { mostrar(destino); history.pushState({ vista: destino }, '', limpia()); }
     });
-    window.addEventListener('hashchange', () => ir(location.hash));
-    window.addEventListener('popstate', () => ir(location.hash));
+    // Un # puesto por el código (p. ej. "Ir a Soporte") abre su módulo y la dirección se limpia
+    window.addEventListener('hashchange', () => { if (!location.hash) return; const antes = actual; ir(location.hash); if (actual !== antes) history.replaceState({ vista: actual }, '', location.href); setTimeout(limpiar, 400); });
+    window.addEventListener('popstate', (e) => { if (e.state?.vista) mostrar(e.state.vista); else if (location.hash) ir(location.hash); else mostrar('inicio'); });
 
     // Al abrir: la dirección manda (#catalogo, #cuenta…); con ?pedido= va a Mis pedidos
     const inicial = new URLSearchParams(location.search).get('pedido') && !location.hash ? '#cuenta' : location.hash;
     raiz.classList.add('con-modulos');
     ir(inicial);
+    history.replaceState({ vista: actual }, '', location.href);
+    // Los demás scripts (Mis pedidos, Soporte) leen el # al cargar: se limpia un instante después
+    setTimeout(limpiar, 800);
     window.DCVistas = { mostrar, ir, get actual() { return actual; } };
 })();
