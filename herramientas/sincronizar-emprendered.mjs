@@ -11,7 +11,10 @@
 import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
-export const BASE_EMPRENDERED = 'https://dctechnology.catalogovirtual.co';
+// 19/10/2026: catálogo de distribuidor en emprendered.com.co (antes la tienda de prueba dctechnology.catalogovirtual.co).
+// Allí "price_sale" ES el precio de distribuidor = NUESTRO COSTO (verificado: coincide con el price_buy de la tienda anterior
+// en 21 de 21 productos) y "price_buy" viene en 0.
+export const BASE_EMPRENDERED = 'https://emprendered.com.co';
 const CATALOGO = `${BASE_EMPRENDERED}/catalogo`;
 const SALIDA = 'herramientas/salida/emprendered.json';
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Safari/537.36';
@@ -62,7 +65,8 @@ export function normalizar(p, categorias) {
         slug: p.url ?? null,
         categoria_id: p.category_id ?? null,
         categoria: categorias.get(p.category_id) ?? null,
-        costo: Math.round(Number(p.price_buy) || 0), // vienen con centavos (39899.99)
+        // Costo: price_buy si el proveedor lo publica; si viene en 0 (emprendered.com.co), su precio de distribuidor
+        costo: Math.round(Number(p.price_buy) || Number(p.price_sale) || 0), // vienen con centavos (39899.99)
         precio_sugerido: Math.round(Number(p.price_sale) || 0),
         precio_antes: Number(p.price_before) || null,
         stock: Number.isFinite(Number(p.quantity_available)) ? Number(p.quantity_available)
@@ -148,7 +152,10 @@ export function resumen(datos) {
    - Caché por producto (herramientas/salida/emprendered-ia.json): cada texto se reescribe una sola vez; si el
      proveedor cambia su texto, se vuelve a escribir.
    - Categorías excluidas (EXCLUIR_CATEGORIAS) no se reescriben ni se importan. */
-export const EXCLUIR_CATEGORIAS = ['RELOJERIA REPLICA']; // réplicas de marcas: riesgo legal y de bloqueo en Meta/WhatsApp
+// Nunca se importan: réplicas de marcas (Ley 1480 / propiedad industrial y bloqueo en Meta/WhatsApp), artículos para
+// adultos y vapeadores (publicidad y venta restringidas: verificación de edad, Ley 2354 de 2024) y cuentas de streaming de
+// terceros (compiten con lo propio y su origen no es verificable).
+export const EXCLUIR_CATEGORIAS = ['RELOJERIA REPLICA', 'CAMISAS 1.1 FUTBOL', 'SEX SHOP', 'VAPES', 'VENDE STREAMING'];
 const CACHE_IA = 'herramientas/salida/emprendered-ia.json';
 const MODELO = 'deepseek-ai/DeepSeek-V3';
 const ETIQUETAS = new Set(['p', 'ul', 'li', 'strong', 'em', 'br']);
@@ -241,21 +248,27 @@ export async function enriquecer(datos, { env = {}, limite = Infinity, concurren
 }
 
 /* ==================== Paso 3 · Precios y tienda ====================
-   Decisión del director (15/10/2026): solo TECNOLOGIA, precio = costo + 40 % (redondeado hacia arriba a $100),
-   réplicas excluidas. Sin precio "antes" (cero descuentos inventados).
+   Decisión del director (19/10/2026): precio = costo + 50 % (redondeado hacia arriba a $100); se importan TODAS las
+   categorías permitidas, pero solo TECNOLOGIA se ve por defecto: las demás llegan con "oculto": true y el director las
+   activa en el panel (proveedor_categorias, wo-047). Réplicas excluidas. Sin precio "antes" (cero descuentos inventados).
    - productos.json: los productos del proveedor van al final con id "er-<slug>" y "sincronizado": true (la tienda
      los oculta si la base no les da un precio activo, p. ej. agotados). Los demás productos no se tocan (texto intacto).
    - supabase/wo-041-emprendered.sql: crea sincronizar_proveedor() (solo service_role, la usa n8n en el paso 4) y la
      ejecuta con este catálogo: precio, costo, stock y activo (stock > 0) por producto. Nunca usa la service_role desde aquí. */
-export const CATEGORIAS_IMPORTAR = ['TECNOLOGIA'];
-export const MARGEN_PCT = 40;
+export const CATEGORIAS_VISIBLES_POR_DEFECTO = ['TECNOLOGIA'];
+export const CATEGORIAS_IMPORTAR = null; // null = todas menos EXCLUIR_CATEGORIAS
+export const importable = (categoria) => Boolean(categoria) && !EXCLUIR_CATEGORIAS.includes(categoria) && (!CATEGORIAS_IMPORTAR || CATEGORIAS_IMPORTAR.includes(categoria));
+export const MARGEN_PCT = 50;
+// "HOGAR" → "Hogar", "RELOJERIA ORIGINAL" → "Relojería original"
+const ACENTOS = { RELOJERIA: 'Relojería', JOYERIA: 'Joyería', PAPELERIA: 'Papelería', PERFUMERIA: 'Perfumería', FERRETERIA: 'Ferretería', CACHARRERIA: 'Cacharrería', BARBERIA: 'Barbería', DULCERIA: 'Dulcería', TECNOLOGIA: 'Tecnología' };
+export const nombreCategoria = (c) => String(c ?? '').split(/\s+/).map((w, i) => { const a = ACENTOS[w] ?? w.charAt(0) + w.slice(1).toLowerCase(); return i ? a.toLowerCase() : a; }).join(' ');
 export const REDONDEO = 100;
 export const precioVenta = (costo) => Math.ceil((Number(costo) * (1 + MARGEN_PCT / 100)) / REDONDEO) * REDONDEO;
 
-const SIGLAS = new Set(['usb', 'led', 'hd', 'tv', 'anc', 'bt', 'rgb', 'otg', 'sd', 'aux', 'ac', 'dc', 'ipx4', 'ipx5', 'ipx7', 'ip67', 'ip68', 'pd', 'qc', 'gb', 'tws', 'fm', 'lcd', 'uv']);
+const SIGLAS = new Set(['usb', 'led', 'hd', 'tv', 'anc', 'bt', 'rgb', 'otg', 'sd', 'aux', 'ac', 'dc', 'ipx4', 'ipx5', 'ipx7', 'ip67', 'ip68', 'pd', 'qc', 'gb', 'tws', 'fm', 'lcd', 'uv', 'aaa', 'aa', 'led', 'hdmi', 'vga', 'ps5', 'ps4']);
 // "CARGADOR CON CABLE ORIGINAL YOOKIE 20W RAPIDO" → "Cargador con Cable Original Yookie 20W Rapido"
 // Réplicas declaradas en el nombre ("1.1", "réplica"…): no se importan, aunque estén en TECNOLOGIA
-export const NOMBRE_REPLICA = /\b1[.:]1\b|r[eé]plica|\bclon|\bcopia\b|\baaa\b|tipo original/i;
+export const NOMBRE_REPLICA = /\b1[.:]1\b|r[eé]plica|\bclon|\bcopia\b|(?<!\bpilas?\b.{0,20})\baaa\b|tipo original/i; // "PILAS AAA" no es réplica
 export function nombreBonito(nombre) {
     const menores = new Set(['de', 'del', 'la', 'el', 'y', 'con', 'para', 'en', 'a', 'por', 'sin', 'o', 'x']);
     let base = String(nombre).replace(/\s+/g, ' ').trim();
@@ -276,17 +289,19 @@ export const idDc = (p) => `er-${String(p.slug || p.nombre).toLowerCase().normal
 
 export function productosTienda(datos) {
     return datos.productos
-        .filter((p) => p.activo && p.stock > 0 && p.costo > 0 && CATEGORIAS_IMPORTAR.includes(p.categoria) && !EXCLUIR_CATEGORIAS.includes(p.categoria) && !NOMBRE_REPLICA.test(p.nombre))
+        .filter((p) => p.activo && p.stock > 0 && p.costo > 0 && importable(p.categoria) && !NOMBRE_REPLICA.test(p.nombre))
         .map((p) => ({
             id: idDc(p),
-            tipo: 'tecnologia',
+            tipo: p.categoria === 'TECNOLOGIA' ? 'tecnologia' : 'variedades',
+            categoria: nombreCategoria(p.categoria),
+            ...(CATEGORIAS_VISIBLES_POR_DEFECTO.includes(p.categoria) ? {} : { oculto: true }),
             marca: 'DC Tecnology',
             nombre: nombreBonito(p.nombre),
             imagen: p.imagenes[0],
             descripcion: p.descripcion_dc ?? (limpiarHtml(p.descripcion) || (p.descripcion_corta ? `<p>${p.descripcion_corta}</p>` : '')),
             variantes: [{ nombre: 'Unidad', precio: precioVenta(p.costo), precio_anterior: null }],
             sincronizado: true,
-            _proveedor: { id: p.id, ref: p.referencia, costo: p.costo, stock: p.stock },
+            _proveedor: { id: p.id, ref: p.referencia, costo: p.costo, stock: p.stock, categoria: p.categoria },
         }));
 }
 
@@ -316,8 +331,8 @@ export function escribirProductosJson(ruta, nuevos) {
 
 const sqlTexto = (v) => `'${String(v).replace(/'/g, "''")}'`;
 export function generarSql(nuevos, leidoAt) {
-    const items = nuevos.map((p) => ({ producto_id: p.id, variante: 'Unidad', producto: p.nombre, tipo: 'tecnologia',
-        costo: p._proveedor.costo, precio: p.variantes[0].precio, stock: p._proveedor.stock, ref: p._proveedor.ref ?? String(p._proveedor.id) }));
+    const items = nuevos.map((p) => ({ producto_id: p.id, variante: 'Unidad', producto: p.nombre, tipo: p.tipo,
+        costo: p._proveedor.costo, precio: p.variantes[0].precio, stock: p._proveedor.stock, ref: p._proveedor.ref ?? String(p._proveedor.id), categoria: p._proveedor.categoria }));
     return `-- =====================================================================
 -- WO-041 · Productos de Emprende Red (dropshipping) en catalogo_precios: precio, costo y stock
 -- Generado por herramientas/sincronizar-emprendered.mjs el ${new Date().toISOString()} con el catálogo leído el ${leidoAt}.
@@ -334,54 +349,13 @@ begin
 end;
 $$;
 
-alter table public.catalogo_precios
-    add column if not exists costo_proveedor    bigint check (costo_proveedor is null or costo_proveedor >= 0),
-    add column if not exists plan_proveedor     text,
-    add column if not exists costo_proveedor_at timestamptz,
-    add column if not exists proveedor          text,
-    add column if not exists stock_proveedor    integer;
-
--- p_items: [{producto_id, variante, producto, tipo, costo, precio, stock, ref}]. Lo que el proveedor ya no trae queda inactivo.
-create or replace function public.sincronizar_proveedor(p_proveedor text, p_items jsonb)
-returns table (insertados integer, actualizados integer, inactivados integer)
-language plpgsql
-volatile
-security definer
-set search_path = ''
-as $$
-declare
-    v_ins integer := 0; v_act integer := 0; v_inact integer := 0;
-    v_nuevo boolean;
-    i jsonb;
+do $$
 begin
-    if p_proveedor is null or p_items is null or jsonb_typeof(p_items) <> 'array' then
-        raise exception 'Datos no válidos';
+    if to_regclass('public.proveedor_categorias') is null then
+        raise exception 'Nada se aplicó. Aplica antes supabase/wo-047-proveedor-y-rastreo.sql (categorías visibles y sincronizar_proveedor con categoría).';
     end if;
-    for i in select * from jsonb_array_elements(p_items) loop
-        insert into public.catalogo_precios as c (producto_id, variante, producto, tipo, precio, precio_anterior, activo,
-                costo_proveedor, plan_proveedor, costo_proveedor_at, proveedor, stock_proveedor, updated_at)
-        values (i->>'producto_id', i->>'variante', i->>'producto', i->>'tipo', round((i->>'precio')::numeric)::bigint, null,
-                coalesce(round((i->>'stock')::numeric)::integer, 0) > 0, round((i->>'costo')::numeric)::bigint, p_proveedor || ' ' || coalesce(i->>'ref', ''),
-                now(), p_proveedor, coalesce(round((i->>'stock')::numeric)::integer, 0), now())
-        on conflict (producto_id, variante) do update
-            set producto = excluded.producto, precio = excluded.precio, activo = excluded.activo,
-                costo_proveedor = excluded.costo_proveedor, plan_proveedor = excluded.plan_proveedor,
-                costo_proveedor_at = now(), proveedor = excluded.proveedor, stock_proveedor = excluded.stock_proveedor,
-                updated_at = now()
-            where c.proveedor = p_proveedor  -- nunca pisa productos propios ni de ANC con el mismo id
-        returning (xmax = 0) into v_nuevo;
-        if v_nuevo then v_ins := v_ins + 1; elsif v_nuevo is not null then v_act := v_act + 1; end if;
-        v_nuevo := null;
-    end loop;
-    update public.catalogo_precios c set activo = false, stock_proveedor = 0, updated_at = now()
-     where c.proveedor = p_proveedor and c.activo
-       and not exists (select 1 from jsonb_array_elements(p_items) x where x->>'producto_id' = c.producto_id and x->>'variante' = c.variante);
-    get diagnostics v_inact = row_count;
-    return query select v_ins, v_act, v_inact;
 end;
 $$;
-revoke all on function public.sincronizar_proveedor(text, jsonb) from public, anon, authenticated;
-grant execute on function public.sincronizar_proveedor(text, jsonb) to service_role;
 
 select * from public.sincronizar_proveedor('emprendered', ${sqlTexto(JSON.stringify(items))}::jsonb);
 
@@ -410,11 +384,19 @@ if (process.argv[1] && fileURLToPath(import.meta.url).toLowerCase() === process.
     }
     if (process.argv.includes('--tienda')) {
         if (!process.argv.includes('--ia')) await enriquecer(datos, { llamar: async () => { throw Object.assign(new Error('sin IA'), { fatal: true }); } }); // solo caché
-        const nuevos = productosTienda(datos);
+        // Mismo producto, mismo id: el proveedor renumeró sus productos al pasar a emprendered.com.co (19/10/2026);
+        // se conserva el id anterior cuando el slug coincide (páginas p/ de Google, precios y pedidos no cambian)
+        const previos = new Map();
+        for (const p of JSON.parse(fs.readFileSync('productos.json', 'utf8'))) if (String(p.id).startsWith('er-')) previos.set(String(p.id).replace(/-\d+$/, ''), p.id);
+        const nuevos = productosTienda(datos).map((p) => ({ ...p, id: previos.get(p.id.replace(/-\d+$/, '')) ?? p.id }));
+        console.log(`  ids conservados de la tienda anterior: ${nuevos.filter((p) => [...previos.values()].includes(p.id)).length} de ${previos.size}`);
         const r = escribirProductosJson('productos.json', nuevos);
         fs.writeFileSync('supabase/wo-041-emprendered.sql', generarSql(nuevos, datos.leido_at));
-        console.log(`\nTienda: ${r.proveedor} productos de Emprende Red (${CATEGORIAS_IMPORTAR.join(', ')}, con stock) + ${r.propios} propios en productos.json`);
-        const replicas = datos.productos.filter((p) => CATEGORIAS_IMPORTAR.includes(p.categoria) && NOMBRE_REPLICA.test(p.nombre));
+        const porCat = {}; nuevos.forEach((p) => { porCat[p._proveedor.categoria] = (porCat[p._proveedor.categoria] ?? 0) + 1; });
+        console.log(`\nTienda: ${r.proveedor} productos de Emprende Red con stock + ${r.propios} propios en productos.json`);
+        console.log(`  por categoría (visibles por defecto: ${CATEGORIAS_VISIBLES_POR_DEFECTO.join(', ')}): ${Object.entries(porCat).map(([k, v]) => `${k} ${v}`).join(' · ')}`);
+        console.log(`  no importadas: ${EXCLUIR_CATEGORIAS.join(', ')}`);
+        const replicas = datos.productos.filter((p) => importable(p.categoria) && NOMBRE_REPLICA.test(p.nombre));
         if (replicas.length) console.log(`  excluidas por ser réplicas declaradas (${replicas.length}): ${replicas.map((p) => p.nombre).join(' | ')}`);
         console.log(`  precios: costo + ${MARGEN_PCT} % · ${nuevos.filter((p) => datos.productos.find((x) => idDc(x) === p.id)?.texto_ia).length} con texto de IA`);
         console.log('  SQL: supabase/wo-041-emprendered.sql → ejecútalo en Supabase y luego: npm run seo && node generar_bot_conocimiento.js');

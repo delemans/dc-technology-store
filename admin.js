@@ -1197,7 +1197,7 @@ function mostrarVista(vista) {
     document.getElementById('vista-pagos-bot').hidden = vista !== 'pagos-bot';
     if (vista === 'pagos-bot') { cargarComprobantesWeb(); cargarCombosPorValidar(); cargarReportesFalla(); }
     document.getElementById('vista-productos').hidden = vista !== 'productos';
-    if (vista === 'productos') { cargarPromociones(); cargarReglasCombo(); cargarPrecios(); }
+    if (vista === 'productos') { cargarPromociones(); cargarReglasCombo(); cargarPrecios(); window.Proveedor?.cargar(supabaseClient, document.getElementById('proveedor-contenido')); }
     document.getElementById('vista-finanzas').hidden = vista !== 'finanzas';
     if (vista === 'finanzas') cargarFinanzas();
     pintarNavegacion();

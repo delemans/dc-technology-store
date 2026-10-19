@@ -14,7 +14,14 @@
         const caja = $('cuenta-resultado');
         if (!limpio || !caja) return;
         caja.innerHTML = '<div class="skeleton" style="min-height:8rem"></div>';
+        // WO-047: el rastreo del envío se consulta en paralelo (sin el SQL aplicado simplemente no aparece)
+        const rastreoP = sb ? sb.rpc('rastreo_publico', { p_referencia: limpio }).maybeSingle().then(({ data: x, error: e }) => (e ? null : x)).catch(() => null) : Promise.resolve(null);
         const { data, error } = sb ? await sb.rpc('consultar_pedido', { p_codigo: limpio }).maybeSingle() : { data: null, error: true };
+        const rastreo = await rastreoP;
+        if ((error || !data) && rastreo) {
+            caja.innerHTML = `<div class="tarjeta space-y-3"><p class="etiqueta">Pedido #${escaparHTML(limpio)}</p></div>${htmlRastreo(rastreo)}`;
+            return;
+        }
         if (error || !data) {
             caja.innerHTML = `<div class="tarjeta"><p class="font-bold">No encontramos el pedido ${escaparHTML(limpio)}</p>
                 <p class="text-sm text-neutral-400 mt-1">Revisa el código que te enviamos por WhatsApp o escríbenos.</p>
@@ -37,11 +44,25 @@
                     ${entregado ? `<a class="btn-p" target="_blank" rel="noopener" href="${escaparHTML(WA.enlace(WA.NUMERO_TIENDA, `Hola, necesito que me reenvíen los accesos de mi pedido #${data.pedido_id ?? limpio} (${data.producto ?? ''}).`))}"><i class="fa-solid fa-key"></i> Pedir mis accesos</a>` : ''}
                     ${entregado ? '<button type="button" class="btn-s" data-reportar><i class="fa-solid fa-screwdriver-wrench"></i> Reportar una falla</button>' : ''}
                 </div>
-            </div>`;
+            </div>${rastreo ? htmlRastreo(rastreo) : ''}`;
         caja.querySelector('[data-reportar]')?.addEventListener('click', () => {
             window.Soporte?.iniciarConPedido({ codigo: data.pedido_id ?? limpio, producto: data.producto, garantiaDias: dias, serialFinal: data.serial_final });
             location.hash = '#soporte';
         });
+    }
+
+    // Envío con transportadora (WO-047): estado, guía y línea de tiempo (lo más reciente arriba)
+    function htmlRastreo(r) {
+        const pasos = (Array.isArray(r.historial) ? r.historial : []).slice(0, 12);
+        const fecha = (t) => { const d = new Date(String(t ?? '').replace(' ', 'T')); return Number.isNaN(d.getTime()) ? escaparHTML(t ?? '') : d.toLocaleString('es-CO', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' }); };
+        return `<div class="tarjeta rastreo mt-3">
+            <p class="etiqueta"><i class="fa-solid fa-truck-fast"></i> Envío</p>
+            <p class="rastreo__estado ${r.entregado ? 'listo' : ''}">${escaparHTML(r.estado ?? 'Despachado: esperando a la transportadora')}</p>
+            ${r.detalle ? `<p class="text-sm text-neutral-400">${escaparHTML(r.detalle)}</p>` : ''}
+            <p class="rastreo__datos">${r.transportadora ? `<span><i class="fa-solid fa-building"></i> ${escaparHTML(r.transportadora)}</span>` : ''}<span><i class="fa-solid fa-barcode"></i> Guía ${escaparHTML(r.guia ?? '')}</span></p>
+            ${pasos.length ? `<ol class="rastreo__linea">${pasos.map((p) => `<li><b>${escaparHTML(p.estado ?? '')}</b>${p.detalle ? ` · ${escaparHTML(p.detalle)}` : ''}${p.novedad ? ` <em>(${escaparHTML(p.novedad)})</em>` : ''}<small>${fecha(p.fecha)}</small></li>`).join('')}</ol>` : ''}
+            <p class="text-[11px] text-neutral-500">Actualizado: ${fecha(r.actualizado)} · Te avisamos por WhatsApp cada cambio.</p>
+        </div>`;
     }
 
     function pintarRecientes() {

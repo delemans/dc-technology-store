@@ -21,7 +21,7 @@ const CANTIDAD_MAXIMA = 10;
 const MODULOS = {
     todos:     { titulo: 'Catálogo completo', tipos: null },
     digitales: { titulo: 'Productos digitales', tipos: ['streaming', 'licencias', 'pines', 'recargas'] },
-    fisicos:   { titulo: 'Tecnología física', tipos: ['tecnologia'] },
+    fisicos:   { titulo: 'Productos físicos', tipos: ['tecnologia', 'variedades'] },
     servicios: { titulo: 'Servicios técnicos', tipos: ['servicios', 'alquiler'] },
 };
 const CATEGORIAS = {
@@ -30,6 +30,7 @@ const CATEGORIAS = {
     pines:      { icono: 'fa-gamepad',           texto: 'Pines virtuales' },
     recargas:   { icono: 'fa-mobile-screen',     texto: 'Recargas' },
     tecnologia: { icono: 'fa-headphones',        texto: 'Tecnología' },
+    variedades: { icono: 'fa-store',             texto: 'Hogar y variedades' }, // otras categorías de Emprende Red (las que actives en el panel)
     servicios:  { icono: 'fa-screwdriver-wrench', texto: 'Servicios' },
     alquiler:   { icono: 'fa-laptop',            texto: 'Alquiler de equipos' },
 };
@@ -243,7 +244,7 @@ function moduloDe(tipo) {
 function grupoTerminos(tipo) {
     if (tipo === 'streaming' || tipo === 'licencias') return 'cuentas';
     if (tipo === 'pines' || tipo === 'recargas') return 'pines';
-    if (tipo === 'tecnologia') return 'tecnologia';
+    if (tipo === 'tecnologia' || tipo === 'variedades') return 'tecnologia'; // mismas reglas de producto físico
     return 'servicios';
 }
 
@@ -261,10 +262,10 @@ function insignias(prod) {
         if (/cuenta completa/.test(variantes)) lista.push({ icono: 'fa-users', texto: 'Cuenta completa', clase: 'text-sky-300 ring-sky-500/30 bg-sky-500/10' });
         lista.push({ icono: 'fa-display', texto: 'TV · Celular · PC', clase: 'text-neutral-300 ring-white/10 bg-white/[0.04]' });
     }
-    if (prod.tipo === 'streaming' || prod.tipo === 'licencias' || prod.tipo === 'tecnologia') {
+    if (prod.tipo === 'streaming' || prod.tipo === 'licencias' || prod.tipo === 'tecnologia' || prod.tipo === 'variedades') {
         lista.push({ icono: 'fa-shield-halved', texto: `Garantía ${GARANTIA_DIAS} días`, clase: 'text-emerald-300 ring-emerald-500/30 bg-emerald-500/10' });
     }
-    if (prod.tipo === 'tecnologia') lista.push({ icono: 'fa-truck-fast', texto: 'Envíos a todo el país', clase: 'text-neutral-300 ring-white/10 bg-white/[0.04]' });
+    if (prod.tipo === 'tecnologia' || prod.tipo === 'variedades') lista.push({ icono: 'fa-truck-fast', texto: 'Envíos a todo el país', clase: 'text-neutral-300 ring-white/10 bg-white/[0.04]' });
     if (esCotizable(prod)) lista.push({ icono: 'fa-calendar-check', texto: 'Agenda por WhatsApp', clase: 'text-neutral-300 ring-white/10 bg-white/[0.04]' });
     return lista;
 }
@@ -311,10 +312,11 @@ async function cargarCatalogo() {
 // Un producto que está en la base solo muestra sus variantes activas; uno que aún no está conserva
 // productos.json. Si la base no responde en 3 s se pinta con productos.json (el servidor igual cobra lo de la base).
 async function aplicarPreciosBase(productos) {
-    if (!supabaseTienda) return productos;
+    if (!supabaseTienda) return productos.filter((p) => !p.oculto);
     const consulta = supabaseTienda.rpc('precios_publicos').then(({ data, error }) => (error ? null : data));
     const data = await Promise.race([consulta, new Promise((r) => setTimeout(() => r(null), 3000))]).catch(() => null);
-    if (!Array.isArray(data) || !data.length) return productos;
+    // Sin respuesta de la base: lo de categorías ocultas del proveedor (oculto) nunca se muestra
+    if (!Array.isArray(data) || !data.length) return productos.filter((p) => !p.oculto);
     const porProducto = new Map();
     data.forEach((x) => porProducto.set(x.producto_id, [...(porProducto.get(x.producto_id) ?? []), x]));
     return productos.map((p) => {
@@ -549,7 +551,7 @@ function crearTarjeta(prod) {
             <img src="${escaparHTML(prod.imagen || imagenRespaldo(prod.nombre))}" alt="${escaparHTML(prod.nombre)}" loading="lazy" decoding="async"
                 class="${esLogo ? '' : 'rounded-xl'}">
         </div>
-        <p class="text-[10px] font-black uppercase tracking-[0.22em] text-dcNeon">${escaparHTML(prod.marca || 'DC Tecnology')}</p>
+        <p class="text-[10px] font-black uppercase tracking-[0.22em] text-dcNeon">${escaparHTML(prod.tipo === 'variedades' && prod.categoria ? prod.categoria : prod.marca || 'DC Tecnology')}</p>
         <h3 class="mt-1 font-tech font-bold text-[15px] sm:text-base leading-snug text-white line-clamp-2">${escaparHTML(prod.nombre)}</h3>
         <div class="mt-2.5 flex flex-wrap gap-1.5">${insignias(prod).slice(0, 2).map(htmlInsignia).join('')}</div>
         <div class="mt-auto pt-4 border-t border-white/[0.06] flex items-end justify-between gap-3">
@@ -781,7 +783,7 @@ function pintarDescripcion(prod) {
 // Ficha técnica para productos físicos (datos del propio catálogo, sin inventar stock)
 function pintarFicha(prod) {
     const caja = $('modal-ficha');
-    if (prod.tipo !== 'tecnologia') {
+    if (prod.tipo !== 'tecnologia' && prod.tipo !== 'variedades') {
         caja.innerHTML = '';
         return;
     }

@@ -17,7 +17,9 @@ const RAIZ = path.resolve(__dirname, '..');
 const SITIO = 'https://dctecnology.xyz';
 const LOGO = 'https://dctecnology.xyz/img/logo-dc-192.png';
 const GARANTIA_DIAS = 30;
-const productos = JSON.parse(fs.readFileSync(path.join(RAIZ, 'productos.json'), 'utf8'));
+// Sin los ocultos: productos de categorías del proveedor que no se muestran (se activan en el panel; para Google, agrégalas a
+// CATEGORIAS_VISIBLES_POR_DEFECTO en sincronizar-emprendered.mjs y vuelve a generar)
+const productos = JSON.parse(fs.readFileSync(path.join(RAIZ, 'productos.json'), 'utf8')).filter((p) => !p.oculto);
 const SUPABASE_URL = 'https://vyqcizwfmjlflncdwzve.supabase.co';
 const SUPABASE_PUBLICA = 'sb_publishable_GvQiv6M7iSrlwsA90lXsOQ_5OfSYBwy'; // la misma clave pública de la tienda
 
@@ -50,7 +52,7 @@ const CATEGORIAS = {
     tecnologia: 'Tecnología', servicios: 'Servicios técnicos', alquiler: 'Alquiler de equipos',
 };
 const DIGITALES = ['streaming', 'licencias', 'pines', 'recargas'];
-const CON_GARANTIA = ['streaming', 'licencias', 'tecnologia'];
+const CON_GARANTIA = ['streaming', 'licencias', 'tecnologia', 'variedades'];
 const COTIZABLES = ['servicios', 'alquiler'];
 
 // Mismos hechos que la tienda (app.js → COMO_FUNCIONA / TERMINOS) y el bot: nada inventado
@@ -105,7 +107,7 @@ function jsonLd(p) {
         // Una oferta por plan, con la política de devolución real (legal/garantias.html): tecnología 5 días hábiles de
         // retracto (envío de vuelta a cargo del cliente); digitales entregados sin devolución (art. 47, Ley 1480).
         // Envío: los digitales llegan por WhatsApp sin costo; el costo de envío de tecnología no se publica (se coordina).
-        const devolucion = p.tipo === 'tecnologia'
+        const devolucion = ['tecnologia', 'variedades'].includes(p.tipo)
             ? { '@type': 'MerchantReturnPolicy', applicableCountry: 'CO', returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow', merchantReturnDays: 5,
                 returnMethod: 'https://schema.org/ReturnByMail', returnFees: 'https://schema.org/ReturnShippingFees', merchantReturnLink: `${SITIO}/legal/garantias.html` }
             : { '@type': 'MerchantReturnPolicy', applicableCountry: 'CO', returnPolicyCategory: 'https://schema.org/MerchantReturnNotPermitted', merchantReturnLink: `${SITIO}/legal/garantias.html` };
@@ -159,7 +161,7 @@ function pagina(p) {
     const { desde, desc, cotizable, categoria } = datosDe(p);
     const titulo = `${p.nombre}${desde ? ` desde ${cop(desde)}` : ''} | ${categoria} en Colombia | DC Tecnology`;
     const descripcion = descripcionMeta(p);
-    const pasos = (cotizable ? PASOS.servicio : p.tipo === 'tecnologia' ? PASOS.tecnologia : PASOS.digital)
+    const pasos = (cotizable ? PASOS.servicio : ['tecnologia', 'variedades'].includes(p.tipo) ? PASOS.tecnologia : PASOS.digital)
         .map((x) => x.replace('el método que elijas', PAGO.texto));
     const detalles = textoPlano(p.descripcion);
     const relacionados = productos.filter((x) => x.tipo === p.tipo && x.id !== p.id).slice(0, 6);
@@ -246,10 +248,10 @@ function preguntas(tipo) {
     const digital = DIGITALES.includes(tipo);
     const lista = [];
     if (digital) lista.push([`¿Cuánto tarda la entrega?`, `Máximo ${WA.ENTREGA_MAX_MIN} minutos después de validar tu pago, en horario de ${WA.HORARIO}. Te llega por WhatsApp.`]);
-    if (tipo === 'tecnologia') lista.push(['¿Hacen envíos?', 'Sí, a todo el país. Confirmamos disponibilidad y coordinamos el envío por WhatsApp.']);
+    if (tipo === 'tecnologia' || tipo === 'variedades') lista.push(['¿Hacen envíos?', 'Sí, a todo el país. Confirmamos disponibilidad y coordinamos el envío por WhatsApp.']);
     if (COTIZABLES.includes(tipo)) lista.push(['¿Cuánto cuesta?', 'El valor de la tienda es estimado: te enviamos la cotización final antes de empezar, sin compromiso.']);
     lista.push(['¿Cómo pago?', `Con ${PAGO.texto}. Envías el comprobante y lo validamos.`]);
-    if (CON_GARANTIA.includes(tipo)) lista.push(['¿Tiene garantía?', tipo === 'tecnologia' ? `Sí, ${GARANTIA_DIAS} días por defectos de fábrica.` : `Sí, ${GARANTIA_DIAS} días desde la entrega si se cumplen las reglas de uso (no cambiar contraseña, correo ni facturación y no compartir el acceso).`]);
+    if (CON_GARANTIA.includes(tipo)) lista.push(['¿Tiene garantía?', ['tecnologia', 'variedades'].includes(tipo) ? `Sí, ${GARANTIA_DIAS} días por defectos de fábrica.` : `Sí, ${GARANTIA_DIAS} días desde la entrega si se cumplen las reglas de uso (no cambiar contraseña, correo ni facturación y no compartir el acceso).`]);
     if (tipo === 'pines' || tipo === 'recargas') lista.push(['¿Puedo devolver una recarga o un pin?', 'No: las recargas y pines entregados no son reversibles. Verifica bien el número o la cuenta antes de pagar.']);
     if (digital) lista.push(['¿Hay descuento en la primera compra?', 'Sí: con el cupón DCTECH2026 tienes 10% en tu primera compra.']);
     lista.push(['¿Cómo los contacto?', `Por WhatsApp al +57 322 328 4622 (${WA.HORARIO}).`]);

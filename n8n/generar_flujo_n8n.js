@@ -42,7 +42,8 @@ const kbEmbebida = {
     plantillas: kb.plantillas,
     notificaciones: { plantilla_por_tipo: kb.notificaciones.plantilla_por_tipo },
     menu: kb.menu,
-    catalogo: kb.catalogo.map(({ id, nombre, tipo, url, variantes, sincronizado }) => ({ id, nombre, tipo, url, ...(sincronizado ? { sincronizado } : {}), variantes: variantes.map(({ nombre: n, precio }) => ({ nombre: n, precio })) })),
+    // Sin los ocultos (categorías del proveedor no activadas): el flujo queda liviano; "Leer Emprende Red" los toma del sitio en vivo
+    catalogo: kb.catalogo.filter((p) => !p.oculto).map(({ id, nombre, tipo, url, variantes, sincronizado, oculto }) => ({ id, nombre, tipo, url, ...(sincronizado ? { sincronizado } : {}), ...(oculto ? { oculto } : {}), variantes: variantes.map(({ nombre: n, precio }) => ({ nombre: n, precio })) })),
 };
 // Nombre visible de cada tipo de método de pago (NEQUI → Nequi, LLAVE_BREB → Llave Bre-B) para el menú
 const nombresPago = Object.fromEntries(WA.TIPOS_PAGO.map((t) => [t.tipo, t.nombre]));
@@ -107,7 +108,7 @@ function utilidades() {
     // Precios vigentes de la base (precios_publicos, igual que la tienda): reemplazan los del catálogo; un producto de
     // proveedor (sincronizado) sin precio activo está agotado y no se ofrece. Sin datos de la base, queda el catálogo.
     const aplicarPrecios = (catalogo, filas) => {
-        if (!Array.isArray(filas) || !filas.length) return catalogo ?? [];
+        if (!Array.isArray(filas) || !filas.length) return (catalogo ?? []).filter((p) => !p.oculto); // categorías ocultas: nunca sin la base
         const por = new Map();
         for (const f of filas) por.set(f.producto_id, [...(por.get(f.producto_id) ?? []), f]);
         return (catalogo ?? []).map((p) => {
@@ -236,7 +237,7 @@ function normalizarMensaje() {
         return [{ json: { ruta: 'triangulacion', origen: 'admin', accion: 'stock', referencia: null, numero, texto: texto.slice(0, 4000), wamid: key.id ?? null } }];
     }
     // #pago/#aprobar/#cancelar (compra automática) · #ok / #no (pago del cliente) · #entregar (accesos de ANC)
-    const comando = /^#(pago|aprobar|cancelar|ok|no|entregar)\s+(DC-[A-Z0-9]{4,8})\b/i.exec(texto);
+    const comando = /^#(pago|aprobar|cancelar|ok|no|entregar|guia|guía)\s+(DC-[A-Z0-9]{4,8})\b/i.exec(texto);
     if (comando && soloDigitos(cfg.numero_aviso_admin) && numero === soloDigitos(cfg.numero_aviso_admin)) {
         return [{ json: { ruta: 'triangulacion', origen: 'admin', accion: comando[1].toLowerCase(), referencia: comando[2].toUpperCase(), numero, texto, wamid: key.id ?? null, conMedia: esImagen || esPdf || Boolean(txid) } }];
     }
@@ -583,10 +584,10 @@ function responderMenu() {
         else {
             if (memoria.menu[numero]) memoria.menu[numero].activo = false;
             const salida = escalar({ ...msg, texto: `Quiere comprar: ${p.nombre} – ${v.nombre}` },
-                `Quiere comprar ${p.nombre} – ${v.nombre} (${precio(v.precio)}): coordinar ${p.tipo === 'tecnologia' ? 'el envío' : 'la cita o la cotización'}`,
+                `Quiere comprar ${p.nombre} – ${v.nombre} (${precio(v.precio)}): coordinar ${['tecnologia', 'variedades'].includes(p.tipo) ? 'el envío' : 'la cita o la cotización'}`,
                 $('Config bot').first().json, kb.plantillas);
             salida[0].json.texto = [`🙋 *Te comunico con un asesor* · ⚡ *DC TECNOLOGY*`, '', `Elegiste *${p.nombre} – ${v.nombre}* (${precio(v.precio)}).`,
-                `Una persona del equipo te escribe por aquí para coordinar ${p.tipo === 'tecnologia' ? 'el envío' : 'la cita'} (${__HORARIO__}).`].join('\n');
+                `Una persona del equipo te escribe por aquí para coordinar ${['tecnologia', 'variedades'].includes(p.tipo) ? 'el envío' : 'la cita'} (${__HORARIO__}).`].join('\n');
             return salida.map((i) => ({ json: { ...i.json, via: 'menu' } }));
         }
     }
@@ -616,7 +617,7 @@ function armarContexto() {
     // servicios y alquiler completos; de tecnología (180+ físicos) solo los que coinciden con lo que el cliente escribe
     // ahora o escribió antes en esta charla (máx. 12), más un resumen. El menú y la web siguen mostrando todo.
     const catalogoTodo = base.catalogo ?? [];
-    const tecnologia = catalogoTodo.filter((p) => p.tipo === 'tecnologia');
+    const tecnologia = catalogoTodo.filter((p) => ['tecnologia', 'variedades'].includes(p.tipo));
     const VACIAS_IA = new Set(['quiero', 'precio', 'precios', 'cuanto', 'cuesta', 'vale', 'valor', 'tienen', 'tiene', 'hay', 'venden', 'busco', 'necesito',
         'comprar', 'para', 'una', 'uno', 'unos', 'unas', 'los', 'las', 'del', 'con', 'por', 'favor', 'hola', 'buenas', 'que', 'como', 'cual', 'este', 'ese', 'esa', 'esta',
         'disponible', 'producto', 'productos', 'original', 'originales', 'bueno', 'buena', 'mejor', 'algo', 'tambien', 'pero', 'muy', 'mas', 'son', 'sus', 'mis', 'tus']);
@@ -648,7 +649,7 @@ function armarContexto() {
         const completo = tipo === 'streaming' || tipo === 'licencias' || TEMAS[tipo]?.test(charla) || items.some((p) => puntaje(p) > 0 && palabrasIa.some((w) => w.length >= 4 && normalizar(p.nombre).includes(w)));
         return [`${TITULOS[tipo]}:`, ...(completo ? items.map(lineaProducto) : [`- ${items.map((p) => p.nombre).join(', ')} (si pide uno, pregúntale cuál; el precio te llega en el siguiente mensaje)`])];
     });
-    const catalogoIa = [...catalogoTodo.filter((p) => p.tipo !== 'tecnologia'), ...tecnoIa];
+    const catalogoIa = [...catalogoTodo.filter((p) => !['tecnologia', 'variedades'].includes(p.tipo)), ...tecnoIa];
     // Preguntas frecuentes: solo las 6 que más se relacionan con la charla (todas cuando no hay pistas)
     const faqUtiles = (base.faq ?? []).filter((f) => !f.pendiente_configurar && f.respuesta);
     const puntajeFaq = (f) => { const t = normalizar(`${f.pregunta} ${f.respuesta}`); return palabrasIa.filter((w) => w.length >= 4 && t.includes(w)).length; };
@@ -1757,7 +1758,7 @@ function enrutarEvento() {
 
     const memoria = $getWorkflowStaticData('global');
     const manual = !['web', 'whatsapp'].includes(String(cfg.canal_compra || 'manual').trim().toLowerCase());
-    const resto = String(msg.texto ?? '').replace(/^#\w+\s+DC-[A-Z0-9]{4,8}\s*/i, '').trim();
+    const resto = String(msg.texto ?? '').replace(/^#\S+\s+DC-[A-Z0-9]{4,8}\s*/i, '').trim(); // \S: también #guía (con tilde)
     const ordenDe = (ref) => Object.values(memoria.ordenesChat ?? {}).find((o) => o.referencia === ref) ?? {};
     // Puede recibir los accesos: pagado (web, o chat con #ok) y aún sin entregar
     const listo = (r) => r && !r.es_combo && (r.estado === 'ESPERANDO_CREDENCIALES' || (r.origen_web && r.estado === 'REVISION_MANUAL'));
@@ -1840,6 +1841,12 @@ function enrutarEvento() {
         // Pedido web: misma validación que el panel (Comprobantes web)
         return [{ json: { accion: 'pago_web', codigo: msg.referencia, aprobar: msg.accion === 'ok', nota: resto || null, numero: msg.numero } }];
     }
+    // WO-047 · Rastreo: #guia DC-X 123456 enlaza la guía de la transportadora al pedido (n8n la consulta cada 30 min)
+    if (msg.origen === 'admin' && (msg.accion === 'guia' || msg.accion === 'guía')) {
+        const guia = String(resto ?? '').trim().split(/\s+/)[0] ?? '';
+        if (!/^[A-Za-z0-9-]{4,60}$/.test(guia)) return avisar(msg.numero, `Escribe la guía después del pedido: *#guia ${msg.referencia} 123456789*`);
+        return [{ json: { accion: 'panel', rpc: 'registrar_guia', args: { p_referencia: msg.referencia, p_guia: guia }, tipo: 'registrar_guia', numero: msg.numero, referencia: msg.referencia, guia } }];
+    }
     // Accesos de ANC: los pegas tú con #entregar, o se toma el último mensaje del proveedor (2 h)
     if (msg.origen === 'admin' && msg.accion === 'entregar') {
         const t = abiertas.find((r) => r.referencia === msg.referencia);
@@ -1921,8 +1928,9 @@ function enrutarEvento() {
 // F1 · Lee todo el catálogo (Inertia: primera página en el HTML, las demás en JSON) y arma precio y stock
 async function leerProveedor() {
     const cfg = $('Config bot').first().json;
-    const base = String(cfg.emprendered_url || 'https://dctechnology.catalogovirtual.co').replace(/\/+$/, '');
-    const margen = Number(cfg.emprendered_margen) > 0 ? Number(cfg.emprendered_margen) : 40;
+    // 19/10/2026: catálogo de distribuidor en emprendered.com.co (la tienda vieja de catalogovirtual.co se ignora) y 50 %
+    const base = String(cfg.emprendered_url && !/catalogovirtual\.co/i.test(cfg.emprendered_url) ? cfg.emprendered_url : 'https://emprendered.com.co').replace(/\/+$/, '');
+    const margen = Number(cfg.emprendered_margen) >= 50 ? Number(cfg.emprendered_margen) : 50;
     const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Safari/537.36';
     const http = (opciones) => this.helpers.httpRequest({ timeout: 20000, ...opciones, headers: { 'User-Agent': UA, ...(opciones.headers ?? {}) } });
     const html = String(await http({ url: `${base}/catalogo`, headers: { Accept: 'text/html' } }));
@@ -1942,26 +1950,30 @@ async function leerProveedor() {
     if (siguiente) throw new Error('el catálogo no terminó de cargar');
     const idDc = (p) => `er-${String(p.url || p.name).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
         .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 140)}-${p.id}`;
-    const replica = /\b1[.:]1\b|r[eé]plica|\bclon|\bcopia\b|\baaa\b|tipo original/i;
+    const replica = /\b1[.:]1\b|r[eé]plica|\bclon|\bcopia\b|(?<!\bpilas?\b.{0,20})\baaa\b|tipo original/i;
+    const EXCLUIR = ['RELOJERIA REPLICA', 'CAMISAS 1.1 FUTBOL', 'SEX SHOP', 'VAPES', 'VENDE STREAMING'];
     // Productos de Emprende Red que ya están en la tienda: los de la base de conocimiento publicada (o la embebida)
     let kbTienda = null;
     try { kbTienda = baseViva(await http({ url: cfg.url_conocimiento, json: true })); } catch { kbTienda = null; }
     const conProveedor = (c) => Array.isArray(c) && c.some((p) => String(p.id).startsWith('er-'));
+    // Por slug (sin el número del proveedor): el proveedor renumeró sus productos y la tienda conserva los ids anteriores
+    const sinNumero = (id) => String(id).replace(/-\d+$/, '');
     const tienda = new Map((conProveedor(kbTienda?.catalogo) ? kbTienda.catalogo : __KB__.catalogo)
-        .filter((p) => String(p.id).startsWith('er-')).map((p) => [p.id, p]));
+        .filter((p) => String(p.id).startsWith('er-')).map((p) => [sinNumero(p.id), p]));
     // Sin productos del proveedor en la tienda no se sincroniza: si no, todos quedarían agotados
     if (!tienda.size) throw new Error('la tienda no tiene productos de Emprende Red (ejecuta el script con --tienda y publica)');
     const items = [];
     let nuevos = 0;
     for (const p of productos.values()) {
         const id = idDc(p);
-        const costo = Math.round(Number(p.price_buy) || 0);
+        const costo = Math.round(Number(p.price_buy) || Number(p.price_sale) || 0); // emprendered.com.co: price_sale = precio de distribuidor
         const stock = Math.round(Number(p.quantity_available ?? (p.stock ?? []).reduce((s, x) => s + (Number(x.quantity) || 0), 0)) || 0);
-        const nuestro = tienda.get(id);
+        const nuestro = tienda.get(sinNumero(id));
+        const categoria = categorias.get(p.category_id) ?? null;
         if (nuestro) {
-            items.push({ producto_id: id, variante: nuestro.variantes?.[0]?.nombre ?? 'Unidad', producto: nuestro.nombre, tipo: nuestro.tipo,
+            items.push({ producto_id: nuestro.id, categoria, variante: nuestro.variantes?.[0]?.nombre ?? 'Unidad', producto: nuestro.nombre, tipo: nuestro.tipo,
                 costo, precio: Math.ceil((costo * (1 + margen / 100)) / 100) * 100, stock: p.active && costo > 0 ? stock : 0, ref: String(p.reference ?? p.id) });
-        } else if (categorias.get(p.category_id) === 'TECNOLOGIA' && p.active && stock > 0 && !replica.test(String(p.name))) nuevos++;
+        } else if (categoria && !EXCLUIR.includes(categoria) && p.active && stock > 0 && costo > 0 && !replica.test(String(p.name))) nuevos++;
     }
     // Si el proveedor devuelve muy pocos de los nuestros, algo falló: no se toca nada (si no, todo quedaría agotado)
     if (tienda.size && items.length < tienda.size * 0.5) throw new Error(`solo encontré ${items.length} de ${tienda.size} productos de la tienda`);
@@ -2219,6 +2231,35 @@ async function leerMedio() {
     return [{ json: { ...salida, error: fallas.join(' | ') || 'sin IA de visión configurada' } }];
 }
 
+/* ---------- H4) Rastreo de envíos (WO-047): guías abiertas → transportadora (vía el rastreo del proveedor) ----------
+   Una sesión por corrida (cookie + token del formulario) y una consulta por guía. Solo se guarda lo que responde;
+   el aviso al cliente lo encola la base cuando el estado cambia (una vez por estado). */
+async function consultarRastreos() {
+    const guias = $input.all().map((i) => i.json).filter((x) => x && x.referencia && x.guia);
+    if (!guias.length) return [];
+    const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Safari/537.36';
+    const base = 'https://emprendered.com.co';
+    const pagina = await this.helpers.httpRequest({ url: `${base}/catalogo`, headers: { 'User-Agent': UA, Accept: 'text/html' }, returnFullResponse: true, timeout: 20000 });
+    const galletas = [].concat(pagina.headers?.['set-cookie'] ?? []).map((c) => String(c).split(';')[0]).join('; ');
+    const token = /name="csrf-token" content="([^"]+)"/.exec(String(pagina.body ?? ''))?.[1] ?? '';
+    const limpiarTexto = (t) => String(t ?? '').replace(/emprende\s*red|emprendered/gi, 'DC Tecnology').replace(/\s+/g, ' ').trim().slice(0, 300);
+    const salida = [];
+    for (const g of guias.slice(0, 40)) {
+        try {
+            const r = await this.helpers.httpRequest({ method: 'POST', url: `${base}/track-order`, json: true, timeout: 20000,
+                headers: { 'User-Agent': UA, Cookie: galletas, 'X-CSRF-TOKEN': token, Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                body: { order_code: g.guia } });
+            const d = r?.data ?? null;
+            if (!d || !d.status) continue; // la transportadora aún no la registra
+            const historial = (Array.isArray(d.history) ? d.history : []).slice(0, 30)
+                .map((h) => ({ fecha: String(h.date ?? '').slice(0, 25), estado: limpiarTexto(h.status), detalle: limpiarTexto(h.description), novedad: limpiarTexto(h.novelty) }));
+            salida.push({ json: { args: { p_referencia: g.referencia, p_estado: limpiarTexto(d.status).toUpperCase(), p_detalle: limpiarTexto(d.statusDetail),
+                p_transportadora: limpiarTexto(d.carrier?.name ?? d.carrier), p_historial: historial } } });
+        } catch { /* la siguiente corrida lo intenta de nuevo */ }
+    }
+    return salida;
+}
+
 /* ---------- H3) Renovaciones (WO-044): avisa 3 días antes de que venza el plan ----------
    Duración: "N días" en la variante, "N mes(es)" × 30, "año" × 365; streaming sin duración = 30 días. Solo cuentas
    de streaming y licencias/apps con duración. Horario: lunes a sábado, 9 a. m. a 7 p. m. (Colombia). */
@@ -2343,6 +2384,14 @@ function resultadoPanel() {
     if (pedido.tipo === 'cargar_stock') {
         if (r.error) return [{ json: { numero: pedido.numero, texto: `⚠️ No cargué los códigos (${String(r.error.message ?? r.error).slice(0, 120)}). ¿Aplicaste supabase/wo-043-stock-pines.sql?` } }];
         return [{ json: { numero: pedido.numero, texto: [`✅ *Stock cargado* · ${pedido.producto}`, `Nuevos: *${r.cargados ?? 0}*${r.repetidos ? ` · repetidos ignorados: ${r.repetidos}` : ''}`, `Disponibles ahora: *${r.disponibles ?? '?'}*`, '', 'Cuando confirmes un pago con *#ok*, el código sale solo al cliente.'].join('\n') } }];
+    }
+    if (pedido.tipo === 'registrar_guia') {
+        if (r.error) return [{ json: { numero: pedido.numero, texto: `⚠️ No guardé la guía (${String(r.error.message ?? r.error).slice(0, 120)}). ¿Aplicaste supabase/wo-047-proveedor-y-rastreo.sql?` } }];
+        if (!r.ok) return [{ json: { numero: pedido.numero, texto: `⚠️ ${r.mensaje ?? 'No guardé la guía.'}` } }];
+        return [
+            { json: { numero: pedido.numero, texto: `✅ ${r.mensaje}` } },
+            ...(r.destino ? [{ json: { numero: r.destino, texto: [`📦 *Tu pedido #${pedido.referencia} ya fue despachado* · DC Tecnology`, '', `🔢 Guía: *${pedido.guia}*`, 'Te aviso por aquí cada vez que cambie su estado.', '', 'Síguelo en *www.dctecnology.xyz* → Pedidos.'].join('\n') } }] : []),
+        ];
     }
     if (pedido.tipo === 'entregar_desde_stock') {
         if (!r.error && r.ok && r.codigo) {
@@ -2978,6 +3027,10 @@ nodoCodigo('Resultado del panel', [2440, -980], resultadoPanel, { conUtilidades:
 nodo('Entregas para renovar', 'n8n-nodes-base.httpRequest', 4.2, [660, 1500], rpcPanel('entregas_para_renovar', '={{ JSON.stringify({ p_dias: 400 }) }}'), { onError: 'continueRegularOutput', alwaysOutputData: true });
 nodoCodigo('Renovaciones', [880, 1500], renovaciones, { conUtilidades: true }, { executeOnce: true });
 nodo('Encolar renovación', 'n8n-nodes-base.httpRequest', 4.2, [1100, 1500], rpcPanel('encolar_renovacion', '={{ JSON.stringify($json.args) }}'), { onError: 'continueRegularOutput' });
+// WO-047 · Rastreo de envíos (rama de salud, cada 30 min)
+nodo('Guías abiertas', 'n8n-nodes-base.httpRequest', 4.2, [660, 1660], rpcPanel('rastreos_abiertos', '={{ JSON.stringify({}) }}'), { onError: 'continueRegularOutput', alwaysOutputData: true });
+nodoCodigo('Consultar rastreo', [880, 1660], consultarRastreos, {}, { executeOnce: true, onError: 'continueRegularOutput' });
+nodo('Guardar rastreo', 'n8n-nodes-base.httpRequest', 4.2, [1100, 1660], rpcPanel('actualizar_rastreo', '={{ JSON.stringify($json.args) }}'), { onError: 'continueRegularOutput' });
 
 /* ---------- J) WO-042: precios de ANC (misma rama "cada 6 horas" que Emprende Red) ---------- */
 nodoCodigo('Leer precios ANC', [440, 1080], leerPreciosAnc, { conUtilidades: true }, { onError: 'continueRegularOutput' });
@@ -3104,6 +3157,9 @@ unir('Revisar salud', 'Enviar respuesta');
 unir('Origen', 'Entregas para renovar', 5);
 unir('Entregas para renovar', 'Renovaciones');
 unir('Renovaciones', 'Encolar renovación');
+unir('Origen', 'Guías abiertas', 5);
+unir('Guías abiertas', 'Consultar rastreo');
+unir('Consultar rastreo', 'Guardar rastreo');
 unir('Origen', 'Medio entrante', 6);
 unir('Medio entrante', '¿Leer medio?');
 unir('¿Leer medio?', 'Descargar medio', 0);

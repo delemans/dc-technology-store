@@ -33,12 +33,14 @@ const catalogo = productos.map((p) => ({
     marca: p.marca,
     nombre: p.nombre,
     imagen: p.imagen,
-    url: `${URL_TIENDA}/p/${p.id}.html`,
+    // Ocultos (categorías del proveedor que no has activado): sin página propia; si los activas, el enlace abre la tienda
+    url: p.oculto ? `${URL_TIENDA}/?producto=${encodeURIComponent(p.id)}` : `${URL_TIENDA}/p/${p.id}.html`,
     variantes: (p.variantes ?? []).map((v) => ({ nombre: v.nombre, precio: v.precio, precio_anterior: v.precio_anterior ?? null })),
     // Producto de proveedor (Emprende Red): sin precio activo en la base = agotado → el bot no lo ofrece
     ...(p.sincronizado ? { sincronizado: true } : {}),
+    ...(p.oculto ? { oculto: true } : {}),
     desde: Math.min(...(p.variantes ?? []).map((v) => v.precio).filter(Number.isFinite)),
-    descripcion: textoPlano(p.descripcion).slice(0, 600) || null,
+    descripcion: p.oculto ? null : textoPlano(p.descripcion).slice(0, 600) || null, // liviano: los ocultos solo llevan nombre y precio
 }));
 
 // Plantillas con {marcadores} para que n8n los reemplace
@@ -68,6 +70,7 @@ const plantillas = {
     entrega_credenciales: WA.entregaCredenciales({ pedido: '{pedido}', producto: '{producto}', usuario: '{usuario}', clave: '{clave}', perfil: '{perfil}', pin: '{pin}' }),
     entrega_pin: WA.entregaPin({ pedido: '{pedido}', producto: '{producto}', pin: '{pin}' }),
     renovacion: WA.renovacion({ producto: '{producto}', variante: '{variante}', vence: '{vence}' }),
+    rastreo: WA.rastreo({ pedido: '{pedido}', estado: '{estado}', transportadora: '{transportadora}', guia: '{guia}' }),
 };
 
 // Cola de posventa (supabase/wo-015.sql → public.notificaciones_whatsapp). n8n la vacía con estas reglas.
@@ -77,6 +80,7 @@ const notificaciones = {
         ENTREGA_CONFIRMADA: 'entrega_confirmada', // compra pasa a ENTREGADO / ENTREGADO_INMEDIATO
         SOLICITUD_RESENA: 'solicitud_resena',     // 24 h después de la entrega, en horario
         RENOVACION: 'renovacion',                 // WO-044: 3 días antes de que venza el plan
+        RASTREO: 'rastreo',                       // WO-047: cambio de estado del envío (transportadora)
         OTP: 'codigo_acceso',                     // WO-028: código del portal (prioridad 0, vence en 5 min)
         ORDEN_VALIDADA: 'orden_validada',         // WO-032: el admin validó el comprobante web
         ORDEN_RECHAZADA: 'orden_rechazada',       // WO-032: comprobante rechazado (con motivo)
@@ -445,6 +449,7 @@ const menu = {
         { tipos: ['pines'], titulo: 'Pines y tarjetas regalo', emoji: '🎟️' },
         { tipos: ['recargas'], titulo: 'Recargas', emoji: '📱' },
         { tipos: ['tecnologia'], titulo: 'Tecnología y accesorios', emoji: '⌚' },
+        { tipos: ['variedades'], titulo: 'Hogar y variedades', emoji: '🏠' },
         { tipos: ['servicios', 'alquiler'], titulo: 'Servicios técnicos y alquiler', emoji: '🛠️' },
     ],
     // Soporte guiado: cada opción responde con su FAQ (misma respuesta que da la IA)

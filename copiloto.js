@@ -23,7 +23,7 @@
     let cola = Promise.resolve();   // las respuestas salen en orden, aunque el usuario escriba rápido
 
     const GARANTIA_DIAS = 30;
-    const TIPOS_CON_GARANTIA = ['streaming', 'licencias', 'tecnologia'];
+    const TIPOS_CON_GARANTIA = ['streaming', 'licencias', 'tecnologia', 'variedades'];
     const TIPOS_COTIZABLES = ['servicios', 'alquiler'];
     const reducirMovimiento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -41,7 +41,7 @@
         { id: 'streaming', texto: 'Streaming', icono: 'fa-tv', tipos: ['streaming'] },
         { id: 'licencias', texto: 'Licencias', icono: 'fa-key', tipos: ['licencias'] },
         { id: 'reparacion', texto: 'Reparación / servicio', icono: 'fa-screwdriver-wrench', tipos: ['servicios', 'alquiler'] },
-        { id: 'tecnologia', texto: 'Tecnología', icono: 'fa-headphones', tipos: ['tecnologia'] },
+        { id: 'tecnologia', texto: 'Tecnología', icono: 'fa-headphones', tipos: ['tecnologia', 'variedades'] },
         { id: 'pines', texto: 'Pines y recargas', icono: 'fa-gamepad', tipos: ['pines', 'recargas'] },
     ];
 

@@ -351,6 +351,17 @@
             '¿Algo no funciona? Responde *SOPORTE* 🛠️',
         ].filter((l) => l !== null).join('\n'),
 
+        // WO-047 · Rastreo del envío: cada cambio de estado de la transportadora (en Mis pedidos se ve el historial)
+        rastreo: ({ pedido, estado, transportadora, guia }) => [
+            `🚚 *Tu pedido #${pedido} va en camino* · ${FIRMA}`,
+            '',
+            `📍 Estado: *${estado}*`,
+            transportadora ? `🏢 Transportadora: ${transportadora}` : null,
+            guia ? `🔢 Guía: ${guia}` : null,
+            '',
+            'Míralo cuando quieras en *www.dctecnology.xyz* → Pedidos.',
+        ].filter((l) => l !== null).join('\n'),
+
         // WO-044 · Renovación: 3 días antes de que venza el plan (la respuesta RENOVAR deja el mismo plan listo para pagar)
         renovacion: ({ producto, variante, vence }) => [
             `⏰ *Tu plan vence pronto* · ${FIRMA}`,
