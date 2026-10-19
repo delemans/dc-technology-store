@@ -65,7 +65,7 @@ const FASES_SERVICIO = [
 
 const estado = {
     productos: [],
-    filtro: { modulo: 'todos', categoria: null, busqueda: '' },
+    filtro: { modulo: 'todos', categoria: null, busqueda: '', orden: leerOrden() },
     seleccion: { producto: null, variante: null, cantidad: 1, cupon: null },
     resenas: [],
 };
@@ -73,6 +73,18 @@ const estado = {
 /* ==================== UTILIDADES ==================== */
 
 const $ = (id) => document.getElementById(id);
+// Orden del catálogo (se recuerda en este navegador)
+function leerOrden() { try { return localStorage.getItem('dc_orden') || 'relevancia'; } catch { return 'relevancia'; } }
+const precioDesde = (p) => { const v = (p.variantes ?? []).map((x) => Number(x.precio)).filter((n) => n > 0); return v.length ? Math.min(...v) : 0; };
+function ordenar(lista, orden) {
+    if (orden === 'relevancia') return lista;
+    const copia = [...lista];
+    if (orden === 'az') return copia.sort((a, b) => a.nombre.localeCompare(b.nombre, 'es', { sensitivity: 'base' }));
+    if (orden === 'za') return copia.sort((a, b) => b.nombre.localeCompare(a.nombre, 'es', { sensitivity: 'base' }));
+    const signo = orden === 'mayor' ? -1 : 1;
+    // "A cotizar" (sin precio) siempre al final
+    return copia.sort((a, b) => { const pa = precioDesde(a), pb = precioDesde(b); if (!pa || !pb) return (!pa) - (!pb); return signo * (pa - pb); });
+}
 
 const formatearPrecio = (valor) => {
     const num = Number.parseFloat(valor);
@@ -375,15 +387,15 @@ async function cargarPromocionesDia() {
 }
 
 function productosFiltrados() {
-    const { modulo, categoria, busqueda } = estado.filtro;
-    return estado.productos.filter((p) => {
+    const { modulo, categoria, busqueda, orden } = estado.filtro;
+    return ordenar(estado.productos.filter((p) => {
         if (busqueda) {
             return `${p.nombre} ${p.marca ?? ''} ${p.tipo}`.toLowerCase().includes(busqueda);
         }
         if (MODULOS[modulo].tipos && !MODULOS[modulo].tipos.includes(p.tipo)) return false;
         if (categoria && p.tipo !== categoria) return false;
         return true;
-    });
+    }), orden);
 }
 
 function pintarModulos() {
@@ -1168,6 +1180,15 @@ document.addEventListener('DOMContentLoaded', () => {
             renderizar();
         }, 150);
     });
+    const selOrden = $('orden-catalogo');
+    if (selOrden) {
+        selOrden.value = estado.filtro.orden;
+        selOrden.addEventListener('change', () => {
+            estado.filtro.orden = selOrden.value;
+            try { localStorage.setItem('dc_orden', selOrden.value); } catch { /* sin almacenamiento */ }
+            renderizar();
+        });
+    }
 
     document.querySelectorAll('[data-cerrar]').forEach((el) => el.addEventListener('click', () => cerrarModal(el.closest('[role="dialog"]'))));
     document.addEventListener('keydown', (e) => {

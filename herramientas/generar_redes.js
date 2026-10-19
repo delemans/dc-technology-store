@@ -49,6 +49,10 @@ const TITULOS = {
     'tip-windows': 'Windows 10 ya no tiene soporte: ¿y ahora? 🪟',
     'tip-antivirus': '4 consejos para no perder tu información 🛡️',
     'tip-pantalla-vs-cuenta': '¿Pantalla o cuenta completa? 📺',
+    'satira-catalogo': 'No llenes los estados de fotos: usa un catálogo 😅',
+    'tip-automatiza': 'Automatiza lo repetitivo de tu negocio ⚙️',
+    'tip-control-negocio': '¿Sabes cuánto ganaste este mes? 📊',
+    'tip-por-que-antivirus': '¿Para qué un antivirus? 🛡️',
 };
 const HASHTAGS = {
     base: ['#DCTecnology', '#Colombia'],
@@ -81,6 +85,10 @@ const HASHTAGS = {
     'tip-windows': ['#Windows11', '#Windows10', '#Seguridad'],
     'tip-antivirus': ['#Ciberseguridad', '#Tips', '#Antivirus'],
     'tip-pantalla-vs-cuenta': ['#Streaming', '#Netflix', '#Tips'],
+    'satira-catalogo': ['#CatalogoVirtual', '#Emprendimiento', '#Humor', '#WhatsApp'],
+    'tip-automatiza': ['#Automatizacion', '#Emprendimiento', '#Pymes'],
+    'tip-control-negocio': ['#Finanzas', '#Dashboard', '#Pymes'],
+    'tip-por-que-antivirus': ['#Ciberseguridad', '#Antivirus', '#Tips'],
 };
 const etiquetas = (id) => [...HASHTAGS.base, ...(HASHTAGS[id] ?? ['#Tecnologia', '#Streaming'])].join(' ');
 

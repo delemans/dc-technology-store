@@ -179,7 +179,15 @@ function normalizarMensaje() {
     // Los mensajes temporales y los de "ver una vez" llegan envueltos
     const crudo = d.message ?? {};
     const m = crudo.ephemeralMessage?.message ?? crudo.viewOnceMessageV2?.message ?? crudo.viewOnceMessage?.message ?? crudo.documentWithCaptionMessage?.message ?? crudo;
-    const texto = String(m.conversation ?? m.extendedTextMessage?.text ?? m.imageMessage?.caption ?? m.documentMessage?.caption ?? m.videoMessage?.caption ?? '').trim();
+    let texto = String(m.conversation ?? m.extendedTextMessage?.text ?? m.imageMessage?.caption ?? m.documentMessage?.caption ?? m.videoMessage?.caption ?? '').trim();
+    // Audio ya transcrito o imagen ya descrita por "Leer medio (IA)" (solo si es este mismo mensaje)
+    let medio = {};
+    for (const fuente of ['Transcripción', 'Leer medio (IA)']) {
+        try { const j = $(fuente).first().json ?? {}; if (j.wamid && j.wamid === key.id) { medio = j; break; } } catch { /* no corrió */ }
+    }
+    if (!medio || medio.wamid !== key.id) medio = {};
+    const deAudio = Boolean(m.audioMessage && !texto && medio.transcripcion);
+    if (deAudio) texto = String(medio.transcripcion).trim();
     // Hash de transacción cripto (TXID): 64 hex (BTC, ETH/BEP20/TRC20…) o firma de Solana (base58, ~88)
     const txid = (/\b(?:0x)?[0-9a-fA-F]{64}\b/.exec(texto) || /\b[1-9A-HJ-NP-Za-km-z]{86,90}\b/.exec(texto) || [])[0] ?? null;
     // Foto o PDF: puede ser un comprobante (Nequi / Daviplata envían captura o PDF), una captura de un problema o algo personal
@@ -258,10 +266,14 @@ function normalizarMensaje() {
     else if (esImagen || esPdf) {
         // ¿Comprobante, captura de un problema o algo personal? Lo dice el texto que la acompaña o la conversación
         if (/\b(pago|pague|pagado|pagando|comprobante|transferencia|transferi|consignacion|consigne|nequi|daviplata|breb|llave|abono|abone|recibo)\b/.test(limpio) || hace(memoria.esperandoPago, 48)) salida.ruta = 'comprobante';
-        else if (/\b(error|falla|fallo|no funciona|no me deja|no puedo|no abre|me sale|me aparece|bloqueo|bloqueado|ayuda)\b/.test(limpio) || hace(memoria.soporte, 2)) Object.assign(salida, { ruta: 'asesor', motivo: 'Envió una captura de un problema' });
+        else if (/\b(error|falla|fallo|no funciona|no me deja|no puedo|no abre|me sale|me aparece|bloqueo|bloqueado|ayuda)\b/.test(limpio) || hace(memoria.soporte, 2)) {
+            // Con la imagen leída, la IA intenta resolverlo con la guía de soporte (y escala si no puede); sin lectura → asesor
+            if (medio.descripcion && !/^comprobante de pago/i.test(medio.descripcion)) Object.assign(salida, { ruta: 'ia', texto: `${texto ? `${texto.slice(0, 600)}\n` : ''}[Captura enviada por el cliente. Se ve: ${medio.descripcion}]` });
+            else Object.assign(salida, { ruta: 'asesor', motivo: 'Envió una captura de un problema' });
+        }
         else if (conversando) salida.ruta = 'comprobante';
-        else Object.assign(salida, { ruta: 'sin_texto', aviso: esPdf ? 'documento' : 'imagen' }); // nadie le habló de compras: te aviso a ti
-    } else if (m.audioMessage) Object.assign(salida, { ruta: 'sin_texto', tipo: 'audio' }, conversando ? {} : { aviso: 'audio' });
+        else Object.assign(salida, { ruta: 'sin_texto', aviso: esPdf ? 'documento' : 'imagen' }, medio.descripcion ? { descripcion: medio.descripcion } : {}); // nadie le habló de compras: te aviso a ti
+    } else if (m.audioMessage && !deAudio) Object.assign(salida, { ruta: 'sin_texto', tipo: 'audio' }, conversando ? {} : { aviso: 'audio' });
     else if (!texto) {
         if (!(m.videoMessage || m.locationMessage || m.liveLocationMessage || m.contactMessage || m.contactsArrayMessage || m.documentMessage)) return [];
         Object.assign(salida, { ruta: 'sin_texto' }, conversando ? {} : { aviso: 'otro' });
@@ -343,6 +355,7 @@ function respuestaFija() {
             `🔔 *Te enviaron ${que}*`,
             `De: +${msg.numero}${msg.nombre ? ` (${String(msg.nombre).replace(/[*_~`]/g, '').slice(0, 40)})` : ''}`,
             msg.texto ? `Texto: «${msg.texto.slice(0, 200)}»` : null,
+            msg.descripcion ? `🤖 Lo que se ve: ${String(msg.descripcion).slice(0, 300)}` : null,
             '',
             'No le respondí porque no venía de una compra con el bot.',
             ['imagen', 'documento'].includes(msg.aviso) ? 'Si es un comprobante, valídalo; si es otro tema, contéstale tú.' : 'Revísalo y contéstale tú.',
@@ -700,6 +713,7 @@ function armarContexto() {
         'CUPONES: aplica DCTECH2026 SOLO si el cliente escribe el código. Si no lo escribió, el total es el precio del catálogo: NO calcules ni muestres un total con descuento (puedes decir una vez "si es tu primera compra, escribe el código DCTECH2026"). Con cupón escrito, di el total con descuento y aclara que se confirma al validar el pago.',
         'NO ES COMPRA: si el mensaje no es de un cliente de la tienda, responde EXACTAMENTE "[NO_COMPRA] <tema en pocas palabras>" y nada más (el dueño le contesta en persona). Ante la duda, atiéndelo como cliente.',
         'ESCALAMIENTO: si aplica cualquier disparador de escalamiento, responde EXACTAMENTE "[ESCALAR] <motivo breve>" y nada más.',
+        'CAPTURAS: si el mensaje trae "[Captura enviada por el cliente. Se ve: …]", es lo que muestra su pantalla (leído por otra IA). Si es un problema de una cuenta o licencia que vendemos y la guía de soporte da una solución concreta, dásela en pasos cortos; si no está claro, es un daño de un equipo o pide revisar su pedido, responde "[ESCALAR] Captura de un problema". Nunca digas que no puedes ver imágenes.',
         'PEDIDO DIGITAL: cuando el cliente CONFIRME un producto digital del catálogo (streaming, licencias, pines o recargas) y su opción, agrega al FINAL de tu respuesta, en una línea aparte: [PEDIDO_DIGITAL] {"producto":"<nombre exacto del catálogo>","variante":"<opción exacta>"} (si el cliente ESCRIBIÓ un cupón, agrega "cupon":"<código>"). Una sola vez por pedido. El cliente no ve esa línea. Luego sigue con el pago normalmente.',
         'PEDIDO COMBO: si lo que el cliente confirma es un COMBO (2 o más plataformas), en vez de [PEDIDO_DIGITAL] agrega al FINAL, en una línea aparte: [PEDIDO_COMBO] {"items":[{"producto":"<nombre exacto>","variante":"<opción exacta>"}]}. Una sola vez por combo.',
     ].join('\n');
@@ -2109,6 +2123,102 @@ function atencionHumana() {
     return [];
 }
 
+/* ---------- H2b) Audios e imágenes (18/10/2026): modelos abiertos ----------
+   Audio → texto con Whisper (Groq). Captura de un problema o imagen sin contexto → descripción con un modelo de visión
+   abierto (Llama 3.2 Vision en NVIDIA; Gemma en OpenRouter de respaldo). Los comprobantes NO pasan por aquí: los valida
+   una persona. Config bot → leer_medios = si lo enciende (apagado por defecto). Si ninguna IA responde, todo sigue como antes (pide escribir). */
+function medioEntrante() {
+    const no = [{ json: { leer: 'no' } }];
+    const cfg = $('Config bot').first().json;
+    const evento = $('Webhook Evolution').first().json;
+    const b = evento.body ?? evento;
+    if (String(b.event ?? '').toLowerCase().replace(/_/g, '.') !== 'messages.upsert') return no;
+    if (String(cfg.bot_responde ?? 'si').trim().toLowerCase() === 'no' || String(cfg.leer_medios ?? 'no').trim().toLowerCase() !== 'si') return no; // se enciende a mano tras probarlo en vivo
+    const d = Array.isArray(b.data) ? b.data[0] : b.data;
+    const key = d?.key ?? {};
+    if (key.fromMe || !key.id) return no;
+    const enviado = Number(d.messageTimestamp ?? 0);
+    if (enviado > 0 && Date.now() / 1000 - enviado > 20 * 60) return no;
+    const original = String(key.remoteJid ?? '');
+    const alterno = String(key.remoteJidAlt ?? key.senderPn ?? d?.senderPn ?? '');
+    const jid = original.endsWith('@lid') && alterno.endsWith('@s.whatsapp.net') ? alterno : original;
+    if (!jid.endsWith('@s.whatsapp.net')) return no;
+    const numero = jid.split('@')[0];
+    const proveedores = String(cfg.numero_proveedor ?? '').split(/[,;\s]+/).map((x) => soloDigitos(x)).filter(Boolean);
+    if (proveedores.includes(numero) || numero === soloDigitos(cfg.numero_aviso_admin)) return no;
+    const memoria = $getWorkflowStaticData('global');
+    if (memoria.pausados?.[numero] || (memoria.vistos ?? []).includes(key.id)) return no;
+    const etiquetas = memoria.etiquetas ?? { chats: {}, nombres: {} };
+    const silencio = String(cfg.etiquetas_silencio ?? 'BAENAMORA').split(',').map((x) => normalizar(x).trim()).filter(Boolean);
+    if ((etiquetas.chats[numero] ?? []).some((id) => silencio.includes(normalizar(etiquetas.nombres[id] ?? '').trim()))) return no;
+    const crudo = d.message ?? {};
+    const m = crudo.ephemeralMessage?.message ?? crudo.viewOnceMessageV2?.message ?? crudo.viewOnceMessage?.message ?? crudo;
+    if (m.audioMessage) {
+        if (Number(m.audioMessage.seconds) > 180) return no; // audios de más de 3 minutos: los escuchas tú
+        return [{ json: { leer: 'si', tipo: 'audio', wamid: key.id, mimetype: String(m.audioMessage.mimetype ?? 'audio/ogg') } }];
+    }
+    if (!m.imageMessage) return no;
+    // Mismas reglas que "Normalizar mensaje": lo que parece comprobante va directo a revisión humana, sin IA
+    const ahora = Date.now();
+    const hace = (mapa, horas) => ahora - (typeof mapa?.[numero] === 'number' ? mapa[numero] : 0) < horas * 3600e3;
+    const limpio = normalizar(String(m.imageMessage.caption ?? '')).replace(/[^a-z0-9\s]/g, ' ');
+    if (/\b(pago|pague|pagado|pagando|comprobante|transferencia|transferi|consignacion|consigne|nequi|daviplata|breb|llave|abono|abone|recibo)\b/.test(limpio) || hace(memoria.esperandoPago, 48)) return no;
+    const problema = /\b(error|falla|fallo|no funciona|no me deja|no puedo|no abre|me sale|me aparece|bloqueo|bloqueado|ayuda)\b/.test(limpio) || hace(memoria.soporte, 2);
+    if (!problema && hace(memoria.conversacion, 72)) return no;
+    return [{ json: { leer: 'si', tipo: 'imagen', wamid: key.id, mimetype: String(m.imageMessage.mimetype ?? 'image/jpeg') } }];
+}
+
+function leerTranscripcion() {
+    const previo = $('Leer medio (IA)').first().json;
+    const r = $input.first().json ?? {};
+    const texto = String(r.text ?? '').trim();
+    if (texto) return [{ json: { wamid: previo.wamid, tipo: 'audio', transcripcion: texto.slice(0, 1000), ia: 'Whisper (Groq)' } }];
+    return [{ json: { wamid: previo.wamid, tipo: 'audio', error: String(r.error?.message ?? r.message ?? 'Whisper sin respuesta').slice(0, 160) } }];
+}
+
+async function leerMedio() {
+    const pedido = $('Medio entrante').first().json;
+    const d = $input.first().json ?? {};
+    const salida = { wamid: pedido.wamid, tipo: pedido.tipo };
+    if (!d.base64) return [{ json: { ...salida, tipo: 'sin_archivo', error: 'no se pudo descargar' } }];
+    const ias = PROVEEDORES_IA.filter((p) => p.clave && p.url);
+    const pedir = (o) => this.helpers.httpRequest({ method: 'POST', returnFullResponse: true, ignoreHttpStatusErrors: true, ...o });
+    const leerJson = (r) => { let j = r.body ?? {}; if (typeof j === 'string') { try { j = JSON.parse(j); } catch { j = {}; } } return j; };
+    const fallas = [];
+    if (pedido.tipo === 'audio') {
+        // El audio NO se envía desde aquí: pasar el archivo a helpers.httpRequest desde un Code satura n8n.
+        // Sale como binario al nodo HTTP "Whisper (audio)" (multipart nativo de n8n) con la clave de Groq.
+        const groq = ias.find((p) => /groq\.com/i.test(p.url));
+        if (!groq) return [{ json: { ...salida, tipo: 'sin_whisper', error: 'sin Whisper (falta la clave de Groq)' } }];
+        const tipo = String(d.mimetype || pedido.mimetype || 'audio/ogg').split(';')[0];
+        const extension = tipo.includes('ogg') ? 'ogg' : tipo.includes('mp4') ? 'm4a' : tipo.includes('wav') ? 'wav' : 'mp3';
+        return [{ json: { ...salida, whisper: { url: `${String(groq.url).replace(/\/+$/, '')}/audio/transcriptions`, clave: groq.clave } },
+            binary: { audio: { data: String(d.base64), mimeType: tipo, fileName: `audio.${extension}` } } }];
+    }
+    // Imagen: modelos de visión abiertos, en orden
+    const nvidia = ias.find((p) => /nvidia\.com/i.test(p.url)), openrouter = ias.find((p) => /openrouter\.ai/i.test(p.url));
+    const cadena = [
+        nvidia && { p: nvidia, modelo: 'meta/llama-3.2-11b-vision-instruct', nombre: 'Llama 3.2 Vision 11B' }, // el más rápido (~10 s)
+        nvidia && { p: nvidia, modelo: 'meta/llama-3.2-90b-vision-instruct', nombre: 'Llama 3.2 Vision 90B' },
+        openrouter && { p: openrouter, modelo: 'google/gemma-4-31b-it:free', nombre: 'Gemma 4' },
+    ].filter(Boolean);
+    const instruccion = 'Eres soporte técnico de una tienda de streaming, licencias y tecnología. Describe en español, en máximo 3 frases, qué muestra esta imagen: la app o el equipo, y copia textual solo los mensajes de error o advertencia que se lean (los botones, menús y precios no son errores; si no hay ninguno, no lo menciones). Si es un comprobante de pago, responde solo "Comprobante de pago". No inventes nada que no se vea.';
+    const tipo = String(d.mimetype || pedido.mimetype || 'image/jpeg').split(';')[0];
+    const inicio = Date.now();
+    for (const c of cadena) {
+        if (Date.now() - inicio > 45000) break;
+        try {
+            const r = await pedir({ url: `${String(c.p.url).replace(/\/+$/, '')}/chat/completions`, json: true, timeout: 25000,
+                headers: { Authorization: `Bearer ${c.p.clave}`, 'Content-Type': 'application/json' },
+                body: { model: c.modelo, max_tokens: 220, temperature: 0.1, messages: [{ role: 'user', content: [{ type: 'text', text: instruccion }, { type: 'image_url', image_url: { url: `data:${tipo};base64,${d.base64}` } }] }] } });
+            const texto = String(leerJson(r).choices?.[0]?.message?.content ?? '').replace(/<think>[\s\S]*?<\/think>/g, '').replace(/\s+/g, ' ').trim();
+            if (Number(r.statusCode) < 300 && texto) return [{ json: { ...salida, descripcion: texto.slice(0, 500), ia: c.nombre } }];
+            fallas.push(`${c.nombre} ${r.statusCode}`);
+        } catch (err) { fallas.push(`${c.nombre}: ${String(err.message ?? err).slice(0, 80)}`); }
+    }
+    return [{ json: { ...salida, error: fallas.join(' | ') || 'sin IA de visión configurada' } }];
+}
+
 /* ---------- H3) Renovaciones (WO-044): avisa 3 días antes de que venza el plan ----------
    Duración: "N días" en la variante, "N mes(es)" × 30, "año" × 365; streaming sin duración = 30 días. Solo cuentas
    de streaming y licencias/apps con duración. Horario: lunes a sábado, 9 a. m. a 7 p. m. (Colombia). */
@@ -2474,6 +2584,7 @@ nodo('Config bot', 'n8n-nodes-base.set', 3.4, [220, 0], set({
     anc_margen: '0',
     bot_responde: 'si',
     consultar_proveedor: 'si',   // 'no' = no le pregunta a ANC por los productos de cada pedido nuevo          // 'no' = el bot no le contesta a nadie (tus comandos #ok/#no/#entregar y el proveedor siguen)
+    leer_medios: 'no',           // 'si' = transcribe audios y lee capturas con IA de modelos abiertos (encender tras probar)
     horas_pausa_humano: '12',    // si escribes a mano en un chat, el bot se calla ahí estas horas (#bot lo reactiva)
 }, { incluirEntrada: true }));
 nodoCodigo('Normalizar mensaje', [440, 0], normalizarMensaje, { conUtilidades: true });
@@ -2500,6 +2611,39 @@ nodo('Ruta', 'n8n-nodes-base.switch', 3.2, [660, 0], {
     rules: { values: [regla('baja', 'Baja'), regla('asesor', 'Asesor'), regla('sin_texto', 'Sin texto'), regla('comprobante', 'Comprobante'), regla('triangulacion', 'Triangulación')] },
     options: { fallbackOutput: 'extra', renameFallbackOutput: 'IA' },
 });
+// Audios e imágenes (18/10/2026): solo los que hay que leer pasan por la descarga y la IA; lo demás va directo a Normalizar
+nodoCodigo('Medio entrante', [300, 160], medioEntrante, { conUtilidades: true });
+nodo('¿Leer medio?', 'n8n-nodes-base.switch', 3.2, [360, 300], {
+    rules: { values: [regla('si', 'Leer', 'leer')] },
+    options: { fallbackOutput: 'extra', renameFallbackOutput: 'Normal' },
+});
+nodo('Descargar medio', 'n8n-nodes-base.httpRequest', 4.2, [380, 440], {
+    ...evolutionEnviar('Config bot'),
+    url: "={{ $('Config bot').first().json.evolution_url }}/chat/getBase64FromMediaMessage/{{ $('Config bot').first().json.evolution_instancia }}",
+    jsonBody: '={{ JSON.stringify({ message: { key: { id: $json.wamid } }, convertToMp4: false }) }}',
+    options: { timeout: 30000 },
+}, { onError: 'continueRegularOutput', alwaysOutputData: true });
+nodoCodigo('Leer medio (IA)', [400, 580], leerMedio, { conUtilidades: true, conIa: true }, { onError: 'continueRegularOutput' });
+nodo('¿Es audio?', 'n8n-nodes-base.switch', 3.2, [420, 720], {
+    rules: { values: [regla('audio', 'Audio', 'tipo')] },
+    options: { fallbackOutput: 'extra', renameFallbackOutput: 'Listo' },
+});
+nodo('Whisper (audio)', 'n8n-nodes-base.httpRequest', 4.2, [440, 860], {
+    method: 'POST',
+    url: '={{ $json.whisper.url }}',
+    sendHeaders: true,
+    headerParameters: { parameters: [{ name: 'Authorization', value: '=Bearer {{ $json.whisper.clave }}' }] },
+    sendBody: true,
+    contentType: 'multipart-form-data',
+    bodyParameters: { parameters: [
+        { parameterType: 'formBinaryData', name: 'file', inputDataFieldName: 'audio' },
+        { name: 'model', value: 'whisper-large-v3-turbo' },
+        { name: 'language', value: 'es' },
+        { name: 'response_format', value: 'json' },
+    ] },
+    options: { timeout: 30000 },
+}, { onError: 'continueRegularOutput', alwaysOutputData: true });
+nodoCodigo('Transcripción', [460, 1000], leerTranscripcion);
 nodo('Registrar baja', 'n8n-nodes-base.httpRequest', 4.2, [900, -300], supabaseRpc('registrar_baja_whatsapp', {
     config: 'Config bot',
     body: "={{ JSON.stringify({ p_numero: $json.numero }) }}",
@@ -2960,7 +3104,16 @@ unir('Revisar salud', 'Enviar respuesta');
 unir('Origen', 'Entregas para renovar', 5);
 unir('Entregas para renovar', 'Renovaciones');
 unir('Renovaciones', 'Encolar renovación');
-unir('Origen', 'Normalizar mensaje', 6);
+unir('Origen', 'Medio entrante', 6);
+unir('Medio entrante', '¿Leer medio?');
+unir('¿Leer medio?', 'Descargar medio', 0);
+unir('¿Leer medio?', 'Normalizar mensaje', 1);
+unir('Descargar medio', 'Leer medio (IA)');
+unir('Leer medio (IA)', '¿Es audio?');
+unir('¿Es audio?', 'Whisper (audio)', 0);
+unir('¿Es audio?', 'Normalizar mensaje', 1);
+unir('Whisper (audio)', 'Transcripción');
+unir('Transcripción', 'Normalizar mensaje');
 unir('Origen', 'Latido bot', 6);
 unir('Configurar Evolution', 'Marcar configuración Evolution');
 unir('Marcar configuración Evolution', 'Config bot');

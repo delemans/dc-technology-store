@@ -1,208 +1,238 @@
 {
-  "_nota": "Esquema de campañas (herramientas/publicar-estado.mjs y generar_redes.js). Cada semana (lunes a domingo) corre UNA campaña; rotan en orden desde inicio_campanas. Cada día sale el video del día de esa campaña, alternando las versiones de voz; los lunes, además, la promo de la campaña en texto. Los textos solo usan hechos del negocio (nada de descuentos ni disponibilidad inventados). Videos de más de 60 s no van a estados (WhatsApp los corta): se usa el siguiente de la lista.",
-  "carpeta": "docs/videos-estados/mp4",
-  "pie": "🛒 dctecnology.xyz · 💬 322 328 4622",
-  "videos": [
-    {
-      "archivo": "bienvenida",
-      "texto": "Somos DC Tecnology: streaming, licencias, pines, recargas, tecnología y servicio técnico. Trabajamos para darte el mejor servicio."
-    },
-    {
-      "archivo": "streaming-desde",
-      "texto": "📺 Netflix, Disney, Max, Prime Video y más, con garantía de 30 días. Elige tu plan en la tienda."
-    },
-    {
-      "archivo": "compra-3-toques",
-      "texto": "Comprar es así de fácil: eliges, pagas con Nequi, Daviplata o Llave Bre-B y te llega por WhatsApp."
-    },
-    {
-      "archivo": "primera-compra",
-      "texto": "🎁 Tu primera compra con 10% de descuento: cupón DCTECH2026."
-    },
-    {
-      "archivo": "relojes-audifonos",
-      "texto": "⌚🎧 Relojes inteligentes, audífonos y más, con garantía de 30 días y envío a todo el país."
-    },
-    {
-      "archivo": "combo-ahorra",
-      "texto": "Arma tu combo: 2 plataformas -10%, 3 o más -15%."
-    },
-    {
-      "archivo": "pines-recargas",
-      "texto": "📱 Recargas Claro, Movistar, Tigo, Wom, ETB y Éxito, diamantes de Free Fire y pines virtuales."
-    },
-    {
-      "archivo": "desarrollos-completo",
-      "texto": "🤖 Automatizamos tu negocio: dashboards, POS, inventarios, catálogos web y bots de WhatsApp con IA. Cotiza sin compromiso."
-    },
-    {
-      "archivo": "tutorial-compra-entrega",
-      "texto": "Así funciona una compra, paso a paso, desde que eliges hasta que recibes."
-    },
-    {
-      "archivo": "servicio-tecnico",
-      "texto": "🛠️ Mantenimiento, reparación de computadores y repuestos. Cotiza por WhatsApp."
-    },
-    {
-      "archivo": "por-que-dc",
-      "texto": "Entrega rápida, garantía de 30 días, pagos locales y personas reales. Compra con confianza."
-    },
-    {
-      "archivo": "licencias",
-      "texto": "🔑 Windows, Office y antivirus. Y si quieres, te lo instalamos."
-    },
-    {
-      "archivo": "comprobante-web",
-      "texto": "Paga directo en la página y sube tu comprobante: te avisamos por WhatsApp."
-    },
-    {
-      "archivo": "pedidos-whatsapp",
-      "texto": "Mira tus pedidos y tu garantía sin contraseñas, solo con tu WhatsApp."
-    },
-    {
-      "archivo": "soporte-garantia",
-      "texto": "¿Algo falla? Repórtalo desde Mis pedidos y te atiende una persona real."
-    },
-    {
-      "archivo": "alquiler-equipos",
-      "texto": "💻 Alquiler de portátiles y equipos de cómputo para empresas, eventos y proyectos."
-    },
-    {
-      "archivo": "renueva-tu-plan",
-      "texto": "⏰ ¿Tu plan está por vencer? Te avisamos 3 días antes: responde RENOVAR y te lo dejamos listo para pagar."
-    },
-    {
-      "archivo": "apps-premium",
-      "texto": "🎨 Canva Pro, CapCut Pro, Duolingo Super y Gemini IA Pro, con garantía de 30 días."
-    },
-    {
-      "archivo": "free-fire-diamantes",
-      "texto": "💎 Diamantes de Free Fire desde 100, directo a tu cuenta."
-    },
-    {
-      "archivo": "regala-un-pin",
-      "texto": "🎁 Regala un pin virtual de Google Play, Roblox, Netflix o Disney: el código te llega por WhatsApp."
-    },
-    {
-      "archivo": "antivirus-mcafee",
-      "texto": "🛡️ McAfee Total Protection: licencia de 1 año para 1 o 5 computadores, desde $45.000, con garantía."
-    },
-    {
-      "archivo": "office-365",
-      "texto": "📄 Office 365 por un año (1 o 5 equipos) u Office Pro Plus vitalicio 2016–2024. Si quieres, te lo instalamos."
-    },
-    {
-      "archivo": "windows-pro",
-      "texto": "🪟 Licencias de Windows 10 Pro y 11 Pro, y servicio de instalación con Office y programas básicos."
-    },
-    {
-      "archivo": "mantenimiento-preventivo",
-      "texto": "🧹 Mantenimiento preventivo (optimización y limpieza) y correctivo con cambio de pasta térmica."
-    },
-    {
-      "archivo": "reparacion-computadores",
-      "texto": "🛠️ Reparamos computadores de escritorio y portátiles, y conseguimos tus repuestos. Cotiza por WhatsApp."
-    },
-    {
-      "archivo": "desarrollo-pos",
-      "texto": "🍻 Sistemas POS para bares y restaurantes: mesas en tiempo real, pedidos por mesa, caja, inventario y reportes."
-    },
-    {
-      "archivo": "desarrollo-rifas",
-      "texto": "🏆 Plataformas de pollas, rifas y juegos con usuarios, tabla de posiciones, premios y cuenta regresiva."
-    },
-    {
-      "archivo": "desarrollo-finanzas",
-      "texto": "💰 Gestor financiero: ingresos, gastos, pagos recurrentes, ventas y solicitudes de gasto en un solo tablero."
-    },
-    {
-      "archivo": "desarrollo-dashboards",
-      "texto": "📊 Dashboards con indicadores en tiempo real, cronogramas, gestión por proceso y matrices."
-    },
-    {
-      "archivo": "desarrollo-tienda-bot",
-      "texto": "🤖 Tu tienda web con catálogo, carrito y pagos locales, más un bot de WhatsApp con IA que toma pedidos."
-    },
-    {
-      "archivo": "tip-mantenimiento",
-      "texto": "🧰 ¿Cada cuánto hacerle mantenimiento a tu PC? Lo recomendable es 1 vez al año (o cada 6 meses con polvo o uso diario). Preventivo desde $50.000."
-    },
-    {
-      "archivo": "tip-office",
-      "texto": "📄 Office 365 vs vitalicio: 365 se paga por año y siempre está al día; el vitalicio es un solo pago y se queda en su versión."
-    },
-    {
-      "archivo": "tip-windows",
-      "texto": "🪟 Windows 10 no recibe actualizaciones de seguridad gratuitas desde octubre de 2025. Pásate a Windows 11 (si tu equipo es compatible): licencia + instalación."
-    },
-    {
-      "archivo": "tip-antivirus",
-      "texto": "🛡️ 4 consejos: programas solo de sitios oficiales, cuidado con enlaces que piden datos, copias de seguridad y antivirus actualizado."
-    },
-    {
-      "archivo": "tip-pantalla-vs-cuenta",
-      "texto": "📺 ¿Pantalla o cuenta completa? Pantalla = un perfil en un dispositivo a la vez. Cuenta completa = todos los perfiles para tu hogar."
-    }
-  ],
-  "inicio_campanas": "2026-10-19",
-  "campanas": [
-    {
-      "id": "entretenimiento",
-      "nombre": "Entretenimiento en casa",
-      "videos": [
-        "streaming-desde",
-        "tip-pantalla-vs-cuenta",
-        "combo-ahorra",
-        "compra-3-toques",
-        "primera-compra",
-        "tutorial-compra-entrega",
-        "renueva-tu-plan"
-      ],
-      "promo": "📺 Semana del entretenimiento\nNetflix, Disney, Max, Prime Video y más con 30 días de garantía.\nArma tu combo: 2 plataformas -10%, 3 o más -15%.\n🛒 dctecnology.xyz"
-    },
-    {
-      "id": "tecnologia",
-      "nombre": "Tecnología, licencias y soporte",
-      "videos": [
-        "tip-mantenimiento",
-        "windows-pro",
-        "tip-windows",
-        "office-365",
-        "tip-office",
-        "mantenimiento-preventivo",
-        "tip-antivirus"
-      ],
-      "promo": "🪟 Semana de licencias y soporte técnico\nWindows, Office y McAfee originales, mantenimiento y reparación de computadores.\nRelojes y audífonos con garantía de 30 días.\n🛒 dctecnology.xyz"
-    },
-    {
-      "id": "recargas",
-      "nombre": "Recarga y juega",
-      "videos": [
-        "pines-recargas",
-        "free-fire-diamantes",
-        "regala-un-pin",
-        "apps-premium",
-        "relojes-audifonos",
-        "comprobante-web",
-        "primera-compra"
-      ],
-      "promo": "📱 Semana de recargas y pines\nClaro, Movistar, Tigo, Wom, ETB y Éxito, diamantes de Free Fire y pines de Google Play, Roblox y más.\n🎁 Primera compra: 10% con DCTECH2026\n💬 322 328 4622"
-    },
-    {
-      "id": "negocios",
-      "nombre": "Soluciones para tu negocio",
-      "videos": [
-        "desarrollo-tienda-bot",
-        "desarrollo-pos",
-        "desarrollo-dashboards",
-        "desarrollo-finanzas",
-        "reparacion-computadores",
-        "antivirus-mcafee",
-        "alquiler-equipos"
-      ],
-      "promo": "🤖 Semana de soluciones para tu negocio\nMantenimiento y reparación de equipos, licencias, alquiler de portátiles, catálogos web y automatizaciones con IA.\nCotiza sin compromiso: 💬 322 328 4622"
-    }
-  ],
-  "promo_dia": 1,
-  "promo_fondo": "#C8102E"
+ "_nota": "Esquema de campañas (herramientas/publicar-estado.mjs y generar_redes.js). Cada semana (lunes a domingo) corre UNA campaña; rotan en orden desde inicio_campanas. Cada día sale el video del día de esa campaña, alternando las versiones de voz; los lunes, además, la promo de la campaña en texto. Los textos solo usan hechos del negocio (nada de descuentos ni disponibilidad inventados). Videos de más de 60 s no van a estados (WhatsApp los corta): se usa el siguiente de la lista.",
+ "carpeta": "docs/videos-estados/mp4",
+ "pie": "🛒 dctecnology.xyz · 💬 322 328 4622",
+ "videos": [
+  {
+   "archivo": "bienvenida",
+   "texto": "Somos DC Tecnology: streaming, licencias, pines, recargas, tecnología y servicio técnico. Trabajamos para darte el mejor servicio."
+  },
+  {
+   "archivo": "streaming-desde",
+   "texto": "📺 Netflix, Disney, Max, Prime Video y más, con garantía de 30 días. Elige tu plan en la tienda."
+  },
+  {
+   "archivo": "compra-3-toques",
+   "texto": "Comprar es así de fácil: eliges, pagas con Nequi, Daviplata o Llave Bre-B y te llega por WhatsApp."
+  },
+  {
+   "archivo": "primera-compra",
+   "texto": "🎁 Tu primera compra con 10% de descuento: cupón DCTECH2026."
+  },
+  {
+   "archivo": "relojes-audifonos",
+   "texto": "⌚🎧 Relojes inteligentes, audífonos y más, con garantía de 30 días y envío a todo el país."
+  },
+  {
+   "archivo": "combo-ahorra",
+   "texto": "Arma tu combo: 2 plataformas -10%, 3 o más -15%."
+  },
+  {
+   "archivo": "pines-recargas",
+   "texto": "📱 Recargas Claro, Movistar, Tigo, Wom, ETB y Éxito, diamantes de Free Fire y pines virtuales."
+  },
+  {
+   "archivo": "desarrollos-completo",
+   "texto": "🤖 Automatizamos tu negocio: dashboards, POS, inventarios, catálogos web y bots de WhatsApp con IA. Cotiza sin compromiso."
+  },
+  {
+   "archivo": "tutorial-compra-entrega",
+   "texto": "Así funciona una compra, paso a paso, desde que eliges hasta que recibes."
+  },
+  {
+   "archivo": "servicio-tecnico",
+   "texto": "🛠️ Mantenimiento, reparación de computadores y repuestos. Cotiza por WhatsApp."
+  },
+  {
+   "archivo": "por-que-dc",
+   "texto": "Entrega rápida, garantía de 30 días, pagos locales y personas reales. Compra con confianza."
+  },
+  {
+   "archivo": "licencias",
+   "texto": "🔑 Windows, Office y antivirus. Y si quieres, te lo instalamos."
+  },
+  {
+   "archivo": "comprobante-web",
+   "texto": "Paga directo en la página y sube tu comprobante: te avisamos por WhatsApp."
+  },
+  {
+   "archivo": "pedidos-whatsapp",
+   "texto": "Mira tus pedidos y tu garantía sin contraseñas, solo con tu WhatsApp."
+  },
+  {
+   "archivo": "soporte-garantia",
+   "texto": "¿Algo falla? Repórtalo desde Mis pedidos y te atiende una persona real."
+  },
+  {
+   "archivo": "alquiler-equipos",
+   "texto": "💻 Alquiler de portátiles y equipos de cómputo para empresas, eventos y proyectos."
+  },
+  {
+   "archivo": "renueva-tu-plan",
+   "texto": "⏰ ¿Tu plan está por vencer? Te avisamos 3 días antes: responde RENOVAR y te lo dejamos listo para pagar."
+  },
+  {
+   "archivo": "apps-premium",
+   "texto": "🎨 Canva Pro, CapCut Pro, Duolingo Super y Gemini IA Pro, con garantía de 30 días."
+  },
+  {
+   "archivo": "free-fire-diamantes",
+   "texto": "💎 Diamantes de Free Fire desde 100, directo a tu cuenta."
+  },
+  {
+   "archivo": "regala-un-pin",
+   "texto": "🎁 Regala un pin virtual de Google Play, Roblox, Netflix o Disney: el código te llega por WhatsApp."
+  },
+  {
+   "archivo": "antivirus-mcafee",
+   "texto": "🛡️ McAfee Total Protection: licencia de 1 año para 1 o 5 computadores, desde $45.000, con garantía."
+  },
+  {
+   "archivo": "office-365",
+   "texto": "📄 Office 365 por un año (1 o 5 equipos) u Office Pro Plus vitalicio 2016–2024. Si quieres, te lo instalamos."
+  },
+  {
+   "archivo": "windows-pro",
+   "texto": "🪟 Licencias de Windows 10 Pro y 11 Pro, y servicio de instalación con Office y programas básicos."
+  },
+  {
+   "archivo": "mantenimiento-preventivo",
+   "texto": "🧹 Mantenimiento preventivo (optimización y limpieza) y correctivo con cambio de pasta térmica."
+  },
+  {
+   "archivo": "reparacion-computadores",
+   "texto": "🛠️ Reparamos computadores de escritorio y portátiles, y conseguimos tus repuestos. Cotiza por WhatsApp."
+  },
+  {
+   "archivo": "desarrollo-pos",
+   "texto": "🍻 Sistemas POS para bares y restaurantes: mesas en tiempo real, pedidos por mesa, caja, inventario y reportes."
+  },
+  {
+   "archivo": "desarrollo-rifas",
+   "texto": "🏆 Plataformas de pollas, rifas y juegos con usuarios, tabla de posiciones, premios y cuenta regresiva."
+  },
+  {
+   "archivo": "desarrollo-finanzas",
+   "texto": "💰 Gestor financiero: ingresos, gastos, pagos recurrentes, ventas y solicitudes de gasto en un solo tablero."
+  },
+  {
+   "archivo": "desarrollo-dashboards",
+   "texto": "📊 Dashboards con indicadores en tiempo real, cronogramas, gestión por proceso y matrices."
+  },
+  {
+   "archivo": "desarrollo-tienda-bot",
+   "texto": "🤖 Tu tienda web con catálogo, carrito y pagos locales, más un bot de WhatsApp con IA que toma pedidos."
+  },
+  {
+   "archivo": "tip-mantenimiento",
+   "texto": "🧰 ¿Cada cuánto hacerle mantenimiento a tu PC? Lo recomendable es 1 vez al año (o cada 6 meses con polvo o uso diario). Preventivo desde $50.000."
+  },
+  {
+   "archivo": "tip-office",
+   "texto": "📄 Office 365 vs vitalicio: 365 se paga por año y siempre está al día; el vitalicio es un solo pago y se queda en su versión."
+  },
+  {
+   "archivo": "tip-windows",
+   "texto": "🪟 Windows 10 no recibe actualizaciones de seguridad gratuitas desde octubre de 2025. Pásate a Windows 11 (si tu equipo es compatible): licencia + instalación."
+  },
+  {
+   "archivo": "tip-antivirus",
+   "texto": "🛡️ 4 consejos: programas solo de sitios oficiales, cuidado con enlaces que piden datos, copias de seguridad y antivirus actualizado."
+  },
+  {
+   "archivo": "tip-pantalla-vs-cuenta",
+   "texto": "📺 ¿Pantalla o cuenta completa? Pantalla = un perfil en un dispositivo a la vez. Cuenta completa = todos los perfiles para tu hogar."
+  },
+  {
+   "archivo": "satira-catalogo",
+   "texto": "😅 ¿40 fotos de productos al día en tus estados? Tus contactos ya te silenciaron. Mejor un catálogo virtual: un solo enlace, con precios, carrito y pedido a tu WhatsApp."
+  },
+  {
+   "archivo": "tip-automatiza",
+   "texto": "⚙️ ¿Horas copiando pedidos y respondiendo lo mismo? Automatízalo: bot que atiende y toma pedidos + inventario al día. Tú con el control."
+  },
+  {
+   "archivo": "tip-control-negocio",
+   "texto": "📊 ¿Sabes cuánto ganaste este mes? Ventas, gastos e inventario en un solo tablero. Decide con datos."
+  },
+  {
+   "archivo": "tip-por-que-antivirus",
+   "texto": "🛡️ Las amenazas llegan por correo, WhatsApp o USB: roban claves, secuestran archivos y ponen lento el equipo. Un antivirus actualizado las detiene."
+  }
+ ],
+ "inicio_campanas": "2026-10-19",
+ "campanas": [
+  {
+   "id": "entretenimiento",
+   "nombre": "Entretenimiento en casa",
+   "videos": [
+    "streaming-desde",
+    "tip-pantalla-vs-cuenta",
+    "combo-ahorra",
+    "compra-3-toques",
+    "primera-compra",
+    "tutorial-compra-entrega",
+    "renueva-tu-plan"
+   ],
+   "promo": "📺 Semana del entretenimiento\nNetflix, Disney, Max, Prime Video y más con 30 días de garantía.\nArma tu combo: 2 plataformas -10%, 3 o más -15%.\n🛒 dctecnology.xyz"
+  },
+  {
+   "id": "tecnologia",
+   "nombre": "Tecnología, licencias y soporte",
+   "videos": [
+    "tip-mantenimiento",
+    "windows-pro",
+    "tip-windows",
+    "office-365",
+    "tip-office",
+    "mantenimiento-preventivo",
+    "tip-antivirus"
+   ],
+   "promo": "🪟 Semana de licencias y soporte técnico\nWindows, Office y McAfee originales, mantenimiento y reparación de computadores.\nRelojes y audífonos con garantía de 30 días.\n🛒 dctecnology.xyz"
+  },
+  {
+   "id": "recargas",
+   "nombre": "Recarga y juega",
+   "videos": [
+    "pines-recargas",
+    "free-fire-diamantes",
+    "regala-un-pin",
+    "apps-premium",
+    "relojes-audifonos",
+    "comprobante-web",
+    "primera-compra"
+   ],
+   "promo": "📱 Semana de recargas y pines\nClaro, Movistar, Tigo, Wom, ETB y Éxito, diamantes de Free Fire y pines de Google Play, Roblox y más.\n🎁 Primera compra: 10% con DCTECH2026\n💬 322 328 4622"
+  },
+  {
+   "id": "negocios",
+   "nombre": "Soluciones para tu negocio",
+   "videos": [
+    "desarrollo-tienda-bot",
+    "desarrollo-pos",
+    "desarrollo-dashboards",
+    "desarrollo-finanzas",
+    "reparacion-computadores",
+    "antivirus-mcafee",
+    "alquiler-equipos"
+   ],
+   "promo": "🤖 Semana de soluciones para tu negocio\nMantenimiento y reparación de equipos, licencias, alquiler de portátiles, catálogos web y automatizaciones con IA.\nCotiza sin compromiso: 💬 322 328 4622"
+  },
+  {
+   "id": "automatiza",
+   "nombre": "Automatiza y protege tu negocio",
+   "videos": [
+    "satira-catalogo",
+    "tip-automatiza",
+    "tip-control-negocio",
+    "tip-por-que-antivirus",
+    "desarrollo-tienda-bot",
+    "desarrollo-dashboards",
+    "antivirus-mcafee"
+   ],
+   "promo": "⚙️ Semana para automatizar y proteger tu negocio\nCatálogo virtual con bot de WhatsApp, tableros de control, licencias y antivirus.\nCotiza sin compromiso: 💬 322 328 4622"
+  }
+ ],
+ "promo_dia": 1,
+ "promo_fondo": "#C8102E"
 }
