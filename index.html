@@ -58,14 +58,14 @@
     <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","@id":"https://dctecnology.xyz/#sitio","name":"DC Tecnology","url":"https://dctecnology.xyz/","inLanguage":"es-CO","publisher":{"@id":"https://dctecnology.xyz/#organizacion"}}</script>
 
     <!-- Estilos compilados con Tailwind (npm run css): sin CDN de desarrollo -->
-    <link rel="stylesheet" href="estilos/tailwind.css?v=202610190342">
+    <link rel="stylesheet" href="estilos/tailwind.css?v=202610191112">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" integrity="sha384-iw3OoTErCYJJB9mCa8LNS2hbsQ7M3C0EpIsO/H5+EGAkPGc6rk+V8i04oW/K5xq0" crossorigin="anonymous" referrerpolicy="no-referrer">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;700;800;900&display=swap" rel="stylesheet">
     <!-- Tema claro/oscuro (antes de pintar, sin destello) -->
-    <script src="tema.js?v=202610190342"></script>
-    <link rel="stylesheet" href="tema.css?v=202610190342">
+    <script src="tema.js?v=202610191112"></script>
+    <link rel="stylesheet" href="tema.css?v=202610191112">
     <!-- Carrito, combos y pago web: mismos estilos que el portal (carrito.js) -->
-    <link rel="stylesheet" href="estilos/cliente.css?v=202610190342">
+    <link rel="stylesheet" href="estilos/cliente.css?v=202610191112">
     <style>
         html { -webkit-tap-highlight-color: transparent; }
         [hidden] { display: none !important; }
@@ -252,8 +252,8 @@
         }
     </style>
     <!-- Estilo corporativo (va de último: recalibra colores y apaga efectos neón) -->
-    <link rel="stylesheet" href="estilos/profesional.css?v=202610190342">
-    <link rel="stylesheet" href="estilos/corriente.css?v=202610190342">
+    <link rel="stylesheet" href="estilos/profesional.css?v=202610191112">
+    <link rel="stylesheet" href="estilos/corriente.css?v=202610191112">
 </head>
 <body class="bg-dcDarkBg text-white min-h-screen flex flex-col font-sans antialiased selection:bg-dcRed/40">
     <div class="mesh" aria-hidden="true"><span></span><span></span><span></span></div>
@@ -294,12 +294,22 @@
                 </button>
             </div>
         </div>
+        <!-- Módulos (vistas.js): cada uno muestra solo sus secciones; en celular están en el menú inferior -->
+        <nav class="modulos-nav" aria-label="Módulos de la tienda">
+            <div class="max-w-7xl mx-auto px-4 flex gap-1">
+                <a href="#inicio" data-ir-vista="inicio"><i class="fa-solid fa-house" aria-hidden="true"></i><span>Inicio</span></a>
+                <a href="#catalogo" data-ir-vista="catalogo"><i class="fa-solid fa-grip" aria-hidden="true"></i><span>Catálogo</span></a>
+                <a href="#servicios" data-ir-vista="servicios"><i class="fa-solid fa-screwdriver-wrench" aria-hidden="true"></i><span>Servicios</span></a>
+                <a href="#cuenta" data-ir-vista="cuenta"><i class="fa-solid fa-receipt" aria-hidden="true"></i><span>Pedidos</span></a>
+                <a href="#soporte" data-ir-vista="soporte"><i class="fa-solid fa-headset" aria-hidden="true"></i><span>Soporte</span></a>
+            </div>
+        </nav>
     </header>
 
     <main class="relative z-10 flex-grow">
         <!-- Héroe -->
         <!-- Portada "Corriente DC" (estilos/corriente.css + efectos.js): el circuito del logo lleva la corriente hasta la marca -->
-        <section id="hero" class="hero-dc entrada" aria-labelledby="hero-titulo">
+        <section id="hero" data-vista="inicio" class="hero-dc entrada" aria-labelledby="hero-titulo">
             <div class="hero-dc__luz" aria-hidden="true"></div>
             <div class="hero-dc__grid max-w-7xl mx-auto px-4">
                 <div class="hero-dc__texto">
@@ -362,7 +372,7 @@
         </section>
 
         <!-- Plataformas disponibles (marcas.js: logos reales del catálogo, pista animada y contadores reales) -->
-        <section id="plataformas" class="plataformas max-w-7xl mx-auto px-4 pb-10" aria-labelledby="plataformas-titulo">
+        <section id="plataformas" data-vista="inicio" class="plataformas max-w-7xl mx-auto px-4 pb-10" aria-labelledby="plataformas-titulo">
             <div class="plataformas__cabecera">
                 <h2 id="plataformas-titulo" class="plataformas__titulo">Todas tus plataformas, <span>en un solo lugar</span></h2>
                 <dl class="plataformas__cifras">
@@ -375,7 +385,7 @@
         </section>
 
         <!-- Así se compra: grabación real del portal (orden de demostración), video liviano sin sonido -->
-        <section id="asi-se-compra" class="asi max-w-7xl mx-auto px-4 pb-12" aria-labelledby="asi-titulo">
+        <section id="asi-se-compra" data-vista="inicio" class="asi max-w-7xl mx-auto px-4 pb-12" aria-labelledby="asi-titulo">
             <div class="asi__marco">
                 <div class="asi__texto">
                     <p class="asi__eyebrow">Así de fácil</p>
@@ -401,7 +411,7 @@
 
         <!-- Catálogo tri-módulo -->
         <!-- Promociones del día (wo-025): solo aparece si hay promociones vigentes -->
-        <section id="promociones-dia" hidden class="max-w-7xl mx-auto px-4 pb-8" aria-labelledby="promos-titulo">
+        <section id="promociones-dia" data-vista="inicio" hidden class="max-w-7xl mx-auto px-4 pb-8" aria-labelledby="promos-titulo">
             <div class="promo-banda">
                 <div class="flex flex-wrap items-end justify-between gap-3 mb-4">
                     <div>
@@ -415,7 +425,7 @@
         </section>
 
         <!-- Arma tu combo (carrito.js + reglas_combo de la base): plegado para no alargar la página -->
-        <section id="combos" class="max-w-7xl mx-auto px-4 pb-10" aria-labelledby="titulo-combos">
+        <section id="combos" data-vista="catalogo" class="max-w-7xl mx-auto px-4 pb-10" aria-labelledby="titulo-combos">
             <details id="combos-caja" class="rounded-3xl bg-white/[0.03] ring-1 ring-white/10 backdrop-blur-xl p-5">
                 <summary class="cursor-pointer list-none flex flex-wrap items-center justify-between gap-4">
                     <span class="min-w-0">
@@ -435,7 +445,7 @@
         </section>
 
         <!-- Nuevo en tecnología: productos del proveedor (sincronizado), 8 que rotan cada día (app.js → pintarNovedades) -->
-        <section id="novedades" hidden class="max-w-7xl mx-auto px-4 pb-10" aria-labelledby="titulo-novedades">
+        <section id="novedades" data-vista="inicio" hidden class="max-w-7xl mx-auto px-4 pb-10" aria-labelledby="titulo-novedades">
             <div class="flex flex-wrap items-end justify-between gap-3 mb-5">
                 <div>
                     <p class="text-[10px] font-black uppercase tracking-[0.25em] text-dcRed mb-1">Recién llegados</p>
@@ -447,7 +457,7 @@
         </section>
 
         <!-- Servicios destacados: abren la ficha del servicio (app.js → data-servicio) o llevan al cotizador -->
-        <section id="servicios-destacados" class="max-w-7xl mx-auto px-4 pb-10" aria-labelledby="titulo-serv-dest">
+        <section id="servicios-destacados" data-vista="servicios" class="max-w-7xl mx-auto px-4 pb-10" aria-labelledby="titulo-serv-dest">
             <div class="flex flex-wrap items-end justify-between gap-3 mb-5">
                 <div>
                     <p class="text-[10px] font-black uppercase tracking-[0.25em] text-dcRed mb-1">Para tu equipo y tu negocio</p>
@@ -485,7 +495,7 @@
 
         <!-- Desarrollos y automatizaciones: sistemas hechos por DC Tecnology (pantallazos reales; datos de clientes difuminados).
              Filtros y vista ampliada en portafolio.js -->
-        <section id="desarrollos" class="desarrollos max-w-7xl mx-auto px-4 pb-12" aria-labelledby="titulo-desarrollos">
+        <section id="desarrollos" data-vista="servicios" class="desarrollos max-w-7xl mx-auto px-4 pb-12" aria-labelledby="titulo-desarrollos">
             <div class="desarrollos__marco">
                 <div class="desarrollos__cabeza">
                     <div>
@@ -579,7 +589,7 @@
             <img alt="">
         </dialog>
 
-        <section id="catalogo" class="max-w-7xl mx-auto px-4 pb-10" aria-labelledby="category-title">
+        <section id="catalogo" data-vista="catalogo" class="max-w-7xl mx-auto px-4 pb-10" aria-labelledby="category-title">
             <div role="tablist" aria-label="Tipo de producto" id="modulos" class="grid grid-cols-2 sm:grid-cols-4 gap-2 p-1.5 rounded-3xl bg-white/[0.03] ring-1 ring-white/10 backdrop-blur-xl mb-4">
                 <button type="button" role="tab" data-modulo="todos" class="min-h-[52px] rounded-2xl text-xs font-black uppercase tracking-wider transition-all"><i class="fa-solid fa-border-all mr-1.5"></i>Todo</button>
                 <button type="button" role="tab" data-modulo="digitales" class="min-h-[52px] rounded-2xl text-xs font-black uppercase tracking-wider transition-all"><i class="fa-solid fa-bolt mr-1.5"></i>Digitales</button>
@@ -606,7 +616,7 @@
         </section>
 
         <!-- Servicios técnicos -->
-        <section id="servicios" class="max-w-7xl mx-auto px-4 pb-12" aria-labelledby="titulo-servicios">
+        <section id="servicios" data-vista="servicios" class="max-w-7xl mx-auto px-4 pb-12" aria-labelledby="titulo-servicios">
             <div class="rounded-3xl bg-white/[0.03] ring-1 ring-white/10 backdrop-blur-xl p-5 sm:p-8">
                 <p class="text-[10px] font-black uppercase tracking-[0.3em] text-dcRed mb-2">Servicios técnicos</p>
                 <h2 id="titulo-servicios" class="font-tech text-2xl sm:text-3xl font-black uppercase tracking-wider">Mantenimiento, automatización <span class="text-dcRed dc-text-glow">y más</span></h2>
@@ -660,7 +670,7 @@
 
         <!-- Reseñas reales -->
         <!-- ============ APRENDE ANTES DE COMPRAR (guías: contenido útil + enlaces internos para Google) ============ -->
-        <section id="aprende" class="max-w-7xl mx-auto px-4 pb-14" aria-labelledby="t-aprende">
+        <section id="aprende" data-vista="inicio" class="max-w-7xl mx-auto px-4 pb-14" aria-labelledby="t-aprende">
             <div class="flex flex-wrap items-end justify-between gap-3 mb-5">
                 <div>
                     <p class="text-[10px] font-black uppercase tracking-[0.3em] text-dcRed mb-2">Guías</p>
@@ -677,7 +687,7 @@
         </section>
 
         <!-- ============ MIS PEDIDOS (antes en cliente.html: sesion.js + pedidos-tienda.js) ============ -->
-        <section id="cuenta" class="max-w-7xl mx-auto px-4 pb-14 scroll-mt-24" aria-labelledby="t-cuenta">
+        <section id="cuenta" data-vista="cuenta" class="max-w-7xl mx-auto px-4 pb-14 scroll-mt-24" aria-labelledby="t-cuenta">
             <div class="cuenta-tienda">
                 <div>
                     <p class="text-[10px] font-black uppercase tracking-[0.3em] text-dcRed mb-2">Autogestión</p>
@@ -701,7 +711,7 @@
         </section>
 
         <!-- ============ SOPORTE (soporte.js) ============ -->
-        <section id="soporte" class="max-w-7xl mx-auto px-4 pb-14 scroll-mt-24" aria-labelledby="t-soporte">
+        <section id="soporte" data-vista="soporte" class="max-w-7xl mx-auto px-4 pb-14 scroll-mt-24" aria-labelledby="t-soporte">
             <p class="text-[10px] font-black uppercase tracking-[0.3em] text-dcRed mb-2">Garantía</p>
             <h2 id="t-soporte" class="font-tech text-2xl sm:text-3xl font-black uppercase tracking-wider">Soporte</h2>
             <p class="mt-2 text-sm text-neutral-400 max-w-xl">Resolvamos juntos el problema en menos de un minuto. Si no se arregla, te pasamos con un asesor con todo ya explicado.</p>
@@ -713,7 +723,7 @@
             <div id="soporte-contenido" class="mt-5"></div>
         </section>
 
-        <section id="opiniones" class="max-w-7xl mx-auto px-4 pb-16" aria-labelledby="titulo-opiniones">
+        <section id="opiniones" data-vista="inicio" class="max-w-7xl mx-auto px-4 pb-16" aria-labelledby="titulo-opiniones">
             <div class="flex flex-wrap items-end justify-between gap-3 mb-5">
                 <div>
                     <p class="text-[10px] font-black uppercase tracking-[0.3em] text-dcRed mb-2">Opiniones</p>
@@ -727,7 +737,7 @@
         </section>
 
         <!-- Formas de pago (wo-027): solo los métodos activos; aparece cuando hay alguno -->
-        <section id="formas-pago" hidden class="max-w-7xl mx-auto px-4 pb-16" aria-labelledby="titulo-formas-pago">
+        <section id="formas-pago" data-vista="inicio" hidden class="max-w-7xl mx-auto px-4 pb-16" aria-labelledby="titulo-formas-pago">
             <div class="rounded-3xl bg-white/[0.03] ring-1 ring-white/10 backdrop-blur-xl p-5 sm:p-6">
                 <h2 id="titulo-formas-pago" class="font-tech text-xl sm:text-2xl font-black uppercase tracking-wider mb-1">Formas de <span class="text-dcRed dc-text-glow">pago</span></h2>
                 <p class="text-xs text-neutral-400 mb-4">Paga en la web subiendo tu comprobante, o elige el medio por WhatsApp y te damos sus datos. Estos son los activos hoy.</p>
@@ -785,6 +795,16 @@
         </details>
         <!-- /SEO:DIRECTORIO -->
     </footer>
+
+    <!-- Menú inferior por módulos (celular), como el portal: Inicio · Catálogo · Carrito · Servicios · Pedidos · Soporte -->
+    <nav class="menu-modulos" aria-label="Módulos de la tienda">
+        <a href="#inicio" data-ir-vista="inicio"><i class="fa-solid fa-house" aria-hidden="true"></i><span>Inicio</span></a>
+        <a href="#catalogo" data-ir-vista="catalogo"><i class="fa-solid fa-grip" aria-hidden="true"></i><span>Catálogo</span></a>
+        <button type="button" data-abrir-carrito class="central" aria-label="Abrir carrito"><i class="fa-solid fa-cart-shopping" aria-hidden="true"></i><span data-contador-carrito class="contador" hidden>0</span></button>
+        <a href="#servicios" data-ir-vista="servicios"><i class="fa-solid fa-screwdriver-wrench" aria-hidden="true"></i><span>Servicios</span></a>
+        <a href="#cuenta" data-ir-vista="cuenta"><i class="fa-solid fa-receipt" aria-hidden="true"></i><span>Pedidos</span></a>
+        <a href="#soporte" data-ir-vista="soporte"><i class="fa-solid fa-headset" aria-hidden="true"></i><span>Soporte</span></a>
+    </nav>
 
     <!-- ============ MODAL DE PRODUCTO / CHECKOUT ============ -->
     <div id="product-modal" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center" hidden role="dialog" aria-modal="true" aria-labelledby="modal-title">
@@ -933,20 +953,21 @@
     <div id="toasts" class="fixed z-[60] left-4 right-24 sm:right-auto bottom-[max(1rem,env(safe-area-inset-bottom))] flex flex-col items-start gap-2 pointer-events-none" aria-live="polite"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js" integrity="sha384-Rj26LVGvoeRVR6+mwQmFfcR3QOBEwT+ZmuCWpuiqeTzJpCs0ER4ITAWGb4Hiy3Ok" crossorigin="anonymous"></script>
-    <script src="plantillas-whatsapp.js?v=202610190342"></script>
-    <script src="ui.js?v=202610190342"></script>
-    <script src="app.js?v=202610190342"></script>
-    <script src="tienda-carrito.js?v=202610190342"></script>
-    <script src="carrito.js?v=202610190342"></script>
-    <script src="sesion.js?v=202610190342"></script>
-    <script src="soporte.js?v=202610190342"></script>
-    <script src="pedidos-tienda.js?v=202610190342"></script>
-    <script src="efectos.js?v=202610190342"></script>
-    <script src="marcas.js?v=202610190342"></script>
-    <script src="portafolio.js?v=202610190342"></script>
-    <script src="copiloto.js?v=202610190342"></script>
-    <script src="app-instalable.js?v=202610190342"></script>
-    <script src="detalles.js?v=202610190342"></script>
+    <script src="vistas.js?v=202610191112"></script>
+    <script src="plantillas-whatsapp.js?v=202610191112"></script>
+    <script src="ui.js?v=202610191112"></script>
+    <script src="app.js?v=202610191112"></script>
+    <script src="tienda-carrito.js?v=202610191112"></script>
+    <script src="carrito.js?v=202610191112"></script>
+    <script src="sesion.js?v=202610191112"></script>
+    <script src="soporte.js?v=202610191112"></script>
+    <script src="pedidos-tienda.js?v=202610191112"></script>
+    <script src="efectos.js?v=202610191112"></script>
+    <script src="marcas.js?v=202610191112"></script>
+    <script src="portafolio.js?v=202610191112"></script>
+    <script src="copiloto.js?v=202610191112"></script>
+    <script src="app-instalable.js?v=202610191112"></script>
+    <script src="detalles.js?v=202610191112"></script>
 
 </body>
 </html>
