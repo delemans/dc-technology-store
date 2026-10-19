@@ -286,3 +286,69 @@ main > section { scroll-margin-top: 96px; }
 .app-boton[hidden] { display: none; }
 .app-boton:hover { border-color: var(--acento); }
 .app-boton[aria-pressed="true"] i, [data-musica][aria-pressed="true"] i { color: var(--acento); }
+
+/* ==================== Mejoras de estilo (19/10/2026) ==================== */
+/* Catálogo por tandas: "Ver más" con avance */
+.catalogo-mas { display: grid; justify-items: center; gap: 12px; margin-top: 28px; text-align: center; }
+.catalogo-mas[hidden] { display: none; }
+.catalogo-mas__texto { font: 600 13px/1 Inter, system-ui, sans-serif; color: rgb(var(--tinta) / .65); font-variant-numeric: tabular-nums; }
+.catalogo-mas__texto b { color: rgb(var(--tinta)); }
+.catalogo-mas__barra { width: min(280px, 70vw); height: 4px; border-radius: 99px; background: rgb(var(--tinta) / .1); overflow: hidden; }
+.catalogo-mas__barra span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, rgb(var(--rojo)), #FF6B78); transition: width .5s cubic-bezier(.2, .8, .2, 1); }
+.catalogo-mas__boton { display: inline-flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 28px; border-radius: 999px; cursor: pointer;
+    font: 800 13px/1 Inter, system-ui, sans-serif; letter-spacing: .04em; color: rgb(var(--tinta)); background: rgb(var(--tarjeta));
+    border: 1px solid rgb(var(--borde)); box-shadow: var(--sombra-1); transition: border-color .2s, transform .2s; }
+.catalogo-mas__boton:hover { border-color: rgb(var(--rojo) / .6); transform: translateY(-1px); }
+.catalogo-mas__boton i { color: rgb(var(--rojo)); }
+
+/* Búsqueda sin resultados: sugerencias de un toque */
+.vacio-catalogo { border-color: rgb(var(--tinta) / .12); background: rgb(var(--tinta) / .02); color: rgb(var(--tinta) / .9); }
+.vacio-catalogo i { color: rgb(var(--tinta) / .35); }
+.vacio-catalogo p.text-xs { color: rgb(var(--tinta) / .6); }
+.vacio-sugerencia { min-height: 38px; padding: 0 16px; border-radius: 999px; cursor: pointer; font: 700 12px/1 Inter, system-ui, sans-serif; color: rgb(var(--tinta));
+    background: rgb(var(--tarjeta)); border: 1px solid rgb(var(--borde)); }
+.vacio-sugerencia:hover { border-color: rgb(var(--rojo) / .6); color: rgb(var(--rojo)); }
+
+/* Barra de lectura: la "corriente" avanza bajo el encabezado mientras bajas */
+.barra-lectura { position: fixed; top: 0; left: 0; right: 0; z-index: 60; height: 2px; transform: scaleX(0); transform-origin: 0 50%; pointer-events: none;
+    background: linear-gradient(90deg, rgb(var(--rojo)), #FF6B78); box-shadow: 0 0 10px rgb(var(--rojo) / .6); }
+
+/* Volver arriba (sobre el botón del bot, sin taparlo) */
+.volver-arriba { position: fixed; right: max(18px, env(safe-area-inset-right)); bottom: calc(96px + env(safe-area-inset-bottom)); z-index: 45; width: 44px; height: 44px;
+    display: grid; place-items: center; border-radius: 14px; cursor: pointer; color: rgb(var(--tinta)); background: rgb(var(--tarjeta) / .92);
+    border: 1px solid rgb(var(--borde)); box-shadow: var(--sombra-2); backdrop-filter: blur(8px); animation: entra-suave .25s ease-out; }
+.volver-arriba[hidden] { display: none; }
+@media (max-width: 639px) { .volver-arriba { right: auto; left: max(16px, env(safe-area-inset-left)); bottom: calc(22px + env(safe-area-inset-bottom)); } }
+.volver-arriba:hover { color: rgb(var(--rojo)); border-color: rgb(var(--rojo) / .5); }
+@keyframes entra-suave { from { opacity: 0; transform: translateY(8px); } }
+
+/* Encabezado: sombra suave cuando la página ya bajó */
+html.bajando header.sticky { box-shadow: 0 8px 24px -18px rgb(0 0 0 / .55); }
+
+/* Tipografía: títulos equilibrados, precios con cifras alineadas, selección con el rojo de marca */
+h1, h2, h3 { text-wrap: balance; }
+#product-grid .font-tech, .precio, [class*="precio"] { font-variant-numeric: tabular-nums; }
+::selection { background: rgb(var(--rojo) / .85); color: #fff; }
+
+@media (prefers-reduced-motion: reduce) {
+    .catalogo-mas__barra span, .catalogo-mas__boton { transition: none; }
+    .volver-arriba { animation: none; }
+}
+
+/* Anclas (#catalogo, #cuenta, #soporte…) no quedan escondidas bajo el encabezado fijo */
+html { scroll-padding-top: 150px; }
+@media (min-width: 768px) { html { scroll-padding-top: 96px; } }
+
+/* Chips de categoría: bordes que se desvanecen = "hay más, desliza" (solo cuando hay desplazamiento) */
+@media (max-width: 1023px) {
+    #chips { -webkit-mask-image: linear-gradient(90deg, #000 88%, transparent); mask-image: linear-gradient(90deg, #000 88%, transparent); }
+}
+
+/* Secciones pesadas fuera de pantalla: el navegador no las pinta hasta acercarse (carga más rápida en celular) */
+#desarrollos, #aprende, #opiniones, footer details { content-visibility: auto; contain-intrinsic-size: auto 900px; }
+
+/* Pie: enlaces con el rojo de marca y subrayado fino al pasar */
+footer a:hover { color: rgb(var(--rojo)) !important; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+
+/* Selector de orden e "Instalar la app": misma altura táctil que los chips (44 px) en celular */
+@media (max-width: 639px) { .orden-catalogo { min-height: 40px; } .app-boton { min-height: 44px; } }

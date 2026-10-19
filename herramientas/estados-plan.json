@@ -158,10 +158,48 @@
   {
    "archivo": "tip-por-que-antivirus",
    "texto": "🛡️ Las amenazas llegan por correo, WhatsApp o USB: roban claves, secuestran archivos y ponen lento el equipo. Un antivirus actualizado las detiene."
+  },
+  {
+   "archivo": "no-aburras-estados",
+   "texto": "🙈 ¿30 fotos de productos al día en tus estados? Tus contactos ya las pasan sin ver… o te silencian. Mejor un catálogo virtual: un solo enlace con fotos, precios y pedido por WhatsApp."
+  },
+  {
+   "archivo": "satira-precio-al-privado",
+   "texto": "😅 \"¿Precio?\" \"Al privado\"… y 3 horas después ya compró en otro lado. Con un catálogo virtual el precio está a la vista, de día y de noche."
+  },
+  {
+   "archivo": "catalogo-un-enlace",
+   "texto": "🔗 Un enlace vale más que cien fotos: tu cliente busca, ordena por precio y ve la ficha completa sin esperar."
+  },
+  {
+   "archivo": "catalogo-pedido-whatsapp",
+   "texto": "🛒 Menos \"precio?\" y \"visto\". En un catálogo virtual el cliente arma su pedido y te llega completo a WhatsApp."
+  },
+  {
+   "archivo": "estados-que-venden",
+   "texto": "📌 3 reglas para estados que venden: máximo 3 al día, algo útil y siempre precio claro con enlace para pedir."
+  },
+  {
+   "archivo": "catalogo-tu-negocio",
+   "texto": "🏪 Ropa, comida, accesorios o servicios: tu catálogo virtual con tu marca, buscador, pedido por WhatsApp y bot opcional."
   }
  ],
  "inicio_campanas": "2026-10-19",
  "campanas": [
+  {
+   "id": "catalogo",
+   "nombre": "Tu catálogo virtual",
+   "videos": [
+    "no-aburras-estados",
+    "catalogo-un-enlace",
+    "satira-precio-al-privado",
+    "catalogo-pedido-whatsapp",
+    "estados-que-venden",
+    "catalogo-tu-negocio",
+    "satira-catalogo"
+   ],
+   "promo": "🛍️ Semana del catálogo virtual\nDeja de llenar tus estados de fotos: un catálogo con tu marca, precios, carrito y pedido por WhatsApp (con bot opcional).\nCotiza sin compromiso: 💬 322 328 4622"
+  },
   {
    "id": "entretenimiento",
    "nombre": "Entretenimiento en casa",

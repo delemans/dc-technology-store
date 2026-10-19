@@ -427,22 +427,39 @@ function pintarModulos() {
     }));
 }
 
+// Catálogo por tandas: 12 en celular, 24 en PC; "Ver más" agrega otra tanda (antes eran 231 tarjetas de una vez)
+const TANDA = () => (window.matchMedia('(min-width: 1024px)').matches ? 24 : 12);
+let firmaFiltro = '';
+let mostrar = 0;
+
 function renderizar() {
-    const lista = productosFiltrados();
-    const { modulo, categoria, busqueda } = estado.filtro;
+    const completa = productosFiltrados();
+    const { modulo, categoria, busqueda, orden } = estado.filtro;
+    const firma = [modulo, categoria, busqueda, orden].join('|');
+    if (firma !== firmaFiltro) { firmaFiltro = firma; mostrar = TANDA(); }
+    const lista = completa.slice(0, mostrar);
+    pintarVerMas(completa.length, lista.length);
     $('category-title').textContent = busqueda ? `Resultados para “${busqueda}”`
         : categoria ? CATEGORIAS[categoria].texto : MODULOS[modulo].titulo;
-    $('product-count').textContent = `${lista.length} producto${lista.length === 1 ? '' : 's'}`;
+    $('product-count').textContent = `${completa.length} producto${completa.length === 1 ? '' : 's'}`;
     pintarModulos();
 
     const grid = $('product-grid');
     if (lista.length === 0) {
         grid.innerHTML = `
-            <div class="col-span-full rounded-3xl bg-white/[0.02] border border-dashed border-white/10 p-10 text-center">
-                <i class="fa-solid fa-magnifying-glass text-3xl text-neutral-600 mb-3"></i>
-                <p class="font-bold">No encontramos productos.</p>
-                <p class="text-xs text-neutral-500 mt-1">Prueba con otra búsqueda o pregúntale al Copiloto.</p>
+            <div class="vacio-catalogo col-span-full rounded-3xl border border-dashed p-10 text-center">
+                <i class="fa-solid fa-magnifying-glass text-3xl mb-3" aria-hidden="true"></i>
+                <p class="font-bold">No encontramos “${escaparHTML(busqueda || 'productos')}”.</p>
+                <p class="text-xs mt-1">Prueba con una de estas búsquedas o escríbenos por WhatsApp.</p>
+                <div class="mt-4 flex flex-wrap justify-center gap-2">${['Netflix', 'Windows', 'Office', 'Audífonos', 'Reloj', 'Roblox'].map((s) => `<button type="button" class="vacio-sugerencia" data-sugerencia="${s}">${s}</button>`).join('')}</div>
             </div>`;
+        grid.querySelectorAll('[data-sugerencia]').forEach((b) => b.addEventListener('click', () => {
+            const input = $('searchInput');
+            input.value = b.dataset.sugerencia;
+            estado.filtro.busqueda = b.dataset.sugerencia.toLowerCase();
+            renderizar();
+        }));
+        idsPintados = '';
         return;
     }
     // Sin cambios en la lista (p. ej. un espacio extra en la búsqueda): no se toca el DOM
@@ -464,6 +481,26 @@ function renderizar() {
     });
 }
 const tarjetasCache = new Map(); // id → <article>
+
+function pintarVerMas(total, visibles) {
+    let caja = $('catalogo-mas');
+    if (!caja) {
+        caja = document.createElement('div');
+        caja.id = 'catalogo-mas';
+        caja.className = 'catalogo-mas';
+        $('product-grid').after(caja);
+        caja.addEventListener('click', (e) => {
+            if (!e.target.closest('button')) return;
+            mostrar += TANDA();
+            renderizar();
+        });
+    }
+    caja.hidden = visibles >= total;
+    if (caja.hidden) return;
+    caja.innerHTML = `<p class="catalogo-mas__texto">Viendo <b>${visibles}</b> de <b>${total}</b></p>
+        <div class="catalogo-mas__barra" aria-hidden="true"><span style="width:${Math.round((visibles / total) * 100)}%"></span></div>
+        <button type="button" class="catalogo-mas__boton">Ver ${Math.min(TANDA(), total - visibles)} más <i class="fa-solid fa-chevron-down" aria-hidden="true"></i></button>`;
+}
 let idsPintados = '';
 
 // "Nuevo en tecnología": 8 productos del proveedor con precio activo; cambian cada día (mismo orden para todos ese día)
