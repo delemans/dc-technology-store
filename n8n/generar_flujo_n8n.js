@@ -117,7 +117,8 @@ function utilidades() {
             if (p.oculto && !conCategorias) return null;
             if (!b) return p.sincronizado ? null : p;
             const variantes = (p.variantes ?? []).map((v) => {
-                const x = b.find((y) => y.variante === v.nombre);
+                const sinDias = (t) => String(t ?? '').replace(/\s*\d+\s*d[ií]as?\b/gi, '').trim().toLowerCase();
+                const x = b.find((y) => y.variante === v.nombre) ?? b.find((y) => sinDias(y.variante) === sinDias(v.nombre)); // aunque cambie la duración
                 return x ? { ...v, precio: Number(x.precio) } : null;
             }).filter(Boolean);
             const existencias = b.find((y) => y.existencias !== null && y.existencias !== undefined)?.existencias;

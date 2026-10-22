@@ -2,6 +2,7 @@
 // Código real de los nodos del bot para el simulador del panel (Prueba del sistema). No envía nada.
 window.SimuladorFlujo = { version: "2026-10-22T20:13:57.280Z", config: {"supabase_url":"https://vyqcizwfmjlflncdwzve.supabase.co","evolution_url":"https://TU-EVOLUTION-API","evolution_instancia":"TU-INSTANCIA","url_conocimiento":"https://dctecnology.xyz/bot-conocimiento.json","numero_aviso_admin":"","numero_proveedor":"","webhook_publico":"http://localhost:5678/webhook/dc-whatsapp","canal_compra":"manual","anc_url":"https://ancpagos.com","anc_metodo":"nequi","anc_correo":"","anc_nombre":"DC","anc_apellido":"Tecnology","anc_whatsapp":"","palabras_asesor":"asesor,humano,persona,agente,reclamo,reembolso,devolucion,estafa,no me llego","etiquetas_silencio":"BAENAMORA","anc_margen":"0","bot_responde":"si","consultar_proveedor":"si","leer_medios":"no","horas_pausa_humano":"12"}, nodos: {
 "Normalizar mensaje": function ($, $input, $getWorkflowStaticData) {
+
 const limpiar = (v) => String(v ?? '').replace(/[*_~`]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 120);
 const rellenar = (plantilla, vars) => String(plantilla ?? '').split('\n').map((linea) => {
     let incompleta = false;
@@ -58,7 +59,8 @@ const aplicarPrecios = (catalogo, filas) => {
         if (p.oculto && !conCategorias) return null;
         if (!b) return p.sincronizado ? null : p;
         const variantes = (p.variantes ?? []).map((v) => {
-            const x = b.find((y) => y.variante === v.nombre);
+            const sinDias = (t) => String(t ?? '').replace(/\s*\d+\s*d[ií]as?\b/gi, '').trim().toLowerCase();
+            const x = b.find((y) => y.variante === v.nombre) ?? b.find((y) => sinDias(y.variante) === sinDias(v.nombre)); // aunque cambie la duración
             return x ? { ...v, precio: Number(x.precio) } : null;
         }).filter(Boolean);
         const existencias = b.find((y) => y.existencias !== null && y.existencias !== undefined)?.existencias;
@@ -79,6 +81,7 @@ const precioDe = (texto) => {
     const n = (s.match(/\d{1,3}(?:[.,]\d{3})+|\d{4,7}/g) || []).map((x) => Number(x.replace(/\D/g, ''))).filter((v) => v >= 1000 && v <= 5e6);
     return n.length ? n[0] : null;
 };
+
 
 const cfg = $('Config bot').first().json;
 const evento = $('Webhook Evolution').first().json;
@@ -274,6 +277,7 @@ return [{ json: salida }];
 
 },
 "Revisar respuesta": function ($, $input, $getWorkflowStaticData) {
+
 const limpiar = (v) => String(v ?? '').replace(/[*_~`]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 120);
 const rellenar = (plantilla, vars) => String(plantilla ?? '').split('\n').map((linea) => {
     let incompleta = false;
@@ -330,7 +334,8 @@ const aplicarPrecios = (catalogo, filas) => {
         if (p.oculto && !conCategorias) return null;
         if (!b) return p.sincronizado ? null : p;
         const variantes = (p.variantes ?? []).map((v) => {
-            const x = b.find((y) => y.variante === v.nombre);
+            const sinDias = (t) => String(t ?? '').replace(/\s*\d+\s*d[ií]as?\b/gi, '').trim().toLowerCase();
+            const x = b.find((y) => y.variante === v.nombre) ?? b.find((y) => sinDias(y.variante) === sinDias(v.nombre)); // aunque cambie la duración
             return x ? { ...v, precio: Number(x.precio) } : null;
         }).filter(Boolean);
         const existencias = b.find((y) => y.existencias !== null && y.existencias !== undefined)?.existencias;
@@ -351,6 +356,7 @@ const precioDe = (texto) => {
     const n = (s.match(/\d{1,3}(?:[.,]\d{3})+|\d{4,7}/g) || []).map((x) => Number(x.replace(/\D/g, ''))).filter((v) => v >= 1000 && v <= 5e6);
     return n.length ? n[0] : null;
 };
+
 
 const cfg = $('Config bot').first().json;
 const msg = $('Normalizar mensaje').first().json;
@@ -547,6 +553,7 @@ return [{ json: { numero: msg.numero, texto: r, pedido: digital, combo } }];
 
 },
 "Crear triangulación": function ($, $input, $getWorkflowStaticData) {
+
 const limpiar = (v) => String(v ?? '').replace(/[*_~`]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 120);
 const rellenar = (plantilla, vars) => String(plantilla ?? '').split('\n').map((linea) => {
     let incompleta = false;
@@ -603,7 +610,8 @@ const aplicarPrecios = (catalogo, filas) => {
         if (p.oculto && !conCategorias) return null;
         if (!b) return p.sincronizado ? null : p;
         const variantes = (p.variantes ?? []).map((v) => {
-            const x = b.find((y) => y.variante === v.nombre);
+            const sinDias = (t) => String(t ?? '').replace(/\s*\d+\s*d[ií]as?\b/gi, '').trim().toLowerCase();
+            const x = b.find((y) => y.variante === v.nombre) ?? b.find((y) => sinDias(y.variante) === sinDias(v.nombre)); // aunque cambie la duración
             return x ? { ...v, precio: Number(x.precio) } : null;
         }).filter(Boolean);
         const existencias = b.find((y) => y.existencias !== null && y.existencias !== undefined)?.existencias;
@@ -624,6 +632,7 @@ const precioDe = (texto) => {
     const n = (s.match(/\d{1,3}(?:[.,]\d{3})+|\d{4,7}/g) || []).map((x) => Number(x.replace(/\D/g, ''))).filter((v) => v >= 1000 && v <= 5e6);
     return n.length ? n[0] : null;
 };
+
 
 const cfg = $('Config bot').first().json;
 const item = $input.first().json;
@@ -676,6 +685,7 @@ return [{ json: {
 
 },
 "Cotización ANC": function ($, $input, $getWorkflowStaticData) {
+
 const limpiar = (v) => String(v ?? '').replace(/[*_~`]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 120);
 const rellenar = (plantilla, vars) => String(plantilla ?? '').split('\n').map((linea) => {
     let incompleta = false;
@@ -732,7 +742,8 @@ const aplicarPrecios = (catalogo, filas) => {
         if (p.oculto && !conCategorias) return null;
         if (!b) return p.sincronizado ? null : p;
         const variantes = (p.variantes ?? []).map((v) => {
-            const x = b.find((y) => y.variante === v.nombre);
+            const sinDias = (t) => String(t ?? '').replace(/\s*\d+\s*d[ií]as?\b/gi, '').trim().toLowerCase();
+            const x = b.find((y) => y.variante === v.nombre) ?? b.find((y) => sinDias(y.variante) === sinDias(v.nombre)); // aunque cambie la duración
             return x ? { ...v, precio: Number(x.precio) } : null;
         }).filter(Boolean);
         const existencias = b.find((y) => y.existencias !== null && y.existencias !== undefined)?.existencias;
@@ -753,6 +764,7 @@ const precioDe = (texto) => {
     const n = (s.match(/\d{1,3}(?:[.,]\d{3})+|\d{4,7}/g) || []).map((x) => Number(x.replace(/\D/g, ''))).filter((v) => v >= 1000 && v <= 5e6);
     return n.length ? n[0] : null;
 };
+
 
 const t = $('Crear triangulación').first().json;
 const cfg = $('Config bot').first().json;
@@ -806,6 +818,7 @@ return [{ json: { body: {
 
 },
 "Evaluar cotización": function ($, $input, $getWorkflowStaticData) {
+
 const limpiar = (v) => String(v ?? '').replace(/[*_~`]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 120);
 const rellenar = (plantilla, vars) => String(plantilla ?? '').split('\n').map((linea) => {
     let incompleta = false;
@@ -862,7 +875,8 @@ const aplicarPrecios = (catalogo, filas) => {
         if (p.oculto && !conCategorias) return null;
         if (!b) return p.sincronizado ? null : p;
         const variantes = (p.variantes ?? []).map((v) => {
-            const x = b.find((y) => y.variante === v.nombre);
+            const sinDias = (t) => String(t ?? '').replace(/\s*\d+\s*d[ií]as?\b/gi, '').trim().toLowerCase();
+            const x = b.find((y) => y.variante === v.nombre) ?? b.find((y) => sinDias(y.variante) === sinDias(v.nombre)); // aunque cambie la duración
             return x ? { ...v, precio: Number(x.precio) } : null;
         }).filter(Boolean);
         const existencias = b.find((y) => y.existencias !== null && y.existencias !== undefined)?.existencias;
@@ -883,6 +897,7 @@ const precioDe = (texto) => {
     const n = (s.match(/\d{1,3}(?:[.,]\d{3})+|\d{4,7}/g) || []).map((x) => Number(x.replace(/\D/g, ''))).filter((v) => v >= 1000 && v <= 5e6);
     return n.length ? n[0] : null;
 };
+
 
 const t = $('Crear triangulación').first().json;
 const b = $input.first().json.body;
@@ -995,6 +1010,7 @@ return [{ json: { costo, texto_admin: [
 
 },
 "Enrutar evento": function ($, $input, $getWorkflowStaticData) {
+
 const limpiar = (v) => String(v ?? '').replace(/[*_~`]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 120);
 const rellenar = (plantilla, vars) => String(plantilla ?? '').split('\n').map((linea) => {
     let incompleta = false;
@@ -1051,7 +1067,8 @@ const aplicarPrecios = (catalogo, filas) => {
         if (p.oculto && !conCategorias) return null;
         if (!b) return p.sincronizado ? null : p;
         const variantes = (p.variantes ?? []).map((v) => {
-            const x = b.find((y) => y.variante === v.nombre);
+            const sinDias = (t) => String(t ?? '').replace(/\s*\d+\s*d[ií]as?\b/gi, '').trim().toLowerCase();
+            const x = b.find((y) => y.variante === v.nombre) ?? b.find((y) => sinDias(y.variante) === sinDias(v.nombre)); // aunque cambie la duración
             return x ? { ...v, precio: Number(x.precio) } : null;
         }).filter(Boolean);
         const existencias = b.find((y) => y.existencias !== null && y.existencias !== undefined)?.existencias;
@@ -1072,6 +1089,7 @@ const precioDe = (texto) => {
     const n = (s.match(/\d{1,3}(?:[.,]\d{3})+|\d{4,7}/g) || []).map((x) => Number(x.replace(/\D/g, ''))).filter((v) => v >= 1000 && v <= 5e6);
     return n.length ? n[0] : null;
 };
+
 
 const msg = $('Normalizar mensaje').first().json;
 const abiertas = $input.all().map((i) => i.json).filter((r) => r && r.referencia);
@@ -1245,6 +1263,7 @@ return [{ json: { accion: 'reanudar', url: t.resume_url, cuerpo: { tipo: t.esper
 
 },
 "Evaluar pago": function ($, $input, $getWorkflowStaticData) {
+
 const limpiar = (v) => String(v ?? '').replace(/[*_~`]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 120);
 const rellenar = (plantilla, vars) => String(plantilla ?? '').split('\n').map((linea) => {
     let incompleta = false;
@@ -1301,7 +1320,8 @@ const aplicarPrecios = (catalogo, filas) => {
         if (p.oculto && !conCategorias) return null;
         if (!b) return p.sincronizado ? null : p;
         const variantes = (p.variantes ?? []).map((v) => {
-            const x = b.find((y) => y.variante === v.nombre);
+            const sinDias = (t) => String(t ?? '').replace(/\s*\d+\s*d[ií]as?\b/gi, '').trim().toLowerCase();
+            const x = b.find((y) => y.variante === v.nombre) ?? b.find((y) => sinDias(y.variante) === sinDias(v.nombre)); // aunque cambie la duración
             return x ? { ...v, precio: Number(x.precio) } : null;
         }).filter(Boolean);
         const existencias = b.find((y) => y.existencias !== null && y.existencias !== undefined)?.existencias;
@@ -1322,6 +1342,7 @@ const precioDe = (texto) => {
     const n = (s.match(/\d{1,3}(?:[.,]\d{3})+|\d{4,7}/g) || []).map((x) => Number(x.replace(/\D/g, ''))).filter((v) => v >= 1000 && v <= 5e6);
     return n.length ? n[0] : null;
 };
+
 
 const t = $('Crear triangulación').first().json;
 const b = $input.first().json.body;
@@ -1332,6 +1353,7 @@ return [{ json: { wamid: b.wamid } }];
 
 },
 "Preparar compra ANC": function ($, $input, $getWorkflowStaticData) {
+
 const limpiar = (v) => String(v ?? '').replace(/[*_~`]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 120);
 const rellenar = (plantilla, vars) => String(plantilla ?? '').split('\n').map((linea) => {
     let incompleta = false;
@@ -1388,7 +1410,8 @@ const aplicarPrecios = (catalogo, filas) => {
         if (p.oculto && !conCategorias) return null;
         if (!b) return p.sincronizado ? null : p;
         const variantes = (p.variantes ?? []).map((v) => {
-            const x = b.find((y) => y.variante === v.nombre);
+            const sinDias = (t) => String(t ?? '').replace(/\s*\d+\s*d[ií]as?\b/gi, '').trim().toLowerCase();
+            const x = b.find((y) => y.variante === v.nombre) ?? b.find((y) => sinDias(y.variante) === sinDias(v.nombre)); // aunque cambie la duración
             return x ? { ...v, precio: Number(x.precio) } : null;
         }).filter(Boolean);
         const existencias = b.find((y) => y.existencias !== null && y.existencias !== undefined)?.existencias;
@@ -1409,6 +1432,7 @@ const precioDe = (texto) => {
     const n = (s.match(/\d{1,3}(?:[.,]\d{3})+|\d{4,7}/g) || []).map((x) => Number(x.replace(/\D/g, ''))).filter((v) => v >= 1000 && v <= 5e6);
     return n.length ? n[0] : null;
 };
+
 
 const t = $('Crear triangulación').first().json;
 const cfg = $('Config bot').first().json;
@@ -1444,6 +1468,7 @@ return [{
 
 },
 "Pedido ANC creado": function ($, $input, $getWorkflowStaticData) {
+
 const limpiar = (v) => String(v ?? '').replace(/[*_~`]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 120);
 const rellenar = (plantilla, vars) => String(plantilla ?? '').split('\n').map((linea) => {
     let incompleta = false;
@@ -1500,7 +1525,8 @@ const aplicarPrecios = (catalogo, filas) => {
         if (p.oculto && !conCategorias) return null;
         if (!b) return p.sincronizado ? null : p;
         const variantes = (p.variantes ?? []).map((v) => {
-            const x = b.find((y) => y.variante === v.nombre);
+            const sinDias = (t) => String(t ?? '').replace(/\s*\d+\s*d[ií]as?\b/gi, '').trim().toLowerCase();
+            const x = b.find((y) => y.variante === v.nombre) ?? b.find((y) => sinDias(y.variante) === sinDias(v.nombre)); // aunque cambie la duración
             return x ? { ...v, precio: Number(x.precio) } : null;
         }).filter(Boolean);
         const existencias = b.find((y) => y.existencias !== null && y.existencias !== undefined)?.existencias;
@@ -1521,6 +1547,7 @@ const precioDe = (texto) => {
     const n = (s.match(/\d{1,3}(?:[.,]\d{3})+|\d{4,7}/g) || []).map((x) => Number(x.replace(/\D/g, ''))).filter((v) => v >= 1000 && v <= 5e6);
     return n.length ? n[0] : null;
 };
+
 
 const t = $('Crear triangulación').first().json;
 const c = $('Cotización ANC').first().json.body;
@@ -1549,6 +1576,7 @@ return [{ json: {
 
 },
 "Accesos en ANC": function ($, $input, $getWorkflowStaticData) {
+
 const limpiar = (v) => String(v ?? '').replace(/[*_~`]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 120);
 const rellenar = (plantilla, vars) => String(plantilla ?? '').split('\n').map((linea) => {
     let incompleta = false;
@@ -1605,7 +1633,8 @@ const aplicarPrecios = (catalogo, filas) => {
         if (p.oculto && !conCategorias) return null;
         if (!b) return p.sincronizado ? null : p;
         const variantes = (p.variantes ?? []).map((v) => {
-            const x = b.find((y) => y.variante === v.nombre);
+            const sinDias = (t) => String(t ?? '').replace(/\s*\d+\s*d[ií]as?\b/gi, '').trim().toLowerCase();
+            const x = b.find((y) => y.variante === v.nombre) ?? b.find((y) => sinDias(y.variante) === sinDias(v.nombre)); // aunque cambie la duración
             return x ? { ...v, precio: Number(x.precio) } : null;
         }).filter(Boolean);
         const existencias = b.find((y) => y.existencias !== null && y.existencias !== undefined)?.existencias;
@@ -1626,6 +1655,7 @@ const precioDe = (texto) => {
     const n = (s.match(/\d{1,3}(?:[.,]\d{3})+|\d{4,7}/g) || []).map((x) => Number(x.replace(/\D/g, ''))).filter((v) => v >= 1000 && v <= 5e6);
     return n.length ? n[0] : null;
 };
+
 
 const pedidos = $('Pedidos ANC esperando').all().map((i) => i.json);
 const salida = [];
@@ -1652,6 +1682,7 @@ return salida;
 
 },
 "Preparar extracción": function ($, $input, $getWorkflowStaticData) {
+
 const limpiar = (v) => String(v ?? '').replace(/[*_~`]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 120);
 const rellenar = (plantilla, vars) => String(plantilla ?? '').split('\n').map((linea) => {
     let incompleta = false;
@@ -1708,7 +1739,8 @@ const aplicarPrecios = (catalogo, filas) => {
         if (p.oculto && !conCategorias) return null;
         if (!b) return p.sincronizado ? null : p;
         const variantes = (p.variantes ?? []).map((v) => {
-            const x = b.find((y) => y.variante === v.nombre);
+            const sinDias = (t) => String(t ?? '').replace(/\s*\d+\s*d[ií]as?\b/gi, '').trim().toLowerCase();
+            const x = b.find((y) => y.variante === v.nombre) ?? b.find((y) => sinDias(y.variante) === sinDias(v.nombre)); // aunque cambie la duración
             return x ? { ...v, precio: Number(x.precio) } : null;
         }).filter(Boolean);
         const existencias = b.find((y) => y.existencias !== null && y.existencias !== undefined)?.existencias;
@@ -1729,6 +1761,7 @@ const precioDe = (texto) => {
     const n = (s.match(/\d{1,3}(?:[.,]\d{3})+|\d{4,7}/g) || []).map((x) => Number(x.replace(/\D/g, ''))).filter((v) => v >= 1000 && v <= 5e6);
     return n.length ? n[0] : null;
 };
+
 
 const t = $('Crear triangulación').first().json;
 const b = $input.first().json.body;
@@ -1750,6 +1783,7 @@ return [{ json: { texto_proveedor: texto, prompt: [
 
 },
 "Validar credenciales": function ($, $input, $getWorkflowStaticData) {
+
 const fuente = $('Preparar extracción').first().json.texto_proveedor;
 let d = {};
 try {
@@ -1769,6 +1803,7 @@ return [{ json: { ...c, confianza, decision: problemas.length ? 'revisar' : 'ent
 
 },
 "Mensaje de entrega": function ($, $input, $getWorkflowStaticData) {
+
 const limpiar = (v) => String(v ?? '').replace(/[*_~`]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 120);
 const rellenar = (plantilla, vars) => String(plantilla ?? '').split('\n').map((linea) => {
     let incompleta = false;
@@ -1825,7 +1860,8 @@ const aplicarPrecios = (catalogo, filas) => {
         if (p.oculto && !conCategorias) return null;
         if (!b) return p.sincronizado ? null : p;
         const variantes = (p.variantes ?? []).map((v) => {
-            const x = b.find((y) => y.variante === v.nombre);
+            const sinDias = (t) => String(t ?? '').replace(/\s*\d+\s*d[ií]as?\b/gi, '').trim().toLowerCase();
+            const x = b.find((y) => y.variante === v.nombre) ?? b.find((y) => sinDias(y.variante) === sinDias(v.nombre)); // aunque cambie la duración
             return x ? { ...v, precio: Number(x.precio) } : null;
         }).filter(Boolean);
         const existencias = b.find((y) => y.existencias !== null && y.existencias !== undefined)?.existencias;
@@ -1846,6 +1882,7 @@ const precioDe = (texto) => {
     const n = (s.match(/\d{1,3}(?:[.,]\d{3})+|\d{4,7}/g) || []).map((x) => Number(x.replace(/\D/g, ''))).filter((v) => v >= 1000 && v <= 5e6);
     return n.length ? n[0] : null;
 };
+
 
 const t = $('Crear triangulación').first().json;
 const c = $input.first().json;

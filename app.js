@@ -331,7 +331,9 @@ async function aplicarPreciosBase(productos) {
         // Productos del proveedor (sincronizado): sin precio activo en la base = agotados o sin confirmar → no se muestran
         if (!base) return p.sincronizado ? null : p;
         const variantes = (p.variantes ?? []).map((v) => {
-            const b = base.find((x) => x.variante === v.nombre);
+            // Exacta; si no, la misma variante con otra duración ("26 días" en la base ↔ "30 días" en el catálogo)
+            const sinDias = (t) => String(t ?? '').replace(/\s*\d+\s*d[ií]as?\b/gi, '').trim().toLowerCase();
+            const b = base.find((x) => x.variante === v.nombre) ?? base.find((x) => sinDias(x.variante) === sinDias(v.nombre));
             return b ? { ...v, precio: Number(b.precio), precio_anterior: b.precio_anterior === null ? null : Number(b.precio_anterior) } : null;
         }).filter(Boolean);
         // Existencias del proveedor (wo-047): las de la base mandan sobre las del archivo
