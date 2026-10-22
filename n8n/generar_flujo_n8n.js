@@ -43,7 +43,7 @@ const kbEmbebida = {
     notificaciones: { plantilla_por_tipo: kb.notificaciones.plantilla_por_tipo },
     menu: kb.menu,
     // Sin los ocultos (categorías del proveedor no activadas): el flujo queda liviano; "Leer Emprende Red" los toma del sitio en vivo
-    catalogo: kb.catalogo.filter((p) => !p.oculto).map(({ id, nombre, tipo, url, variantes, sincronizado, oculto }) => ({ id, nombre, tipo, url, ...(sincronizado ? { sincronizado } : {}), ...(oculto ? { oculto } : {}), variantes: variantes.map(({ nombre: n, precio }) => ({ nombre: n, precio })) })),
+    catalogo: kb.catalogo.filter((p) => !p.oculto).map(({ id, nombre, tipo, url, variantes, sincronizado, oculto, existencias }) => ({ id, nombre, tipo, url, ...(sincronizado ? { sincronizado } : {}), ...(oculto ? { oculto } : {}), ...(Number.isFinite(existencias) ? { existencias } : {}), variantes: variantes.map(({ nombre: n, precio }) => ({ nombre: n, precio })) })),
 };
 // Nombre visible de cada tipo de método de pago (NEQUI → Nequi, LLAVE_BREB → Llave Bre-B) para el menú
 const nombresPago = Object.fromEntries(WA.TIPOS_PAGO.map((t) => [t.tipo, t.nombre]));
@@ -111,14 +111,17 @@ function utilidades() {
         if (!Array.isArray(filas) || !filas.length) return (catalogo ?? []).filter((p) => !p.oculto); // categorías ocultas: nunca sin la base
         const por = new Map();
         for (const f of filas) por.set(f.producto_id, [...(por.get(f.producto_id) ?? []), f]);
+        const conCategorias = Object.prototype.hasOwnProperty.call(filas[0] ?? {}, 'existencias'); // base con wo-047
         return (catalogo ?? []).map((p) => {
             const b = por.get(p.id);
+            if (p.oculto && !conCategorias) return null;
             if (!b) return p.sincronizado ? null : p;
             const variantes = (p.variantes ?? []).map((v) => {
                 const x = b.find((y) => y.variante === v.nombre);
                 return x ? { ...v, precio: Number(x.precio) } : null;
             }).filter(Boolean);
-            return variantes.length ? { ...p, variantes } : null;
+            const existencias = b.find((y) => y.existencias !== null && y.existencias !== undefined)?.existencias;
+            return variantes.length ? { ...p, variantes, ...(existencias !== undefined ? { existencias: Number(existencias) } : {}) } : null;
         }).filter(Boolean);
     };
     const preciosVivos = () => { try { return $('Precios vivos').all().map((i) => i.json).filter((x) => x && x.producto_id); } catch { return []; } };
@@ -642,7 +645,7 @@ function armarContexto() {
         alquiler: /alquil|rentar|renta|prestamo de equipo|portatil|computador/,
     };
     const TITULOS = { streaming: 'STREAMING', licencias: 'LICENCIAS Y APPS', pines: 'PINES Y TARJETAS', recargas: 'RECARGAS', servicios: 'SERVICIOS TÉCNICOS (a cotizar = lo coordina una persona)', alquiler: 'ALQUILER DE EQUIPOS' };
-    const lineaProducto = (p) => `- ${p.nombre}: ${(p.variantes ?? []).map((v) => `${v.nombre} ${Number(v.precio) > 0 ? cop(v.precio) : 'a cotizar'}`).join('; ')}`;
+    const lineaProducto = (p) => `- ${p.nombre}: ${(p.variantes ?? []).map((v) => `${v.nombre} ${Number(v.precio) > 0 ? cop(v.precio) : 'a cotizar'}`).join('; ')}${Number(p.existencias) > 0 && Number(p.existencias) <= 5 ? ` (quedan ${p.existencias} unidades: no ofrezcas más de esas)` : ''}`;
     const bloquesCatalogo = Object.keys(TITULOS).flatMap((tipo) => {
         const items = catalogoTodo.filter((p) => p.tipo === tipo);
         if (!items.length) return [];
@@ -2262,11 +2265,12 @@ async function consultarRastreos() {
 
 /* ---------- H3) Renovaciones (WO-044): avisa 3 días antes de que venza el plan ----------
    Duración: "N días" en la variante, "N mes(es)" × 30, "año" × 365; streaming sin duración = 30 días. Solo cuentas
-   de streaming y licencias/apps con duración. Horario: lunes a sábado, 9 a. m. a 7 p. m. (Colombia). */
+   de streaming y licencias/apps con duración. Horario (Ley 2300 de 2023): lun–vie 9 a. m.–7 p. m., sábado 9 a. m.–3 p. m. */
 function renovaciones() {
     const ahora = Date.now();
     const local = new Date(new Date(ahora).toLocaleString('en-US', { timeZone: 'America/Bogota' }));
-    if (local.getDay() === 0 || local.getHours() < 9 || local.getHours() >= 19) return [];
+    // Ley 2300 de 2023: mensajes comerciales lun–vie hasta las 7 p. m. y sábados hasta las 3 p. m.; domingos no (festivos: la cola, wo-048)
+    if (local.getDay() === 0 || local.getHours() < 9 || local.getHours() >= (local.getDay() === 6 ? 15 : 19)) return [];
     const filas = $input.all().map((i) => i.json).filter((x) => x && x.referencia && x.entregado_at);
     const cat = __KB__.catalogo ?? [];
     const salida = [];
@@ -2432,13 +2436,18 @@ async function leerPreciosAnc() {
     const plano = (x) => normalizar(x).replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim();
     const sinDias = (x) => plano(x).replace(/\b\d+ dias?\b/g, '').replace(/\s+/g, ' ').trim();
     const items = [];
+    // Duración: si ANC cambia los días del plan (p. ej. 26 → 30) se te avisa; el nombre que ve el cliente lo cambias tú
+    const dias = (x) => { const d = /\b(\d+)\s*d[ií]as?\b/i.exec(String(x ?? '')); return d ? Number(d[1]) : null; };
+    const duraciones = [];
     for (const m of __ANC_MAPA__) {
         const p = productos.find((x) => plano(x.nombre) === plano(m.anc_producto));
         const v = p?.variantes.find((x) => plano(x.nombre) === plano(m.anc_plan)) ?? p?.variantes.find((x) => sinDias(x.nombre) === sinDias(m.anc_plan));
         if (!v?.precio) continue;
+        const nuestros = dias(m.variante), suyos = dias(v.nombre);
+        if (nuestros && suyos && nuestros !== suyos) duraciones.push({ producto_id: m.id, variante: m.variante, nuestros, suyos, plan: v.nombre });
         items.push({ producto_id: m.id, variante: m.variante, costo: v.precio, precio: Math.round((v.precio * (1 + margen / 100)) / 100) * 100, plan: `${m.anc_producto} · ${m.anc_plan}` });
     }
-    return [{ json: { items, leidos: productos.length } }];
+    return [{ json: { items, leidos: productos.length, duraciones } }];
 }
 function resultadoPreciosAnc() {
     const cfg = $('Config bot').first().json;
@@ -2456,12 +2465,19 @@ function resultadoPreciosAnc() {
         return [{ json: { numero: admin, texto: `⚠️ *Precios de ANC*\n${causa}\nLos precios quedan como estaban; reintento en 6 horas.` } }];
     }
     const cambios = (r.cambios ?? []);
-    if (!cambios.length || !admin) return [];
+    // Duración distinta a la que anuncias (una vez al día por plan): el cliente debe recibir lo que dice el nombre
+    memoria.avisoDuracion = memoria.avisoDuracion || {};
+    const duraciones = (lectura.duraciones ?? []).filter((d) => ahora - (memoria.avisoDuracion[d.producto_id + d.variante] || 0) > 24 * 3600e3);
+    duraciones.forEach((d) => { memoria.avisoDuracion[d.producto_id + d.variante] = ahora; });
+    const avisoDias = duraciones.length ? ['', '📅 *La duración cambió en ANC*', ...duraciones.map((d) => `• ${d.producto_id} · ${d.variante}: tú anuncias *${d.nuestros} días* y ANC ahora entrega *${d.suyos} días* («${d.plan}»).`),
+        'Actualiza el nombre del plan (productos.json, equivalencias y la base) para que el cliente reciba lo que promete.'] : [];
+    if ((!cambios.length && !avisoDias.length) || !admin) return [];
     const nombre = (c) => `${c.producto_id} · ${c.variante}`;
-    return [{ json: { numero: admin, texto: ['💲 *Precios sincronizados con ANC*',
+    return [{ json: { numero: admin, texto: [...(cambios.length ? ['💲 *Precios sincronizados con ANC*'] : []),
         ...cambios.filter((c) => c.aplicado).map((c) => `• ${nombre(c)}: ${cop(c.antes)} → *${cop(c.ahora)}*`),
         ...cambios.filter((c) => !c.aplicado).map((c) => `• ⚠️ ${nombre(c)}: ANC muestra ${cop(c.ahora)} (antes ${cop(c.antes)}). NO lo apliqué: revísalo en el panel.`),
-    ].join('\n') } }];
+        ...avisoDias,
+    ].join('\n').trim() } }];
 }
 
 /* ---------- G) Salud del sistema cada 30 min: te avisa solo cuando algo CAMBIA (cae o vuelve) ----------

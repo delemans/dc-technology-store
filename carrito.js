@@ -57,6 +57,11 @@
         });
     }
     function agregar(p, variante, { combo = null, silencioso = false } = {}) {
+        const quedan = Number(p?.existencias);
+        if (Number.isFinite(quedan) && p.existencias !== null && lineas.filter((l) => l.id === p.id).length >= quedan) {
+            mostrarToast(quedan > 0 ? `Solo quedan ${quedan} de ${p.nombre}.` : `${p.nombre} se agotó.`, 'info', 3500);
+            return;
+        }
         lineas.push({ uid: crypto.randomUUID(), id: p.id, nombre: p.nombre, variante: variante?.nombre ?? '', precio: Number(variante?.precio) || 0, imagen: p.imagen, tipo: p.tipo, combo });
         guardar();
         if (!silencioso) mostrarToast(`${p.nombre} agregado al carrito`, 'ok', 2500);

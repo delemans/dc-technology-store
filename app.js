@@ -16,6 +16,8 @@ const CUPON_PROMO = 'DCTECH2026';
 const UMBRAL_PRUEBA_SOCIAL = 10;  // ventas completadas necesarias para mostrar cifras
 const GARANTIA_DIAS = 30;
 const CANTIDAD_MAXIMA = 10;
+// Tope por producto: lo que le queda al proveedor (Emprende Red) o 10
+const maxCantidad = (p) => (Number.isFinite(Number(p?.existencias)) && p.existencias !== null ? Math.max(1, Math.min(CANTIDAD_MAXIMA, Number(p.existencias))) : CANTIDAD_MAXIMA);
 
 // Tri-módulo: qué tipos de productos.json van en cada pestaña
 const MODULOS = {
@@ -254,6 +256,8 @@ const esCotizable = (prod) => prod.tipo === 'servicios' || prod.tipo === 'alquil
 function insignias(prod) {
     const lista = [];
     const variantes = (prod.variantes || []).map((v) => (v.nombre || '').toLowerCase()).join(' ');
+    // Pocas unidades del proveedor: se avisa primero (es lo que más ayuda a decidir)
+    if (Number(prod.existencias) > 0 && Number(prod.existencias) <= 5) lista.push({ icono: 'fa-box-open', texto: Number(prod.existencias) === 1 ? '¡Queda 1!' : `Quedan ${prod.existencias}`, clase: 'text-amber-300 ring-amber-500/30 bg-amber-500/10' });
     // Pin en stock propio: sale apenas se confirma el pago
     if (prod.tipo === 'pines' && estado.conStock?.has(prod.id)) lista.push({ icono: 'fa-bolt', texto: 'Entrega inmediata', clase: 'text-emerald-300 ring-emerald-500/30 bg-emerald-500/10' });
     else if (moduloDe(prod.tipo) === 'digitales') lista.push({ icono: 'fa-bolt', texto: 'Entrega ≤ 15 min', clase: 'text-amber-300 ring-amber-500/30 bg-amber-500/10' });
@@ -319,15 +323,20 @@ async function aplicarPreciosBase(productos) {
     if (!Array.isArray(data) || !data.length) return productos.filter((p) => !p.oculto);
     const porProducto = new Map();
     data.forEach((x) => porProducto.set(x.producto_id, [...(porProducto.get(x.producto_id) ?? []), x]));
+    // Base con wo-047 = trae la columna existencias y ya filtra por categorías visibles; sin eso, lo oculto nunca se muestra
+    const conCategorias = Object.prototype.hasOwnProperty.call(data[0] ?? {}, 'existencias');
     return productos.map((p) => {
         const base = porProducto.get(p.id);
+        if (p.oculto && !conCategorias) return null;
         // Productos del proveedor (sincronizado): sin precio activo en la base = agotados o sin confirmar → no se muestran
         if (!base) return p.sincronizado ? null : p;
         const variantes = (p.variantes ?? []).map((v) => {
             const b = base.find((x) => x.variante === v.nombre);
             return b ? { ...v, precio: Number(b.precio), precio_anterior: b.precio_anterior === null ? null : Number(b.precio_anterior) } : null;
         }).filter(Boolean);
-        return variantes.length ? { ...p, variantes } : null;
+        // Existencias del proveedor (wo-047): las de la base mandan sobre las del archivo
+        const existencias = base.find((x) => x.existencias !== null && x.existencias !== undefined)?.existencias;
+        return variantes.length ? { ...p, variantes, ...(existencias !== undefined ? { existencias: Number(existencias) } : {}) } : null;
     }).filter(Boolean);
 }
 
@@ -841,7 +850,9 @@ function actualizarTotal() {
     const t = totales();
     $('cantidad').textContent = cantidad;
     $('cantidad-menos').disabled = cantidad <= 1;
-    $('cantidad-mas').disabled = cantidad >= CANTIDAD_MAXIMA || esCotizable(producto);
+    $('cantidad-mas').disabled = cantidad >= maxCantidad(producto) || esCotizable(producto);
+    const disp = $('cantidad-disponibles');
+    if (disp) { const n = Number(producto?.existencias); disp.hidden = !(n > 0 && n <= 20); disp.textContent = n === 1 ? 'Última unidad disponible' : `${n} disponibles`; }
 
     const cotizable = esCotizable(producto);
     $('modal-price').innerHTML = t.unitario === 0 ? 'A cotizar'
@@ -861,7 +872,7 @@ function actualizarTotal() {
 
 function cambiarCantidad(delta) {
     const s = estado.seleccion;
-    s.cantidad = Math.min(CANTIDAD_MAXIMA, Math.max(1, s.cantidad + delta));
+    s.cantidad = Math.min(maxCantidad(s.producto), Math.max(1, s.cantidad + delta));
     actualizarTotal();
 }
 

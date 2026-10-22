@@ -300,6 +300,7 @@ export function productosTienda(datos) {
             imagen: p.imagenes[0],
             descripcion: p.descripcion_dc ?? (limpiarHtml(p.descripcion) || (p.descripcion_corta ? `<p>${p.descripcion_corta}</p>` : '')),
             variantes: [{ nombre: 'Unidad', precio: precioVenta(p.costo), precio_anterior: null }],
+            existencias: p.stock, // unidades que le quedan al proveedor (la base las actualiza cada 6 h)
             sincronizado: true,
             _proveedor: { id: p.id, ref: p.referencia, costo: p.costo, stock: p.stock, categoria: p.categoria },
         }));

@@ -2,7 +2,8 @@
 -- WO-047 · Emprende Red (emprendered.com.co): categorías que TÚ eliges mostrar + rastreo de envíos en tu sitio
 --   1. catalogo_precios.categoria_proveedor: la categoría de cada producto del proveedor (TECNOLOGIA, HOGAR…).
 --   2. proveedor_categorias: qué categorías se muestran (por defecto solo TECNOLOGIA). Lo cambias en el panel admin.
---   3. precios_publicos(): la tienda y el bot solo ven productos de categorías visibles (los demás quedan ocultos).
+--   3. precios_publicos(): la tienda y el bot solo ven productos de categorías visibles (los demás quedan ocultos) y
+--      reciben las EXISTENCIAS del proveedor (unidades que le quedan) para avisar "Quedan N" y no vender de más.
 --   4. sincronizar_proveedor(): además guarda la categoría (n8n la usa cada 6 h con la credencial de servidor).
 --   5. Rastreo: guía de la transportadora por pedido (#guia DC-X 123456 desde tu WhatsApp), n8n la consulta en
 --      el proveedor, guarda estado e historial, y avisa al cliente cuando cambia. El cliente lo ve en Mis pedidos
@@ -63,13 +64,14 @@ revoke all on function public.categoria_visible(text, text) from public, anon, a
 -- 3) Precios públicos: solo categorías visibles del proveedor (lo propio y lo de ANC no cambia) -------------
 drop function if exists public.precios_publicos();
 create function public.precios_publicos()
-returns table (producto_id text, variante text, precio bigint, precio_anterior bigint)
+returns table (producto_id text, variante text, precio bigint, precio_anterior bigint, existencias integer)
 language sql
 stable
 security definer
 set search_path = ''
 as $$
-    select c.producto_id, c.variante, c.precio, c.precio_anterior
+    select c.producto_id, c.variante, c.precio, c.precio_anterior,
+           case when c.proveedor = 'emprendered' then c.stock_proveedor end
     from public.catalogo_precios c
     where c.activo
       and (c.proveedor is distinct from 'emprendered' or public.categoria_visible(c.proveedor, c.categoria_proveedor));

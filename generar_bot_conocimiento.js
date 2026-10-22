@@ -39,6 +39,7 @@ const catalogo = productos.map((p) => ({
     // Producto de proveedor (Emprende Red): sin precio activo en la base = agotado → el bot no lo ofrece
     ...(p.sincronizado ? { sincronizado: true } : {}),
     ...(p.oculto ? { oculto: true } : {}),
+    ...(Number.isFinite(p.existencias) ? { existencias: p.existencias } : {}),
     desde: Math.min(...(p.variantes ?? []).map((v) => v.precio).filter(Number.isFinite)),
     descripcion: p.oculto ? null : textoPlano(p.descripcion).slice(0, 600) || null, // liviano: los ocultos solo llevan nombre y precio
 }));
@@ -114,7 +115,7 @@ const reglasNegocio = [
     'El cupón DCTECH2026 NO se acumula con el descuento por combo: solo aplica a los productos que van fuera del combo.',
     'Tú nunca escribes cuentas, contraseñas, perfiles, PIN ni seriales: el sistema los envía por este chat después de validar el pago (y quedan en Mis pedidos).',
     'Nunca pidas contraseñas, códigos de verificación ni datos bancarios completos al cliente.',
-    'Duración: di la que trae el nombre de la variante (ej. "Pantalla Colombia 26 días" son 26 días, no "un mes"). No prometas renovaciones, perfiles ni dispositivos que el nombre no diga.',
+    'Duración: di la que trae el nombre de la variante (ej. "Pantalla Colombia 30 días" son 30 días, no "un mes"). No prometas renovaciones, perfiles ni dispositivos que el nombre no diga.',
     'Si te preguntan algo que no está escrito aquí (diferencias técnicas entre planes, región, compatibilidad, calidad, dispositivos), no lo supongas ni lo deduzcas del nombre: di solo lo que dice el nombre y ofrece confirmarlo con un asesor.',
     'Nunca inventes urgencia ni escasez ("últimas unidades", "solo hoy") ni opiniones de otros clientes: solo promociones activas y datos del catálogo.',
     'TECNOLOGÍA (relojes, audífonos, diademas, powerbank), SERVICIOS TÉCNICOS y ALQUILER: da precio y detalles del catálogo; cuando el cliente quiera comprarlo o agendarlo, responde "[ESCALAR] Pedido de <producto>": el envío o la visita los coordina una persona.',
