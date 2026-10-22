@@ -5,7 +5,7 @@
   "scripts": {
     "css": "tailwindcss -c tailwind.config.js -i estilos/entrada.css -o estilos/tailwind.css --minify",
     "css:vigilar": "tailwindcss -c tailwind.config.js -i estilos/entrada.css -o estilos/tailwind.css --watch",
-    "seo": "node herramientas/generar_seo.js",
+    "seo": "node herramientas/generar_seo.js && node herramientas/generar_feed_google.js",
     "compilar": "npm run css && npm run seo"
   },
   "devDependencies": {
