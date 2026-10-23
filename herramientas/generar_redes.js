@@ -14,7 +14,7 @@ const plan = JSON.parse(fs.readFileSync(path.join(RAIZ, 'herramientas', 'estados
 const ESCRITORIO = 'C:/Users/dise12/Desktop/Anuncios DC Tecnology';
 
 const TITULOS = {
-    'ing-antivirus': '¿Por qué tener antivirus? El Ingeniero DC te explica 🛡️',
+    'ing-antivirus': '¿Por qué tener antivirus? Te lo explicamos 🛡️',
     'ing-franquicias': '¿Qué ves en Disney Plus, HBO Max, Netflix y Prime Video? 🎬',
     'ing-mantenimiento': '¿Tu PC suena como un avión? Es el polvo 🧹',
     'ing-combos': 'Combos de streaming: 10 % con 2 y 15 % con 3 o más 🧩',

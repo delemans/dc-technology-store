@@ -185,7 +185,7 @@
   },
   {
    "archivo": "ing-antivirus",
-   "texto": "🛡️ El Ingeniero DC te explica por qué tener antivirus: los virus entran por correos, enlaces y memorias USB. McAfee original por 1 año, con garantía de 30 días."
+   "texto": "🛡️ Por qué tener antivirus: los virus entran por correos, enlaces y memorias USB. McAfee original por 1 año, con garantía de 30 días."
   },
   {
    "archivo": "ing-franquicias",
@@ -193,7 +193,7 @@
   },
   {
    "archivo": "ing-mantenimiento",
-   "texto": "🧹 ¿Tu computador suena como un avión? Es el polvo. El Ingeniero DC te cuenta cada cuánto hacer mantenimiento. Valor final tras el diagnóstico."
+   "texto": "🧹 ¿Tu computador suena como un avión? Es el polvo. Te contamos cada cuánto hacer mantenimiento. Valor final tras el diagnóstico."
   },
   {
    "archivo": "ing-combos",
@@ -226,7 +226,7 @@
   },
   {
    "id": "ingeniero",
-   "nombre": "Consejos del Ingeniero DC",
+   "nombre": "Consejos DC",
    "videos": [
     "ing-antivirus",
     "ing-franquicias",
@@ -236,7 +236,7 @@
     "ing-innovador",
     "tip-pantalla-vs-cuenta"
    ],
-   "promo": "👨‍🔧 Semana del Ingeniero DC\nConsejos reales para tu tecnología: antivirus, mantenimiento, Windows 11 y qué ver en cada plataforma.\nPregúntale al Ingeniero DC en la tienda.\n🛒 www.dctecnology.xyz"
+   "promo": "🛠️ Semana de consejos DC\nConsejos reales para tu tecnología: antivirus, mantenimiento, Windows 11 y qué ver en cada plataforma.\nPregúntanos por WhatsApp o en la tienda.\n🛒 www.dctecnology.xyz"
   },
   {
    "id": "entretenimiento",

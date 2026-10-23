@@ -42,10 +42,3 @@
     tarjetas();
     new MutationObserver(tarjetas).observe(document.querySelector('main') ?? document.body, { childList: true, subtree: true });
 })();
-
-// Burbuja del Ingeniero DC en la portada: abre el copiloto
-document.addEventListener('click', (ev) => {
-    if (!ev.target.closest('[data-abrir-copiloto]')) return;
-    const boton = document.getElementById('copiloto-abrir');
-    if (boton && boton.getAttribute('aria-expanded') !== 'true') boton.click();
-});

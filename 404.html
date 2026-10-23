@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es-CO">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Página no encontrada | DC Tecnology</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0B0F19">
+<link rel="icon" href="https://dctecnology.xyz/img/logo-dc-192.png">
+<style>
+:root{--f:#0D1015;--c:#151920;--t:#F3F4F6;--m:#A3A9B3;--r:#E03445;--b:rgba(255,255,255,.1)}
+@media (prefers-color-scheme:light){:root{--f:#F6F7F9;--c:#FFFFFF;--t:#0F111A;--m:#4B5260;--r:#C8102E;--b:rgba(15,17,26,.12)}}
+*{box-sizing:border-box}html,body{height:100%}
+body{margin:0;display:grid;place-items:center;padding:24px 16px;background:var(--f);color:var(--t);font:16px/1.6 Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+main{width:100%;max-width:560px;display:grid;gap:22px;text-align:center}
+.marca{display:inline-flex;align-items:center;justify-content:center;gap:10px;font-weight:800;letter-spacing:.04em;color:var(--t);text-decoration:none}
+.marca img{width:44px;height:44px;border-radius:10px}.marca b{color:var(--r)}
+.codigo{font:800 clamp(64px,18vw,120px)/1 Inter,system-ui,sans-serif;letter-spacing:-.04em;color:var(--r)}
+h1{margin:0;font-size:clamp(22px,5vw,30px);line-height:1.25;text-wrap:balance}
+p{margin:0;color:var(--m)}
+form{display:flex;gap:8px}
+input{flex:1;min-width:0;min-height:50px;padding:0 16px;border-radius:14px;border:0;background:var(--c);color:var(--t);font:inherit;box-shadow:inset 0 0 0 1px var(--b)}
+input:focus{outline:2px solid var(--r);outline-offset:1px}
+button,.btn{min-height:50px;padding:0 20px;border-radius:14px;border:0;background:var(--r);color:#fff;font:700 15px/50px Inter,system-ui,sans-serif;text-decoration:none;cursor:pointer}
+.enlaces{display:flex;flex-wrap:wrap;justify-content:center;gap:10px}
+.enlaces a{padding:10px 16px;border-radius:999px;color:var(--t);text-decoration:none;font-size:14px;font-weight:600;box-shadow:inset 0 0 0 1px var(--b)}
+.enlaces a:hover,.enlaces a:focus-visible{box-shadow:inset 0 0 0 2px var(--r);outline:none}
+</style>
+</head>
+<body>
+<main>
+  <a class="marca" href="https://dctecnology.xyz/"><img src="https://dctecnology.xyz/img/logo-dc-192.png" alt="" width="44" height="44">DC <b>TECNOLOGY</b></a>
+  <div class="codigo" aria-hidden="true">404</div>
+  <h1>Esta página no existe o cambió de dirección</h1>
+  <p>Busca el producto que necesitas o vuelve a la tienda.</p>
+  <form action="https://dctecnology.xyz/" method="get" role="search">
+    <label for="buscar" style="position:absolute;left:-9999px">Buscar en la tienda</label>
+    <input id="buscar" name="buscar" type="search" placeholder="Netflix, Windows, audífonos…" maxlength="60" autocomplete="off">
+    <button type="submit">Buscar</button>
+  </form>
+  <div class="enlaces">
+    <a href="https://dctecnology.xyz/">Ir a la tienda</a>
+    <a href="https://dctecnology.xyz/?buscar=streaming">Streaming</a>
+    <a href="https://dctecnology.xyz/?buscar=licencia">Licencias</a>
+    <a href="https://dctecnology.xyz/?buscar=pin">Pines</a>
+    <a href="https://wa.me/573223284622?text=Hola%20DC%20Tecnology" rel="noopener">WhatsApp 322 328 4622</a>
+  </div>
+  <p style="font-size:13px">www.dctecnology.xyz</p>
+</main>
+<script>
+// Sugerencia: lo que venía en la dirección (p. ej. /p/netflix-viejo) se pone como búsqueda
+try { const t = decodeURIComponent(location.pathname.split('/').filter(Boolean).pop() || '').replace(/\.html?$/, '').replace(/[-_]+/g, ' ').trim(); if (t && t.length < 60) document.getElementById('buscar').value = t; } catch (e) { /* dirección rara */ }
+</script>
+</body>
+</html>

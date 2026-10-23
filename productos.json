@@ -1424,6 +1424,19 @@
     "sincronizado": true
   },
   {
+    "id": "er-lampara-mata-mosquitos-372",
+    "tipo": "variedades",
+    "categoria": "Hogar",
+    "oculto": true,
+    "marca": "DC Tecnology",
+    "nombre": "Lampara Mata Mosquitos",
+    "imagen": "https://emprendered.com.co/storage/shop/front/img/products/372-0386a933-b30f-4593-9eb3-8984c1f01cd0.webp?v=1760732536",
+    "descripcion": "<p>• <strong>Lámpara eléctrica compacta con luz UV</strong> que atrae y elimina mosquitos y otros insectos voladores.</p><p>• <strong>Funcionamiento silencioso y sin químicos</strong>, ideal para uso nocturno en dormitorios, salas u oficinas.</p><p>• <strong>Diseño moderno y portátil</strong> con <strong>entrada USB</strong> para conexión a corriente, adaptadores o power banks.</p>",
+    "variantes": [ { "nombre": "Unidad", "precio": 16400, "precio_anterior": null } ],
+    "existencias": 1,
+    "sincronizado": true
+  },
+  {
     "id": "er-payaso-ojos-saltones-377",
     "tipo": "variedades",
     "categoria": "Halloween",
@@ -6100,7 +6113,7 @@
     "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1724-drone-e99-pro-con-camara-full-hd-1.webp?v=1784667449",
     "descripcion": "RECOMENDACIONES DE USO<ul><li>Encienda primero el dron y luego el control remoto. Mueva el joystick izquierdo hacia arriba y abajo hasta escuchar un pitido.</li><li>Para usar la cámara, conecte primero el celular a la red WiFi del dron y después abra la aplicación.</li><li>No use al mismo tiempo el control remoto y el teléfono para manejar el dron.</li><li>Se recomienda que los principiantes practiquen en espacios abiertos y lean el manual antes de volar.</li><li>Cargue la batería con un puerto USB o cargador de máximo 5V/2A.</li><li>Al cambiar las hélices, instale correctamente las piezas marcadas con las letras A y B.</li><li>El dron puede desplazarse por el viento, por lo que requiere correcciones con el control remoto.</li></ul>",
     "variantes": [ { "nombre": "Unidad", "precio": 82500, "precio_anterior": null } ],
-    "existencias": 2,
+    "existencias": 4,
     "sincronizado": true
   },
   {

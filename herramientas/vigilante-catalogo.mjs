@@ -169,6 +169,13 @@ if (publicar && !PROBAR) {
     }
 }
 
+/* ---------- 4b) El sitio en vivo (páginas del sitemap, recursos, bot, Shopping y fotos) ---------- */
+{
+    const rs = spawnSync(process.execPath, [path.join(RAIZ, 'herramientas', 'revisar-sitio.mjs')], { cwd: RAIZ, encoding: 'utf8', timeout: 15 * 60e3 });
+    const fallasSitio = (rs.stdout || '').split('\n').filter((l) => l.startsWith('FALLA')).map((l) => l.replace(/^FALLA\s+/, ''));
+    if (rs.status !== 0) informe.push(`🌐 *El sitio tiene fallas*\n${(fallasSitio.length ? fallasSitio : ['la revisión no terminó']).map((l) => `• ${l}`).join('\n')}`);
+}
+
 /* ---------- 5) Informe ---------- */
 const texto = informe.length ? ['🛰️ *Vigilante del catálogo · DC Tecnology*', '', ...informe].join('\n\n') : null;
 log(texto ? texto.replace(/\n+/g, ' | ').slice(0, 900) : 'sin cambios');

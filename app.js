@@ -1242,6 +1242,18 @@ document.addEventListener('DOMContentLoaded', () => {
         renderizar();
     }));
 
+    // dctecnology.xyz/?buscar=roblox (página 404, Google y enlaces de redes): abre el Catálogo ya filtrado
+    const buscarUrl = new URLSearchParams(location.search).get('buscar');
+    if (buscarUrl && buscarUrl.trim()) {
+        const q = buscarUrl.trim().slice(0, 60);
+        $('searchInput').value = q;
+        estado.filtro.busqueda = q.toLowerCase();
+        const params = new URLSearchParams(location.search);
+        params.delete('buscar');
+        history.replaceState(history.state, '', location.pathname + (params.toString() ? `?${params}` : '') + location.hash);
+        setTimeout(() => { document.getElementById('catalogo')?.scrollIntoView(); renderizar(); }, 0);
+    }
+
     let espera;
     $('searchInput').addEventListener('input', (e) => {
         clearTimeout(espera);

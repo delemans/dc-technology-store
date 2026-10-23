@@ -67,17 +67,17 @@
         }
     }
     </script>
-    <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","@id":"https://dctecnology.xyz/#sitio","name":"DC Tecnology","url":"https://dctecnology.xyz/","inLanguage":"es-CO","publisher":{"@id":"https://dctecnology.xyz/#organizacion"}}</script>
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","@id":"https://dctecnology.xyz/#sitio","name":"DC Tecnology","url":"https://dctecnology.xyz/","inLanguage":"es-CO","publisher":{"@id":"https://dctecnology.xyz/#organizacion"},"potentialAction":{"@type":"SearchAction","target":{"@type":"EntryPoint","urlTemplate":"https://dctecnology.xyz/?buscar={search_term_string}"},"query-input":"required name=search_term_string"}}</script>
 
     <!-- Estilos compilados con Tailwind (npm run css): sin CDN de desarrollo -->
-    <link rel="stylesheet" href="estilos/tailwind.css?v=202610231300">
+    <link rel="stylesheet" href="estilos/tailwind.css?v=202610231357">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" integrity="sha384-iw3OoTErCYJJB9mCa8LNS2hbsQ7M3C0EpIsO/H5+EGAkPGc6rk+V8i04oW/K5xq0" crossorigin="anonymous" referrerpolicy="no-referrer">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;700;800;900&display=swap" rel="stylesheet">
     <!-- Tema claro/oscuro (antes de pintar, sin destello) -->
-    <script src="tema.js?v=202610231300"></script>
-    <link rel="stylesheet" href="tema.css?v=202610231300">
+    <script src="tema.js?v=202610231357"></script>
+    <link rel="stylesheet" href="tema.css?v=202610231357">
     <!-- Carrito, combos y pago web: mismos estilos que el portal (carrito.js) -->
-    <link rel="stylesheet" href="estilos/cliente.css?v=202610231300">
+    <link rel="stylesheet" href="estilos/cliente.css?v=202610231357">
     <style>
         html { -webkit-tap-highlight-color: transparent; }
         [hidden] { display: none !important; }
@@ -264,10 +264,11 @@
         }
     </style>
     <!-- Estilo corporativo (va de último: recalibra colores y apaga efectos neón) -->
-    <link rel="stylesheet" href="estilos/profesional.css?v=202610231300">
-    <link rel="stylesheet" href="estilos/corriente.css?v=202610231300">
+    <link rel="stylesheet" href="estilos/profesional.css?v=202610231357">
+    <link rel="stylesheet" href="estilos/corriente.css?v=202610231357">
 </head>
 <body class="bg-dcDarkBg text-white min-h-screen flex flex-col font-sans antialiased selection:bg-dcRed/40">
+    <a href="#contenido" class="saltar">Saltar al contenido</a>
     <div class="mesh" aria-hidden="true"><span></span><span></span><span></span></div>
     <div class="bg-grid fixed inset-0 pointer-events-none" aria-hidden="true"></div>
 
@@ -318,7 +319,7 @@
         </nav>
     </header>
 
-    <main class="relative z-10 flex-grow">
+    <main id="contenido" tabindex="-1" class="relative z-10 flex-grow">
         <!-- Héroe -->
         <!-- Portada "Corriente DC" (estilos/corriente.css + efectos.js): el circuito del logo lleva la corriente hasta la marca -->
         <section id="hero" data-vista="inicio" class="hero-dc entrada" aria-labelledby="hero-titulo">
@@ -341,8 +342,8 @@
                     <!-- Prueba social: se llena con datos reales de Supabase (o un texto neutro) -->
                     <div id="prueba-social" class="hero-dc__social"><i class="fa-solid fa-heart" aria-hidden="true"></i> Únete a nuestros clientes satisfechos</div>
                 </div>
-                <div class="hero-dc__visual">
-                    <svg class="circuito" viewBox="0 0 480 420" role="presentation" aria-hidden="true">
+                <div class="hero-dc__visual" aria-hidden="true">
+                    <svg class="circuito" viewBox="0 0 480 420" role="presentation">
                         <defs>
                             <radialGradient id="halo-dc" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#E03445" stop-opacity=".35"/><stop offset="1" stop-color="#E03445" stop-opacity="0"/></radialGradient>
                         </defs>
@@ -379,9 +380,6 @@
                         <rect x="150" y="120" width="180" height="180" rx="34" class="circuito__chip"/>
                         <image href="img/logo-dc-512.png" x="168" y="138" width="144" height="144" preserveAspectRatio="xMidYMid meet" clip-path="inset(0 round 24px)"/>
                     </svg>
-                    <!-- Ingeniero DC: la mascota de la marca (img/ingeniero-dc.svg, mismo personaje de los videos) -->
-                    <img class="hero-dc__ingeniero" src="img/ingeniero-dc.svg" alt="" width="190" height="285" decoding="async">
-                    <button type="button" class="hero-dc__ayuda" data-abrir-copiloto><b>¿Te ayudo a elegir?</b><span>Soy el Ingeniero DC</span></button>
                 </div>
             </div>
         </section>
@@ -907,7 +905,7 @@
             <ul id="terminos-lista" class="space-y-2.5 text-sm text-neutral-300"></ul>
             <label class="mt-5 flex items-start gap-3 rounded-2xl bg-dcDarkBg/70 ring-1 ring-white/10 p-4 cursor-pointer">
                 <input type="checkbox" id="terminos-acepto" required class="mt-0.5 w-5 h-5 accent-[#FF0033] shrink-0">
-                <span class="text-xs text-neutral-300">Leí y acepto estas condiciones y los <a href="legal/terminos.html" target="_blank" class="underline">Términos</a>, y autorizo el tratamiento de mis datos según la <a href="legal/privacidad.html" target="_blank" class="underline">Política de datos</a>. Entiendo que incumplir las reglas anula la garantía.</span>
+                <span class="text-xs text-neutral-300">Leí y acepto estas condiciones y los <a href="legal/terminos.html" target="_blank" rel="noopener" class="underline">Términos</a>, y autorizo el tratamiento de mis datos según la <a href="legal/privacidad.html" target="_blank" rel="noopener" class="underline">Política de datos</a>. Entiendo que incumplir las reglas anula la garantía.</span>
             </label>
             <div class="grid gap-3 mt-6">
                 <button type="button" id="btn-terminos-carrito" hidden class="btn-cyber ancho min-h-[56px] rounded-2xl bg-dcRed hover:bg-dcRedDark text-xs font-black uppercase tracking-wider text-white shadow-lg shadow-red-600/30 flex items-center justify-center gap-2">
@@ -926,11 +924,11 @@
         <section id="copiloto-panel" hidden aria-label="Copiloto de compras"
             class="w-[min(24rem,calc(100vw-2rem))] h-[min(34rem,calc(100dvh-7rem))] flex flex-col rounded-3xl bg-dcDarkCard/95 backdrop-blur-xl ring-1 ring-dcRed/30 shadow-2xl shadow-black/70 overflow-hidden">
             <header class="flex items-center gap-3 px-4 py-3 border-b border-white/10 bg-dcRed/10">
-                <span class="relative grid place-items-center w-10 h-10 rounded-2xl bg-white overflow-hidden"><img src="img/ingeniero-dc-cara.svg" alt="" class="w-10 h-10">
+                <span class="relative grid place-items-center w-10 h-10 rounded-2xl bg-dcRed text-white"><i class="fa-solid fa-robot"></i>
                     <span class="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-400 ring-2 ring-dcDarkCard"></span>
                 </span>
                 <div class="flex-1 min-w-0">
-                    <p class="font-tech font-black uppercase tracking-wider text-sm">Ingeniero DC</p>
+                    <p class="font-tech font-black uppercase tracking-wider text-sm">Copiloto DC</p>
                     <p class="text-[10px] text-neutral-400">Asistente automático · te paso con un asesor cuando quieras</p>
                 </div>
                 <button type="button" id="copiloto-cerrar" aria-label="Cerrar copiloto" class="w-10 h-10 grid place-items-center rounded-xl text-neutral-400 hover:text-white hover:bg-white/5"><i class="fa-solid fa-xmark"></i></button>
@@ -946,8 +944,8 @@
         <div class="flex items-center gap-2">
             <p id="copiloto-burbuja" hidden class="max-w-[14rem] rounded-2xl rounded-br-md bg-dcDarkCard/95 ring-1 ring-white/10 px-4 py-2.5 text-xs font-semibold text-neutral-200 shadow-xl">¿Te ayudo a elegir? 👋</p>
             <button type="button" id="copiloto-abrir" aria-label="Abrir copiloto de compras" aria-expanded="false" aria-controls="copiloto-panel"
-                class="btn-cyber w-16 h-16 grid place-items-center rounded-3xl bg-white overflow-hidden ring-2 ring-dcRed shadow-[0_0_30px_rgba(255,0,51,.55)]">
-                <img src="img/ingeniero-dc-cara.svg" alt="" class="w-16 h-16">
+                class="btn-cyber w-16 h-16 grid place-items-center rounded-3xl bg-dcRed text-white text-2xl shadow-[0_0_30px_rgba(255,0,51,.55)]">
+                <i class="fa-solid fa-robot"></i>
             </button>
         </div>
     </div>
@@ -969,21 +967,21 @@
     <div id="toasts" class="fixed z-[60] left-4 right-24 sm:right-auto bottom-[max(1rem,env(safe-area-inset-bottom))] flex flex-col items-start gap-2 pointer-events-none" aria-live="polite"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js" integrity="sha384-Rj26LVGvoeRVR6+mwQmFfcR3QOBEwT+ZmuCWpuiqeTzJpCs0ER4ITAWGb4Hiy3Ok" crossorigin="anonymous"></script>
-    <script src="vistas.js?v=202610231300"></script>
-    <script src="plantillas-whatsapp.js?v=202610231300"></script>
-    <script src="ui.js?v=202610231300"></script>
-    <script src="app.js?v=202610231300"></script>
-    <script src="tienda-carrito.js?v=202610231300"></script>
-    <script src="carrito.js?v=202610231300"></script>
-    <script src="sesion.js?v=202610231300"></script>
-    <script src="soporte.js?v=202610231300"></script>
-    <script src="pedidos-tienda.js?v=202610231300"></script>
-    <script src="efectos.js?v=202610231300"></script>
-    <script src="marcas.js?v=202610231300"></script>
-    <script src="portafolio.js?v=202610231300"></script>
-    <script src="copiloto.js?v=202610231300"></script>
-    <script src="app-instalable.js?v=202610231300"></script>
-    <script src="detalles.js?v=202610231300"></script>
+    <script src="vistas.js?v=202610231357"></script>
+    <script src="plantillas-whatsapp.js?v=202610231357"></script>
+    <script src="ui.js?v=202610231357"></script>
+    <script src="app.js?v=202610231357"></script>
+    <script src="tienda-carrito.js?v=202610231357"></script>
+    <script src="carrito.js?v=202610231357"></script>
+    <script src="sesion.js?v=202610231357"></script>
+    <script src="soporte.js?v=202610231357"></script>
+    <script src="pedidos-tienda.js?v=202610231357"></script>
+    <script src="efectos.js?v=202610231357"></script>
+    <script src="marcas.js?v=202610231357"></script>
+    <script src="portafolio.js?v=202610231357"></script>
+    <script src="copiloto.js?v=202610231357"></script>
+    <script src="app-instalable.js?v=202610231357"></script>
+    <script src="detalles.js?v=202610231357"></script>
 
 </body>
 </html>

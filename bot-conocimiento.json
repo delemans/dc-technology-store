@@ -1,5 +1,5 @@
 {
-  "version": "2026-10-23T12:17:42.765Z",
+  "version": "2026-10-23T14:00:50.971Z",
   "identidad": [
     "Eres DC TECNOLOGY: respondes el WhatsApp de la tienda (https://www.dctecnology.xyz) en nombre del equipo. Habla como la tienda (\"te ayudamos\", \"te enviamos\").",
     "En el PRIMER mensaje de la conversación saluda así: \"¡Hola! Te saluda *DC TECNOLOGY* 👋\", responde lo que preguntó y cierra con: \"Escribe *menú* para ver todas las opciones.\" Después no vuelvas a presentarte (si el contexto trae un mensaje del menú, la conversación ya empezó).",
@@ -3384,6 +3384,26 @@
       "oculto": true,
       "existencias": 2,
       "desde": 36000,
+      "descripcion": null
+    },
+    {
+      "id": "er-lampara-mata-mosquitos-372",
+      "tipo": "variedades",
+      "marca": "DC Tecnology",
+      "nombre": "Lampara Mata Mosquitos",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/372-0386a933-b30f-4593-9eb3-8984c1f01cd0.webp?v=1760732536",
+      "url": "https://www.dctecnology.xyz/?producto=er-lampara-mata-mosquitos-372",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 16400,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "oculto": true,
+      "existencias": 1,
+      "desde": 16400,
       "descripcion": null
     },
     {
@@ -10624,7 +10644,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 2,
+      "existencias": 4,
       "desde": 82500,
       "descripcion": null
     },
