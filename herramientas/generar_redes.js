@@ -14,6 +14,12 @@ const plan = JSON.parse(fs.readFileSync(path.join(RAIZ, 'herramientas', 'estados
 const ESCRITORIO = 'C:/Users/dise12/Desktop/Anuncios DC Tecnology';
 
 const TITULOS = {
+    'ing-antivirus': '¿Por qué tener antivirus? El Ingeniero DC te explica 🛡️',
+    'ing-franquicias': '¿Qué ves en Disney Plus, HBO Max, Netflix y Prime Video? 🎬',
+    'ing-mantenimiento': '¿Tu PC suena como un avión? Es el polvo 🧹',
+    'ing-combos': 'Combos de streaming: 10 % con 2 y 15 % con 3 o más 🧩',
+    'ing-windows11': 'Windows 10 ya no tiene parches de seguridad: pásate a Windows 11 🪟',
+    'ing-innovador': 'Tu catálogo web con asistente de IA que toma pedidos 🤖',
     'bienvenida': 'Somos DC Tecnology 🇨🇴 | Streaming, licencias y tecnología',
     'streaming-desde': 'Streaming desde $8.000 en Colombia 📺',
     'compra-3-toques': 'Así compras tu plataforma en 3 toques ⚡',

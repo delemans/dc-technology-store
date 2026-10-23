@@ -182,6 +182,30 @@
   {
    "archivo": "catalogo-tu-negocio",
    "texto": "🏪 Ropa, comida, accesorios o servicios: tu catálogo virtual con tu marca, buscador, pedido por WhatsApp y bot opcional."
+  },
+  {
+   "archivo": "ing-antivirus",
+   "texto": "🛡️ El Ingeniero DC te explica por qué tener antivirus: los virus entran por correos, enlaces y memorias USB. McAfee original por 1 año, con garantía de 30 días."
+  },
+  {
+   "archivo": "ing-franquicias",
+   "texto": "🎬 ¿Qué ves en cada plataforma? Disney Plus: Marvel, Star Wars y Pixar. HBO Max: series de HBO y películas de DC. Netflix y Prime Video con sus series originales. El catálogo puede variar según el país."
+  },
+  {
+   "archivo": "ing-mantenimiento",
+   "texto": "🧹 ¿Tu computador suena como un avión? Es el polvo. El Ingeniero DC te cuenta cada cuánto hacer mantenimiento. Valor final tras el diagnóstico."
+  },
+  {
+   "archivo": "ing-combos",
+   "texto": "🧩 Arma tu combo de plataformas: 2 distintas con 10 % y 3 o más con 15 % de descuento. Garantía de 30 días."
+  },
+  {
+   "archivo": "ing-windows11",
+   "texto": "🪟 Windows 10 ya no recibe actualizaciones de seguridad gratuitas desde octubre de 2025. Revisamos si tu equipo es compatible con Windows 11 y te lo dejamos con licencia original."
+  },
+  {
+   "archivo": "ing-innovador",
+   "texto": "🤖 Catálogo web con tus productos y un asistente con IA que responde y toma pedidos. Tú confirmas el pago y entregas. Lo hacemos a la medida de tu negocio."
   }
  ],
  "inicio_campanas": "2026-10-19",
@@ -199,6 +223,20 @@
     "satira-catalogo"
    ],
    "promo": "🛍️ Semana del catálogo virtual\nDeja de llenar tus estados de fotos: un catálogo con tu marca, precios, carrito y pedido por WhatsApp (con bot opcional).\nCotiza sin compromiso: 💬 322 328 4622"
+  },
+  {
+   "id": "ingeniero",
+   "nombre": "Consejos del Ingeniero DC",
+   "videos": [
+    "ing-antivirus",
+    "ing-franquicias",
+    "ing-mantenimiento",
+    "ing-combos",
+    "ing-windows11",
+    "ing-innovador",
+    "tip-pantalla-vs-cuenta"
+   ],
+   "promo": "👨‍🔧 Semana del Ingeniero DC\nConsejos reales para tu tecnología: antivirus, mantenimiento, Windows 11 y qué ver en cada plataforma.\nPregúntale al Ingeniero DC en la tienda.\n🛒 www.dctecnology.xyz"
   },
   {
    "id": "entretenimiento",
