@@ -6,7 +6,7 @@
     const esc = (v) => String(v ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
     const cop = (n) => (Number(n) > 0 ? new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(n) : '—');
     const ACENTOS = { RELOJERIA: 'Relojería', JOYERIA: 'Joyería', PAPELERIA: 'Papelería', PERFUMERIA: 'Perfumería', FERRETERIA: 'Ferretería', CACHARRERIA: 'Cacharrería', BARBERIA: 'Barbería', DULCERIA: 'Dulcería', TECNOLOGIA: 'Tecnología' };
-    const nombre = (c) => String(c ?? '').split(/\s+/).map((w, i) => { const a = ACENTOS[w] ?? w.charAt(0) + w.slice(1).toLowerCase(); return i ? a.toLowerCase() : a; }).join(' ');
+    const nombre = (c) => c === 'GENERAL' ? 'Otros (sin categoría del proveedor)' : String(c ?? '').split(/\s+/).map((w, i) => { const a = ACENTOS[w] ?? w.charAt(0) + w.slice(1).toLowerCase(); return i ? a.toLowerCase() : a; }).join(' ');
 
     async function cargar(sb, caja) {
         caja.innerHTML = '<p class="prov-nota">Cargando categorías del proveedor…</p>';

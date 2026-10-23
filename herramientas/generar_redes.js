@@ -14,6 +14,13 @@ const plan = JSON.parse(fs.readFileSync(path.join(RAIZ, 'herramientas', 'estados
 const ESCRITORIO = 'C:/Users/dise12/Desktop/Anuncios DC Tecnology';
 
 const TITULOS = {
+    'srv-mantenimiento': 'Mantenimiento de computadores en Colombia 🛠️',
+    'srv-instalacion': 'Windows, Office y software instalados 💻',
+    'srv-reparacion': 'Reparación de computadores y repuestos 🔧',
+    'srv-alquiler': 'Alquiler de portátiles por meses 🏢',
+    'srv-asesoria': 'Asesoría técnica personalizada 🎓',
+    'srv-catalogo-web': 'Tu catálogo web con asistente de IA 🛍️',
+    'srv-automatizaciones': 'Tableros, inventarios y sistemas para tu negocio 📊',
     'ing-antivirus': '¿Por qué tener antivirus? Te lo explicamos 🛡️',
     'ing-franquicias': '¿Qué ves en Disney Plus, HBO Max, Netflix y Prime Video? 🎬',
     'ing-mantenimiento': '¿Tu PC suena como un avión? Es el polvo 🧹',

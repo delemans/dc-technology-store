@@ -201,5 +201,71 @@
       "PIN de $159.900": "1 Año - 5 Dispositivos",
       "PIN de $189.900": "1 Año - 10 Dispositivos"
     }
+  },
+  "reloj-inteligente-smartwatch-d16-con-auriculares-inalambricos-incorporados": {
+    "proveedor": "Reloj Inteligente Smartwatch D16 con Auriculares Inalámbricos incorporados",
+    "variantes": {
+      "Unidad Completa": ""
+    }
+  },
+  "diademas-gamer-a3s-alambrico": {
+    "proveedor": "Diademas Gamer A3S Alámbrico",
+    "variantes": {
+      "Unidad Gamer": ""
+    }
+  },
+  "reloj-inteligente-smartwatch-gt5-pro-en-acero-inoxidable": {
+    "proveedor": "Reloj Inteligente Smartwatch GT5 Pro En Acero Inoxidable",
+    "variantes": {
+      "Acero Inoxidable": ""
+    }
+  },
+  "powerbank-portatil-recargable-20-000-mah": {
+    "proveedor": "Powerbank Portátil Recargable 20.000 mah",
+    "variantes": {
+      "Carga Rápida 20.000 mAh": ""
+    }
+  },
+  "auriculares-inalambricos-de-gancho-sp16": {
+    "proveedor": "Auriculares Inalámbricos de Gancho SP16",
+    "variantes": {
+      "Unidad Estándar": ""
+    }
+  },
+  "auriculares-inalambricos-m19-con-powerbank": {
+    "proveedor": "Auriculares Inalámbricos M19 (Con Powerbank)",
+    "variantes": {
+      "Powerbank M19": ""
+    }
+  },
+  "reloj-inteligente-smartwatch-h19": {
+    "proveedor": "Reloj Inteligente Smartwatch H19 en Acero Inoxidable",
+    "variantes": {
+      "Acero Inoxidable": ""
+    }
+  },
+  "auriculares-inalambricos-m25-con-powerbank": {
+    "proveedor": "Auriculares Inalámbricos M25 (Con Powerbank)",
+    "variantes": {
+      "Gamer M25": ""
+    }
+  },
+  "reloj-inteligente-smartwatch-z90": {
+    "proveedor": "Reloj Inteligente Smartwatch Z90",
+    "variantes": {
+      "Deportivo Z90": ""
+    }
+  },
+  "reloj-inteligente-smartwatch-p13-de-lujo-en-acero-inoxidable": {
+    "proveedor": "Reloj Inteligente Smartwatch P13 de Lujo en Acero Inoxidable",
+    "variantes": {
+      "Acero de Lujo P13": ""
+    }
+  },
+  "reloj-inteligente-smartwatch-m9": {
+    "proveedor": "Reloj Inteligente Smartwatch M9",
+    "variantes": {
+      "Edición M9": ""
+    }
   }
 }

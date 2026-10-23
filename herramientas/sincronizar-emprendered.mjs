@@ -64,7 +64,7 @@ export function normalizar(p, categorias) {
         nombre: String(p.name ?? '').trim(),
         slug: p.url ?? null,
         categoria_id: p.category_id ?? null,
-        categoria: categorias.get(p.category_id) ?? null,
+        categoria: categoriaDe(p.name, categorias.get(p.category_id) ?? null),
         // Costo: price_buy si el proveedor lo publica; si viene en 0 (emprendered.com.co), su precio de distribuidor
         costo: Math.round(Number(p.price_buy) || Number(p.price_sale) || 0), // vienen con centavos (39899.99)
         precio_sugerido: Math.round(Number(p.price_sale) || 0),
@@ -177,6 +177,10 @@ const fuenteIa = (p) => `Nombre: ${p.nombre}\nCategoría: ${p.categoria ?? ''}\n
 export const limpiarHtml = (html) => String(html ?? '')
     .replace(/<(script|style)[\s\S]*?<\/\1>/gi, '')
     .replace(/<\/?([a-z0-9]+)[^>]*>/gi, (m, t) => (ETIQUETAS.has(t.toLowerCase()) ? `<${m.startsWith('</') ? '/' : ''}${t.toLowerCase()}>` : ''))
+    // El cliente nunca ve al proveedor: fuera las frases que lo nombran (cupones, enlaces o contacto de Emprende Red)
+    .replace(/\S*(emprendered|catalogovirtual)\.[a-z.\/]+\S*/gi, ' EMPRENDE RED ')
+    .replace(/[^<>.!?\n]*(emprende ?red)[^<>.!?\n]*[.!?]?/gi, '')
+    .replace(/<(p|li|strong|b|em)>\s*(&nbsp;|\s)*<\/\1>/gi, '')
     .replace(/\s+/g, ' ').trim();
 
 // Cero datos inventados: cada número del texto nuevo debe existir en el del proveedor
@@ -255,20 +259,34 @@ export async function enriquecer(datos, { env = {}, limite = Infinity, concurren
      los oculta si la base no les da un precio activo, p. ej. agotados). Los demás productos no se tocan (texto intacto).
    - supabase/wo-041-emprendered.sql: crea sincronizar_proveedor() (solo service_role, la usa n8n en el paso 4) y la
      ejecuta con este catálogo: precio, costo, stock y activo (stock > 0) por producto. Nunca usa la service_role desde aquí. */
+// Categoría 1 de Emprende Red: viene sin nombre en su lista de categorías (307 productos el 23/10/2026). Lo que es
+// tecnología va a TECNOLOGIA; lo demás a GENERAL («Otros», oculto hasta que lo actives en el panel).
+export const TEC_SIN_CATEGORIA = /play ?station|\bps[45]\b|xbox|nintendo|consola|gamer|\busb\b|cargador|\bcable\b|aud[ií]fono|auricular|diadema|parlante|bafle|\bmouse\b|teclado|celular|tablet|smart ?watch|reloj inteligente|power ?bank|bater[ií]a port[aá]til|memoria|micro ?sd|disco (duro|s[oó]lido)|c[aá]mara|bluetooth|\bhdmi\b|router|proyector|tv ?box|micr[oó]fono|tr[ií]pode|aro de luz|\bdron|adaptador/i;
+// Marcas de lujo a precio de cacharrería = imitación: no se venden (riesgo de marca y de la SIC). Perfumería queda aparte (oculta)
+export const LUJO = /\b(hublot|rolex|cartier|van ?cleef|louis ?vuitton|gucci|chanel|bvlgari|bulgari|tiffany|patek|audemars|omega|tag ?heuer|pandora|prada|versace|balenciaga|dior|herm[eè]s|richard ?mille)\b/i;
+export const categoriaDe = (nombre, categoria) => categoria ?? (TEC_SIN_CATEGORIA.test(String(nombre)) ? 'TECNOLOGIA' : 'GENERAL');
+// Marca del fabricante solo si aparece en el nombre (nunca se inventa; sin marca reconocida, el campo no va)
+const MARCAS = ['Yookie', 'Xiaomi', 'Redmi', 'Samsung', 'Apple', 'JBL', 'Lenovo', 'Sony', 'Logitech', 'Genius', 'Huawei', 'Haylou', 'Amazfit', 'Kingston', 'SanDisk', 'TP-Link', 'Anker', 'Baseus',
+    'Hoco', 'Remax', 'Philips', 'Panasonic', 'Casio', 'Nintendo', 'Microsoft', 'HP', 'Dell', 'Asus', 'Acer', 'Motorola', 'Kalley', 'Xtech', 'Maxell', 'Duracell', 'Energizer', 'Ugreen', 'Soundcore', 'QCY', 'Lenyes', 'Kanji'];
+export function marcaDe(nombre) {
+    const n = String(nombre);
+    if (/play ?station|\bps[45]\b/i.test(n)) return 'Sony';
+    return MARCAS.find((m) => new RegExp(`\\b${m.replace(/[-]/g, '[- ]?')}\\b`, 'i').test(n)) ?? null;
+}
 export const CATEGORIAS_VISIBLES_POR_DEFECTO = ['TECNOLOGIA'];
 export const CATEGORIAS_IMPORTAR = null; // null = todas menos EXCLUIR_CATEGORIAS
 export const importable = (categoria) => Boolean(categoria) && !EXCLUIR_CATEGORIAS.includes(categoria) && (!CATEGORIAS_IMPORTAR || CATEGORIAS_IMPORTAR.includes(categoria));
 export const MARGEN_PCT = 50;
 // "HOGAR" → "Hogar", "RELOJERIA ORIGINAL" → "Relojería original"
 const ACENTOS = { RELOJERIA: 'Relojería', JOYERIA: 'Joyería', PAPELERIA: 'Papelería', PERFUMERIA: 'Perfumería', FERRETERIA: 'Ferretería', CACHARRERIA: 'Cacharrería', BARBERIA: 'Barbería', DULCERIA: 'Dulcería', TECNOLOGIA: 'Tecnología' };
-export const nombreCategoria = (c) => String(c ?? '').split(/\s+/).map((w, i) => { const a = ACENTOS[w] ?? w.charAt(0) + w.slice(1).toLowerCase(); return i ? a.toLowerCase() : a; }).join(' ');
+export const nombreCategoria = (c) => c === 'GENERAL' ? 'Otros' : String(c ?? '').split(/\s+/).map((w, i) => { const a = ACENTOS[w] ?? w.charAt(0) + w.slice(1).toLowerCase(); return i ? a.toLowerCase() : a; }).join(' ');
 export const REDONDEO = 100;
 export const precioVenta = (costo) => Math.ceil((Number(costo) * (1 + MARGEN_PCT / 100)) / REDONDEO) * REDONDEO;
 
 const SIGLAS = new Set(['usb', 'led', 'hd', 'tv', 'anc', 'bt', 'rgb', 'otg', 'sd', 'aux', 'ac', 'dc', 'ipx4', 'ipx5', 'ipx7', 'ip67', 'ip68', 'pd', 'qc', 'gb', 'tws', 'fm', 'lcd', 'uv', 'aaa', 'aa', 'led', 'hdmi', 'vga', 'ps5', 'ps4']);
 // "CARGADOR CON CABLE ORIGINAL YOOKIE 20W RAPIDO" → "Cargador con Cable Original Yookie 20W Rapido"
 // Réplicas declaradas en el nombre ("1.1", "réplica"…): no se importan, aunque estén en TECNOLOGIA
-export const NOMBRE_REPLICA = /\b1[.:]1\b|r[eé]plica|\bclon|\bcopia\b|(?<!\bpilas?\b.{0,20})\baaa\b|tipo original/i; // "PILAS AAA" no es réplica
+export const NOMBRE_REPLICA = /\b1[.:]1\b|r[eé]plica|\bclon|\bcopia\b|(?<!\b(?:pilas?|bater[ií]as?)\b.{0,20})\ba{2,3}\b|tipo original/i; // "PILAS AAA" no es réplica; "CASIO … AA" sí
 export function nombreBonito(nombre) {
     const menores = new Set(['de', 'del', 'la', 'el', 'y', 'con', 'para', 'en', 'a', 'por', 'sin', 'o', 'x']);
     let base = String(nombre).replace(/\s+/g, ' ').trim();
@@ -290,14 +308,14 @@ export const idDc = (p) => `er-${String(p.slug || p.nombre).toLowerCase().normal
 // conservar: slugs (id sin el número) que ya estaban en la tienda → si se agotan quedan como "agotado" (no se borran)
 export function productosTienda(datos, conservar = new Set()) {
     return datos.productos
-        .filter((p) => p.activo && p.costo > 0 && importable(p.categoria) && !NOMBRE_REPLICA.test(p.nombre)
+        .filter((p) => p.activo && p.costo > 0 && importable(p.categoria) && !NOMBRE_REPLICA.test(p.nombre) && !(LUJO.test(p.nombre) && p.categoria !== 'PERFUMERIA')
             && (p.stock > 0 || conservar.has(idDc(p).replace(/-\d+$/, ''))))
         .map((p) => ({
             id: idDc(p),
             tipo: p.categoria === 'TECNOLOGIA' ? 'tecnologia' : 'variedades',
             categoria: nombreCategoria(p.categoria),
             ...(CATEGORIAS_VISIBLES_POR_DEFECTO.includes(p.categoria) ? {} : { oculto: true }),
-            marca: 'DC Tecnology',
+            ...(marcaDe(p.nombre) ? { marca: marcaDe(p.nombre) } : {}),
             nombre: nombreBonito(p.nombre),
             imagen: p.imagenes[0],
             descripcion: p.descripcion_dc ?? (limpiarHtml(p.descripcion) || (p.descripcion_corta ? `<p>${p.descripcion_corta}</p>` : '')),

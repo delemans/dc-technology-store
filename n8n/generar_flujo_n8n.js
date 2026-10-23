@@ -1290,7 +1290,7 @@ async function tiendaAnc() {
         for (let m; (m = re.exec(pagina));) {
             let variantes = [];
             try { variantes = JSON.parse(m[1].replace(/&quot;/g, '"').replace(/&amp;/g, '&')); } catch { continue; }
-            productos.push({ nombre: m[2].trim(), variantes: variantes.map((v) => ({ nombre: [v.option0, v.option1, v.option2].filter(Boolean).join(' / '), precio: Number(v.price_number) || null, disponible: v.available !== false })) });
+            productos.push({ nombre: m[2].trim(), variantes: variantes.map((v) => ({ nombre: [v.option0, v.option1, v.option2].filter(Boolean).join(' / '), precio: Number(v.price_number) || null, disponible: v.available !== false, stock: Number.isFinite(v.stock) ? v.stock : null })) });
         }
         if (productos.length === antes) break;
     }
@@ -1955,7 +1955,11 @@ async function leerProveedor() {
     if (siguiente) throw new Error('el catálogo no terminó de cargar');
     const idDc = (p) => `er-${String(p.url || p.name).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
         .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 140)}-${p.id}`;
-    const replica = /\b1[.:]1\b|r[eé]plica|\bclon|\bcopia\b|(?<!\bpilas?\b.{0,20})\baaa\b|tipo original/i;
+    const replica = /\b1[.:]1\b|r[eé]plica|\bclon|\bcopia\b|(?<!\b(?:pilas?|bater[ií]as?)\b.{0,20})\ba{2,3}\b|tipo original/i;
+    // Mismas reglas que herramientas/sincronizar-emprendered.mjs (categoría 1 sin nombre → TECNOLOGIA o GENERAL; lujo = imitación)
+    const TEC_SIN_CATEGORIA = /play ?station|\bps[45]\b|xbox|nintendo|consola|gamer|\busb\b|cargador|\bcable\b|aud[ií]fono|auricular|diadema|parlante|bafle|\bmouse\b|teclado|celular|tablet|smart ?watch|reloj inteligente|power ?bank|bater[ií]a port[aá]til|memoria|micro ?sd|disco (duro|s[oó]lido)|c[aá]mara|bluetooth|\bhdmi\b|router|proyector|tv ?box|micr[oó]fono|tr[ií]pode|aro de luz|\bdron|adaptador/i;
+    const LUJO = /\b(hublot|rolex|cartier|van ?cleef|louis ?vuitton|gucci|chanel|bvlgari|bulgari|tiffany|patek|audemars|omega|tag ?heuer|pandora|prada|versace|balenciaga|dior|herm[eè]s|richard ?mille)\b/i;
+    const categoriaDe = (nombre, categoria) => categoria ?? (TEC_SIN_CATEGORIA.test(String(nombre)) ? 'TECNOLOGIA' : 'GENERAL');
     const EXCLUIR = ['RELOJERIA REPLICA', 'CAMISAS 1.1 FUTBOL', 'SEX SHOP', 'VAPES', 'VENDE STREAMING'];
     // Productos de Emprende Red que ya están en la tienda: los de la base de conocimiento publicada (o la embebida)
     let kbTienda = null;
@@ -1974,11 +1978,11 @@ async function leerProveedor() {
         const costo = Math.round(Number(p.price_buy) || Number(p.price_sale) || 0); // emprendered.com.co: price_sale = precio de distribuidor
         const stock = Math.round(Number(p.quantity_available ?? (p.stock ?? []).reduce((s, x) => s + (Number(x.quantity) || 0), 0)) || 0);
         const nuestro = tienda.get(sinNumero(id));
-        const categoria = categorias.get(p.category_id) ?? null;
+        const categoria = categoriaDe(p.name, categorias.get(p.category_id) ?? null);
         if (nuestro) {
             items.push({ producto_id: nuestro.id, categoria, variante: nuestro.variantes?.[0]?.nombre ?? 'Unidad', producto: nuestro.nombre, tipo: nuestro.tipo,
                 costo, precio: Math.ceil((costo * (1 + margen / 100)) / 100) * 100, stock: p.active && costo > 0 ? stock : 0, ref: String(p.reference ?? p.id), imagen: p.image ?? null });
-        } else if (categoria && !EXCLUIR.includes(categoria) && p.active && stock > 0 && costo > 0 && !replica.test(String(p.name))) nuevos++;
+        } else if (categoria && !EXCLUIR.includes(categoria) && p.active && stock > 0 && costo > 0 && !replica.test(String(p.name)) && !(LUJO.test(String(p.name)) && categoria !== 'PERFUMERIA')) nuevos++;
     }
     // Si el proveedor devuelve muy pocos de los nuestros, algo falló: no se toca nada (si no, todo quedaría agotado)
     if (tienda.size && items.length < tienda.size * 0.5) throw new Error(`solo encontré ${items.length} de ${tienda.size} productos de la tienda`);
@@ -2474,7 +2478,7 @@ async function leerPreciosAnc() {
         for (let m; (m = re.exec(pagina));) {
             let variantes = [];
             try { variantes = JSON.parse(m[1].replace(/&quot;/g, '"').replace(/&amp;/g, '&')); } catch { continue; }
-            productos.push({ nombre: m[2].trim(), variantes: variantes.map((v) => ({ nombre: [v.option0, v.option1, v.option2].filter(Boolean).join(' / '), precio: Number(v.price_number) || null, disponible: v.available !== false })) });
+            productos.push({ nombre: m[2].trim(), variantes: variantes.map((v) => ({ nombre: [v.option0, v.option1, v.option2].filter(Boolean).join(' / '), precio: Number(v.price_number) || null, disponible: v.available !== false, stock: Number.isFinite(v.stock) ? v.stock : null })) });
         }
         if (productos.length === antes) break;
     }
@@ -2492,7 +2496,8 @@ async function leerPreciosAnc() {
         const p = productos.find((x) => plano(x.nombre) === plano(m.anc_producto));
         const v = p?.variantes.find((x) => plano(x.nombre) === plano(m.anc_plan)) ?? p?.variantes.find((x) => sinDias(x.nombre) === sinDias(m.anc_plan));
         if (!v) { faltan.push({ producto_id: m.id, variante: m.variante, agotado: true }); continue; }
-        disponibilidad.push({ producto_id: m.id, variante: m.variante, agotado: v.disponible === false });
+        // WO-051: cantidad que publica ANC por plan (null = sin límite; 0 = agotado)
+        disponibilidad.push({ producto_id: m.id, variante: m.variante, agotado: v.disponible === false || v.stock === 0, stock: v.disponible === false ? 0 : v.stock });
         if (!v?.precio) continue;
         const nuestros = dias(m.variante), suyos = dias(v.nombre);
         if (nuestros && suyos && nuestros !== suyos) duraciones.push({ producto_id: m.id, variante: m.variante, nuestros, suyos, plan: v.nombre });

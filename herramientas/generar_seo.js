@@ -102,7 +102,7 @@ function jsonLd(p) {
     const { precios, desde, cotizable, categoria } = datosDe(p);
     const item = cotizable
         ? { '@type': 'Service', name: p.nombre, serviceType: categoria, areaServed: { '@type': 'Country', name: 'Colombia' }, provider: { '@id': `${SITIO}/#organizacion` }, image: p.imagen, url: urlProducto(p) }
-        : { '@type': 'Product', name: p.nombre, image: [p.imagen], brand: { '@type': 'Brand', name: p.marca || 'DC Tecnology' }, category: categoria, url: urlProducto(p), description: descripcionMeta(p) };
+        : { '@type': 'Product', name: p.nombre, image: [p.imagen], ...(p.marca || !p.sincronizado ? { brand: { '@type': 'Brand', name: p.marca || 'DC Tecnology' } } : {}), category: categoria, url: urlProducto(p), description: descripcionMeta(p) };
     if (desde) {
         // Una oferta por plan, con la política de devolución real (legal/garantias.html): tecnología 5 días hábiles de
         // retracto (envío de vuelta a cargo del cliente); digitales entregados sin devolución (art. 47, Ley 1480).
@@ -206,7 +206,7 @@ ${jsonLd(p).map((o) => `<script type="application/ld+json">${jsonSeguro(o)}</scr
 <article class="ficha">
 <div class="vitrina"><img src="${esc(p.imagen)}" alt="${esc(p.nombre)}" width="480" height="480" loading="eager" decoding="async"></div>
 <div>
-<p class="marca-p">${esc(p.marca || 'DC Tecnology')}</p>
+<p class="marca-p">${esc(p.marca || (p.sincronizado ? p.categoria || 'Tecnología' : 'DC Tecnology'))}</p>
 <h1>${esc(p.nombre)}</h1>
 <div class="chips">${chips.map((c) => `<span class="chip">${esc(c)}</span>`).join('')}</div>
 <table><tbody>${(p.variantes ?? []).map((v) => `<tr><td>${esc(v.nombre)}</td><td>${Number(v.precio) > 0 ? `${Number(v.precio_anterior) > Number(v.precio) ? `<s>${cop(v.precio_anterior)}</s>` : ''}${cop(v.precio)}` : 'A cotizar'}</td></tr>`).join('')}</tbody></table>

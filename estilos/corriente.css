@@ -480,3 +480,17 @@ html.app-instalada [data-instalar], html.app-instalada #ayuda-ios { display: non
 /* ---------- Accesibilidad: «Saltar al contenido» (solo aparece con el teclado) ---------- */
 .saltar { position: fixed; left: 16px; top: -80px; z-index: 100; padding: 12px 18px; border-radius: 12px; background: #E03445; color: #fff; font: 700 14px/1 Inter, system-ui, sans-serif; text-decoration: none; transition: top .2s; }
 .saltar:focus { top: calc(12px + env(safe-area-inset-top, 0px)); outline: 3px solid #fff; outline-offset: 2px; }
+
+/* ---------- Personas reales (portada): fotos de servicio con texto sobre degradado ---------- */
+.humano-grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); }
+.humano-card { position: relative; display: block; overflow: hidden; border: 0; padding: 0; border-radius: 24px; text-align: left; cursor: pointer; aspect-ratio: 4 / 3; max-width: 100%;
+    background: #12161D; box-shadow: 0 24px 50px -30px rgb(0 0 0 / .7); isolation: isolate; }
+.humano-card img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform .6s cubic-bezier(.2, .7, .1, 1); z-index: -1; }
+.humano-card::after { content: ''; position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, rgb(11 14 20 / 0) 30%, rgb(11 14 20 / .88) 78%); }
+.humano-txt { position: absolute; left: 0; right: 0; bottom: 0; display: grid; gap: 6px; padding: 20px; color: #fff; }
+.humano-txt b { font: 800 19px/1.2 Inter, system-ui, sans-serif; }
+.humano-txt span { font-size: 13px; line-height: 1.45; color: rgb(255 255 255 / .82); }
+.humano-txt em { justify-self: start; margin-top: 4px; padding: 6px 12px; border-radius: 999px; font: 800 12px/1 Inter, system-ui, sans-serif; font-style: normal; background: #E03445; color: #fff; }
+.humano-card:hover img, .humano-card:focus-visible img { transform: scale(1.05); }
+.humano-card:focus-visible { outline: 3px solid #E03445; outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) { .humano-card img { transition: none; } }

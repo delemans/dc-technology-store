@@ -17,6 +17,9 @@ const UMBRAL_PRUEBA_SOCIAL = 10;  // ventas completadas necesarias para mostrar 
 const GARANTIA_DIAS = 30;
 const CANTIDAD_MAXIMA = 10;
 // Tope por producto: lo que le queda al proveedor (Emprende Red) o 10
+// Marca del fabricante si se conoce (no «DC Tecnology» para productos de terceros); si no, la categoría
+const marcaVisible = (p) => (p?.marca && p.marca !== 'DC Tecnology' ? p.marca : null);
+const etiquetaMarca = (p) => marcaVisible(p) ?? (p?.tipo === 'variedades' && p.categoria ? p.categoria : (CATEGORIAS[p?.tipo]?.texto ?? 'DC Tecnology'));
 const maxCantidad = (p) => (Number.isFinite(Number(p?.existencias)) && p.existencias !== null ? Math.max(1, Math.min(CANTIDAD_MAXIMA, Number(p.existencias))) : CANTIDAD_MAXIMA);
 
 // Tri-módulo: qué tipos de productos.json van en cada pestaña
@@ -305,6 +308,7 @@ async function cargarCatalogo() {
     pintarModulos();
     renderizar();
     pintarNovedades();
+    pintarServicioHumano();
     pintarCotizador();
     inyectarSEO();
     abrirDesdeEnlace();
@@ -525,6 +529,15 @@ function pintarVerMas(total, visibles) {
 let idsPintados = '';
 
 // "Nuevo en tecnología": 8 productos del proveedor con precio activo; cambian cada día (mismo orden para todos ese día)
+// Franja «Servicio técnico con personas reales»: precio vigente de cada servicio (o «Cotización por WhatsApp»)
+function pintarServicioHumano() {
+    document.querySelectorAll('[data-precio-servicio]').forEach((el) => {
+        const p = estado.productos.find((x) => x.id === el.dataset.precioServicio);
+        const precios = (p?.variantes ?? []).map((v) => Number(v.precio)).filter((n) => n > 0);
+        el.textContent = precios.length ? `Desde ${formatearPrecio(Math.min(...precios))}` : 'Cotización por WhatsApp';
+    });
+}
+
 function pintarNovedades() {
     const seccion = $('novedades');
     const nuevos = estado.productos.filter((p) => p.sincronizado);
@@ -565,7 +578,7 @@ function crearTarjeta(prod) {
             <img src="${escaparHTML(prod.imagen || imagenRespaldo(prod.nombre))}" alt="${escaparHTML(prod.nombre)}" loading="lazy" decoding="async"
                 class="${esLogo ? '' : 'rounded-xl'}">
         </div>
-        <p class="text-[10px] font-black uppercase tracking-[0.22em] text-dcNeon">${escaparHTML(prod.tipo === 'variedades' && prod.categoria ? prod.categoria : prod.marca || 'DC Tecnology')}</p>
+        <p class="text-[10px] font-black uppercase tracking-[0.22em] text-dcNeon">${escaparHTML(etiquetaMarca(prod))}</p>
         <h3 class="mt-1 font-tech font-bold text-[15px] sm:text-base leading-snug text-white line-clamp-2">${escaparHTML(prod.nombre)}</h3>
         <div class="mt-2.5 flex flex-wrap gap-1.5">${insignias(prod).slice(0, 2).map(htmlInsignia).join('')}</div>
         <div class="mt-auto pt-4 border-t border-white/[0.06] flex items-end justify-between gap-3">
@@ -627,7 +640,7 @@ function abrirProducto(id) {
     const precioValido = (prod.variantes ?? []).find((v) => Number(v.precio) > 0 && !v.agotado) ?? (prod.variantes ?? []).find((v) => Number(v.precio) > 0) ?? prod.variantes?.[0];
     estado.seleccion = { producto: prod, variante: precioValido, cantidad: 1, cupon: estado.seleccion.cupon };
 
-    $('modal-brand').textContent = prod.marca || 'DC Tecnology';
+    $('modal-brand').textContent = etiquetaMarca(prod);
     $('modal-title').textContent = prod.nombre;
     metaProducto(prod);
     $('modal-badges').innerHTML = insignias(prod).map(htmlInsignia).join('');
@@ -730,7 +743,9 @@ const ICONOS_DETALLE = [
 
 // Convierte la descripción HTML del catálogo ("• <strong>Título:</strong> texto<br>…") en puntos con ícono
 function detallesCatalogo(html) {
-    const lineas = String(html ?? '').split(/<br\s*\/?>/i).map((l) => l.trim()).filter(Boolean);
+    // Párrafos y listas (descripciones de ANC y Emprende Red) se tratan como líneas, igual que los <br>
+    const lineas = String(html ?? '').replace(/<!--[\s\S]*?-->/g, '').replace(/<\/(p|li|h\d)>|<\/?ul>|<\/?ol>/gi, '<br>')
+        .split(/<br\s*\/?>/i).map((l) => l.trim()).filter(Boolean);
     const texto = (l) => new DOMParser().parseFromString(l, 'text/html').body.textContent.replace(/\s+/g, ' ').trim();
     let encabezado = '';
     const puntos = [];
@@ -806,10 +821,11 @@ function pintarFicha(prod) {
     // Busca "Garantía: 30 días…" (con número), no el título "…USO Y GARANTÍA:"
     const garantia = /Garant[ií]a:?\s*(\d[^.•]*)/i.exec(texto)?.[1]?.trim() || `${GARANTIA_DIAS} días por defectos de fábrica`;
     const filas = [
-        ['Marca', prod.marca || 'DC Tecnology'],
+        ...(marcaVisible(prod) ? [['Marca', marcaVisible(prod)]] : []),
         ['Modelo', prod.nombre],
         ['Garantía', garantia],
-        ['Disponibilidad', 'Confirmada por WhatsApp al pedir'],
+        ['Disponibilidad', prod.agotado ? 'Agotado por ahora' : Number(prod.existencias) > 0 ? `${prod.existencias} ${Number(prod.existencias) === 1 ? 'unidad' : 'unidades'} disponibles` : 'Confirmada por WhatsApp al pedir'],
+        ['Vendido por', 'DC Tecnology'],
     ];
     caja.innerHTML = `
         <dl class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 rounded-2xl bg-dcDarkBg/60 ring-1 ring-white/5 p-4 text-xs">
@@ -1120,6 +1136,8 @@ async function cargarResenas() {
     if (error) console.error('resenas_publicas:', error);
     estado.resenas = data ?? [];
     caja.innerHTML = estado.resenas.length ? estado.resenas.slice(0, 9).map(tarjetaResena).join('') : vacio;
+    const seccion = $('opiniones');
+    if (seccion) seccion.hidden = !estado.resenas.length;
 }
 
 // En el modal: reseñas cuyo producto coincide con la marca o el nombre

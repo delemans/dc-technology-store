@@ -5,7 +5,7 @@
 // Qué vigila:
 //   · Emprende Red: productos nuevos, retirados (desaparecen), agotados (quedan "Agotado"), repuestos, precios, nombres
 //     y descripciones. Actualiza productos.json, páginas de Google, Shopping y el conocimiento del bot, y publica.
-//   · ANC: planes nuevos o retirados en su tienda, cambios de nombre o de días, precios y agotados.
+//   · ANC: planes nuevos o retirados, días (plazo), precios, cantidades, agotados, condiciones de cada producto y lo que aún no vendes.
 //   · Políticas: términos, privacidad y devoluciones de ANC y términos de Emprende Red (te avisa si cambian).
 // Precios y existencias en la base los actualiza n8n cada 6 h (con la credencial de servidor); este vigilante no la usa.
 // Seguridad: si el proveedor devuelve muchos menos productos de los que había (caída a medias), NO se publica nada.
@@ -79,33 +79,57 @@ if (r.status !== 0) {
     }
 }
 
-/* ---------- 2) ANC: planes, días, precios y agotados en su tienda ---------- */
+/* ---------- 2) ANC: TODO lo de su tienda (precios, cantidades, plazos, agotados, condiciones y productos que no vendes) ---------- */
 try {
-    const { leerTiendaAnc } = await import('./catalogo_ancpagos.mjs');
+    const { leerTiendaAnc, leerCondicionesAnc, diferenciasAnc } = await import('./catalogo_ancpagos.mjs');
     const t = await leerTiendaAnc();
-    const ahora = Object.fromEntries((t.tienda ?? []).flatMap((p) => p.variantes.map((v) => [`${p.nombre} · ${v.nombre || 'única'}`, { precio: v.precio, disponible: v.disponible }])));
+    const ahora = Object.fromEntries((t.tienda ?? []).flatMap((p) => p.variantes.map((v) => [`${p.nombre} · ${v.nombre || 'única'}`,
+        { precio: v.precio, disponible: v.disponible, stock: v.stock ?? null, plazo_dias: v.plazo_dias ?? null }])));
     const previo = leerJson(ANTES_ANC, null);
-    if (previo && Object.keys(ahora).length >= Object.keys(previo).length * 0.6) {
-        const dias = (x) => /(\d+)\s*d[ií]as?/i.exec(x)?.[1];
-        const nuevos = Object.keys(ahora).filter((k) => !(k in previo));
-        const idos = Object.keys(previo).filter((k) => !(k in ahora));
-        const cambioDias = nuevos.filter((k) => idos.some((o) => o.replace(/\d+\s*d[ií]as?/i, '') === k.replace(/\d+\s*d[ií]as?/i, '') && dias(o) !== dias(k)))
-            .map((k) => { const o = idos.find((x) => x.replace(/\d+\s*d[ií]as?/i, '') === k.replace(/\d+\s*d[ií]as?/i, '')); return `• ${o} → ${k}`; });
-        const precioCambio = Object.keys(ahora).filter((k) => k in previo && ahora[k].precio !== previo[k].precio).map((k) => `• ${k}: ${cop(previo[k].precio)} → ${cop(ahora[k].precio)}`);
-        const agotado = Object.keys(ahora).filter((k) => k in previo && previo[k].disponible && !ahora[k].disponible).map((k) => `• ${k}`);
-        const vuelve = Object.keys(ahora).filter((k) => k in previo && !previo[k].disponible && ahora[k].disponible).map((k) => `• ${k}`);
-        if (cambioDias.length) informe.push(`📅 ANC cambió la duración de planes (revisa el nombre que anuncias):\n${cambioDias.join('\n')}`);
-        const soloNuevos = nuevos.filter((k) => !cambioDias.some((c) => c.endsWith(k)));
-        const soloIdos = idos.filter((o) => !cambioDias.some((c) => c.startsWith(`• ${o} →`)));
-        if (soloNuevos.length) informe.push(`🆕 ANC tiene planes nuevos (agrégalos si te sirven):\n${soloNuevos.slice(0, 10).map((k) => `• ${k} · ${cop(ahora[k].precio)}`).join('\n')}`);
-        if (soloIdos.length) informe.push(`🗑️ ANC ya no ofrece:\n${soloIdos.slice(0, 10).map((k) => `• ${k}`).join('\n')}`);
-        if (precioCambio.length) informe.push(`💲 ANC cambió precios (la base se ajusta sola cada 6 h):\n${precioCambio.slice(0, 10).join('\n')}`);
-        if (agotado.length) informe.push(`⛔ Agotado en ANC:\n${agotado.join('\n')}`);
-        if (vuelve.length) informe.push(`🔔 Volvió en ANC:\n${vuelve.join('\n')}`);
+    const completa = !previo || Object.keys(ahora).length >= Object.keys(previo).length * 0.6;
+    if (previo && completa) informe.push(...diferenciasAnc(previo, ahora, { cop }));
+    if (completa) fs.writeFileSync(ANTES_ANC, JSON.stringify(ahora, null, 1));
+    // Condiciones y descripción de cada producto: aviso cuando cambian (garantías, región, reglas de uso…)
+    const RUTA_COND = path.join(SALIDA, 'vigilante-anc-condiciones.json');
+    const condPrevias = leerJson(RUTA_COND, null);
+    const cond = await leerCondicionesAnc(t.tienda ?? []);
+    if (condPrevias) {
+        const cambiaron = Object.keys(cond).filter((k) => condPrevias[k] && condPrevias[k].huella !== cond[k].huella);
+        if (cambiaron.length) informe.push(`📝 ANC cambió la descripción o las condiciones de:\n${cambiaron.slice(0, 10).map((k) => `• ${k} · ${cond[k].url}`).join('\n')}\nRevisa si cambia lo que le prometes al cliente.`);
     }
-    if (!previo || Object.keys(ahora).length >= Object.keys(previo).length * 0.6) fs.writeFileSync(ANTES_ANC, JSON.stringify(ahora, null, 1));
+    if (Object.keys(cond).length >= Object.keys(condPrevias ?? {}).length * 0.6) fs.writeFileSync(RUTA_COND, JSON.stringify({ ...(condPrevias ?? {}), ...cond }, null, 1));
+    // Productos de ANC que aún no vendes (se avisa cada uno una sola vez)
+    const { _nota, ...eq } = leerJson(path.join(RAIZ, 'herramientas', 'equivalencias-ancpagos.json'), {});
+    const plano = (x) => String(x ?? '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim();
+    const vendidos = new Set([...Object.values(eq).map((e) => plano(e.proveedor)), ...(t.filas ?? []).map((x) => plano(String(x.tienda ?? '').split(' · ')[0]))]);
+    const RUTA_NO = path.join(SALIDA, 'vigilante-anc-no-vendidos.json');
+    const avisados = new Set(leerJson(RUTA_NO, []));
+    const noVendidos = (t.tienda ?? []).filter((p) => !vendidos.has(plano(p.nombre)) && !avisados.has(p.nombre));
+    // ¿Ya lo tienes en tu tienda con otro nombre (precio manual, sin enlace a ANC)? Si el nombre trae modelo (D16, GT5…)
+    // ese modelo debe estar; si no, las dos primeras palabras (sin «PIN virtual»)
+    const propios = leerJson(path.join(RAIZ, 'productos.json'), []).filter((x) => !String(x.id).startsWith('er-')).map((x) => ` ${plano(x.nombre)} `);
+    const claves = (x) => { const w = plano(x).replace(/^(pin virtual|pin) /, '').split(' '); const modelos = w.filter((t) => /\d/.test(t) && /[a-z]/.test(t)); return modelos.length ? modelos : w.slice(0, 2); };
+    const yaLoTienes = (p) => propios.some((n) => claves(p.nombre).every((t) => n.includes(` ${t} `)));
+    const linea = (p) => {
+        const precios = p.variantes.map((x) => x.precio).filter(Boolean);
+        const und = p.variantes.map((x) => x.stock).filter((x) => Number.isInteger(x));
+        return `• ${p.nombre} · ${precios.length ? cop(Math.min(...precios)) : 's/p'}${und.length ? ` · ${und.reduce((x, y) => x + y, 0)} und.` : ''}`;
+    };
+    const sinEnlace = noVendidos.filter(yaLoTienes), nuevosAnc = noVendidos.filter((p) => !yaLoTienes(p));
+    if (sinEnlace.length) informe.push(`🔗 Los vendes pero su precio no se ajusta solo desde ANC (falta enlazarlos en equivalencias-ancpagos.json):\n${sinEnlace.slice(0, 15).map(linea).join('\n')}`);
+    if (nuevosAnc.length) informe.push(`🧾 ANC vende y tú aún no (decide si los agregas; su precio público es tu costo de referencia):\n${nuevosAnc.slice(0, 15).map(linea).join('\n')}${nuevosAnc.length > 15 ? `\n… y ${nuevosAnc.length - 15} más` : ''}`);
+    if (noVendidos.length && !PROBAR) fs.writeFileSync(RUTA_NO, JSON.stringify([...avisados, ...noVendidos.map((p) => p.nombre)], null, 1));
 } catch (e) {
     informe.push(`⚠️ No pude leer la tienda de ANC: ${String(e.message).slice(0, 140)}`);
+}
+
+/* ---------- 2b) Descripciones de ANC (tecnología y pines enlazados): se actualizan en productos.json y se publican ---------- */
+{
+    const antes = fs.readFileSync(RUTA_PRODUCTOS, 'utf8');
+    const rd = spawnSync(process.execPath, [path.join(RAIZ, 'herramientas', 'descripciones-anc.mjs'), ...(PROBAR ? [] : ['--aplicar'])], { cwd: RAIZ, encoding: 'utf8', timeout: 10 * 60e3 });
+    const n = /DESCRIPCIONES ANC: (\d+)/.exec(rd.stdout || '')?.[1];
+    if (n && fs.readFileSync(RUTA_PRODUCTOS, 'utf8') !== antes) { publicar = true; informe.push(`📝 Descripciones de ANC actualizadas en tu tienda: ${n} productos`); }
+    else if (rd.status !== 0) informe.push(`⚠️ No pude actualizar descripciones de ANC: ${String(rd.stderr || '').trim().split('\n').pop()?.slice(0, 140)}`);
 }
 
 /* ---------- 3) Políticas de los proveedores ---------- */

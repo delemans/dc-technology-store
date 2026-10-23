@@ -206,6 +206,34 @@
   {
    "archivo": "ing-innovador",
    "texto": "🤖 Catálogo web con tus productos y un asistente con IA que responde y toma pedidos. Tú confirmas el pago y entregas. Lo hacemos a la medida de tu negocio."
+  },
+  {
+   "archivo": "srv-mantenimiento",
+   "texto": "🛠️ Mantenimiento de computadores: limpieza interna, revisión del software y cambio de pasta térmica. Valor de referencia y precio final tras el diagnóstico."
+  },
+  {
+   "archivo": "srv-instalacion",
+   "texto": "💻 Te dejamos el computador listo: Windows 10 u 11 Pro, Office y software base. Licencias originales disponibles."
+  },
+  {
+   "archivo": "srv-reparacion",
+   "texto": "🔧 Reparación de computadores de escritorio y portátiles, y repuestos. Cuéntanos la falla por WhatsApp y te cotizamos."
+  },
+  {
+   "archivo": "srv-alquiler",
+   "texto": "🏢 Alquiler de portátiles por meses para tu equipo o proyecto. Entre más tiempo, menor la cuota mensual."
+  },
+  {
+   "archivo": "srv-asesoria",
+   "texto": "🎓 Asesoría y tutoría técnica personalizada, a tu ritmo. Sesiones de 1 hora."
+  },
+  {
+   "archivo": "srv-catalogo-web",
+   "texto": "🛍️ Tu catálogo web con tus productos y un asistente con IA que atiende por WhatsApp. Proyecto a la medida."
+  },
+  {
+   "archivo": "srv-automatizaciones",
+   "texto": "📊 Tableros en tiempo real, inventarios, sistemas para bares y supermercados y automatización de macros."
   }
  ],
  "inicio_campanas": "2026-10-19",
@@ -237,6 +265,20 @@
     "tip-pantalla-vs-cuenta"
    ],
    "promo": "🛠️ Semana de consejos DC\nConsejos reales para tu tecnología: antivirus, mantenimiento, Windows 11 y qué ver en cada plataforma.\nPregúntanos por WhatsApp o en la tienda.\n🛒 www.dctecnology.xyz"
+  },
+  {
+   "id": "servicios-dc",
+   "nombre": "Servicios DC",
+   "videos": [
+    "srv-mantenimiento",
+    "srv-instalacion",
+    "srv-reparacion",
+    "srv-alquiler",
+    "srv-asesoria",
+    "srv-catalogo-web",
+    "srv-automatizaciones"
+   ],
+   "promo": "🛠️ Semana de servicios DC\nMantenimiento, reparación, instalación, alquiler de portátiles, asesorías y soluciones para tu negocio.\nPersonas reales, cotización por WhatsApp.\n🛒 www.dctecnology.xyz"
   },
   {
    "id": "entretenimiento",
