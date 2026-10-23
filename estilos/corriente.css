@@ -471,3 +471,8 @@ html.app-instalada [data-instalar], html.app-instalada #ayuda-ios { display: non
 .rastreo__linea li::before { content: ''; position: absolute; left: -24px; top: 5px; width: 10px; height: 10px; border-radius: 50%; background: rgb(var(--borde)); box-shadow: 0 0 0 3px rgb(var(--tarjeta)); }
 .rastreo__linea li:first-child::before { background: rgb(var(--rojo)); }
 .rastreo__linea small { display: block; font-size: 11px; color: rgb(var(--tinta) / .5); font-variant-numeric: tabular-nums; }
+
+/* Agotados (wo-050): a la vista, sin poder comprarse */
+.tarjeta-3d.agotada .marco-img img { filter: grayscale(1); opacity: .55; }
+.tarjeta-3d.agotada .btn-neon { background: rgb(var(--tinta) / .12) !important; color: rgb(var(--tinta) / .75) !important; box-shadow: none !important; }
+#btn-continuar.agotado { background: rgb(var(--tinta) / .12) !important; color: rgb(var(--tinta)) !important; box-shadow: inset 0 0 0 1px rgb(var(--borde)) !important; }

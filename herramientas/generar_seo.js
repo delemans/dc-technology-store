@@ -115,7 +115,7 @@ function jsonLd(p) {
             shippingRate: { '@type': 'MonetaryAmount', value: 0, currency: 'COP' },
             deliveryTime: { '@type': 'ShippingDeliveryTime', handlingTime: { '@type': 'QuantitativeValue', minValue: 0, maxValue: 0, unitCode: 'DAY' }, transitTime: { '@type': 'QuantitativeValue', minValue: 0, maxValue: 0, unitCode: 'DAY' } } } : null;
         item.offers = (p.variantes ?? []).filter((v) => Number(v.precio) > 0).map((v) => ({
-            '@type': 'Offer', name: v.nombre, price: Number(v.precio), priceCurrency: 'COP', url: urlProducto(p), availability: 'https://schema.org/InStock',
+            '@type': 'Offer', name: v.nombre, price: Number(v.precio), priceCurrency: 'COP', url: urlProducto(p), availability: p.agotado || v.agotado ? 'https://schema.org/OutOfStock' : 'https://schema.org/InStock',
             itemCondition: 'https://schema.org/NewCondition', seller: { '@id': `${SITIO}/#organizacion` }, hasMerchantReturnPolicy: devolucion, ...(envio ? { shippingDetails: envio } : {}),
         }));
     }

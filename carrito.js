@@ -57,6 +57,7 @@
         });
     }
     function agregar(p, variante, { combo = null, silencioso = false } = {}) {
+        if (p?.agotado || variante?.agotado) { mostrarToast(`${p.nombre} está agotado por ahora.`, 'info', 3500); return; }
         const quedan = Number(p?.existencias);
         if (Number.isFinite(quedan) && p.existencias !== null && lineas.filter((l) => l.id === p.id).length >= quedan) {
             mostrarToast(quedan > 0 ? `Solo quedan ${quedan} de ${p.nombre}.` : `${p.nombre} se agotó.`, 'info', 3500);

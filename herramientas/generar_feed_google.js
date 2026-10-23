@@ -16,7 +16,7 @@ const paginas = new Set(fs.readdirSync(path.join(RAIZ, 'p')).map((f) => f.replac
 
 const items = productos
     .filter((p) => (p.tipo === 'tecnologia' || p.tipo === 'variedades') && !p.oculto && paginas.has(p.id))
-    .filter((p) => !Number.isFinite(p.existencias) || p.existencias > 0)
+    .filter((p) => !p.agotado && (!Number.isFinite(p.existencias) || p.existencias > 0))
     .map((p) => {
         const v = (p.variantes ?? []).find((x) => Number(x.precio) > 0);
         if (!v || !p.imagen) return null;

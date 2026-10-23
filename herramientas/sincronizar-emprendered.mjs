@@ -287,9 +287,11 @@ export function nombreBonito(nombre) {
 export const idDc = (p) => `er-${String(p.slug || p.nombre).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
     .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 140)}-${p.id}`;
 
-export function productosTienda(datos) {
+// conservar: slugs (id sin el número) que ya estaban en la tienda → si se agotan quedan como "agotado" (no se borran)
+export function productosTienda(datos, conservar = new Set()) {
     return datos.productos
-        .filter((p) => p.activo && p.stock > 0 && p.costo > 0 && importable(p.categoria) && !NOMBRE_REPLICA.test(p.nombre))
+        .filter((p) => p.activo && p.costo > 0 && importable(p.categoria) && !NOMBRE_REPLICA.test(p.nombre)
+            && (p.stock > 0 || conservar.has(idDc(p).replace(/-\d+$/, ''))))
         .map((p) => ({
             id: idDc(p),
             tipo: p.categoria === 'TECNOLOGIA' ? 'tecnologia' : 'variedades',
@@ -301,6 +303,7 @@ export function productosTienda(datos) {
             descripcion: p.descripcion_dc ?? (limpiarHtml(p.descripcion) || (p.descripcion_corta ? `<p>${p.descripcion_corta}</p>` : '')),
             variantes: [{ nombre: 'Unidad', precio: precioVenta(p.costo), precio_anterior: null }],
             existencias: p.stock, // unidades que le quedan al proveedor (la base las actualiza cada 6 h)
+            ...(p.stock > 0 ? {} : { agotado: true }),
             sincronizado: true,
             _proveedor: { id: p.id, ref: p.referencia, costo: p.costo, stock: p.stock, categoria: p.categoria },
         }));
@@ -389,7 +392,7 @@ if (process.argv[1] && fileURLToPath(import.meta.url).toLowerCase() === process.
         // se conserva el id anterior cuando el slug coincide (páginas p/ de Google, precios y pedidos no cambian)
         const previos = new Map();
         for (const p of JSON.parse(fs.readFileSync('productos.json', 'utf8'))) if (String(p.id).startsWith('er-')) previos.set(String(p.id).replace(/-\d+$/, ''), p.id);
-        const nuevos = productosTienda(datos).map((p) => ({ ...p, id: previos.get(p.id.replace(/-\d+$/, '')) ?? p.id }));
+        const nuevos = productosTienda(datos, new Set(previos.keys())).map((p) => ({ ...p, id: previos.get(p.id.replace(/-\d+$/, '')) ?? p.id }));
         console.log(`  ids conservados de la tienda anterior: ${nuevos.filter((p) => [...previos.values()].includes(p.id)).length} de ${previos.size}`);
         const r = escribirProductosJson('productos.json', nuevos);
         fs.writeFileSync('supabase/wo-041-emprendered.sql', generarSql(nuevos, datos.leido_at));

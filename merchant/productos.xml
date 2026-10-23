@@ -212,7 +212,7 @@
       <g:identifier_exists>no</g:identifier_exists>
       <g:google_product_category>Electronics</g:google_product_category>
       <g:product_type>Tecnología</g:product_type>
-      <g:sell_on_google_quantity>10</g:sell_on_google_quantity>
+      <g:sell_on_google_quantity>9</g:sell_on_google_quantity>
     </item>
     <item>
       <g:id>er-lamparas-usb-led-07-6</g:id>
@@ -296,7 +296,7 @@
       <g:identifier_exists>no</g:identifier_exists>
       <g:google_product_category>Electronics</g:google_product_category>
       <g:product_type>Tecnología</g:product_type>
-      <g:sell_on_google_quantity>6</g:sell_on_google_quantity>
+      <g:sell_on_google_quantity>5</g:sell_on_google_quantity>
     </item>
     <item>
       <g:id>er-mouse-gamer-3200-dpi-20</g:id>
@@ -352,7 +352,7 @@
       <g:identifier_exists>no</g:identifier_exists>
       <g:google_product_category>Electronics</g:google_product_category>
       <g:product_type>Tecnología</g:product_type>
-      <g:sell_on_google_quantity>7</g:sell_on_google_quantity>
+      <g:sell_on_google_quantity>5</g:sell_on_google_quantity>
     </item>
     <item>
       <g:id>er-power-bank-30000-mah-sin-cable-30</g:id>
@@ -394,7 +394,7 @@
       <g:identifier_exists>no</g:identifier_exists>
       <g:google_product_category>Electronics</g:google_product_category>
       <g:product_type>Tecnología</g:product_type>
-      <g:sell_on_google_quantity>4</g:sell_on_google_quantity>
+      <g:sell_on_google_quantity>3</g:sell_on_google_quantity>
     </item>
     <item>
       <g:id>er-airpods-generacion-6-53</g:id>
@@ -913,6 +913,20 @@
       <g:google_product_category>Electronics</g:google_product_category>
       <g:product_type>Tecnología</g:product_type>
       <g:sell_on_google_quantity>11</g:sell_on_google_quantity>
+    </item>
+    <item>
+      <g:id>er-tripode-estabilizador-celular-ay49t-1118</g:id>
+      <g:title>Tripode Estabilizador Celular AY49T</g:title>
+      <g:description>Caracter sticas: Soporte Expandible hasta 55cm. Micr fono Conexi n por cable 3.5mm Luz LED de 6500 K. Control Bluetooth El montaje superior del gancho permite un montaje r pido del micr fono y la luz LED.</g:description>
+      <g:link>https://dctecnology.xyz/p/er-tripode-estabilizador-celular-ay49t-1118.html</g:link>
+      <g:image_link>https://emprendered.com.co/storage/shop/front/img/products/1118-whatsapp-image-2026-02-14-at-54610-pm.webp?v=1771109185</g:image_link>
+      <g:availability>in_stock</g:availability>
+      <g:price>54800 COP</g:price>
+      <g:condition>new</g:condition>
+      <g:identifier_exists>no</g:identifier_exists>
+      <g:google_product_category>Electronics</g:google_product_category>
+      <g:product_type>Tecnología</g:product_type>
+      <g:sell_on_google_quantity>5</g:sell_on_google_quantity>
     </item>
     <item>
       <g:id>er-mini-tripode-tp-009-141</g:id>
@@ -1934,7 +1948,7 @@
       <g:identifier_exists>no</g:identifier_exists>
       <g:google_product_category>Electronics</g:google_product_category>
       <g:product_type>Tecnología</g:product_type>
-      <g:sell_on_google_quantity>10</g:sell_on_google_quantity>
+      <g:sell_on_google_quantity>9</g:sell_on_google_quantity>
     </item>
     <item>
       <g:id>er-parlante-bluetooth-con-luz-rgb-kts-2310-307</g:id>

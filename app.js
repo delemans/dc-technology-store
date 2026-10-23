@@ -256,8 +256,9 @@ const esCotizable = (prod) => prod.tipo === 'servicios' || prod.tipo === 'alquil
 function insignias(prod) {
     const lista = [];
     const variantes = (prod.variantes || []).map((v) => (v.nombre || '').toLowerCase()).join(' ');
+    if (prod.agotado) lista.push({ icono: 'fa-circle-xmark', texto: 'Agotado por ahora', clase: 'text-neutral-300 ring-white/20 bg-white/[0.06]' });
     // Pocas unidades del proveedor: se avisa primero (es lo que más ayuda a decidir)
-    if (Number(prod.existencias) > 0 && Number(prod.existencias) <= 5) lista.push({ icono: 'fa-box-open', texto: Number(prod.existencias) === 1 ? '¡Queda 1!' : `Quedan ${prod.existencias}`, clase: 'text-amber-300 ring-amber-500/30 bg-amber-500/10' });
+    if (!prod.agotado && Number(prod.existencias) > 0 && Number(prod.existencias) <= 5) lista.push({ icono: 'fa-box-open', texto: Number(prod.existencias) === 1 ? '¡Queda 1!' : `Quedan ${prod.existencias}`, clase: 'text-amber-300 ring-amber-500/30 bg-amber-500/10' });
     // Pin en stock propio: sale apenas se confirma el pago
     if (prod.tipo === 'pines' && estado.conStock?.has(prod.id)) lista.push({ icono: 'fa-bolt', texto: 'Entrega inmediata', clase: 'text-emerald-300 ring-emerald-500/30 bg-emerald-500/10' });
     else if (moduloDe(prod.tipo) === 'digitales') lista.push({ icono: 'fa-bolt', texto: 'Entrega ≤ 15 min', clase: 'text-amber-300 ring-amber-500/30 bg-amber-500/10' });
@@ -334,11 +335,13 @@ async function aplicarPreciosBase(productos) {
             // Exacta; si no, la misma variante con otra duración ("26 días" en la base ↔ "30 días" en el catálogo)
             const sinDias = (t) => String(t ?? '').replace(/\s*\d+\s*d[ií]as?\b/gi, '').trim().toLowerCase();
             const b = base.find((x) => x.variante === v.nombre) ?? base.find((x) => sinDias(x.variante) === sinDias(v.nombre));
-            return b ? { ...v, precio: Number(b.precio), precio_anterior: b.precio_anterior === null ? null : Number(b.precio_anterior) } : null;
+            return b ? { ...v, precio: Number(b.precio), precio_anterior: b.precio_anterior === null ? null : Number(b.precio_anterior), agotado: b.agotado === true } : null;
         }).filter(Boolean);
         // Existencias del proveedor (wo-047): las de la base mandan sobre las del archivo
         const existencias = base.find((x) => x.existencias !== null && x.existencias !== undefined)?.existencias;
-        return variantes.length ? { ...p, variantes, ...(existencias !== undefined ? { existencias: Number(existencias) } : {}) } : null;
+        // Agotado (wo-050): sigue a la vista con su precio, pero no se puede comprar hasta que vuelva
+        const agotado = variantes.length > 0 && variantes.every((v) => v.agotado);
+        return variantes.length ? { ...p, variantes, agotado, ...(existencias !== undefined ? { existencias: Number(existencias) } : {}) } : null;
     }).filter(Boolean);
 }
 
@@ -413,7 +416,7 @@ function productosFiltrados() {
         if (MODULOS[modulo].tipos && !MODULOS[modulo].tipos.includes(p.tipo)) return false;
         if (categoria && p.tipo !== categoria) return false;
         return true;
-    }), orden);
+    }), orden).sort((a, b) => Number(Boolean(a.agotado)) - Number(Boolean(b.agotado))); // agotados al final
 }
 
 function pintarModulos() {
@@ -552,7 +555,7 @@ function crearTarjeta(prod) {
     // Digitales = logos de marca (marco compacto); tecnología y servicios = fotos (marco más alto)
     const esLogo = MODULOS.digitales.tipos.includes(prod.tipo);
 
-    tarjeta.className = 'tarjeta-3d group relative overflow-hidden rounded-3xl p-4 flex flex-col cursor-pointer';
+    tarjeta.className = `tarjeta-3d group relative overflow-hidden rounded-3xl p-4 flex flex-col cursor-pointer${prod.agotado ? ' agotada' : ''}`;
     tarjeta.tabIndex = 0;
     tarjeta.setAttribute('aria-label', `${prod.nombre}, ${cotizacion ? 'a cotizar' : `desde ${formatearPrecio(desde)}`}`);
     tarjeta.innerHTML = `
@@ -572,7 +575,7 @@ function crearTarjeta(prod) {
                 ${descuento && Number(base.precio) === desde ? `<p class="mt-1 text-[11px] text-neutral-500"><span class="line-through">${formatearPrecio(anterior)}</span> <span class="ml-1 font-bold text-emerald-300">Ahorras ${formatearPrecio(anterior - base.precio)}</span></p>` : ''}
             </div>
             <span class="btn-neon shrink-0 inline-flex items-center gap-2 min-h-[44px] px-4 rounded-2xl text-[11px] font-black uppercase tracking-[0.14em]">
-                ${esCotizable(prod) ? 'Cotizar' : 'Comprar'} <i class="fa-solid fa-arrow-right"></i>
+                ${prod.agotado ? 'Agotado' : esCotizable(prod) ? 'Cotizar' : 'Comprar'} <i class="fa-solid ${prod.agotado ? 'fa-bell' : 'fa-arrow-right'}"></i>
             </span>
         </div>`;
     const img = tarjeta.querySelector('img');
@@ -621,7 +624,7 @@ document.addEventListener('click', (e) => {
 function abrirProducto(id) {
     const prod = estado.productos.find((p) => p.id === id);
     if (!prod) return;
-    const precioValido = (prod.variantes ?? []).find((v) => Number(v.precio) > 0) ?? prod.variantes?.[0];
+    const precioValido = (prod.variantes ?? []).find((v) => Number(v.precio) > 0 && !v.agotado) ?? (prod.variantes ?? []).find((v) => Number(v.precio) > 0) ?? prod.variantes?.[0];
     estado.seleccion = { producto: prod, variante: precioValido, cantidad: 1, cupon: estado.seleccion.cupon };
 
     $('modal-brand').textContent = prod.marca || 'DC Tecnology';
@@ -644,6 +647,7 @@ function abrirProducto(id) {
     $('btn-continuar').innerHTML = cotizable
         ? '<i class="fa-solid fa-calendar-check"></i> Cotizar y agendar'
         : '<i class="fa-solid fa-cart-shopping"></i> Continuar con la compra';
+    actualizarTotal(); // si la opción elegida está agotada, el botón pasa a «Avísame cuando vuelva»
 
     try { history.replaceState(null, '', `?producto=${encodeURIComponent(prod.id)}`); } catch { /* sin historial */ }
     document.dispatchEvent(new CustomEvent('dc:producto-visto', { detail: prod }));
@@ -828,7 +832,7 @@ function pintarVariantes() {
                 <span class="shrink-0 w-4 h-4 rounded-full ring-2 ${activa ? 'ring-dcRed bg-dcRed' : 'ring-neutral-500'}"></span>
                 <span class="text-sm font-bold truncate">${escaparHTML(v.nombre || `Opción ${i + 1}`)}</span>
             </span>
-            <span class="shrink-0 text-sm font-black ${activa ? 'text-dcRed' : ''}">${formatearPrecio(v.precio)}</span>`;
+            <span class="shrink-0 text-sm font-black ${activa ? 'text-dcRed' : ''}">${v.agotado ? 'Agotado' : formatearPrecio(v.precio)}</span>`;
         btn.addEventListener('click', () => {
             estado.seleccion.variante = v;
             pintarVariantes();
@@ -853,6 +857,10 @@ function actualizarTotal() {
     $('cantidad').textContent = cantidad;
     $('cantidad-menos').disabled = cantidad <= 1;
     $('cantidad-mas').disabled = cantidad >= maxCantidad(producto) || esCotizable(producto);
+    const agotadaSel = Boolean(estado.seleccion.variante?.agotado);
+    $('btn-continuar').classList.toggle('agotado', agotadaSel);
+    if (agotadaSel) $('btn-continuar').innerHTML = '<i class="fa-solid fa-bell"></i> Agotado · Avísame cuando vuelva';
+    else if (!esCotizable(producto)) $('btn-continuar').innerHTML = '<i class="fa-solid fa-cart-shopping"></i> Continuar con la compra';
     const disp = $('cantidad-disponibles');
     if (disp) { const n = Number(producto?.existencias); disp.hidden = !(n > 0 && n <= 20); disp.textContent = n === 1 ? 'Última unidad disponible' : `${n} disponibles`; }
 
@@ -949,8 +957,13 @@ async function pintarBannerPromo() {
 /* ==================== TÉRMINOS Y ENVÍO DEL PEDIDO ==================== */
 
 function continuarCompra() {
-    const { producto } = estado.seleccion;
+    const { producto, variante } = estado.seleccion;
     if (!producto) return;
+    if (variante?.agotado) {
+        const texto = `Hola DC Tecnology, avísenme cuando vuelva ${producto.nombre}${variante.nombre && variante.nombre !== 'Unidad' ? ` (${variante.nombre})` : ''}. Gracias.`;
+        window.open(WA.enlace(WA.NUMERO_TIENDA, texto), '_blank', 'noopener');
+        return;
+    }
     $('terminos-lista').innerHTML = TERMINOS[grupoTerminos(producto.tipo)]
         .map((t) => `<li class="flex items-start gap-3"><i class="fa-solid fa-circle-exclamation text-amber-400 mt-1"></i><span>${t}</span></li>`).join('');
     $('terminos-acepto').checked = false;

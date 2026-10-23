@@ -117,6 +117,7 @@ function utilidades() {
             if (p.oculto && !conCategorias) return null;
             if (!b) return p.sincronizado ? null : p;
             const variantes = (p.variantes ?? []).map((v) => {
+                if ((b.find((y) => y.variante === v.nombre) ?? {}).agotado === true) return null; // agotado (wo-050): no se ofrece
                 const sinDias = (t) => String(t ?? '').replace(/\s*\d+\s*d[ií]as?\b/gi, '').trim().toLowerCase();
                 const x = b.find((y) => y.variante === v.nombre) ?? b.find((y) => sinDias(y.variante) === sinDias(v.nombre)); // aunque cambie la duración
                 return x ? { ...v, precio: Number(x.precio) } : null;
@@ -1976,7 +1977,7 @@ async function leerProveedor() {
         const categoria = categorias.get(p.category_id) ?? null;
         if (nuestro) {
             items.push({ producto_id: nuestro.id, categoria, variante: nuestro.variantes?.[0]?.nombre ?? 'Unidad', producto: nuestro.nombre, tipo: nuestro.tipo,
-                costo, precio: Math.ceil((costo * (1 + margen / 100)) / 100) * 100, stock: p.active && costo > 0 ? stock : 0, ref: String(p.reference ?? p.id) });
+                costo, precio: Math.ceil((costo * (1 + margen / 100)) / 100) * 100, stock: p.active && costo > 0 ? stock : 0, ref: String(p.reference ?? p.id), imagen: p.image ?? null });
         } else if (categoria && !EXCLUIR.includes(categoria) && p.active && stock > 0 && costo > 0 && !replica.test(String(p.name))) nuevos++;
     }
     // Si el proveedor devuelve muy pocos de los nuestros, algo falló: no se toca nada (si no, todo quedaría agotado)
@@ -2004,9 +2005,24 @@ function resultadoProveedor() {
         memoria.avisoProveedor = ahora;
         salida.push({ json: { numero: aviso, texto: ['⚠️ *Sincronización con Emprende Red*', fallo, 'Precios y stock quedan como estaban; reintento cada 6 horas (este aviso sale máximo una vez al día).'].join('\n') } });
     }
+    // WO-050: lo que volvió (estado "¡Volvió!" en la cola) y lo que se agotó (solo te aviso)
+    const fila = Array.isArray(r) ? r[0] : r;
+    const repuestos = Array.isArray(fila?.repuestos) ? fila.repuestos : [];
+    const agotados = Array.isArray(fila?.agotados) ? fila.agotados : [];
+    if (!fallo && repuestos.length) {
+        const imagenes = new Map((lectura.items ?? []).map((x) => [x.producto_id, x.imagen]));
+        memoria.estadosPendientes = [...(memoria.estadosPendientes ?? []), ...repuestos.map((x) => ({ producto: x.producto, imagen: imagenes.get(x.producto_id) ?? null,
+            texto: `🔔 ¡Volvió! ${x.producto}\nQuedan ${x.stock} unidad${Number(x.stock) === 1 ? '' : 'es'} · ${cop(x.precio)}\n🛒 www.dctecnology.xyz · 💬 322 328 4622`, at: ahora }))].slice(-20);
+    }
+    if (!fallo && (repuestos.length || agotados.length)) {
+        salida.push({ json: { numero: aviso, texto: ['📦 *Disponibilidad en Emprende Red*',
+            ...repuestos.slice(0, 15).map((x) => `• 🔔 Volvió: ${x.producto} (${x.stock} u.)`),
+            ...agotados.slice(0, 15).map((x) => `• ⛔ Se agotó: ${x.producto} (en la tienda sale «Agotado»)`),
+            repuestos.length ? 'Publico un estado «¡Volvió!» con los que regresaron (máximo 2 estados al día).' : null].filter(Boolean).join('\n') } });
+    }
     if (!fallo && lectura.nuevos > 0 && ahora - (memoria.avisoNuevosProveedor || 0) > 7 * 864e5) {
         memoria.avisoNuevosProveedor = ahora;
-        salida.push({ json: { numero: aviso, texto: [`🆕 *Emprende Red tiene ${lectura.nuevos} productos de tecnología nuevos con stock*`,
+        salida.push({ json: { numero: aviso, texto: [`🆕 *Emprende Red tiene ${lectura.nuevos} productos nuevos con stock*`,
             'Aún no están en tu tienda. Para agregarlos: node herramientas/sincronizar-emprendered.mjs --tienda (y publicar).'].join('\n') } });
     }
     return salida;
@@ -2264,6 +2280,35 @@ async function consultarRastreos() {
     return salida;
 }
 
+/* ---------- H5) Estados "¡Volvió!" (WO-050): uno por vez, máximo 2 al día, de día (lun–vie 9–19, sáb 9–15) ---------- */
+function estadoPendiente() {
+    const memoria = $getWorkflowStaticData('global');
+    const cola = memoria.estadosPendientes ?? [];
+    if (!cola.length) return [];
+    const local = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Bogota' }));
+    if (local.getDay() === 0 || local.getHours() < 9 || local.getHours() >= (local.getDay() === 6 ? 15 : 19)) return [];
+    const hoy = local.toDateString();
+    memoria.estadosHoy = memoria.estadosHoy?.dia === hoy ? memoria.estadosHoy : { dia: hoy, n: 0 };
+    if (memoria.estadosHoy.n >= 2) return [];
+    // Vigentes (menos de 2 días); si hay varios, se juntan en uno solo
+    const vigentes = cola.filter((x) => Date.now() - (x.at ?? 0) < 2 * 864e5);
+    memoria.estadosPendientes = [];
+    if (!vigentes.length) return [];
+    memoria.estadosHoy.n += 1;
+    if (vigentes.length === 1 && vigentes[0].imagen) return [{ json: { tipo: 'image', contenido: vigentes[0].imagen, texto: vigentes[0].texto } }];
+    const texto = vigentes.length === 1 ? vigentes[0].texto
+        : `🔔 ¡Volvieron!\n${vigentes.slice(0, 6).map((x) => `• ${String(x.producto).slice(0, 60)}`).join('\n')}\n🛒 www.dctecnology.xyz · 💬 322 328 4622`;
+    return [{ json: { tipo: 'text', contenido: texto, texto } }];
+}
+function listaContactosEstado() {
+    const pedido = $('Estado pendiente').first().json;
+    const lista = [...new Set($input.all().map((i) => i.json).filter((c) => c && c.pushName && /^\d{8,15}@s\.whatsapp\.net$/.test(String(c.remoteJid ?? ''))).map((c) => c.remoteJid))];
+    if (!lista.length) return [];
+    return [{ json: pedido.tipo === 'image'
+        ? { type: 'image', content: pedido.contenido, caption: pedido.texto, statusJidList: lista }
+        : { type: 'text', content: pedido.contenido, backgroundColor: '#C8102E', font: 1, statusJidList: lista } }];
+}
+
 /* ---------- H3) Renovaciones (WO-044): avisa 3 días antes de que venza el plan ----------
    Duración: "N días" en la variante, "N mes(es)" × 30, "año" × 365; streaming sin duración = 30 días. Solo cuentas
    de streaming y licencias/apps con duración. Horario (Ley 2300 de 2023): lun–vie 9 a. m.–7 p. m., sábado 9 a. m.–3 p. m. */
@@ -2429,7 +2474,7 @@ async function leerPreciosAnc() {
         for (let m; (m = re.exec(pagina));) {
             let variantes = [];
             try { variantes = JSON.parse(m[1].replace(/&quot;/g, '"').replace(/&amp;/g, '&')); } catch { continue; }
-            productos.push({ nombre: m[2].trim(), variantes: variantes.map((v) => ({ nombre: [v.option0, v.option1, v.option2].filter(Boolean).join(' / '), precio: Number(v.price_number) || null })) });
+            productos.push({ nombre: m[2].trim(), variantes: variantes.map((v) => ({ nombre: [v.option0, v.option1, v.option2].filter(Boolean).join(' / '), precio: Number(v.price_number) || null, disponible: v.available !== false })) });
         }
         if (productos.length === antes) break;
     }
@@ -2440,22 +2485,32 @@ async function leerPreciosAnc() {
     // Duración: si ANC cambia los días del plan (p. ej. 26 → 30) se te avisa; el nombre que ve el cliente lo cambias tú
     const dias = (x) => { const d = /\b(\d+)\s*d[ií]as?\b/i.exec(String(x ?? '')); return d ? Number(d[1]) : null; };
     const duraciones = [];
+    // WO-050: disponibilidad (agotado en su tienda o el plan ya no está) para mostrar "Agotado" y avisar cuando vuelva
+    const disponibilidad = [];
+    const faltan = [];
     for (const m of __ANC_MAPA__) {
         const p = productos.find((x) => plano(x.nombre) === plano(m.anc_producto));
         const v = p?.variantes.find((x) => plano(x.nombre) === plano(m.anc_plan)) ?? p?.variantes.find((x) => sinDias(x.nombre) === sinDias(m.anc_plan));
+        if (!v) { faltan.push({ producto_id: m.id, variante: m.variante, agotado: true }); continue; }
+        disponibilidad.push({ producto_id: m.id, variante: m.variante, agotado: v.disponible === false });
         if (!v?.precio) continue;
         const nuestros = dias(m.variante), suyos = dias(v.nombre);
         if (nuestros && suyos && nuestros !== suyos) duraciones.push({ producto_id: m.id, variante: m.variante, nuestros, suyos, plan: v.nombre });
         items.push({ producto_id: m.id, variante: m.variante, costo: v.precio, precio: Math.round((v.precio * (1 + margen / 100)) / 100) * 100, plan: `${m.anc_producto} · ${m.anc_plan}` });
     }
-    return [{ json: { items, leidos: productos.length, duraciones } }];
+    // Lo que ya no está en su tienda cuenta como agotado, solo si la lectura fue completa (≥ 80 % encontrado)
+    if (disponibilidad.length >= (disponibilidad.length + faltan.length) * 0.8) disponibilidad.push(...faltan);
+    return [{ json: { items, leidos: productos.length, duraciones, disponibilidad } }];
 }
 function resultadoPreciosAnc() {
     const cfg = $('Config bot').first().json;
     const admin = soloDigitos(cfg.numero_aviso_admin);
     const lectura = $('Leer precios ANC').first().json;
-    const r0 = $input.first().json;
+    const r0 = $('Sincronizar precios ANC').first().json;
     const r = Array.isArray(r0) ? r0[0] : r0;
+    // WO-050: lo que se agotó o volvió en ANC (sin wo-050 aplicado, esto llega con error y se ignora)
+    const d0 = $input.first().json;
+    const disp = d0?.error ? {} : (Array.isArray(d0) ? d0[0] : d0) ?? {};
     const memoria = $getWorkflowStaticData('global');
     const ahora = Date.now();
     if (lectura.error || r0.error) {
@@ -2466,18 +2521,26 @@ function resultadoPreciosAnc() {
         return [{ json: { numero: admin, texto: `⚠️ *Precios de ANC*\n${causa}\nLos precios quedan como estaban; reintento en 6 horas.` } }];
     }
     const cambios = (r.cambios ?? []);
+    const repuestosAnc = Array.isArray(disp.repuestos) ? disp.repuestos : [];
+    const agotadosAnc = Array.isArray(disp.agotados) ? disp.agotados : [];
+    if (repuestosAnc.length) {
+        memoria.estadosPendientes = [...(memoria.estadosPendientes ?? []), { producto: repuestosAnc.map((x) => x.producto).join(', '), imagen: null,
+            texto: `🔔 ¡Volvió! ${[...new Set(repuestosAnc.map((x) => x.producto))].join(' · ')}\nPídelo hoy y te llega por WhatsApp.\n🛒 www.dctecnology.xyz · 💬 322 328 4622`, at: ahora }].slice(-20);
+    }
+    const avisoDisp = (repuestosAnc.length || agotadosAnc.length) ? ['', '📦 *Disponibilidad en ANC*', ...repuestosAnc.map((x) => `• 🔔 Volvió: ${x.producto} · ${x.variante}`), ...agotadosAnc.map((x) => `• ⛔ Agotado: ${x.producto} · ${x.variante} (en la tienda sale «Agotado»)`)] : [];
     // Duración distinta a la que anuncias (una vez al día por plan): el cliente debe recibir lo que dice el nombre
     memoria.avisoDuracion = memoria.avisoDuracion || {};
     const duraciones = (lectura.duraciones ?? []).filter((d) => ahora - (memoria.avisoDuracion[d.producto_id + d.variante] || 0) > 24 * 3600e3);
     duraciones.forEach((d) => { memoria.avisoDuracion[d.producto_id + d.variante] = ahora; });
     const avisoDias = duraciones.length ? ['', '📅 *La duración cambió en ANC*', ...duraciones.map((d) => `• ${d.producto_id} · ${d.variante}: tú anuncias *${d.nuestros} días* y ANC ahora entrega *${d.suyos} días* («${d.plan}»).`),
         'Actualiza el nombre del plan (productos.json, equivalencias y la base) para que el cliente reciba lo que promete.'] : [];
-    if ((!cambios.length && !avisoDias.length) || !admin) return [];
+    if ((!cambios.length && !avisoDias.length && !avisoDisp.length) || !admin) return [];
     const nombre = (c) => `${c.producto_id} · ${c.variante}`;
     return [{ json: { numero: admin, texto: [...(cambios.length ? ['💲 *Precios sincronizados con ANC*'] : []),
         ...cambios.filter((c) => c.aplicado).map((c) => `• ${nombre(c)}: ${cop(c.antes)} → *${cop(c.ahora)}*`),
         ...cambios.filter((c) => !c.aplicado).map((c) => `• ⚠️ ${nombre(c)}: ANC muestra ${cop(c.ahora)} (antes ${cop(c.antes)}). NO lo apliqué: revísalo en el panel.`),
         ...avisoDias,
+        ...avisoDisp,
     ].join('\n').trim() } }];
 }
 
@@ -3053,7 +3116,24 @@ nodo('Guardar rastreo', 'n8n-nodes-base.httpRequest', 4.2, [1100, 1660], rpcPane
 nodoCodigo('Leer precios ANC', [440, 1080], leerPreciosAnc, { conUtilidades: true }, { onError: 'continueRegularOutput' });
 nodo('Sincronizar precios ANC', 'n8n-nodes-base.httpRequest', 4.2, [660, 1080],
     rpcPanel('sincronizar_precios_anc', "={{ JSON.stringify({ p_items: $json.items ?? [] }) }}"), { onError: 'continueRegularOutput', alwaysOutputData: true });
+nodo('Disponibilidad ANC', 'n8n-nodes-base.httpRequest', 4.2, [770, 1180],
+    rpcPanel('marcar_disponibilidad_anc', "={{ JSON.stringify({ p_items: $('Leer precios ANC').first().json.disponibilidad ?? [] }) }}"), { onError: 'continueRegularOutput', alwaysOutputData: true });
 nodoCodigo('Resultado precios ANC', [880, 1080], resultadoPreciosAnc, { conUtilidades: true });
+// WO-050 · Estados "¡Volvió!" (rama de salud, cada 30 min)
+nodoCodigo('Estado pendiente', [660, 1820], estadoPendiente, {}, { executeOnce: true });
+nodo('Contactos para estado', 'n8n-nodes-base.httpRequest', 4.2, [880, 1820], {
+    ...evolutionEnviar('Config bot'),
+    url: "={{ $('Config bot').first().json.evolution_url }}/chat/findContacts/{{ $('Config bot').first().json.evolution_instancia }}",
+    jsonBody: '={{ JSON.stringify({}) }}',
+    options: { timeout: 30000 },
+}, { onError: 'continueRegularOutput' });
+nodoCodigo('Lista de contactos', [1100, 1820], listaContactosEstado, {}, { executeOnce: true });
+nodo('Publicar estado', 'n8n-nodes-base.httpRequest', 4.2, [1320, 1820], {
+    ...evolutionEnviar('Config bot'),
+    url: "={{ $('Config bot').first().json.evolution_url }}/message/sendStatus/{{ $('Config bot').first().json.evolution_instancia }}",
+    jsonBody: '={{ JSON.stringify($json) }}',
+    options: { timeout: 60000 },
+}, { onError: 'continueRegularOutput' });
 
 /* ---------- G) Salud del sistema cada 30 minutos ---------- */
 nodo('Salud cada 30 minutos', 'n8n-nodes-base.scheduleTrigger', 1.2, [-220, 1160], { rule: { interval: [{ field: 'minutes', minutesInterval: 30 }] } });
@@ -3175,6 +3255,10 @@ unir('Origen', 'Entregas para renovar', 5);
 unir('Entregas para renovar', 'Renovaciones');
 unir('Renovaciones', 'Encolar renovación');
 unir('Origen', 'Guías abiertas', 5);
+unir('Origen', 'Estado pendiente', 5);
+unir('Estado pendiente', 'Contactos para estado');
+unir('Contactos para estado', 'Lista de contactos');
+unir('Lista de contactos', 'Publicar estado');
 unir('Guías abiertas', 'Consultar rastreo');
 unir('Consultar rastreo', 'Guardar rastreo');
 unir('Origen', 'Medio entrante', 6);
@@ -3257,7 +3341,8 @@ unir('RPC del panel', 'Resultado del panel');
 unir('Resultado del panel', 'Enviar respuesta');
 unir('Origen', 'Leer precios ANC', 4);
 unir('Leer precios ANC', 'Sincronizar precios ANC');
-unir('Sincronizar precios ANC', 'Resultado precios ANC');
+unir('Sincronizar precios ANC', 'Disponibilidad ANC');
+unir('Disponibilidad ANC', 'Resultado precios ANC');
 unir('Resultado precios ANC', 'Enviar respuesta');
 const enCadena = (lista) => lista.slice(0, -1).forEach((n, i) => unir(n, lista[i + 1]));
 enCadena(['Crear triangulación', 'Registrar triangulación', 'Vincular al panel', '¿Compra web?']);

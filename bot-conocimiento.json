@@ -1,5 +1,5 @@
 {
-  "version": "2026-10-22T20:13:57.280Z",
+  "version": "2026-10-23T12:17:42.765Z",
   "identidad": [
     "Eres DC TECNOLOGY: respondes el WhatsApp de la tienda (https://www.dctecnology.xyz) en nombre del equipo. Habla como la tienda (\"te ayudamos\", \"te enviamos\").",
     "En el PRIMER mensaje de la conversación saluda así: \"¡Hola! Te saluda *DC TECNOLOGY* 👋\", responde lo que preguntó y cierra con: \"Escribe *menú* para ver todas las opciones.\" Después no vuelvas a presentarte (si el contexto trae un mensaje del menú, la conversación ya empezó).",
@@ -2315,7 +2315,7 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 10,
+      "existencias": 9,
       "desde": 57000,
       "descripcion": "Audífonos inalámbricos con cancelación activa y ambiental de ruido (ANC/ENC), modo sonido ambiente, control táctil y estuche con pantalla que muestra batería y hora. Sonido nítido, llamadas claras y diseño cómodo con almohadillas de silicona.GARANTIA DE 2 MESES"
     },
@@ -2489,7 +2489,7 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 6,
+      "existencias": 5,
       "desde": 30000,
       "descripcion": "🔋📱 Mantén tu iPhone con energía de forma práctica con este power bank inalámbrico de 10.000 mAh. Su formato grande ofrece una solución cómoda para llevar energía adicional contigo.\r\n⚡️ Características destacadas:\r\n• Capacidad de 10.000 mAh: proporciona energía adicional para tu dispositivo.\r\n• Carga inalámbrica: permite cargar dispositivos compatibles sin necesidad de cable.\r\n• Diseño grande: ofrece una presentación práctica para el uso diario."
     },
@@ -2625,7 +2625,7 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 7,
+      "existencias": 5,
       "desde": 7800,
       "descripcion": "¡Olvídate de las esperas! Carga tu iPhone a la velocidad de la luz con nuestro cable Type-C a Lightning de 20W. Diseñado para la máxima potencia y durabilidad, conéctate y listo. ¿Quieres experimentar la carga rápida definitiva? ¡Descubre más ahora!"
     },
@@ -3042,7 +3042,7 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 4,
+      "existencias": 3,
       "desde": 27000,
       "descripcion": "🔊 Características destacadas:\n* Cancelación activa de ruido (ANC): ayuda a reducir los sonidos del entorno.\n* Modo de sonido ambiente: permite escuchar los sonidos exteriores en modelos compatibles.\n* Estuche con puerto USB-C: facilita la recarga mediante un cable compatible."
     },
@@ -3222,7 +3222,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 21,
+      "existencias": 19,
       "desde": 4500,
       "descripcion": null
     },
@@ -3242,7 +3242,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 58,
+      "existencias": 56,
       "desde": 4500,
       "descripcion": null
     },
@@ -3842,7 +3842,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 59,
+      "existencias": 56,
       "desde": 3800,
       "descripcion": null
     },
@@ -3882,7 +3882,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 9,
+      "existencias": 6,
       "desde": 1900,
       "descripcion": null
     },
@@ -3962,7 +3962,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 4,
+      "existencias": 2,
       "desde": 3000,
       "descripcion": null
     },
@@ -4162,7 +4162,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 57,
+      "existencias": 55,
       "desde": 2400,
       "descripcion": null
     },
@@ -4301,7 +4301,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 19,
+      "existencias": 20,
       "desde": 5700,
       "descripcion": null
     },
@@ -4696,7 +4696,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 3,
+      "existencias": 2,
       "desde": 7500,
       "descripcion": null
     },
@@ -5153,6 +5153,26 @@
       "oculto": true,
       "existencias": 1,
       "desde": 96000,
+      "descripcion": null
+    },
+    {
+      "id": "er-corrector-de-postura-unisex-741",
+      "tipo": "variedades",
+      "marca": "DC Tecnology",
+      "nombre": "Corrector de Postura Unisex",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/741-937e9105-2ff2-4d2a-b5d4-ec189ed92514.webp?v=1778090899",
+      "url": "https://www.dctecnology.xyz/?producto=er-corrector-de-postura-unisex-741",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 14900,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "oculto": true,
+      "existencias": 5,
+      "desde": 14900,
       "descripcion": null
     },
     {
@@ -5665,7 +5685,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 3,
+      "existencias": 1,
       "desde": 3000,
       "descripcion": null
     },
@@ -5784,7 +5804,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 8,
+      "existencias": 9,
       "desde": 14300,
       "descripcion": null
     },
@@ -6502,7 +6522,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 3,
+      "existencias": 2,
       "desde": 33000,
       "descripcion": null
     },
@@ -7131,7 +7151,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 17,
+      "existencias": 14,
       "desde": 800,
       "descripcion": null
     },
@@ -7568,6 +7588,25 @@
       "existencias": 11,
       "desde": 9800,
       "descripcion": null
+    },
+    {
+      "id": "er-tripode-estabilizador-celular-ay49t-1118",
+      "tipo": "tecnologia",
+      "marca": "DC Tecnology",
+      "nombre": "Tripode Estabilizador Celular AY49T",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1118-whatsapp-image-2026-02-14-at-54610-pm.webp?v=1771109185",
+      "url": "https://www.dctecnology.xyz/p/er-tripode-estabilizador-celular-ay49t-1118.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 54800,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "existencias": 5,
+      "desde": 54800,
+      "descripcion": "Caracter&iacute;sticas:\r\n\r\n\r\n \r\n Soporte Expandible hasta 55cm.\r\n \r\n \r\n Micr&oacute;fono Conexi&oacute;n por cable 3.5mm\r\n \r\n \r\n Luz LED de 6500 K.\r\n \r\n \r\n Control Bluetooth\r\n \r\n \r\n El montaje superior del gancho permite un montaje r&aacute;pido del micr&oacute;fono y la luz LED."
     },
     {
       "id": "er-mini-tripode-tp-009-141",
@@ -8827,7 +8866,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 7,
+      "existencias": 6,
       "desde": 52500,
       "descripcion": null
     },
@@ -10725,7 +10764,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 4,
+      "existencias": 3,
       "desde": 31400,
       "descripcion": null
     },
@@ -10925,7 +10964,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 21,
+      "existencias": 9,
       "desde": 1500,
       "descripcion": null
     },
@@ -13352,7 +13391,7 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 10,
+      "existencias": 9,
       "desde": 31100,
       "descripcion": "¡Olvídate de esperar! Con el CABLE YOOKIE CB108 de 100W, tus dispositivos estarán cargados a toda velocidad. Su diseño de carga rápida y transferencia veloz te sorprenderá. ¿Listo para experimentar la potencia?"
     },
@@ -13452,7 +13491,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 2,
+      "existencias": 3,
       "desde": 11100,
       "descripcion": null
     },
@@ -14504,7 +14543,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 6,
+      "existencias": 5,
       "desde": 37400,
       "descripcion": null
     }
