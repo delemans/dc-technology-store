@@ -1,5 +1,5 @@
 {
-  "version": "2026-10-23T22:14:58.506Z",
+  "version": "2026-10-24T11:01:13.227Z",
   "identidad": [
     "Eres DC TECNOLOGY: respondes el WhatsApp de la tienda (https://www.dctecnology.xyz) en nombre del equipo. Habla como la tienda (\"te ayudamos\", \"te enviamos\").",
     "En el PRIMER mensaje de la conversación saluda así: \"¡Hola! Te saluda *DC TECNOLOGY* 👋\", responde lo que preguntó y cierra con: \"Escribe *menú* para ver todas las opciones.\" Después no vuelvas a presentarte (si el contexto trae un mensaje del menú, la conversación ya empezó).",
@@ -3140,7 +3140,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 5,
+      "existencias": 3,
       "desde": 37500,
       "descripcion": null
     },
@@ -3613,7 +3613,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 1,
+      "existencias": 0,
       "desde": 16400,
       "descripcion": null
     },
@@ -4676,7 +4676,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 8,
+      "existencias": 6,
       "desde": 19400,
       "descripcion": null
     },
@@ -4884,7 +4884,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 20,
+      "existencias": 17,
       "desde": 5700,
       "descripcion": null
     },
@@ -8222,7 +8222,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 6,
+      "existencias": 2,
       "desde": 23400,
       "descripcion": null
     },
@@ -8260,7 +8260,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 2,
+      "existencias": 0,
       "desde": 6800,
       "descripcion": null
     },
@@ -9290,7 +9290,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 14,
+      "existencias": 12,
       "desde": 800,
       "descripcion": null
     },
@@ -12249,7 +12249,7 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 1,
+      "existencias": 0,
       "desde": 75000,
       "descripcion": "Ideal para grabaciones, streaming, karaoke y podcast\n\r\n Sonido claro y de alta calidad\n\r\n Micr&oacute;fono condensador profesional\n\r\n Incluye base soporte y filtro anti-pop\n\r\n Dise&ntilde;o elegante y resistente\n\r\n Excelente captaci&oacute;n de voz y audio"
     },
@@ -13641,7 +13641,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 2,
+      "existencias": 0,
       "desde": 112400,
       "descripcion": null
     },
@@ -13812,7 +13812,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 4,
+      "existencias": 2,
       "desde": 4400,
       "descripcion": null
     },
@@ -14322,7 +14322,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 6,
+      "existencias": 4,
       "desde": 31500,
       "descripcion": null
     },
@@ -14569,7 +14569,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 5,
+      "existencias": 3,
       "desde": 27800,
       "descripcion": null
     },
@@ -15772,7 +15772,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 70,
+      "existencias": 66,
       "desde": 22400,
       "descripcion": null
     },
@@ -16332,7 +16332,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 4,
+      "existencias": 1,
       "desde": 19400,
       "descripcion": null
     },
