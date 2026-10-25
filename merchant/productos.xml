@@ -198,7 +198,7 @@
       <g:identifier_exists>no</g:identifier_exists>
       <g:google_product_category>Electronics</g:google_product_category>
       <g:product_type>Tecnología</g:product_type>
-      <g:sell_on_google_quantity>6</g:sell_on_google_quantity>
+      <g:sell_on_google_quantity>4</g:sell_on_google_quantity>
     </item>
     <item>
       <g:id>er-anc-airpods-pantalla-tactil-5</g:id>
@@ -408,7 +408,7 @@
       <g:identifier_exists>no</g:identifier_exists>
       <g:google_product_category>Electronics</g:google_product_category>
       <g:product_type>Tecnología</g:product_type>
-      <g:sell_on_google_quantity>3</g:sell_on_google_quantity>
+      <g:sell_on_google_quantity>2</g:sell_on_google_quantity>
     </item>
     <item>
       <g:id>er-airpods-generacion-6-53</g:id>
@@ -786,7 +786,7 @@
       <g:identifier_exists>no</g:identifier_exists>
       <g:google_product_category>Electronics</g:google_product_category>
       <g:product_type>Tecnología</g:product_type>
-      <g:sell_on_google_quantity>6</g:sell_on_google_quantity>
+      <g:sell_on_google_quantity>5</g:sell_on_google_quantity>
     </item>
     <item>
       <g:id>er-parlante-bluetooh-rgb-110</g:id>
@@ -1615,6 +1615,20 @@
       <g:sell_on_google_quantity>15</g:sell_on_google_quantity>
     </item>
     <item>
+      <g:id>er-microfono-profesional-q-mic3-1406</g:id>
+      <g:title>Microfono Profesional Q-MIC3</g:title>
+      <g:description>Ideal para grabaciones, streaming, karaoke y podcast Sonido claro y de alta calidad Micr fono condensador profesional Incluye base soporte y filtro anti-pop Dise o elegante y resistente Excelente captaci n de voz y audio</g:description>
+      <g:link>https://dctecnology.xyz/p/er-microfono-profesional-q-mic3-1406.html</g:link>
+      <g:image_link>https://emprendered.com.co/storage/shop/front/img/products/1406-cf91c0a3-d8e0-4477-b169-abdf88812d88.webp?v=1778278832</g:image_link>
+      <g:availability>in_stock</g:availability>
+      <g:price>75000 COP</g:price>
+      <g:condition>new</g:condition>
+      <g:identifier_exists>no</g:identifier_exists>
+      <g:google_product_category>Electronics</g:google_product_category>
+      <g:product_type>Tecnología</g:product_type>
+      <g:sell_on_google_quantity>1</g:sell_on_google_quantity>
+    </item>
+    <item>
       <g:id>er-audifonos-e6s-inalambricos-1410</g:id>
       <g:title>Audifonos E6S Inalambricos</g:title>
       <g:description>Auriculares 100% inal mbricos con un dise o compacto y elegante, sonido n tido y bater a de larga duraci n. Su estuche de carga digital te muestra el nivel de bater a en tiempo real, y el dise o dividido permite usar cada auricular por separado. Perfectos para m sica, llamadas y tu d a a d a sin cables ni complicaciones.</g:description>
@@ -1920,7 +1934,7 @@
       <g:identifier_exists>no</g:identifier_exists>
       <g:google_product_category>Electronics</g:google_product_category>
       <g:product_type>Tecnología</g:product_type>
-      <g:sell_on_google_quantity>71</g:sell_on_google_quantity>
+      <g:sell_on_google_quantity>70</g:sell_on_google_quantity>
     </item>
     <item>
       <g:id>er-audifonos-tws-s510-con-pantalla-digital-256</g:id>
@@ -2032,7 +2046,7 @@
       <g:identifier_exists>no</g:identifier_exists>
       <g:google_product_category>Electronics</g:google_product_category>
       <g:product_type>Tecnología</g:product_type>
-      <g:sell_on_google_quantity>9</g:sell_on_google_quantity>
+      <g:sell_on_google_quantity>8</g:sell_on_google_quantity>
     </item>
     <item>
       <g:id>er-pantalla-selfie-270</g:id>

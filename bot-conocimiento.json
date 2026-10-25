@@ -1,5 +1,5 @@
 {
-  "version": "2026-10-24T11:01:13.227Z",
+  "version": "2026-10-25T11:01:11.371Z",
   "identidad": [
     "Eres DC TECNOLOGY: respondes el WhatsApp de la tienda (https://www.dctecnology.xyz) en nombre del equipo. Habla como la tienda (\"te ayudamos\", \"te enviamos\").",
     "En el PRIMER mensaje de la conversación saluda así: \"¡Hola! Te saluda *DC TECNOLOGY* 👋\", responde lo que preguntó y cierra con: \"Escribe *menú* para ver todas las opciones.\" Después no vuelvas a presentarte (si el contexto trae un mensaje del menú, la conversación ya empezó).",
@@ -2295,7 +2295,7 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 6,
+      "existencias": 4,
       "desde": 50700,
       "descripcion": "Capacidad de 20.000 mAhDisplay indicador de carga4 cables integrados y luz LED"
     },
@@ -3140,7 +3140,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 3,
+      "existencias": 4,
       "desde": 37500,
       "descripcion": null
     },
@@ -3214,7 +3214,7 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 3,
+      "existencias": 2,
       "desde": 27000,
       "descripcion": "🔊 Características destacadas:\n* Cancelación activa de ruido (ANC): ayuda a reducir los sonidos del entorno.\n* Modo de sonido ambiente: permite escuchar los sonidos exteriores en modelos compatibles.\n* Estuche con puerto USB-C: facilita la recarga mediante un cable compatible."
     },
@@ -3537,7 +3537,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 9,
+      "existencias": 8,
       "desde": 24800,
       "descripcion": null
     },
@@ -3556,7 +3556,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 4,
+      "existencias": 3,
       "desde": 33000,
       "descripcion": null
     },
@@ -4676,7 +4676,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 6,
+      "existencias": 7,
       "desde": 19400,
       "descripcion": null
     },
@@ -4884,7 +4884,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 17,
+      "existencias": 20,
       "desde": 5700,
       "descripcion": null
     },
@@ -5447,7 +5447,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 2,
+      "existencias": 1,
       "desde": 7500,
       "descripcion": null
     },
@@ -5713,7 +5713,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 2,
+      "existencias": 1,
       "desde": 23300,
       "descripcion": null
     },
@@ -5789,7 +5789,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 6,
+      "existencias": 5,
       "desde": 87000,
       "descripcion": null
     },
@@ -5865,7 +5865,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 2,
+      "existencias": 1,
       "desde": 59900,
       "descripcion": null
     },
@@ -7388,7 +7388,7 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 6,
+      "existencias": 5,
       "desde": 19500,
       "descripcion": "Micr&oacute;fono: marca digital de silicona\r\n \r\n \r\n Capacidad de la bater&iacute;a: 60mAh\r\n \r\n \r\n Duraci&oacute;n de la bater&iacute;a: 5-6 horas\r\n \r\n \r\n Relaci&oacute;n se&ntilde;al-ruido: 60dB\r\n \r\n \r\n Caracter&iacute;sticas: reducci&oacute;n de ruido, Cable de carga\r\n \r\n \r\n Conector de salida: tipo C"
     },
@@ -8090,7 +8090,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 9,
+      "existencias": 8,
       "desde": 20700,
       "descripcion": null
     },
@@ -8222,7 +8222,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 2,
+      "existencias": 4,
       "desde": 23400,
       "descripcion": null
     },
@@ -8260,7 +8260,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 0,
+      "existencias": 2,
       "desde": 6800,
       "descripcion": null
     },
@@ -8601,7 +8601,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 6,
+      "existencias": 5,
       "desde": 41300,
       "descripcion": null
     },
@@ -9290,7 +9290,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 12,
+      "existencias": 14,
       "desde": 800,
       "descripcion": null
     },
@@ -9499,7 +9499,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 3,
+      "existencias": 0,
       "desde": 42800,
       "descripcion": null
     },
@@ -11331,7 +11331,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 11,
+      "existencias": 10,
       "desde": 6900,
       "descripcion": null
     },
@@ -11740,7 +11740,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 3,
+      "existencias": 2,
       "desde": 20300,
       "descripcion": null
     },
@@ -12249,7 +12249,7 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 0,
+      "existencias": 1,
       "desde": 75000,
       "descripcion": "Ideal para grabaciones, streaming, karaoke y podcast\n\r\n Sonido claro y de alta calidad\n\r\n Micr&oacute;fono condensador profesional\n\r\n Incluye base soporte y filtro anti-pop\n\r\n Dise&ntilde;o elegante y resistente\n\r\n Excelente captaci&oacute;n de voz y audio"
     },
@@ -13207,7 +13207,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 7,
+      "existencias": 6,
       "desde": 22400,
       "descripcion": null
     },
@@ -13717,7 +13717,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 22,
+      "existencias": 21,
       "desde": 2400,
       "descripcion": null
     },
@@ -13812,7 +13812,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 2,
+      "existencias": 3,
       "desde": 4400,
       "descripcion": null
     },
@@ -13868,7 +13868,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 40,
+      "existencias": 39,
       "desde": 3200,
       "descripcion": null
     },
@@ -14322,7 +14322,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 4,
+      "existencias": 5,
       "desde": 31500,
       "descripcion": null
     },
@@ -14569,7 +14569,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 3,
+      "existencias": 4,
       "desde": 27800,
       "descripcion": null
     },
@@ -14850,7 +14850,7 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 71,
+      "existencias": 70,
       "desde": 24800,
       "descripcion": "✅ Iluminación profesional\n✅ Soporte para dos celulares\n✅ Altura ajustable\n✅ Rotación de 360°\n✅ Control de intensidad\n✅ Conexión USB\n✅ Base estable y resistente¡Haz que cada video y fotografía se vea más profesional! Pide el tuyo hoy."
     },
@@ -15203,7 +15203,7 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 9,
+      "existencias": 8,
       "desde": 87000,
       "descripcion": "cable incluido"
     },
@@ -15772,7 +15772,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 66,
+      "existencias": 67,
       "desde": 22400,
       "descripcion": null
     },
@@ -16332,7 +16332,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 1,
+      "existencias": 2,
       "desde": 19400,
       "descripcion": null
     },
@@ -16596,7 +16596,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 3,
+      "existencias": 2,
       "desde": 44900,
       "descripcion": null
     },
@@ -17068,7 +17068,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 4,
+      "existencias": 3,
       "desde": 39000,
       "descripcion": null
     },
@@ -17368,7 +17368,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 93,
+      "existencias": 92,
       "desde": 22400,
       "descripcion": null
     },
@@ -17859,7 +17859,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 5,
+      "existencias": 4,
       "desde": 39000,
       "descripcion": null
     },
@@ -17897,7 +17897,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 5,
+      "existencias": 4,
       "desde": 37400,
       "descripcion": null
     },
