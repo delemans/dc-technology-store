@@ -489,7 +489,7 @@ function pintarEstadoSistema(operativo) {
       <span class="absolute inline-flex h-full w-full rounded-full ${color} opacity-75 animate-ping"></span>
       <span class="relative inline-flex h-2 w-2 rounded-full ${color}"></span>
     </span>
-    ${operativo ? 'Servidores y entregas automáticas operativas' : 'Conexión inestable · reintentando'}`;
+    ${operativo ? 'Seguimiento de pedidos en línea' : 'Conexión inestable · reintentando'}`;
 }
 
 // Comprobación real al cargar: una consulta vacía a la RPC confirma que el servicio responde

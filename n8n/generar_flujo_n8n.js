@@ -398,7 +398,7 @@ function comprobanteRecibido() {
             ...(orden ? ['', `🛒 Pedido *#${orden.referencia}*: ${orden.producto}${orden.variante ? ` – ${orden.variante}` : ''}`, '', '*Paso a paso:*',
                 `1️⃣ Revisa en tu Nequi/Daviplata que llegaron *${cop(orden.precio)}*${orden.cupon ? ` (con cupón ${orden.cupon}: confirma que sea su primera compra)` : ''}.`,
                 `2️⃣ Si llegó responde *#ok ${orden.referencia}* · si no: *#no ${orden.referencia} motivo*`,
-                `3️⃣ Te digo qué comprar en ANC (${orden.plan ?? orden.producto}) y, cuando ANC envíe la cuenta, se la entrego al cliente.`]
+                (String($('Config bot').first().json.entrega_cuentas ?? 'manual').trim().toLowerCase() === 'automatica' ? `3️⃣ Te digo qué comprar en ANC (${orden.plan ?? orden.producto}) y, cuando ANC envíe la cuenta, se la entrego al cliente.` : `3️⃣ Consigue la cuenta (${orden.plan ?? orden.producto}) y entrégala con *#entregar ${orden.referencia} correo / clave*.`)]
                 : ['Valídalo en el panel → Pagos & Bot.']),
         ].filter(Boolean).join('\n') } });
     }
@@ -1072,13 +1072,13 @@ function evaluarCotizacion() {
             '*Paso a paso:*',
             ...(t.pagado ? [
                 `1️⃣ Compra en ANC${fuente ? ` (${fuente.replace(' (el portal no responde)', '')})` : ''}: ${comprar}. Como WhatsApp pon el del bot: 322 328 4622.`,
-                '2️⃣ Cuando ANC envíe la cuenta a ese WhatsApp, se la entrego al cliente con nuestra marca y activo la garantía.',
-                `   Si no la reconozco te pido: *#entregar ${t.referencia}*`,
+                ...(String($('Config bot').first().json.entrega_cuentas ?? 'manual').trim().toLowerCase() === 'automatica' ? ['2️⃣ Cuando ANC envíe la cuenta a ese WhatsApp, se la entrego al cliente con nuestra marca y activo la garantía.', `   Si no la reconozco te pido: *#entregar ${t.referencia}*`]
+                    : [`2️⃣ Entrega la cuenta tú: *#entregar ${t.referencia} correo / clave* (y perfil o PIN si aplica). El cliente la recibe con nuestra marca y se activa la garantía.`]),
             ] : [
                 '1️⃣ Espera su comprobante (te aviso apenas llegue).',
                 `2️⃣ Revisa en tu Nequi/Daviplata que llegaron *${cop(t.precio_venta)}* y responde *#ok ${t.referencia}* (o *#no ${t.referencia} motivo*).`,
                 `3️⃣ Compra en ANC: ${comprar}. Como WhatsApp pon el del bot: 322 328 4622.`,
-                '4️⃣ Cuando ANC envíe la cuenta, se la entrego al cliente y activo la garantía.',
+                String($('Config bot').first().json.entrega_cuentas ?? 'manual').trim().toLowerCase() === 'automatica' ? '4️⃣ Cuando ANC envíe la cuenta, se la entrego al cliente y activo la garantía.' : `4️⃣ Entrega la cuenta con *#entregar ${t.referencia} correo / clave*: el cliente la recibe con nuestra marca y se activa la garantía.`,
             ]),
             consulta ? '' : null,
             consulta ? '📨 Ya le pregunté a ANC si lo tiene disponible; su respuesta te llega aquí.' : null,
@@ -1816,7 +1816,7 @@ function enrutarEvento() {
                 tipo: 'entregar_desde_stock', referencia: t.referencia, cliente: t.cliente, cliente_nombre: t.cliente_nombre, producto: `${t.producto}${t.variante ? ` – ${t.variante}` : ''}`, numero: msg.numero,
                 sin_stock: `Compra en ANC: *${ordenDe(t.referencia).plan ?? `${t.producto} – ${t.variante ?? ''}`}* (WhatsApp del pedido: 322 328 4622) y cuando llegue el código se lo entrego.` } }];
         }
-        if (t && t.origen_web && msg.accion === 'ok') return avisar(msg.numero, `*#${t.referencia}* es un pedido web y su pago ya está validado. Cuando ANC envíe la cuenta se la entrego al cliente (o usa *#entregar ${t.referencia}*).`);
+        if (t && t.origen_web && msg.accion === 'ok') return avisar(msg.numero, `*#${t.referencia}* es un pedido web y su pago ya está validado. ${String($('Config bot').first().json.entrega_cuentas ?? 'manual').trim().toLowerCase() === 'automatica' ? `Cuando ANC envíe la cuenta se la entrego al cliente (o usa *#entregar ${t.referencia}*).` : `Entrégale la cuenta con *#entregar ${t.referencia} correo / clave*.`}`);
         // Pedido por chat: el pago lo confirmas tú (lo viste en tu Nequi/Daviplata)
         if (t && !t.origen_web) {
             const o = ordenDe(t.referencia);
@@ -1827,7 +1827,7 @@ function enrutarEvento() {
                 ];
             }
             if (t.estado === 'ESPERANDO_CREDENCIALES') return avisar(msg.numero, `*#${t.referencia}* ya tiene el pago confirmado: falta que ANC envíe la cuenta.`);
-            const confirmado = { json: { accion: 'avisar', numero: t.cliente, texto: ['✅ *¡Pago confirmado!* · ⚡ *DC TECNOLOGY*', '', `Gracias${t.cliente_nombre ? `, ${t.cliente_nombre.split(' ')[0]}` : ''} 🙌 Ya estamos procesando tu pedido de *${t.producto}*.`, 'Te lo enviamos por este chat en los próximos minutos.'].join('\n') } };
+            const confirmado = { json: { accion: 'avisar', numero: t.cliente, texto: ['✅ *¡Pago confirmado!* · ⚡ *DC TECNOLOGY*', '', `Gracias${t.cliente_nombre ? `, ${t.cliente_nombre.split(' ')[0]}` : ''} 🙌 Ya estamos procesando tu pedido de *${t.producto}*.`, 'Te lo enviamos por este chat apenas esté listo, con nuestra marca y tu garantía.'].join('\n') } };
             const stock = deStock(t);
             if (stock) {
                 return [confirmado, { json: { accion: 'panel', rpc: 'entregar_desde_stock', args: { p_referencia: t.referencia, p_producto_id: stock.producto_id, p_variante: stock.variante },
@@ -1836,11 +1836,12 @@ function enrutarEvento() {
             }
             return [
                 { json: { accion: 'panel', rpc: 'entregar_manual', args: { p_referencia: t.referencia, p_estado: 'PEDIDO_REALIZADO', p_clave: null }, referencia: t.referencia } },
-                { json: { accion: 'avisar', numero: t.cliente, texto: ['✅ *¡Pago confirmado!* · ⚡ *DC TECNOLOGY*', '', `Gracias${t.cliente_nombre ? `, ${t.cliente_nombre.split(' ')[0]}` : ''} 🙌 Ya estamos procesando tu pedido de *${t.producto}*.`, 'Te lo enviamos por este chat en los próximos minutos.'].join('\n') } },
+                { json: { accion: 'avisar', numero: t.cliente, texto: ['✅ *¡Pago confirmado!* · ⚡ *DC TECNOLOGY*', '', `Gracias${t.cliente_nombre ? `, ${t.cliente_nombre.split(' ')[0]}` : ''} 🙌 Ya estamos procesando tu pedido de *${t.producto}*.`, 'Te lo enviamos por este chat apenas esté listo, con nuestra marca y tu garantía.'].join('\n') } },
                 { json: { accion: 'avisar', numero: msg.numero, texto: [`✅ *Pago de #${t.referencia} confirmado* · le avisé al cliente.`, '',
                     `👉 Ahora compra en ANC: *${o.plan ?? `${t.producto} – ${t.variante ?? ''}`}*${o.costo ? ` (costo ${cop(o.costo)})` : ''}.`,
                     'En el pedido de ANC pon como WhatsApp el del bot (322 328 4622).',
-                    '📦 Cuando ANC envíe la cuenta a este WhatsApp, se la entrego al cliente y activo la garantía. Si no la reconozco, te pido *#entregar*.'].join('\n') } },
+                    String($('Config bot').first().json.entrega_cuentas ?? 'manual').trim().toLowerCase() === 'automatica' ? '📦 Cuando ANC envíe la cuenta a este WhatsApp, se la entrego al cliente y activo la garantía. Si no la reconozco, te pido *#entregar*.'
+                        : `📦 Cuando tengas la cuenta, entrégala con *#entregar ${t.referencia} correo / clave* (y perfil o PIN si aplica): le llega al cliente con nuestra marca y se activa la garantía.`].join('\n') } },
             ];
         }
         // Pedido web: misma validación que el panel (Comprobantes web)
@@ -1862,7 +1863,8 @@ function enrutarEvento() {
         if (!texto) return avisar(msg.numero, `Pega los datos de la cuenta después del código: *#entregar ${t.referencia} correo / clave*`);
         return [{ json: { accion: 'entrega_manual', t, texto, numero_admin: msg.numero } }];
     }
-    // Modo manual: el proveedor (ANC) envía la cuenta → se entrega sola si se sabe de qué pedido es
+    // Modo manual: el proveedor (ANC) envía la cuenta → con entrega_cuentas = automatica se entrega sola si se sabe de qué pedido es;
+    // por defecto (manual) te la reenvía con el pedido sugerido y tú la entregas con #entregar
     if (msg.origen === 'proveedor' && manual) {
         memoria.ultimoProveedor = { texto: String(msg.texto ?? '').slice(0, 2000), at: Date.now() };
         const candidatos = abiertas.filter(listo);
@@ -1873,7 +1875,10 @@ function enrutarEvento() {
         const consultado = refTexto2 && !candidatos.some((r) => r.referencia === refTexto2) ? abiertas.find((r) => r.referencia === refTexto2) : null;
         if (consultado) return admin ? avisar(admin, [`📨 *ANC respondió sobre #${consultado.referencia}* (${consultado.producto})`, `«${String(msg.texto).slice(0, 400)}»`, '',
             consultado.estado === 'REVISION_MANUAL' && !consultado.origen_web ? `El cliente aún no paga. Cuando pague confirma con *#ok ${consultado.referencia}*.` : 'Si es la cuenta, usa *#entregar ' + consultado.referencia + '*.'].join('\n')) : [];
-        if (t && msg.texto) return [{ json: { accion: 'entrega_manual', t, texto: msg.texto, numero_admin: admin } }];
+        const automatica = String(cfg.entrega_cuentas ?? 'manual').trim().toLowerCase() === 'automatica';
+        if (t && msg.texto && automatica) return [{ json: { accion: 'entrega_manual', t, texto: msg.texto, numero_admin: admin } }];
+        if (t && msg.texto) return admin ? avisar(admin, ['📨 *Mensaje de ANC* (parece para *#' + t.referencia + '*, ' + t.producto + ')', `«${String(msg.texto).slice(0, 400)}»`, '',
+            `La entrega de cuentas es manual: si es la cuenta, revísala y responde *#entregar ${t.referencia}* (uso este mensaje) o *#entregar ${t.referencia} correo / clave*.`].join('\n')) : [];
         return admin ? avisar(admin, [
             '📨 *Mensaje de ANC*',
             `«${String(msg.texto).slice(0, 400) || '(sin texto)'}»`,
@@ -2717,6 +2722,7 @@ nodo('Config bot', 'n8n-nodes-base.set', 3.4, [220, 0], set({
     // Precio de venta = tienda de ANC + este % (0 = igual que ANC). Se aplica cada 6 h (WO-042)
     anc_margen: '0',
     bot_responde: 'si',
+    entrega_cuentas: 'manual', // 'manual' (por defecto): las cuentas las entregas tú con #entregar · 'automatica': el bot entrega lo que mande ANC (confianza ≥ 0,9)
     consultar_proveedor: 'si',   // 'no' = no le pregunta a ANC por los productos de cada pedido nuevo          // 'no' = el bot no le contesta a nadie (tus comandos #ok/#no/#entregar y el proveedor siguen)
     leer_medios: 'no',           // 'si' = transcribe audios y lee capturas con IA de modelos abiertos (encender tras probar)
     horas_pausa_humano: '12',    // si escribes a mano en un chat, el bot se calla ahí estas horas (#bot lo reactiva)
