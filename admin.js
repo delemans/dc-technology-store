@@ -500,7 +500,7 @@ function pintarKPIs(filas) {
         nota.textContent = `${tiempos.length} entrega${tiempos.length === 1 ? '' : 's'}`;
     } else {
         kpiTiempo.textContent = '—';
-        nota.textContent = tieneColumnaEntregado() ? 'Sin entregas aún' : 'Falta columna entregado_at';
+        nota.textContent = tieneColumnaEntregado() ? 'Sin entregas aún' : 'Se activa al aplicar el SQL pendiente';
     }
 }
 

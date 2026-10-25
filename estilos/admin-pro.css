@@ -1,0 +1,77 @@
+/* estilos/admin-pro.css — Panel administrador más profesional (25/10/2026): ingreso en dos columnas con estado del sistema en vivo,
+   franja de sincronización, estados vacíos, microanimaciones sobrias. Funciona en tema claro y oscuro (tema.css). Respeta «reducir movimiento». */
+:root { --ap-rojo: #E03445; --ap-rojo2: #C8102E; --ap-ok: #10B981; --ap-ambar: #F59E0B; --ap-borde: rgb(15 17 26 / .1); --ap-tarjeta: #fff; --ap-suave: #5B6170; --ap-fondo-marca: #0E1219; }
+html.dark, [data-theme="dark"] { --ap-borde: rgb(255 255 255 / .1); --ap-tarjeta: rgb(255 255 255 / .03); --ap-suave: #A3A9B3; }
+
+/* ---------- Ingreso: marca y estado a la izquierda (PC), formulario a la derecha ---------- */
+#vista-login.login-pro { gap: 0; }
+.login-pro .login-marco { display: grid; width: min(100%, 980px); border-radius: 28px; overflow: hidden; box-shadow: 0 40px 90px -40px rgb(15 17 26 / .45); border: 1px solid var(--ap-borde); }
+@media (min-width: 1024px) { .login-pro .login-marco { grid-template-columns: 1.05fr 1fr; } }
+.login-pro .login-marco > div:last-child { max-width: none; border-radius: 0; box-shadow: none; border: 0; }
+.login-lado { display: none; position: relative; padding: 44px; color: #F3F4F6; background: radial-gradient(120% 90% at 0% 0%, rgb(224 52 69 / .32), transparent 55%), var(--ap-fondo-marca); overflow: hidden; }
+@media (min-width: 1024px) { .login-lado { display: grid; align-content: space-between; gap: 32px; } }
+.login-lado::after { content: ''; position: absolute; inset: 0; pointer-events: none; opacity: .5;
+    background-image: linear-gradient(rgb(255 255 255 / .05) 1px, transparent 1px), linear-gradient(90deg, rgb(255 255 255 / .05) 1px, transparent 1px); background-size: 32px 32px;
+    mask-image: radial-gradient(80% 70% at 30% 30%, #000, transparent); }
+.login-lado > * { position: relative; z-index: 1; }
+.login-lado .ll-marca { display: flex; align-items: center; gap: 14px; font: 800 15px/1.2 Inter, system-ui, sans-serif; letter-spacing: .14em; text-transform: uppercase; }
+.login-lado .ll-marca img { width: 44px; height: 44px; border-radius: 12px; }
+.login-lado .ll-marca b { color: var(--ap-rojo); }
+.login-lado h2 { margin: 0; font: 800 34px/1.12 Inter, system-ui, sans-serif; letter-spacing: -.02em; text-wrap: balance; }
+.login-lado h2 span { color: #FF5A68; }
+.login-lado p { margin: 10px 0 0; color: rgb(243 244 246 / .72); font-size: 14px; line-height: 1.55; max-width: 38ch; }
+.ll-estado { display: grid; gap: 10px; }
+.ll-estado h3 { margin: 0 0 4px; font: 700 11px/1 Inter, system-ui, sans-serif; letter-spacing: .22em; text-transform: uppercase; color: rgb(243 244 246 / .6); }
+.ll-fila { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 14px; background: rgb(255 255 255 / .05); box-shadow: inset 0 0 0 1px rgb(255 255 255 / .08); font-size: 13px; }
+.ll-fila .pt { flex: none; width: 9px; height: 9px; border-radius: 50%; background: #6B7280; }
+.ll-fila[data-ok="si"] .pt { background: var(--ap-ok); box-shadow: 0 0 0 4px rgb(16 185 129 / .18); }
+.ll-fila[data-ok="no"] .pt { background: var(--ap-ambar); box-shadow: 0 0 0 4px rgb(245 158 11 / .18); }
+.ll-fila span { flex: 1; min-width: 0; }
+.ll-fila b { font-variant-numeric: tabular-nums; font-weight: 700; color: #fff; }
+.ll-pie { font-size: 12px; color: rgb(243 244 246 / .55); }
+
+/* Campos con foco visible y botón con brillo sobrio */
+#form-login input:focus { box-shadow: 0 0 0 4px rgb(224 52 69 / .14); }
+#btn-login { position: relative; overflow: hidden; }
+#btn-login::after { content: ''; position: absolute; inset: 0; background: linear-gradient(110deg, transparent 35%, rgb(255 255 255 / .28) 50%, transparent 65%); transform: translateX(-100%); }
+
+/* ---------- Tablero ---------- */
+.ap-estado { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding: 12px 14px; border-radius: 18px; border: 1px solid var(--ap-borde); background: var(--ap-tarjeta); font-size: 12px; color: var(--ap-suave); }
+.ap-estado .ap-tit { font-weight: 800; text-transform: uppercase; letter-spacing: .18em; font-size: 10px; margin-right: 4px; }
+.ap-chip { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--ap-borde); white-space: nowrap; }
+.ap-chip b { font-variant-numeric: tabular-nums; }
+.ap-chip .pt { width: 8px; height: 8px; border-radius: 50%; background: #9CA3AF; }
+.ap-chip[data-ok="si"] .pt { background: var(--ap-ok); }
+.ap-chip[data-ok="no"] .pt { background: var(--ap-ambar); }
+.ap-estado .ap-hora { margin-left: auto; font-variant-numeric: tabular-nums; }
+.ap-estado button { font: inherit; font-weight: 700; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--ap-borde); background: transparent; color: inherit; cursor: pointer; }
+.ap-estado button:focus-visible { outline: 3px solid var(--ap-rojo); outline-offset: 2px; }
+
+/* Todo al día: lista sin pedidos */
+.ap-vacio { grid-column: 1 / -1; display: grid; justify-items: center; gap: 10px; padding: 42px 20px; border-radius: 24px; border: 1px dashed var(--ap-borde); text-align: center; color: var(--ap-suave); }
+.ap-vacio .ic { width: 56px; height: 56px; display: grid; place-items: center; border-radius: 18px; background: rgb(16 185 129 / .12); color: var(--ap-ok); font-size: 24px; }
+.ap-vacio b { font-size: 16px; color: inherit; }
+
+/* Menú lateral: indicador del módulo activo */
+nav button[data-vista] { position: relative; transition: background-color .2s, color .2s, transform .2s; }
+nav button[data-vista]::before { content: ''; position: absolute; left: -8px; top: 12px; bottom: 12px; width: 3px; border-radius: 3px; background: var(--ap-rojo); transform: scaleY(0); transition: transform .25s cubic-bezier(.2, .7, .1, 1); }
+nav button[data-vista][aria-current="page"]::before, nav button[data-vista].activo::before { transform: scaleY(1); }
+
+/* Indicadores: elevación al pasar y pulso cuando cambian */
+#kpi-hoy, #kpi-procesando, #kpi-tiempo, #kpi-por-verificar, #kpi-satisfaccion, #kpi-renovacion { font-variant-numeric: tabular-nums; }
+.ap-kpi { transition: transform .25s cubic-bezier(.2, .7, .1, 1), box-shadow .25s; }
+.ap-kpi:hover { transform: translateY(-2px); box-shadow: 0 18px 40px -24px rgb(15 17 26 / .35); }
+
+@media (prefers-reduced-motion: no-preference) {
+    .login-pro .login-marco { animation: ap-entra .6s cubic-bezier(.2, .7, .1, 1) both; }
+    .ll-fila { animation: ap-entra .5s cubic-bezier(.2, .7, .1, 1) both; }
+    .ll-fila:nth-child(3) { animation-delay: .08s; } .ll-fila:nth-child(4) { animation-delay: .16s; } .ll-fila:nth-child(5) { animation-delay: .24s; }
+    .ll-fila[data-ok="si"] .pt { animation: ap-late 2.4s ease-in-out infinite; }
+    #btn-login:hover::after { transform: translateX(100%); transition: transform .8s ease; }
+    .ap-cambio { animation: ap-pulso .7s cubic-bezier(.2, .7, .1, 1); }
+    .ap-vacio .ic { animation: ap-entra .5s cubic-bezier(.2, .7, .1, 1) both; }
+    #lista-pedidos > * { animation: ap-entra .45s cubic-bezier(.2, .7, .1, 1) both; }
+}
+@keyframes ap-entra { from { opacity: 0; transform: translateY(12px); } }
+@keyframes ap-late { 50% { box-shadow: 0 0 0 7px rgb(16 185 129 / .06); } }
+@keyframes ap-pulso { 30% { transform: scale(1.08); } }

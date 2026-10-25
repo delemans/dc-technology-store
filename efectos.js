@@ -18,7 +18,46 @@
         });
     }
 
+    // Indicador «En vivo» junto al conteo del catálogo: precios (y unidades, si la base ya las trae) leídos de la base al abrir
+    const enVivo = (d) => {
+        const conteo = document.getElementById('product-count');
+        if (!conteo || !d || document.getElementById('en-vivo')) return;
+        const chip = document.createElement('span');
+        chip.id = 'en-vivo';
+        chip.className = 'en-vivo';
+        chip.setAttribute('title', 'Precios leídos de la base al abrir la tienda; los proveedores se sincronizan cada 6 horas');
+        chip.innerHTML = '<i aria-hidden="true"></i><span></span>';
+        chip.querySelector('span').textContent = `${d.conUnidades ? 'Precios y unidades' : 'Precios'} en vivo · ${d.hora.toLocaleTimeString('es-CO', { hour: 'numeric', minute: '2-digit' })}`;
+        conteo.insertAdjacentElement('beforebegin', chip);
+    };
+    if (window.DCSincronizado) enVivo(window.DCSincronizado);
+    window.addEventListener('dc:sincronizado', (e) => enVivo(e.detail));
+
     if (menosMovimiento || !('IntersectionObserver' in window)) return;
+    // Titular de la portada: las palabras entran una tras otra (solo al abrir)
+    const titulo = document.getElementById('hero-titulo');
+    if (titulo && !titulo.dataset.animado) {
+        titulo.dataset.animado = '1';
+        let n = 0;
+        const partir = (nodo) => {
+            for (const hijo of [...nodo.childNodes]) {
+                if (hijo.nodeType === 3) {
+                    const frag = document.createDocumentFragment();
+                    for (const parte of hijo.textContent.split(/(\s+)/)) {
+                        if (!parte) continue;
+                        if (/^\s+$/.test(parte)) { frag.appendChild(document.createTextNode(parte)); continue; }
+                        const s = document.createElement('span');
+                        s.className = 'palabra';
+                        s.style.setProperty('--i', n++);
+                        s.textContent = parte;
+                        frag.appendChild(s);
+                    }
+                    hijo.replaceWith(frag);
+                } else if (hijo.nodeType === 1) partir(hijo);
+            }
+        };
+        partir(titulo);
+    }
     const observador = new IntersectionObserver((entradas) => {
         for (const e of entradas) {
             if (!e.isIntersecting) continue;

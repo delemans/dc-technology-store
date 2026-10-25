@@ -326,6 +326,9 @@ async function aplicarPreciosBase(productos) {
     const data = await Promise.race([consulta, new Promise((r) => setTimeout(() => r(null), 3000))]).catch(() => null);
     // Sin respuesta de la base: lo de categorías ocultas del proveedor (oculto) nunca se muestra
     if (!Array.isArray(data) || !data.length) return productos.filter((p) => !p.oculto);
+    // Aviso para el indicador «En vivo» del catálogo (efectos.js): precios y unidades leídos de la base ahora
+    window.DCSincronizado = { hora: new Date(), planes: data.length, conUnidades: Object.prototype.hasOwnProperty.call(data[0], 'existencias') };
+    window.dispatchEvent(new CustomEvent('dc:sincronizado', { detail: window.DCSincronizado }));
     const porProducto = new Map();
     data.forEach((x) => porProducto.set(x.producto_id, [...(porProducto.get(x.producto_id) ?? []), x]));
     // Base con wo-047 = trae la columna existencias y ya filtra por categorías visibles; sin eso, lo oculto nunca se muestra
