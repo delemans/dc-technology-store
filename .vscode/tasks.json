@@ -1,0 +1,31 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Gemini: abrir el asistente en la terminal",
+      "type": "shell",
+      "command": "npx -y @google/gemini-cli",
+      "problemMatcher": [],
+      "presentation": { "panel": "dedicated", "focus": true }
+    },
+    {
+      "label": "Pruebas: todas (npm test)",
+      "type": "shell",
+      "command": "npm test",
+      "problemMatcher": [],
+      "group": { "kind": "test", "isDefault": true }
+    },
+    {
+      "label": "Pruebas: solo la web",
+      "type": "shell",
+      "command": "npm test -- web",
+      "problemMatcher": []
+    },
+    {
+      "label": "Ver ramas de Gemini por revisar",
+      "type": "shell",
+      "command": "git fetch -q; git branch -a --list '*gemini/*'",
+      "problemMatcher": []
+    }
+  ]
+}

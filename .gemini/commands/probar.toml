@@ -1,0 +1,6 @@
+description = "Corre todas las pruebas del proyecto y explica el resultado en palabras simples"
+prompt = """
+Lee GEMINI.md y .agent/rules/dc-tecnology.md si aún no los leíste en esta sesión.
+Luego abre .agent/workflows/probar.md y sigue sus pasos al pie de la letra, en español.
+Indicaciones extra del director (puede estar vacío): {{args}}
+"""

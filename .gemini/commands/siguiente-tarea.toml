@@ -1,0 +1,6 @@
+description = "Toma la siguiente tarea técnica del BLUEPRINT, la hace en una rama, la prueba y la deja lista para revisión"
+prompt = """
+Lee GEMINI.md y .agent/rules/dc-tecnology.md si aún no los leíste en esta sesión.
+Luego abre .agent/workflows/siguiente-tarea.md y sigue sus pasos al pie de la letra, en español.
+Indicaciones extra del director (puede estar vacío): {{args}}
+"""

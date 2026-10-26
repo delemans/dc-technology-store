@@ -1,0 +1,6 @@
+description = "Guía al director paso a paso en sus tareas pendientes (Google, Supabase, redes, legal), una a la vez y verificando cada paso"
+prompt = """
+Lee GEMINI.md y .agent/rules/dc-tecnology.md si aún no los leíste en esta sesión.
+Luego abre .agent/workflows/ayudar-al-director.md y sigue sus pasos al pie de la letra, en español.
+Indicaciones extra del director (puede estar vacío): {{args}}
+"""
