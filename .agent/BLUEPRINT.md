@@ -160,6 +160,65 @@ _Escrito por Claude el 26/10/2026. Lo siguen Gemini (Antigravity) u otro agente 
 
 ---
 
+# Fase «Sin depender del PC» (pedida por el director el 26/10/2026)
+**Objetivo:** que tienda, bot, WhatsApp y tareas automáticas sigan funcionando aunque el PC de la oficina esté apagado.
+**Hoy dependen del PC:**
+- n8n (`localhost:5678`) y Evolution/WhatsApp (`localhost:8080`, con un parche local; ver CLAUDE.md);
+- las tareas de Windows: vigilantes, videos, estados, redes y respaldo.
+
+La tienda (GitHub Pages) y la base (Supabase) ya están en internet.
+**Orden:**
+1. T13: lo que no necesita servidor va a GitHub Actions.
+2. T14: se prepara el servidor.
+3. B10: el director lo contrata.
+4. Claude hace la mudanza.
+
+## T13 · Vigilante del catálogo en GitHub Actions — **Pendiente** (alta)
+**Para qué:** sincronizar Emprende Red y ANC, publicar el catálogo y revisar el sitio cada día, aunque el PC esté apagado.
+1. **Workflow:** crea `.github/workflows/vigilante-catalogo.yml`:
+   - se ejecuta a diario a las 11:00 UTC (6 a. m. en Bogotá) y también a mano (`schedule` + `workflow_dispatch`);
+   - usa Node 24 (`actions/setup-node`) y `npm ci`;
+   - corre `node herramientas/vigilante-catalogo.mjs`;
+   - tiene `permissions: contents: write` y git configurado como «DC Tecnology bot».
+2. **Correr sin `.env`:** el vigilante y sus subprocesos leen las variables con `cargarEntorno()`, que solo toma de la terminal los prefijos de `entorno.js`. Amplía esa lista para que también tome `NUMERO_`, `EVOLUTION_`, `IA_`, `SUPABASE_` y `ANC_` (los secretos de GitHub llegan como variables de la terminal). No cambies cómo funciona en el PC.
+3. **Secretos:** se leen de `secrets.*` (los carga el director: B11). Si `EVOLUTION_URL` no existe o es `localhost`, el informe se imprime en el registro de Actions en vez de enviarse por WhatsApp. Eso pasa hasta que exista el servidor.
+4. **Sin Windows:** `powershell.exe` solo se usa con `--instalar`; verifica que el camino normal no lo use. El push lo hace el propio vigilante con `git`; en Actions usa el `GITHUB_TOKEN`.
+5. **Mismo trabajo en otro workflow:** `revisar-sitio.yml` (diario 11:30 UTC, `node herramientas/revisar-sitio.mjs`; no necesita secretos).
+6. **Pruebas:**
+   - `pruebas/datos/test-actions.mjs` lee los `.yml` y comprueba la hora (`cron`), los permisos y que no tengan claves escritas;
+   - prueba aparte que `cargarEntorno()` toma las variables nuevas de la terminal.
+7. **No apagues la tarea de Windows:** eso lo hace Claude cuando el workflow ya haya corrido bien una vez.
+
+## T14 · Paquete del servidor para n8n + WhatsApp — **Pendiente** (alta; el despliegue lo hace Claude)
+**Para qué:** mudar el bot a un servidor en internet (VPS) de forma reproducible.
+1. **`infra/servidor/docker-compose.yml`:**
+   - n8n (con Postgres) y Evolution API 2.3.7 (con su Postgres y Redis);
+   - Caddy con HTTPS automático para `bot.dctecnology.xyz` (n8n) y `wa.dctecnology.xyz` (Evolution);
+   - volúmenes persistentes y `restart: unless-stopped`;
+   - zona horaria `America/Bogota` (`GENERIC_TIMEZONE` y `TZ`).
+2. **`infra/servidor/.env.servidor.ejemplo`:** solo los nombres de las variables (sin valores) y un comentario de dónde sale cada una.
+3. **Parche de Evolution:** que ignore los JID `@bot`, como el parche local de CLAUDE.md. Hazlo con un `Dockerfile` que parte de la imagen oficial y aplica el cambio. Si no se puede, déjalo anotado como pendiente para Claude. Además, `groupsIgnore = true`.
+4. **`infra/servidor/LEEME.md`, paso a paso para el director:**
+   - cómo crear el VPS;
+   - cómo apuntar los subdominios en el DNS;
+   - `docker compose up -d`;
+   - cómo vincular WhatsApp leyendo el QR desde el celular del bot.
+5. **`herramientas/mudar-n8n.mjs` (lo prepara Gemini; lo corre Claude):**
+   - lee el flujo del n8n del PC (API) y lo crea en el n8n nuevo (`N8N_URL_NUEVO` y `N8N_API_KEY_NUEVO`);
+   - con `--probar` solo muestra lo que haría;
+   - nunca imprime claves.
+6. **Prueba:** `pruebas/datos/test-infra.mjs` valida el YAML (servicios, volúmenes, reinicio), que no haya claves escritas y que el `.env.servidor.ejemplo` tenga todas las variables que usa el compose.
+7. **No despliegues nada ni toques el n8n del PC:** el despliegue lo hace Claude con el director.
+
+## T15 · Tareas del PC que pasan al servidor o a Actions — **Pendiente** (media; después de T13)
+1. Lista en `infra/servidor/LEEME.md`, para cada tarea de Windows, dónde queda:
+   - **Actions:** vigilante del catálogo y revisión del sitio;
+   - **servidor (cron del VPS):** estados de WhatsApp, redes y respaldo semanal;
+   - **sigue en el PC por ahora:** los videos de las 3 a. m. (necesitan Chrome, ffmpeg y la cuota de voz; se pueden mover después).
+2. Los videos MP4 no están en git: propone dónde guardarlos para que el servidor los publique (por ejemplo, un bucket de Supabase Storage). Escríbelo como propuesta, sin implementarla.
+
+---
+
 ## Bloqueadas (necesitan algo del director: no tocar)
 | ID | Tarea | Qué falta |
 |---|---|---|
@@ -172,8 +231,12 @@ _Escrito por Claude el 26/10/2026. Lo siguen Gemini (Antigravity) u otro agente 
 | B7 | Publicación automática en redes | Cuentas y claves en `.env` (las pone el director) |
 | B8 | Videos con video real | `PEXELS_API_KEY` en `.env` (el estudio es de Claude) |
 | B9 | Activar categorías de Emprende Red | Elección del director en el panel |
+| B10 | Desplegar el servidor (n8n + WhatsApp en internet) | El director contrata el VPS y apunta el DNS (pendiente 15); después Claude hace la mudanza con el paquete de T14 |
+| B11 | Activar los workflows de T13 | El director carga los secretos en GitHub (pendiente 16) |
 
 ## Para Claude al volver
+- **Mudanza fuera del PC:** revisar T13 y T14, activar Actions con los secretos (B11), desplegar el VPS (B10), mudar el flujo, vincular WhatsApp por QR, cambiar las URL en Config bot y en .env, apagar las tareas de Windows que ya corran afuera y actualizar CLAUDE.md.
+- **IA en cascada (26/10):** `herramientas/ia.mjs` está listo; falta pasar los scripts del estudio de videos (scratchpad) cuando se muden.
 - Revisar cada rama `gemini/*`: diff, `npm test`, y fusionar a `main` lo que esté bien.
 - Aplicar lo necesario en vivo: sincronizar n8n, versionar y publicar.
 - Actualizar este archivo y CLAUDE.md.
