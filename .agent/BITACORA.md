@@ -4,6 +4,12 @@ La más reciente va arriba.
 
 ---
 
+## 26/10/2026 · Claude · Tareas de redes y página de pendientes
+- **Qué se hizo:**
+  - BLUEPRINT: nuevas T10 (verificar claves de redes sin publicar), T11 (plan de redes que se renueva solo) y T12 (resumen semanal de redes y estados);
+  - página de pendientes del director con paso a paso y checks guardados: https://claude.ai/artifact/UzLJXxiq8RzUJQgR5NtPM9 (enlazada desde el informe interactivo).
+- **Siguiente:** T01, T02 y T10 (prioridad alta).
+
 ## 26/10/2026 · Claude · Preparación para Gemini (Antigravity)
 - **Qué se hizo:**
   - se crearon `GEMINI.md`, `AGENTS.md`, `.agent/rules/dc-tecnology.md`, `.agent/BLUEPRINT.md` (tareas T01–T09 y bloqueadas B1–B9) y los flujos `/siguiente-tarea`, `/ayudar-al-director` y `/probar`;
@@ -14,5 +20,3 @@ La más reciente va arriba.
   - lo que no hay en ANC ni en Emprende Red no sale (`disponibilidad.json`);
   - SQL pendiente sin aplicar por el director (`supabase/APLICAR-PENDIENTES.sql`, wo-042 a wo-051).
 - **Siguiente:** T01 (resumen diario de ventas).
-
-
