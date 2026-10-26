@@ -14,3 +14,5 @@ La más reciente va arriba.
   - lo que no hay en ANC ni en Emprende Red no sale (`disponibilidad.json`);
   - SQL pendiente sin aplicar por el director (`supabase/APLICAR-PENDIENTES.sql`, wo-042 a wo-051).
 - **Siguiente:** T01 (resumen diario de ventas).
+
+

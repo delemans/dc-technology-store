@@ -129,6 +129,37 @@ _Escrito por Claude el 26/10/2026. Lo siguen Gemini (Antigravity) u otro agente 
 
 ---
 
+## T10 · Redes: verificar las claves sin publicar — **Pendiente** (alta)
+**Para qué:** cuando el director ponga sus claves de YouTube, Meta o TikTok en `.env`, saber en segundos si sirven, sin subir ningún video.
+1. En `herramientas/publicar-redes.mjs` agrega el modo `--verificar`. Para cada red con claves (usa `redesActivas(env)`), haz una consulta de solo lectura:
+   - YouTube: `tokenYoutube(env)` y luego `channels?part=snippet&mine=true`;
+   - Facebook: `GET {META_PAGE_ID}?fields=name`;
+   - Instagram: `GET {META_IG_USER_ID}?fields=username`;
+   - TikTok: `user/info/` con `fields=display_name`.
+2. Imprime una línea por red: ✅ con el nombre de la cuenta, o ❌ con el motivo en palabras simples (token vencido, permiso faltante). **Nunca imprimas el token.**
+3. Recibe `f = fetch` como las demás funciones para poder probarla con respuestas simuladas.
+4. **Prueba:** amplía `pruebas/datos/test-publicar-redes.mjs` con casos OK, 401 y red sin claves.
+5. **Guía:** en «Anuncios DC Tecnology/REDES - CONFIGURAR UNA VEZ.txt» (Escritorio), paso 4, agrega `--verificar` antes de `--probar`.
+
+## T11 · Redes: el plan se renueva solo — **Pendiente** (media)
+**Para qué:** hoy, cada 4 semanas, hay que correr `node herramientas/generar_redes.js AAAA-MM-DD` a mano; si se olvida, las redes se quedan sin publicar.
+1. En `publicar-redes.mjs`, antes de publicar: si la última fecha de `redes-plan.json` está a menos de 3 días, genera el plan siguiente desde el lunes después de esa fecha (reutiliza la función de `generar_redes.js` sin cambiar su salida).
+2. Lo ya publicado no se repite: `redes-publicadas.json` manda.
+3. **Prueba:** un plan que vence mañana debe generar las 4 semanas siguientes, y uno con 10 días por delante no debe cambiar nada.
+
+## T12 · Redes y estados: resumen semanal por WhatsApp — **Pendiente** (media)
+**Para qué:** que el director sepa cada lunes qué salió en cada red y en los estados, sin abrir archivos.
+1. Script nuevo `herramientas/resumen-redes.mjs`:
+   - lee `herramientas/salida/redes-publicadas.json` y `herramientas/salida/estados.json` de los últimos 7 días;
+   - cuenta, por red, lo publicado y lo fallido (con su motivo);
+   - dice la campaña de la semana que empieza (de `herramientas/estados-plan.json`).
+2. Lo envía al número de aviso con la misma función de envío que usa `publicar-estado.mjs`; con `--probar` solo imprime.
+3. Agrega `--instalar` para la tarea de Windows «DC Tecnology - resumen de redes» (lunes, 8 a. m.), igual que los otros scripts.
+4. **Sin métricas inventadas:** solo lo que está en los registros. Las vistas y los seguidores requieren las APIs de estadísticas (bloqueada B7).
+5. **Prueba:** `pruebas/datos/test-resumen-redes.mjs` con registros de ejemplo.
+
+---
+
 ## Bloqueadas (necesitan algo del director: no tocar)
 | ID | Tarea | Qué falta |
 |---|---|---|
