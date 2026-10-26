@@ -217,6 +217,20 @@ La tienda (GitHub Pages) y la base (Supabase) ya están en internet.
    - **sigue en el PC por ahora:** los videos de las 3 a. m. (necesitan Chrome, ffmpeg y la cuota de voz; se pueden mover después).
 2. Los videos MP4 no están en git: propone dónde guardarlos para que el servidor los publique (por ejemplo, un bucket de Supabase Storage). Escríbelo como propuesta, sin implementarla.
 
+## T16 · Contenido de la semana (videos, imágenes y redes) — **Pendiente** (media; repetible)
+**Para qué:** que el canal y las redes sigan creciendo mientras Claude no está.
+**Usa los skills:**
+1. `/calendario-contenido`;
+2. `/guion-video` para cada video nuevo;
+3. `/imagen-anuncio` (2 por semana);
+4. `/textos-redes`.
+Entrega en la rama `gemini/T16-<semana>`.
+Los videos los graba el estudio de Claude (scratchpad): deja los guiones en `docs/guiones/` y Claude los graba al volver.
+Revisa los videos existentes con `/revisar-video`.
+
+## T17 · Auditoría semanal del sitio — **Pendiente** (baja; repetible)
+`/auditar-sitio`. Convierte cada problema en una tarea nueva del BLUEPRINT, o en un arreglo pequeño con su prueba.
+
 ---
 
 ## Bloqueadas (necesitan algo del director: no tocar)

@@ -1,0 +1,12 @@
+---
+name: auditar-sitio
+description: "Revisa la tienda en vivo y resume los problemas"
+invokable: true
+---
+1. Corre: node herramientas/revisar-sitio.mjs
+2. Corre: npm test -- web
+3. Resume en una lista:
+   - qué falla y dónde (archivo o página);
+   - qué impacto tiene en ventas o en Google (alto, medio o bajo);
+   - qué tarea del BLUEPRINT lo cubre, o propone una nueva (Txx) con pasos concretos.
+No cambies nada en esta orden.

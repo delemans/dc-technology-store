@@ -1,0 +1,14 @@
+---
+name: textos-redes
+description: "Mejora títulos, descripciones y hashtags de cada red sin romper el publicador"
+invokable: true
+---
+Reglas: español; cero datos inventados (precios y existencias solo de productos.json o de precios_publicos; nada de descuentos, reseñas ni tiempos que no existan); marca «DC Tecnology» y «www.dctecnology.xyz»; WhatsApp 322 328 4622; nunca nombrar proveedores (ANC, Emprende Red); nunca abrir .env; trabaja en una rama gemini/<tema>.
+1. Lee herramientas/generar_redes.js y pruebas/datos/test-publicar-redes.mjs.
+2. Mejora los textos por red respetando sus límites:
+   - YouTube: título ≤ 100 y descripción ≤ 5000;
+   - Instagram y Facebook: pie ≤ 2200 y máx. 30 hashtags;
+   - TikTok: ≤ 2200.
+   Primera línea con gancho, llamado a la acción con www.dctecnology.xyz y la marca de contenido hecho con IA donde ya existe.
+3. Corre: node herramientas/generar_redes.js y npm test -- datos (0 FALLA). Muestra 3 ejemplos antes y después.
+4. No cambies la lógica de publicación ni las fechas. Entrega con /entregar.
