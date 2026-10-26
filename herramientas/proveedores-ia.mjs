@@ -36,19 +36,29 @@ export const PROVEEDORES_IA = [
     { id: 'OPENROUTER', nombre: 'OpenRouter', url: 'https://openrouter.ai/api/v1', claveEnv: 'IA_OPENROUTER_KEY', peso: 50,
         modelo: 'nvidia/nemotron-3-super-120b-a12b:free', preferir: [/nemotron-3-super.*:free$/i, /gemma-4-31b.*:free$/i, /deepseek.*:free$/i, /llama.*70b.*:free$/i],
         registro: 'https://openrouter.ai/keys', nota: 'modelos ":free" (50 consultas/día; 1000 si cargas US$10 una vez)' },
+    { id: 'OPENAI', nombre: 'OpenAI', url: 'https://api.openai.com/v1', claveEnv: 'IA_OPENAI_KEY', claveAlt: 'OPENAI_API_KEY', peso: 200,
+        modelo: 'gpt-4o-mini', preferir: [/^gpt-5-mini$/i, /^gpt-4.1-mini$/i, /^gpt-4o-mini$/i],
+        registro: 'https://platform.openai.com/api-keys', nota: 'de pago por uso (no es abierto)' },
+    // Modelo en tu PC (Ollama, LM Studio, vLLM…), sin clave: se activa con IA_LOCAL_URL (Ollama: http://localhost:11434/v1;
+    // LM Studio: http://localhost:1234/v1; si n8n corre en Docker: http://host.docker.internal:11434/v1) e IA_LOCAL_MODELO
+    { id: 'LOCAL', nombre: 'IA local', url: 'http://localhost:11434/v1', urlEnv: 'IA_LOCAL_URL', claveEnv: 'IA_LOCAL_KEY', sinClave: true, modeloEnv: 'IA_LOCAL_MODELO', peso: 100,
+        modelo: 'qwen2.5:7b', preferir: [/qwen/i, /llama/i, /gemma/i, /mistral/i],
+        registro: 'https://ollama.com/download (luego: ollama pull qwen2.5:7b)', nota: 'gratis y sin internet; tan rápida como tu PC' },
     { id: 'GITHUB', nombre: 'GitHub Models', url: 'https://models.github.ai/inference', claveEnv: 'IA_GITHUB_KEY', peso: 50,
         modelo: 'deepseek/DeepSeek-V3-0324', preferir: [/deepseek.*v3/i, /llama-3\.3-70b/i],
         registro: 'https://github.com/settings/tokens (token con permiso models:read)', nota: 'gratis con tu cuenta de GitHub, cupo bajo' },
 ];
 
 // Lista para el nodo de n8n: solo las que tienen clave y no están apagadas
+export const claveDe = (p, env) => String(env[p.claveEnv] || (p.claveAlt && env[p.claveAlt]) || '').trim();
+export const activa = (p, env) => (p.sinClave ? !!String(env[p.urlEnv] ?? '').trim() : !!claveDe(p, env));
 export function armarProveedores(env) {
-    return PROVEEDORES_IA.filter((p) => String(env[p.claveEnv] ?? '').trim() && !/^(1|si|sí|true)$/i.test(String(env[`IA_${p.id}_APAGADA`] ?? '')))
+    return PROVEEDORES_IA.filter((p) => activa(p, env) && !/^(1|si|sí|true)$/i.test(String(env[`IA_${p.id}_APAGADA`] ?? '')))
         .map((p) => ({
             nombre: p.nombre,
             url: String((p.urlEnv && env[p.urlEnv]) || p.url).trim().replace(/\/+$/, ''),
             modelo: String((p.modeloEnv && env[p.modeloEnv]) || env[`IA_${p.id}_MODELO`] || p.modelo).trim(),
-            clave: String(env[p.claveEnv]).trim(),
+            clave: claveDe(p, env) || 'local',
             peso: Number(env[`IA_${p.id}_PESO`]) > 0 ? Number(env[`IA_${p.id}_PESO`]) : p.peso,
             ...(p.limite ? { limite: p.limite } : {}), ...(p.maxTokens ? { maxTokens: p.maxTokens } : {}), ...(p.extra ? { extra: p.extra } : {}),
         }));

@@ -20,3 +20,4 @@ pruebas/flujo/anc/
 
 # Material privado del director (lista de pendientes para el agente): solo en este PC
 privado/
+.env.respaldo-*

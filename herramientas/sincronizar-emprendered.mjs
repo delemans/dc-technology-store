@@ -10,6 +10,7 @@
 // proveedor (referencia de descuento: no se muestra en la tienda, regla de cero descuentos inventados).
 import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
+import { pedirIA } from './ia.mjs';
 
 // 19/10/2026: catálogo de distribuidor en emprendered.com.co (antes la tienda de prueba dctechnology.catalogovirtual.co).
 // Allí "price_sale" ES el precio de distribuidor = NUESTRO COSTO (verificado: coincide con el price_buy de la tienda anterior
@@ -157,7 +158,6 @@ export function resumen(datos) {
 // terceros (compiten con lo propio y su origen no es verificable).
 export const EXCLUIR_CATEGORIAS = ['RELOJERIA REPLICA', 'CAMISAS 1.1 FUTBOL', 'SEX SHOP', 'VAPES', 'VENDE STREAMING'];
 const CACHE_IA = 'herramientas/salida/emprendered-ia.json';
-const MODELO = 'deepseek-ai/DeepSeek-V3';
 const ETIQUETAS = new Set(['p', 'ul', 'li', 'strong', 'em', 'br']);
 
 export const PROMPT_IA = [
@@ -195,30 +195,9 @@ export function validarIa(p, r) {
 
 export async function enriquecer(datos, { env = {}, limite = Infinity, concurrencia = 3, llamar } = {}) {
     const cache = fs.existsSync(CACHE_IA) ? JSON.parse(fs.readFileSync(CACHE_IA, 'utf8')) : {};
-    // IA en cadena, igual que el bot: SiliconFlow → IA de respaldo (IA_RESPALDO_* en .env). Un servidor sin saldo
-    // (402) o con la clave mala (401/403) se salta el resto de la corrida
-    const servidores = [
-        env.SILICONFLOW_API_KEY && { nombre: 'SiliconFlow', url: env.SILICONFLOW_BASE_URL || 'https://api.siliconflow.com/v1', clave: env.SILICONFLOW_API_KEY, modelo: MODELO },
-        env.IA_RESPALDO_KEY && { nombre: 'IA de respaldo', url: env.IA_RESPALDO_URL || 'https://generativelanguage.googleapis.com/v1beta/openai', clave: env.IA_RESPALDO_KEY, modelo: env.IA_RESPALDO_MODELO || 'gemini-2.5-flash' },
-    ].filter(Boolean);
-    const caidos = new Set();
-    const ia = llamar ?? (async (texto) => {
-        let ultimo = 'sin servidores de IA en .env';
-        for (const s of servidores.filter((x) => !caidos.has(x.nombre))) {
-            const r = await fetch(`${s.url.replace(/\/+$/, '')}/chat/completions`, {
-                method: 'POST', signal: AbortSignal.timeout(60000),
-                headers: { Authorization: `Bearer ${s.clave.trim()}`, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ model: s.modelo, temperature: 0.4, max_tokens: 700, response_format: { type: 'json_object' },
-                    messages: [{ role: 'system', content: PROMPT_IA }, { role: 'user', content: texto }] }),
-            }).catch((e) => ({ ok: false, status: e.message, json: async () => ({}) }));
-            const j = await r.json().catch(() => ({}));
-            if (r.ok) return j.choices?.[0]?.message?.content ?? '';
-            ultimo = `${s.nombre}: HTTP ${r.status} ${String(j.message ?? j.error?.message ?? '').slice(0, 80)}`;
-            if ([401, 402, 403].includes(r.status)) caidos.add(s.nombre);
-        }
-        if (caidos.size >= servidores.length) throw Object.assign(new Error(`Ninguna IA disponible (${ultimo}). Recarga SiliconFlow o agrega IA_RESPALDO_KEY en .env.`), { fatal: true });
-        throw new Error(ultimo);
-    });
+    // IA en cascada, igual que el bot (herramientas/ia.mjs): si una no tiene saldo, se cae o tarda, pasa a la siguiente
+    const ia = llamar ?? (async (texto) => (await pedirIA([{ role: 'system', content: PROMPT_IA }, { role: 'user', content: texto }],
+        { tarea: 'descripciones-emprendered', temperatura: 0.4, maxTokens: 700, json: true, timeoutMs: 60000 }, { env })).texto);
     const pendientes = datos.productos.filter((p) => !EXCLUIR_CATEGORIAS.includes(p.categoria) && cache[p.id]?.hash !== hash(fuenteIa(p))).slice(0, limite);
     const cuenta = { nuevos: 0, rechazados: 0, errores: 0 };
     let fatal = null;

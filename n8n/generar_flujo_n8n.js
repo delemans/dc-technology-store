@@ -2083,6 +2083,10 @@ function motorIa() {
                 codigo = Number(r.statusCode) || 0;
                 if (codigo >= 200 && codigo < 300 && texto) {
                     Object.assign(s, { usos: s.usos + 1, hasta: 0, ultimo: new Date(ahora).toISOString(), motivo: null, sinSaldo: false });
+                    // Consumo por día y por IA (30 días): lo muestra node herramientas/ia.mjs --uso
+                    const h = memoria.iaHistorial = memoria.iaHistorial ?? {};
+                    (h[hoy] = h[hoy] ?? {})[p.nombre] = (h[hoy][p.nombre] ?? 0) + 1;
+                    for (const k of Object.keys(h).sort().slice(0, -30)) delete h[k];
                     return { texto, ia: p.nombre };
                 }
                 detalle = String(j.error?.message ?? j.message ?? j[0]?.error?.message ?? (texto ? '' : 'respuesta vacía')).replace(/\s+/g, ' ').slice(0, 160);

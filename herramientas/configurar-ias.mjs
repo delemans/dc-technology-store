@@ -6,7 +6,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { createRequire } from 'node:module';
-import { PROVEEDORES_IA, armarProveedores } from './proveedores-ia.mjs';
+import { PROVEEDORES_IA, armarProveedores, activa } from './proveedores-ia.mjs';
 
 const require = createRequire(import.meta.url);
 const { RAIZ, cargarEntorno, ocultar } = require('./entorno.js');
@@ -41,8 +41,8 @@ const cambiosEnv = {};
 for (const p of PROVEEDORES_IA) {
     const cfg = activas.find((a) => a.nombre === p.nombre);
     if (!cfg) {
-        const apagada = String(env[p.claveEnv] ?? '').trim();
-        console.log(`  · ${p.nombre.padEnd(13)} ${apagada ? 'apagada (IA_' + p.id + '_APAGADA)' : `sin clave → créala en ${p.registro} y ponla en .env como ${p.claveEnv}=…`}  (${p.nota})`);
+        const apagada = activa(p, env);
+        console.log(`  · ${p.nombre.padEnd(13)} ${apagada ? 'apagada (IA_' + p.id + '_APAGADA)' : `${p.sinClave ? `sin configurar → instala (${p.registro}) y pon en .env ${p.urlEnv}=… e ${p.modeloEnv}=…` : `sin clave → créala en ${p.registro} y ponla en .env como ${p.claveEnv}=…`}`}  (${p.nota})`);
         continue;
     }
     let r = await probar(cfg.url, cfg.clave, cfg.modelo);
