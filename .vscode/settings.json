@@ -1,0 +1,9 @@
+{
+  "terminal.integrated.defaultProfile.windows": "Git Bash",
+  "terminal.integrated.profiles.windows": {
+    "Git Bash": {
+      "path": "${env:LOCALAPPDATA}\Programs\Git\bin\bash.exe",
+      "args": ["--login"]
+    }
+  }
+}

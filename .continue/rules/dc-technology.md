@@ -16,4 +16,5 @@ Reglas:
 - Cero datos inventados.
 - No edites a mano los archivos generados (`n8n/flujo_bot_dctechnology.json`, `bot-conocimiento.json`, `p/`, `c/`, `estilos/tailwind.css`).
 - Antes de entregar, `npm test` debe dar 0 FALLA. Anota lo que hiciste en `.agent/BITACORA.md`.
-- La terminal es **PowerShell 5**: NO uses `&&` (da error). Corre los comandos uno por uno, o sepáralos con `;`.
+- Terminal: el proyecto usa **Git Bash** (grep, head, && funcionan). Si un comando dice «no se reconoce» estás en PowerShell: usa `Select-String -Path archivo -Pattern texto` en vez de grep, y `;` en vez de &&.
+- Catálogo: lee `docs/catalogo-resumen.md`; NO abras productos.json entero (650 KB). Para la foto o el detalle de UN producto: grep su id en productos.json.
