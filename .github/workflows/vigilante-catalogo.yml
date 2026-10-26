@@ -1,0 +1,38 @@
+# Vigilante del catálogo en GitHub (T13, 26/10/2026): corre aunque el PC de la oficina esté apagado.
+# Sincroniza Emprende Red y ANC (solo páginas públicas), recalcula disponibilidad, SEO, Shopping y bot, revisa el sitio y,
+# si algo cambió, publica en main (el mismo script que la tarea de Windows; hace pull --rebase antes de subir).
+# El informe por WhatsApp sale solo si existen los secretos EVOLUTION_* y NUMERO_AVISO_ADMIN (cuando el bot esté en un
+# servidor); mientras tanto queda en el registro de esta ejecución (pestaña Actions).
+name: vigilante-catalogo
+on:
+  schedule:
+    - cron: '30 11 * * *'   # 6:30 a. m. en Bogotá (la tarea del PC corre a las 6:00; no chocan)
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: vigilante-catalogo
+  cancel-in-progress: false
+jobs:
+  vigilante:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Autor de los commits
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+      - name: Vigilante del catálogo
+        run: node herramientas/vigilante-catalogo.mjs
+        env:
+          TZ: America/Bogota
+          NUMERO_AVISO_ADMIN: ${{ secrets.NUMERO_AVISO_ADMIN }}
+          EVOLUTION_URL: ${{ secrets.EVOLUTION_URL }}
+          EVOLUTION_API_KEY: ${{ secrets.EVOLUTION_API_KEY }}
+          EVOLUTION_INSTANCIA: ${{ secrets.EVOLUTION_INSTANCIA }}

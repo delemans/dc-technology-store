@@ -173,7 +173,7 @@ La tienda (GitHub Pages) y la base (Supabase) ya están en internet.
 3. B10: el director lo contrata.
 4. Claude hace la mudanza.
 
-## T13 · Vigilante del catálogo en GitHub Actions — **Pendiente** (alta)
+## T13 · Vigilante del catálogo en GitHub Actions — **Hecha (Claude, 26/10/2026)**: `.github/workflows/vigilante-catalogo.yml` (6:30 a. m. Bogotá; no necesita secretos porque solo lee páginas públicas; con los secretos EVOLUTION_* y NUMERO_AVISO_ADMIN además envía el informe). Prueba: pruebas/datos/test-actions.mjs. Gemini: no la rehagas; sigue con T14
 **Para qué:** sincronizar Emprende Red y ANC, publicar el catálogo y revisar el sitio cada día, aunque el PC esté apagado.
 1. **Workflow:** crea `.github/workflows/vigilante-catalogo.yml`:
    - se ejecuta a diario a las 11:00 UTC (6 a. m. en Bogotá) y también a mano (`schedule` + `workflow_dispatch`);
