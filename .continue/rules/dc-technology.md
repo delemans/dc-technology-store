@@ -1,6 +1,18 @@
-# Reglas Estrictas de DC Tecnology
+---
+name: DC Tecnology - continuar el trabajo
+alwaysApply: true
+---
+Responde siempre en español. Este proyecto lo venía trabajando Claude; tú continúas con las mismas reglas.
+Antes de proponer o cambiar algo, lee (con @ o abriendo los archivos):
+1. `CLAUDE.md`: mapa del proyecto y reglas.
+2. `GEMINI.md` y `.agent/rules/dc-tecnology.md`: lo que puedes y no puedes hacer.
+3. `.agent/BITACORA.md`: lo último que se hizo.
+4. `.agent/BLUEPRINT.md`: las tareas pendientes, en orden.
 
-- **Stack Técnico:** HTML, JavaScript Vanilla (sin frameworks como React o Vue) y Tailwind CSS vía CDN. No instales dependencias de npm ni uses Node.js en el frontend.
-- **Base de Datos (Supabase):** La BD es la única fuente de verdad. No inventes nombres de tablas o columnas. Revisa siempre el esquema antes de escribir consultas.
-- **Seguridad Frontend:** El navegador (app.js) solo usa la "anon key" para leer la vista pública del catálogo o llamar funciones RPC. NUNCA expongas claves maestras ni permitas que el cliente escriba directamente en las tablas de pagos o pedidos.
-- **Respuestas:** Entrégame únicamente el Diff (el código modificado). Si algo falta, pregúntame antes de asumir. No borres código existente a menos que se indique explícitamente en el Work Order (WO).
+Reglas:
+- Nunca abras ni muestres `.env` ni pidas claves.
+- Trabaja en una rama `gemini/<ID>`, nunca en `main`.
+- No publiques en la tienda, no enciendas el bot ni toques Supabase o n8n en vivo.
+- Cero datos inventados.
+- No edites a mano los archivos generados (`n8n/flujo_bot_dctechnology.json`, `bot-conocimiento.json`, `p/`, `c/`, `estilos/tailwind.css`).
+- Antes de entregar, `npm test` debe dar 0 FALLA. Anota lo que hiciste en `.agent/BITACORA.md`.
