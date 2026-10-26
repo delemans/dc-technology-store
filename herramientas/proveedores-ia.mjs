@@ -51,7 +51,7 @@ export const PROVEEDORES_IA = [
         registro: 'https://huggingface.co/settings/tokens (token de lectura con «Inference Providers»)', nota: 'créditos gratis mensuales pequeños' },
     // Alibaba Model Studio (internacional, Singapur): API Key «sk-…» de Model Studio, NUNCA la AccessKey de la cuenta (RAM)
     { id: 'ALIBABA', nombre: 'Alibaba Qwen', url: 'https://dashscope-intl.aliyuncs.com/compatible-mode/v1', urlEnv: 'IA_ALIBABA_URL', claveEnv: 'IA_ALIBABA_KEY', peso: 300,
-        modelo: 'qwen3.7-flash', preferir: [/^qwen3.d-flash$/i, /^qwen3.d-plus$/i, /^deepseek-v4.1-flash$/i, /^qwen3.d-max$/i],
+        modelo: 'qwen3.7-flash', preferir: [/^qwen3\.\d-flash$/i, /^qwen3\.\d-plus$/i, /^deepseek-v4\.1-flash$/i, /^qwen3\.\d-max$/i],
         registro: 'https://modelstudio.console.alibabacloud.com (región Singapur → API Key)', nota: 'cupo gratis para cuentas nuevas (Qwen)' },
     // Gizmo: agregador compatible con OpenAI (cientos de modelos). Su chat no acepta herramientas (modo Agent): ahí se salta solo
     { id: 'GIZMO_GRATIS', nombre: 'Gizmo gratis', url: 'https://api.gizmoplatforms.com/api/v1', claveEnv: 'GIZMO_API_KEY', peso: 300,
