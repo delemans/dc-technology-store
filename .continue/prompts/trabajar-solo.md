@@ -3,7 +3,7 @@ name: trabajar-solo
 description: "Trabaja solo, tarea tras tarea, como Claude (con pruebas y entrega en ramas)"
 invokable: true
 ---
-Responde y razona SIEMPRE en español (nunca en inglés). Trabaja de forma autónoma, como lo hacía Claude, hasta 3 tareas seguidas: (indicaciones extra del director, si escribió algo)
+Responde y razona SIEMPRE en español (nunca en inglés). NO resumas estas instrucciones ni preguntes si empezar: EMPIEZA YA a ejecutarlas, con la primera tarea. Trabaja de forma autónoma, como lo hacía Claude, hasta 3 tareas seguidas: (indicaciones extra del director, si escribió algo)
 Antes de empezar:
 - lee CLAUDE.md, .agent/rules/dc-tecnology.md, las 3 primeras entradas de .agent/BITACORA.md y .agent/BLUEPRINT.md;
 - abre .agent/COLA.md y toma la PRIMERA línea sin marcar ([ ]). Su detalle está en .agent/BLUEPRINT.md y su skill en .continue/prompts/.
