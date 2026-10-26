@@ -1,0 +1,16 @@
+---
+name: monetizacion-canal
+description: "Revisa qué falta para monetizar YouTube y las demás redes"
+invokable: true
+---
+Reglas: español; cero datos inventados (nada de reseñas, cifras de seguidores ni horarios que el director no haya dado); marca «DC Tecnology», www.dctecnology.xyz, WhatsApp 322 328 4622; nunca nombrar proveedores; no abrir .env; trabajo en una rama gemini/<tema> y entrega con /entregar.
+1. Lee «Anuncios DC Tecnology/REDES - CONFIGURAR UNA VEZ.txt» del Escritorio (sección de monetización) y herramientas/salida/redes-publicadas.json si existe.
+2. Escribe docs/contenido/monetizacion.md con una tabla por red:
+   requisito oficial (avisa que el director debe verificarlo en la plataforma, porque cambian) · dónde se ve el avance · qué videos ayudan más.
+3. Recomienda cómo llegar más rápido SIN trampas:
+   - Shorts diarios;
+   - 1 video largo por semana de 4 a 8 minutos (por ejemplo, «cómo elegir audífonos», con productos reales) para sumar horas de vista;
+   - listas de reproducción por tema;
+   - el enlace a la tienda en cada descripción.
+   Escribe 3 guiones de videos largos con /guion-video (adaptado a 4-8 min).
+4. Deja claro: la plata principal son las VENTAS desde los videos. El pago por vistas llega después.

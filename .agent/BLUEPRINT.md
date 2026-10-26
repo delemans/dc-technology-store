@@ -252,6 +252,20 @@ Usa `/mejorar-flujo <flujo>`, en este orden:
 ## T20 · Seguridad — **Pendiente** (alta; los hallazgos solo en privado/)
 Usa `/auditar-seguridad`. Las reglas del skill mandan: nada de fallas concretas en archivos públicos hasta corregirlas.
 
+## T21 · Google Maps y SEO local — **Pendiente** (alta)
+1. **Datos estructurados:**
+   - agrega a index.html un `LocalBusiness` (tipo `ElectronicsStore`) con nombre, url, logo, teléfono +57 322 328 4622 y `areaServed`;
+   - SIN dirección ni horario hasta que el director los dé (B3); déjalos como TODO en un comentario;
+   - valida que el JSON sea correcto y agrega una prueba web.
+2. **Enlace para reseñas en Google:**
+   - agrega `enlace_resena_google` a Config bot en n8n/generar_flujo_n8n.js (vacío por defecto);
+   - si está lleno, la plantilla de solicitud de reseña lo incluye;
+   - prueba de flujo. Claude sincroniza n8n.
+3. **Contenido semanal:** `/perfil-google` (repetible, rama `gemini/T21-maps-<semana>`).
+
+## T22 · Monetización y crecimiento sin pagar — **Pendiente** (media)
+Usa `/monetizacion-canal` y `/crecimiento-gratis`. Los guiones van a `docs/guiones/`; Claude los graba al volver.
+
 ---
 
 ## Bloqueadas (necesitan algo del director: no tocar)
