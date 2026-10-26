@@ -3,7 +3,7 @@ name: textos-redes
 description: "Mejora títulos, descripciones y hashtags de cada red sin romper el publicador"
 invokable: true
 ---
-Reglas: español; cero datos inventados (precios y existencias solo de productos.json o de precios_publicos; nada de descuentos, reseñas ni tiempos que no existan); marca «DC Tecnology» y «www.dctecnology.xyz»; WhatsApp 322 328 4622; nunca nombrar proveedores (ANC, Emprende Red); nunca abrir .env; trabaja en una rama gemini/<tema>.
+Reglas: español; cero datos inventados (precios y existencias solo de docs/catalogo-resumen.md, de la página del producto o de precios_publicos; nada de descuentos, reseñas ni tiempos que no existan); marca «DC Tecnology» y «www.dctecnology.xyz»; WhatsApp 322 328 4622; nunca nombrar proveedores (ANC, Emprende Red); nunca abrir .env; trabaja en una rama gemini/<tema>.
 1. Lee herramientas/generar_redes.js y pruebas/datos/test-publicar-redes.mjs.
 2. Mejora los textos por red respetando sus límites:
    - YouTube: título ≤ 100 y descripción ≤ 5000;

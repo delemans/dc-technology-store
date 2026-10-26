@@ -189,11 +189,12 @@ if (publicar && !PROBAR) {
         const correr = (cmd, a) => execFileSync(cmd, a, { cwd: RAIZ, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], timeout: 10 * 60e3 });
         correr(process.execPath, [path.join(RAIZ, 'herramientas', 'generar_seo.js')]);
         correr(process.execPath, [path.join(RAIZ, 'herramientas', 'generar_feed_google.js')]);
+        correr(process.execPath, [path.join(RAIZ, 'herramientas', 'resumen-catalogo.js')]); // resumen para las IA (docs/catalogo-resumen.md)
         correr(process.execPath, [path.join(RAIZ, 'generar_bot_conocimiento.js')]);
         correr(process.execPath, [path.join(RAIZ, 'herramientas', 'versionar.js')]);
         JSON.parse(fs.readFileSync(RUTA_PRODUCTOS, 'utf8'));
         JSON.parse(fs.readFileSync(path.join(RAIZ, 'bot-conocimiento.json'), 'utf8'));
-        const rutas = ['disponibilidad.json', 'productos.json', 'bot-conocimiento.json', 'p', 'c', 'guias', 'sitemap.xml', 'robots.txt', 'index.html', 'merchant', 'supabase/wo-041-emprendered.sql', 'admin.html', 'cliente.html', 'portal.html'];
+        const rutas = ['disponibilidad.json', 'productos.json', 'bot-conocimiento.json', 'p', 'c', 'guias', 'sitemap.xml', 'robots.txt', 'index.html', 'merchant', 'docs/catalogo-resumen.md', 'supabase/wo-041-emprendered.sql', 'admin.html', 'cliente.html', 'portal.html'];
         correr('git', ['add', '--', ...rutas.filter((x) => fs.existsSync(path.join(RAIZ, x)))]);
         const diff = correr('git', ['diff', '--cached']);
         if (/gsk_[a-z0-9]{10}|nvapi-[a-z0-9]{10}|sk-or-v1|AIza[0-9A-Za-z_-]{20}|ghp_[A-Za-z0-9]{20}|eyJhbGciOi/i.test(diff)) throw new Error('el cambio parece contener una clave: no se publica');

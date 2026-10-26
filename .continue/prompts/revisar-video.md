@@ -3,7 +3,7 @@ name: revisar-video
 description: "Revisa que los videos cumplan formato para estados y redes"
 invokable: true
 ---
-Reglas: español; cero datos inventados (precios y existencias solo de productos.json o de precios_publicos; nada de descuentos, reseñas ni tiempos que no existan); marca «DC Tecnology» y «www.dctecnology.xyz»; WhatsApp 322 328 4622; nunca nombrar proveedores (ANC, Emprende Red); nunca abrir .env; trabaja en una rama gemini/<tema>.
+Reglas: español; cero datos inventados (precios y existencias solo de docs/catalogo-resumen.md, de la página del producto o de precios_publicos; nada de descuentos, reseñas ni tiempos que no existan); marca «DC Tecnology» y «www.dctecnology.xyz»; WhatsApp 322 328 4622; nunca nombrar proveedores (ANC, Emprende Red); nunca abrir .env; trabaja en una rama gemini/<tema>.
 1. Lista docs/videos-estados/mp4/*.mp4. Para cada uno corre:
    ffprobe -v error -show_entries format=duration:stream=width,height,codec_type -of json "<archivo>"
    (si ffprobe no existe, dilo y para).
