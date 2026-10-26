@@ -33,9 +33,10 @@
         pista.style.setProperty('--duracion', `${Math.max(30, logos.length * 3.2)}s`);
 
         // Contador: productos, plataformas digitales y operadores de recargas (reales)
-        const totales = { productos: productos.length, plataformas: productos.filter((p) => ['streaming', 'licencias', 'pines'].includes(p.tipo)).length, recargas: productos.filter((p) => p.tipo === 'recargas').length };
+        const totales = { productos: productos.length, plataformas: productos.filter((p) => ['streaming', 'licencias', 'pines'].includes(p.tipo)).length, recargas: productos.filter((p) => p.tipo === 'recargas').length, servicios: productos.filter((p) => ['servicios', 'alquiler'].includes(p.tipo) || String(p.id).startsWith('servicio-')).length };
         seccion.querySelectorAll('[data-contar]').forEach((el) => {
             const fin = totales[el.dataset.contar] ?? 0;
+            if (!fin) { el.closest('div')?.setAttribute('hidden', ''); return; } // nunca un «0» en la portada
             if (menosMovimiento || !('IntersectionObserver' in window)) { el.textContent = fin; return; }
             const obs = new IntersectionObserver(([e]) => {
                 if (!e.isIntersecting) return;

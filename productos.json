@@ -14,7 +14,7 @@
     "marca": "DC Tecnology",
     "nombre": "Diademas Inalámbricas CR-8 con Luces LED",
     "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2026-08-05t124115-373-36ef27e8fec107431017859523974607-640-0.webp",
-    "descripcion": "<strong>RECOMENDACIONES IMPORTANTES DE USO Y GARANTÍA:</strong><br><br>• <strong>Carga Segura:</strong> NO usar adaptadores de carga rápida superiores a 5V/1A o 5W. El exceso de voltaje quema la batería interna y anula la garantía.<br>• <strong>Tiempo de Carga:</strong> Máximo 2 a 3 horas. No dejar cargando toda la noche.<br>• <strong>Garantía:</strong> 30 días por defectos de fábrica. No cubre daños por jalones de cable, golpes, o sobrecarga eléctrica.",
+    "descripcion": "<!--anc--><p>Disfruta de las Diademas Inalámbricas CR-8 con luces dinámicas y sonido estéreo. Comodidad y estilo para tu música.</p><p>¡Ponle color y ritmo a tu vida con las Diademas Inalámbricas CR-8 ! Diseñadas para ofrecerte un sonido potente y envolvente, estas diademas destacan por su espectacular sistema de luces integradas, dándote un estilo único y llamativo mientras disfrutas de tu música sin enredos.</p><p>Estilo, confort total y luces vibrantes. El accesorio ideal para quienes viven la música a otro nivel.</p><ul><li><strong>Sonido Envolvente y Graves Potentes:</strong> Sumérgete en tus playlists y juegos con una calidad de audio superior, bajos profundos y agudos nítidos que te harán vibrar con cada canción.</li><li><strong>Iluminación LED Dinámica:</strong> Destaca a donde vayas con su diseño moderno que incluye divertidas y coloridas luces LED en las orejeras, perfectas para un look gamer o urbano.</li><li><strong>Conexión Inalámbrica Estable:</strong> Olvídate por completo de los cables. Conéctate fácilmente a tu celular, tablet o PC mediante Bluetooth para una experiencia de audio libre e ininterrumpida.</li><li><strong>Diseño Ergonomómico y Batería Duradera:</strong> Almohadillas extra suaves que no cansan tus orejas tras horas de uso y una batería optimizada para aguantar largas sesiones de reproducción.</li></ul><!--/anc--><br><br><strong>RECOMENDACIONES IMPORTANTES DE USO Y GARANTÍA:</strong><br><br>• <strong>Carga Segura:</strong> NO usar adaptadores de carga rápida superiores a 5V/1A o 5W. El exceso de voltaje quema la batería interna y anula la garantía.<br>• <strong>Tiempo de Carga:</strong> Máximo 2 a 3 horas. No dejar cargando toda la noche.<br>• <strong>Garantía:</strong> 30 días por defectos de fábrica. No cubre daños por jalones de cable, golpes, o sobrecarga eléctrica.",
     "variantes": [ { "nombre": "Unidad Completa", "precio": 100000, "precio_anterior": 180000 } ]
   },
   {
@@ -339,6 +339,7 @@
     "marca": "Netflix",
     "nombre": "PIN Virtual Netflix Colombia",
     "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2026-07-25t230306-675-e59d09cb99d572efd717850386081961-640-0.webp",
+    "descripcion": "<!--anc--><p>Activa tu suscripción Netflix con PIN Virtual. Pago seguro, entrega rápida y sin tarjeta.</p><p>Ingresa a netflix.com/codigo e inicia sesión.</p><p>Escribe el código que te enviamos y confirma.</p><p>El saldo se abona a tu cuenta.</p><ul><li><strong>Región estricta:</strong> Este código es válido únicamente para cuentas registradas en Colombia .</li><li><strong>Sin ataduras:</strong> Al ser un método de prepago, no requiere tarjetas de crédito ni genera cobros automáticos sorpresa.</li><li>Al comprar, aceptas estas condiciones. Producto original y garantizado.</li><li>Los PIN son de un solo uso y válidos únicamente para cuentas de Colombia.</li><li><strong>Pagar tu plan:</strong> Usa el saldo para pagar tu suscripción.</li><li><strong>Sin tarjetas:</strong> No necesitas vincular una tarjeta de crédito.</li><li><strong>Multidispositivo:</strong> Disfruta en TV, celular y más.</li></ul><!--/anc-->",
     "variantes": [
       { "nombre": "PIN de $20.000", "precio": 20000, "precio_anterior": null },
       { "nombre": "PIN de $30.000", "precio": 30000, "precio_anterior": null },
@@ -760,7 +761,8 @@
     "imagen": "https://emprendered.com.co/storage/shop/front/img/products/38-whatsapp-image-2026-04-09-at-124114-pm.webp?v=1775756492",
     "descripcion": "<p>25W POWER ADAPTER</p><p>GARANTIA 30 DIAS</p><p>PRODUCTO IMPORTADO DE CALIDAD</p>",
     "variantes": [ { "nombre": "Unidad", "precio": 24800, "precio_anterior": null } ],
-    "existencias": 4,
+    "existencias": 0,
+    "agotado": true,
     "sincronizado": true
   },
   {
@@ -936,7 +938,7 @@
     "imagen": "https://emprendered.com.co/storage/shop/front/img/products/142-cable-lightning-apple-2-2782eb47.webp?v=1789505937",
     "descripcion": "",
     "variantes": [ { "nombre": "Unidad", "precio": 4400, "precio_anterior": null } ],
-    "existencias": 23,
+    "existencias": 22,
     "sincronizado": true
   },
   {
@@ -1978,7 +1980,7 @@
     "imagen": "https://emprendered.com.co/storage/shop/front/img/products/419-21d2c16c-f66a-4fbb-843a-dde72337c717.webp?v=1761070898",
     "descripcion": "<p><p>PROMOCION!</p></p>",
     "variantes": [ { "nombre": "Unidad", "precio": 2400, "precio_anterior": null } ],
-    "existencias": 4,
+    "existencias": 3,
     "sincronizado": true
   },
   {
@@ -2050,7 +2052,7 @@
     "imagen": "https://emprendered.com.co/storage/shop/front/img/products/427-a4fb9785-288c-41fa-88fe-c6a9c279c821.webp?v=1761098856",
     "descripcion": "",
     "variantes": [ { "nombre": "Unidad", "precio": 3300, "precio_anterior": null } ],
-    "existencias": 23,
+    "existencias": 19,
     "sincronizado": true
   },
   {
@@ -2062,7 +2064,7 @@
     "imagen": "https://emprendered.com.co/storage/shop/front/img/products/428-17a4abe8-d350-4f02-a3a1-848606027cd5.webp?v=1761101506",
     "descripcion": "",
     "variantes": [ { "nombre": "Unidad", "precio": 3300, "precio_anterior": null } ],
-    "existencias": 35,
+    "existencias": 31,
     "sincronizado": true
   },
   {
@@ -2629,7 +2631,7 @@
     "imagen": "https://emprendered.com.co/storage/shop/front/img/products/552-dama-kairos-original-fa017-401l-1-1b48deba.webp?v=1790895497",
     "descripcion": "<p><strong>GARANTIA DE 6 MESES EN MAQUINARIA</strong></p><p><strong>RESISTENTE AL AGUA</strong></p><p><strong>NO ES SUMERGIBLE</strong></p>",
     "variantes": [ { "nombre": "Unidad", "precio": 112500, "precio_anterior": null } ],
-    "existencias": 2,
+    "existencias": 1,
     "sincronizado": true
   },
   {
@@ -2653,7 +2655,7 @@
     "imagen": "https://emprendered.com.co/storage/shop/front/img/products/554-kairos-original-fa185m-900-hombre-1.webp?v=1783376472",
     "descripcion": "<p><strong>GARANTIA DE 6 MESES EN MAQUINARIA</strong></p><p><strong>RESISTENTE AL AGUA</strong></p><p><strong>NO ES SUMERGIBLE</strong></p>",
     "variantes": [ { "nombre": "Unidad", "precio": 59900, "precio_anterior": null } ],
-    "existencias": 2,
+    "existencias": 1,
     "sincronizado": true
   },
   {
@@ -3081,7 +3083,7 @@
     "imagen": "https://emprendered.com.co/storage/shop/front/img/products/629-2cf10476-40ca-4ca1-8eb2-ebc930fbf550.webp?v=1763832091",
     "descripcion": "<p><p>UNIDADES AL AZAR SE ENTREGAN</p></p>",
     "variantes": [ { "nombre": "Unidad", "precio": 4800, "precio_anterior": null } ],
-    "existencias": 12,
+    "existencias": 6,
     "sincronizado": true
   },
   {
@@ -3618,7 +3620,7 @@
     "imagen": "https://emprendered.com.co/storage/shop/front/img/products/758-ce98bd81-5e9b-490a-8437-a6dcb39cee74.webp?v=1765403027",
     "descripcion": "<p><p>BOMBA DE RIEGO</p></p>",
     "variantes": [ { "nombre": "Unidad", "precio": 4800, "precio_anterior": null } ],
-    "existencias": 11,
+    "existencias": 8,
     "sincronizado": true
   },
   {
@@ -4184,7 +4186,7 @@
     "imagen": "https://emprendered.com.co/storage/shop/front/img/products/897-05fbbdf9-75c9-4927-b9d1-7090cd896f58.webp?v=1767114213",
     "descripcion": "",
     "variantes": [ { "nombre": "Unidad", "precio": 31200, "precio_anterior": null } ],
-    "existencias": 7,
+    "existencias": 6,
     "sincronizado": true
   },
   {
@@ -5933,7 +5935,7 @@
     "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1187-whatsapp-image-2026-02-23-at-23651-pm.webp?v=1771875429",
     "descripcion": "",
     "variantes": [ { "nombre": "Unidad", "precio": 5100, "precio_anterior": null } ],
-    "existencias": 25,
+    "existencias": 13,
     "sincronizado": true
   },
   {
@@ -7365,6 +7367,18 @@
     "sincronizado": true
   },
   {
+    "id": "er-polvo-mega-limon-acido-x40-und-1543",
+    "tipo": "variedades",
+    "categoria": "Dulcería importada",
+    "oculto": true,
+    "nombre": "Polvo Mega Limon Acido X40 Und",
+    "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1543-polvo-mega-limon-acido-x40-und-1-8b6e081e.webp?v=1792971858",
+    "descripcion": "",
+    "variantes": [ { "nombre": "Unidad", "precio": 7500, "precio_anterior": null } ],
+    "existencias": 6,
+    "sincronizado": true
+  },
+  {
     "id": "er-aceite-corporal-coco-120-ml-1551",
     "tipo": "variedades",
     "categoria": "Belleza",
@@ -7760,7 +7774,7 @@
     "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1626-9da2a988-cf1d-44ee-a4ee-3ed6e8ebef8e.webp?v=1781994744",
     "descripcion": "<p><p><strong>VaporPlus Spray</strong> es una soluci&oacute;n pr&aacute;ctica para quienes buscan una sensaci&oacute;n de alivio y frescura en zonas de molestia corporal.</p>\r\n\r\n<p>Su presentaci&oacute;n mediana a peque&ntilde;a es f&aacute;cil de llevar, usar y guardar. Ideal para aplicar en espalda, cuello, piernas, brazos o zonas cansadas despu&eacute;s del trabajo, ejercicio o largas jornadas.</p>\r\n\r\n<p>Con ingredientes como <strong>marihuana, &aacute;rnica y moringa</strong>, ofrece una experiencia herbal refrescante con aroma mentolado.</p>\r\n\r\n<p><strong>VaporPlus Spray: alivio pr&aacute;ctico, natural y al alcance de tu mano.</strong></p></p>",
     "variantes": [ { "nombre": "Unidad", "precio": 6900, "precio_anterior": null } ],
-    "existencias": 14,
+    "existencias": 8,
     "sincronizado": true
   },
   {
@@ -8266,6 +8280,18 @@
     "sincronizado": true
   },
   {
+    "id": "er-huevo-salchicha-huevardo-x15-und-1735",
+    "tipo": "variedades",
+    "categoria": "Dulcería importada",
+    "oculto": true,
+    "nombre": "Huevo Salchicha Huevardo X15 Und",
+    "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1735-huevo-salchicha-huevardo-x15-und-1.webp?v=1785177782",
+    "descripcion": "<p>¡Despierta tu antojo con las Gomitas HUEVARDO! 15 unidades de pura diversión en forma de huevo y salchicha. ¡Una explosión de sabor que te hará querer más! ¿Te atreves a probar esta delicia única?</p>",
+    "variantes": [ { "nombre": "Unidad", "precio": 20600, "precio_anterior": null } ],
+    "existencias": 12,
+    "sincronizado": true
+  },
+  {
     "id": "er-cola-loka-spray-x20-und-1736",
     "tipo": "variedades",
     "categoria": "Dulcería importada",
@@ -8290,6 +8316,18 @@
     "sincronizado": true
   },
   {
+    "id": "er-trueno-pop-x50-und-1738",
+    "tipo": "variedades",
+    "categoria": "Dulcería importada",
+    "oculto": true,
+    "nombre": "Trueno Pop X50 Und",
+    "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1738-trueno-pop-x50-und-1.webp?v=1785179585",
+    "descripcion": "<p>¡Despierta tus sentidos con Trueno Pop! Cada caramelo es una explosión de sabor frutal que te hará vibrar de emoción. Descubre la sorpresa que te espera en cada uno de estos 50 explosivos sabores. ¡No te quedes sin probar esta dulce aventura!</p>",
+    "variantes": [ { "nombre": "Unidad", "precio": 14000, "precio_anterior": null } ],
+    "existencias": 8,
+    "sincronizado": true
+  },
+  {
     "id": "er-chupete-anillo-luminoso-x15und-1739",
     "tipo": "variedades",
     "categoria": "Dulcería importada",
@@ -8299,6 +8337,18 @@
     "descripcion": "<p>¡Descubre la magia en cada chupada! Este anillo luminoso transforma tu dulce favorito en una experiencia brillante y divertida. Su luz LED integrada te sorprenderá a cada instante. ¿Listo para saborear la diversión y el brillo? ¡No te quedes sin el tuyo!</p>",
     "variantes": [ { "nombre": "Unidad", "precio": 22500, "precio_anterior": null } ],
     "existencias": 1,
+    "sincronizado": true
+  },
+  {
+    "id": "er-nachos-hot-chilli-x12-und-1740",
+    "tipo": "variedades",
+    "categoria": "Dulcería importada",
+    "oculto": true,
+    "nombre": "Nachos Hot-chilli X12 Und",
+    "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1740-nachos-hot-chilli-x12-und-1.webp?v=1785180988",
+    "descripcion": "<p>¡Prepárate para una explosión de sabor! Nuestros NACHOS HOT-CHILLI te envuelven en una intensidad picante y un toque cítrico que te harán querer más. Cada unidad (x12) es una experiencia crujiente y deliciosa. ¿Te atreves a probarlos?</p>",
+    "variantes": [ { "nombre": "Unidad", "precio": 13700, "precio_anterior": null } ],
+    "existencias": 12,
     "sincronizado": true
   },
   {
@@ -8747,7 +8797,8 @@
     "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1792-afilador-de-cuchillos-1-3854ebb8.webp?v=1787334043",
     "descripcion": "<p>**¡Revoluciona tu cocina!** Descubre el secreto de un corte perfecto y sin esfuerzo. Con nuestro afilador, tus cuchillos volverán a la vida en segundos, garantizando **más filo y precisión** en cada preparación. ¡Prepárate para cortar como un profesional!</p>",
     "variantes": [ { "nombre": "Unidad", "precio": 7400, "precio_anterior": null } ],
-    "existencias": 1,
+    "existencias": 0,
+    "agotado": true,
     "sincronizado": true
   },
   {
@@ -9209,6 +9260,30 @@
     "descripcion": "<p>¡Captura la luz perfecta en cada foto! Con esta MINI LUZ LED RECARGABLE, tus selfies y videos brillarán como nunca antes. Olvídate de la poca luz y luce espectacular al instante. ¡Descubre el secreto de la iluminación profesional!</p>",
     "variantes": [ { "nombre": "Unidad", "precio": 7400, "precio_anterior": null } ],
     "existencias": 162,
+    "sincronizado": true
+  },
+  {
+    "id": "er-pitillo-acido-mango-x24-und-1841",
+    "tipo": "variedades",
+    "categoria": "Dulcería importada",
+    "oculto": true,
+    "nombre": "Pitillo Acido Mango X24 Und",
+    "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1841-pitillo-acido-mango-x24-und-1-14bdf01f.webp?v=1788370001",
+    "descripcion": "<p>¡Prepárate para una explosión de sabor! Nuestros Pitillos Ácido Mango X24 UND te transportarán al trópico con su intensidad y dulzura. Cada mordisco es una aventura que te dejará pidiendo más. ¿Te atreves a probar la locura tropical?</p>",
+    "variantes": [ { "nombre": "Unidad", "precio": 7800, "precio_anterior": null } ],
+    "existencias": 24,
+    "sincronizado": true
+  },
+  {
+    "id": "er-pitillo-enchilado-x24-und-1842",
+    "tipo": "variedades",
+    "categoria": "Dulcería importada",
+    "oculto": true,
+    "nombre": "Pitillo Enchilado X24 Und",
+    "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1842-pitillo-enchilado-x24-und-1-79bb6348.webp?v=1788370471",
+    "descripcion": "<p>¡Prepárate para una explosión de sabor y picante! Nuestros PITILLOS ENCHILADOS X24 UND te ofrecen una experiencia inolvidable. ¿Te atreves a descubrir el sabor que te pica? ¡Son perfectos para los amantes de la adrenalina y el dulce con un toque atrevido!</p>",
+    "variantes": [ { "nombre": "Unidad", "precio": 7800, "precio_anterior": null } ],
+    "existencias": 24,
     "sincronizado": true
   },
   {
@@ -9926,7 +10001,7 @@
     "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1942-emulsion-de-vitamina-e-y-c-bioaqua-bqy89222-1-0ca7c516.webp?v=1790618913",
     "descripcion": "<p>¡Despierta una piel irresistiblemente suave y luminosa! La Emulsión Bioaqua, con Vitamina E y C, nutre profundamente sin dejar rastro graso. Descubre el secreto de una tez jugosa y radiante. ¡Tu piel te lo agradecerá!</p>",
     "variantes": [ { "nombre": "Unidad", "precio": 8100, "precio_anterior": null } ],
-    "existencias": 6,
+    "existencias": 5,
     "sincronizado": true
   },
   {
@@ -9938,7 +10013,7 @@
     "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1943-gas-pimienta-grande-defensa-personal-1-81bfe8b3.webp?v=1790632524",
     "descripcion": "<p>¡Tu seguridad es lo primero! Este potente gas pimienta te brinda una defensa instantánea y eficaz ante cualquier amenaza. Su tamaño grande asegura una protección duradera. ¿Listo para sentirte seguro en todo momento? ¡Descúbrelo ahora!</p>",
     "variantes": [ { "nombre": "Unidad", "precio": 12800, "precio_anterior": null } ],
-    "existencias": 10,
+    "existencias": 7,
     "sincronizado": true
   },
   {
@@ -9986,7 +10061,7 @@
     "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1949-bandas-tubulares-x-11-d002-1-58bdd3f9.webp?v=1790872462",
     "descripcion": "<p>¡Transforma tu cuerpo desde casa! Descubre la versatilidad de las BANDAS TUBULARES X 11 D002. Tonifica, fortalece y esculpe cada músculo con la resistencia perfecta. ¡Tu gimnasio portátil te espera para resultados asombrosos!</p>",
     "variantes": [ { "nombre": "Unidad", "precio": 20700, "precio_anterior": null } ],
-    "existencias": 4,
+    "existencias": 2,
     "sincronizado": true
   },
   {
@@ -10093,7 +10168,8 @@
     "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1964-impermeabilizante-brocha-v-2051-1-066bb7ea.webp?v=1790964862",
     "descripcion": "<p>¡Adiós humedades y grietas! Con IMPERMEABILIZANTE + BROCHA V-2051, protege tu hogar fácilmente. Su fórmula de alta adherencia crea una barrera impermeable infalible. ¡Descubre la solución definitiva para tus reparaciones!</p>",
     "variantes": [ { "nombre": "Unidad", "precio": 14900, "precio_anterior": null } ],
-    "existencias": 3,
+    "existencias": 0,
+    "agotado": true,
     "sincronizado": true
   },
   {
@@ -10234,7 +10310,7 @@
     "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1979-juego-de-cuchillos-cocina-x6-und-1-a997a4b9.webp?v=1791394518",
     "descripcion": "<p><strong>Cuchilla de acero inoxidable:</strong> La hoja de acero inoxidable asegura durabilidad y resistencia a la corrosión, lo que la hace ideal para un uso a largo plazo en la cocina.</p><p><strong>Filo combinado:</strong> Un filo combinado proporciona versatilidad, permitiendo al cuchillo manejar eficazmente tanto tareas de rebanado como de picado.</p>",
     "variantes": [ { "nombre": "Unidad", "precio": 29900, "precio_anterior": null } ],
-    "existencias": 36,
+    "existencias": 33,
     "sincronizado": true
   },
   {
@@ -10519,7 +10595,7 @@
     "imagen": "https://emprendered.com.co/storage/shop/front/img/products/2015-bolsa-para-lavadora-1-361c8980.webp?v=1792622974",
     "descripcion": "<p>🧦 ¡Cuida tu ropa en cada lavado!<br>Ideal para sujetadores, ropa interior, calcetines e incluso zapatos. También funciona como un práctico organizador.</p>",
     "variantes": [ { "nombre": "Unidad", "precio": 5900, "precio_anterior": null } ],
-    "existencias": 12,
+    "existencias": 4,
     "sincronizado": true
   },
   {
@@ -10543,7 +10619,7 @@
     "imagen": "https://emprendered.com.co/storage/shop/front/img/products/2017-organizador-perchero-esquinero-1-e822c7b8.webp?v=1792778328",
     "descripcion": "<p>¡Despídete del desorden y da la bienvenida a la elegancia! Este perchero esquinero transforma tu espacio, ofreciendo organización y estilo en cada rincón. ¡Descubre cómo puede revolucionar tu habitación!</p>",
     "variantes": [ { "nombre": "Unidad", "precio": 39000, "precio_anterior": null } ],
-    "existencias": 6,
+    "existencias": 4,
     "sincronizado": true
   }
 ]

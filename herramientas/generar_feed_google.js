@@ -9,7 +9,7 @@ const fs = require('fs');
 const path = require('path');
 const RAIZ = path.resolve(__dirname, '..');
 const SITIO = 'https://dctecnology.xyz';
-const productos = JSON.parse(fs.readFileSync(path.join(RAIZ, 'productos.json'), 'utf8'));
+const productos = require('./disponibilidad.js').filtrar(JSON.parse(fs.readFileSync(path.join(RAIZ, 'productos.json'), 'utf8')));
 const xml = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&apos;' }[c]));
 const texto = (html) => String(html ?? '').replace(/<[^>]+>/g, ' ').replace(/&[a-z]+;/gi, ' ').replace(/\s+/g, ' ').trim();
 const paginas = new Set(fs.readdirSync(path.join(RAIZ, 'p')).map((f) => f.replace(/\.html$/, '')));

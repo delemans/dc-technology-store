@@ -17,7 +17,8 @@ const RUTA_SALIDA = path.join(__dirname, 'bot-conocimiento.json');
 // Portal del cliente: historial, accesos, garantía y reportes de falla (entra con un código por WhatsApp)
 const URL_MIS_PEDIDOS = 'https://www.dctecnology.xyz/#cuenta';
 const URL_TIENDA = 'https://www.dctecnology.xyz';
-const productos = JSON.parse(fs.readFileSync(path.join(__dirname, 'productos.json'), 'utf8'));
+// Lo que ya no hay en ANC ni en Emprende Red queda oculto para el bot (disponibilidad.json); n8n lo sigue sincronizando
+const productos = require('./herramientas/disponibilidad.js').marcar(JSON.parse(fs.readFileSync(path.join(__dirname, 'productos.json'), 'utf8')));
 const anterior = fs.existsSync(RUTA_SALIDA) ? JSON.parse(fs.readFileSync(RUTA_SALIDA, 'utf8')) : {};
 
 const textoPlano = (html) => String(html ?? '')

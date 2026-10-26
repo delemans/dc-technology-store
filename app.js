@@ -4,8 +4,21 @@
 
 const SUPABASE_URL = 'https://vyqcizwfmjlflncdwzve.supabase.co';
 // Catálogo: UNA sola descarga para toda la página (la franja de marcas la reutiliza); empieza de una vez
-window.DCCatalogoCrudo = fetch('productos.json', { cache: 'no-cache' }) // revalida: nunca el catálogo viejo del navegador
-    .then((r) => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); });
+// disponibilidad.json (herramientas/disponibilidad-proveedores.mjs): lo que ya no hay en ANC ni en Emprende Red no se muestra
+window.DCFiltrarDisponibles = (productos, disp) => {
+    if (!disp || typeof disp !== 'object') return productos.filter((p) => !p.agotado);
+    const ocultos = disp.ocultos ?? {}, planes = disp.variantes ?? {};
+    return productos.filter((p) => !ocultos[p.id] && !p.agotado).map((p) => {
+        const fuera = planes[p.id];
+        if (!fuera) return p;
+        const variantes = (p.variantes ?? []).filter((v) => !fuera[v.nombre]);
+        return variantes.length ? { ...p, variantes } : null;
+    }).filter(Boolean);
+};
+window.DCCatalogoCrudo = Promise.all([
+    fetch('productos.json', { cache: 'no-cache' }).then((r) => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); }), // revalida: nunca el catálogo viejo
+    fetch('disponibilidad.json', { cache: 'no-cache' }).then((r) => (r.ok ? r.json() : null)).catch(() => null),
+]).then(([productos, disp]) => window.DCFiltrarDisponibles(productos, disp));
 const SUPABASE_CLAVE_PUBLICA = 'sb_publishable_GvQiv6M7iSrlwsA90lXsOQ_5OfSYBwy';
 // La tienda funciona aunque Supabase no responda: solo se pierden cupones, reseñas y contadores
 const supabaseTienda = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_CLAVE_PUBLICA) : null;
@@ -343,12 +356,11 @@ async function aplicarPreciosBase(productos) {
             const sinDias = (t) => String(t ?? '').replace(/\s*\d+\s*d[ií]as?\b/gi, '').trim().toLowerCase();
             const b = base.find((x) => x.variante === v.nombre) ?? base.find((x) => sinDias(x.variante) === sinDias(v.nombre));
             return b ? { ...v, precio: Number(b.precio), precio_anterior: b.precio_anterior === null ? null : Number(b.precio_anterior), agotado: b.agotado === true } : null;
-        }).filter(Boolean);
+        }).filter(Boolean).filter((v) => !v.agotado); // 25/10/2026: lo agotado no se muestra; vuelve solo cuando el proveedor repone
         // Existencias del proveedor (wo-047): las de la base mandan sobre las del archivo
         const existencias = base.find((x) => x.existencias !== null && x.existencias !== undefined)?.existencias;
-        // Agotado (wo-050): sigue a la vista con su precio, pero no se puede comprar hasta que vuelva
-        const agotado = variantes.length > 0 && variantes.every((v) => v.agotado);
-        return variantes.length ? { ...p, variantes, agotado, ...(existencias !== undefined ? { existencias: Number(existencias) } : {}) } : null;
+        if (existencias !== undefined && existencias !== null && Number(existencias) <= 0) return null;
+        return variantes.length ? { ...p, variantes, agotado: false, ...(existencias !== undefined ? { existencias: Number(existencias) } : {}) } : null;
     }).filter(Boolean);
 }
 

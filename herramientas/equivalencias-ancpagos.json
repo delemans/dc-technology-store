@@ -25,7 +25,7 @@
     "variantes": {
       "Pantalla Estándar 1 Mes": "Pantalla Estandar",
       "Pantalla Platino 1 Mes": "Pantalla Platino",
-      "Cuenta Completa Estándar 1 Mes": "Completa Estandar",
+      "Cuenta Completa Estándar 1 Mes": "Cuenta Completa Estándar",
       "Cuenta Completa Platino 1 Mes": "Completa Platino"
     }
   },
@@ -108,10 +108,10 @@
     }
   },
   "mcafee-antivirus": {
-    "proveedor": "McAfee",
+    "proveedor": "McAfee Antivirus",
     "variantes": {
-      "Licencia 1 Año (1 PC)": "1 Año 1 Equipo",
-      "Licencia 1 Año (5 PCs)": "1 Año 5 Equipos"
+      "Licencia 1 Año (1 PC)": "1 año x1 equipo",
+      "Licencia 1 Año (5 PCs)": "1 año x5 equipos"
     }
   },
   "office-365": {
@@ -266,6 +266,22 @@
     "proveedor": "Reloj Inteligente Smartwatch M9",
     "variantes": {
       "Edición M9": ""
+    }
+  },
+  "pin-virtual-netflix": {
+    "proveedor": "PIN Virtual Netflix",
+    "variantes": {
+      "PIN de $20.000": "20.000",
+      "PIN de $30.000": "30.000",
+      "PIN de $35.000": "35.000",
+      "PIN de $40.000": "40.000",
+      "PIN de $50.000": "50.000"
+    }
+  },
+  "diademas-inalambricas-cr-8-con-luces-r9s7x": {
+    "proveedor": "Diademas Inalámbricas CR-8 con Luces",
+    "variantes": {
+      "Unidad Completa": ""
     }
   }
 }

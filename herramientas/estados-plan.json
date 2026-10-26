@@ -234,6 +234,38 @@
   {
    "archivo": "srv-automatizaciones",
    "texto": "📊 Tableros en tiempo real, inventarios, sistemas para bares y supermercados y automatización de macros."
+  },
+  {
+   "archivo": "t-audifonos",
+   "texto": "🎧 Audífonos con garantía de 30 días por defectos de fábrica. Envíos a todo el país con número de guía."
+  },
+  {
+   "archivo": "t-relojes-inteligentes",
+   "texto": "⌚ Relojes inteligentes con garantía de 30 días. Unidades limitadas: mira los precios de hoy en la tienda."
+  },
+  {
+   "archivo": "t-powerbank-cargadores",
+   "texto": "🔋 Power banks y cargadores para que nunca te quedes sin batería. Garantía de 30 días."
+  },
+  {
+   "archivo": "t-parlantes",
+   "texto": "🔊 Parlantes con garantía de 30 días y envío a todo el país."
+  },
+  {
+   "archivo": "t-gamer",
+   "texto": "🎮 Accesorios gamer con garantía de 30 días. Pídelo en la tienda o por WhatsApp."
+  },
+  {
+   "archivo": "p-pin-google-play",
+   "texto": "🎮 Pin de Google Play: juegos, apps y más. El código te llega por WhatsApp apenas validamos tu pago."
+  },
+  {
+   "archivo": "p-pin-virtual-roblox",
+   "texto": "🟥 Pin de Roblox para Robux o Premium. Te llega por WhatsApp; válido para cuentas de Colombia."
+  },
+  {
+   "archivo": "p-pin-virtual-disney-plus-1tpu5",
+   "texto": "🏰 Pin de Disney Plus: Marvel, Star Wars y Pixar. Válido para cuentas de Colombia."
   }
  ],
  "inicio_campanas": "2026-10-19",
@@ -260,7 +292,7 @@
     "ing-franquicias",
     "ing-mantenimiento",
     "ing-combos",
-    "ing-windows11",
+    "t-parlantes",
     "ing-innovador",
     "tip-pantalla-vs-cuenta"
    ],
@@ -271,7 +303,7 @@
    "nombre": "Servicios DC",
    "videos": [
     "srv-mantenimiento",
-    "srv-instalacion",
+    "reparacion-computadores",
     "srv-reparacion",
     "srv-alquiler",
     "srv-asesoria",
@@ -299,28 +331,28 @@
    "nombre": "Tecnología, licencias y soporte",
    "videos": [
     "tip-mantenimiento",
-    "windows-pro",
+    "t-audifonos",
     "tip-windows",
-    "office-365",
-    "tip-office",
+    "t-relojes-inteligentes",
+    "t-powerbank-cargadores",
     "mantenimiento-preventivo",
     "tip-antivirus"
    ],
    "promo": "🪟 Semana de licencias y soporte técnico\nWindows, Office y McAfee originales, mantenimiento y reparación de computadores.\nRelojes y audífonos con garantía de 30 días.\n🛒 www.dctecnology.xyz"
   },
   {
-   "id": "recargas",
-   "nombre": "Recarga y juega",
+   "id": "pines",
+   "nombre": "Pines y regalos",
    "videos": [
-    "pines-recargas",
-    "free-fire-diamantes",
+    "p-pin-google-play",
+    "p-pin-virtual-roblox",
     "regala-un-pin",
-    "apps-premium",
-    "relojes-audifonos",
+    "p-pin-virtual-disney-plus-1tpu5",
+    "t-gamer",
     "comprobante-web",
     "primera-compra"
    ],
-   "promo": "📱 Semana de recargas y pines\nClaro, Movistar, Tigo, Wom, ETB y Éxito, diamantes de Free Fire y pines de Google Play, Roblox y más.\n🎁 Primera compra: 10% con DCTECH2026\n💬 322 328 4622"
+   "promo": "🎁 Semana de pines y regalos\nGoogle Play, Roblox, Disney Plus, Netflix y más: el código te llega por WhatsApp apenas validamos tu pago.\n🛒 www.dctecnology.xyz"
   },
   {
    "id": "negocios",

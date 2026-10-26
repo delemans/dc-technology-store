@@ -19,7 +19,8 @@ const LOGO = 'https://dctecnology.xyz/img/logo-dc-192.png';
 const GARANTIA_DIAS = 30;
 // Sin los ocultos: productos de categorías del proveedor que no se muestran (se activan en el panel; para Google, agrégalas a
 // CATEGORIAS_VISIBLES_POR_DEFECTO en sincronizar-emprendered.mjs y vuelve a generar)
-const productos = JSON.parse(fs.readFileSync(path.join(RAIZ, 'productos.json'), 'utf8')).filter((p) => !p.oculto);
+// Lo que ya no hay en ANC ni en Emprende Red no tiene página (disponibilidad.json)
+const productos = require('./disponibilidad.js').filtrar(JSON.parse(fs.readFileSync(path.join(RAIZ, 'productos.json'), 'utf8')).filter((p) => !p.oculto));
 const SUPABASE_URL = 'https://vyqcizwfmjlflncdwzve.supabase.co';
 const SUPABASE_PUBLICA = 'sb_publishable_GvQiv6M7iSrlwsA90lXsOQ_5OfSYBwy'; // la misma clave pública de la tienda
 

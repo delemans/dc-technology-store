@@ -132,6 +132,21 @@ try {
     else if (rd.status !== 0) informe.push(`⚠️ No pude actualizar descripciones de ANC: ${String(rd.stderr || '').trim().split('\n').pop()?.slice(0, 140)}`);
 }
 
+/* ---------- 2c) Lo que ya no hay en ANC ni en Emprende Red no se muestra (disponibilidad.json); lo que vuelve, reaparece ---------- */
+{
+    const antes = fs.existsSync(path.join(RAIZ, 'disponibilidad.json')) ? fs.readFileSync(path.join(RAIZ, 'disponibilidad.json'), 'utf8') : '';
+    const rd = spawnSync(process.execPath, [path.join(RAIZ, 'herramientas', 'disponibilidad-proveedores.mjs'), ...(PROBAR ? [] : ['--aplicar'])], { cwd: RAIZ, encoding: 'utf8', timeout: 10 * 60e3 });
+    const ahora = fs.existsSync(path.join(RAIZ, 'disponibilidad.json')) ? fs.readFileSync(path.join(RAIZ, 'disponibilidad.json'), 'utf8') : '';
+    if (/DISPONIBILIDAD: actualizada/.test(rd.stdout || '') && ahora !== antes) {
+        publicar = true;
+        const leer = (t) => { try { const j = JSON.parse(t); return new Set([...Object.keys(j.ocultos ?? {}), ...Object.entries(j.variantes ?? {}).flatMap(([id, v]) => Object.keys(v).map((x) => `${id} · ${x}`))]); } catch { return new Set(); } };
+        const a = leer(antes), b = leer(ahora);
+        const salen = [...b].filter((x) => !a.has(x)), vuelven = [...a].filter((x) => !b.has(x));
+        if (salen.length) informe.push(`🙈 Ya no salen en la tienda (no los hay en el proveedor):\n${salen.slice(0, 12).map((x) => `• ${x}`).join('\n')}${salen.length > 12 ? `\n… y ${salen.length - 12} más` : ''}`);
+        if (vuelven.length) informe.push(`✅ Volvieron a la tienda:\n${vuelven.slice(0, 12).map((x) => `• ${x}`).join('\n')}`);
+    } else if (/Lectura incompleta/.test(rd.stdout || '')) informe.push('⚠️ No pude leer bien ANC: la disponibilidad queda como estaba.');
+}
+
 /* ---------- 3) Políticas de los proveedores ---------- */
 const textoPlano = (html) => String(html ?? '').replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/gi, ' ').replace(/<[^>]+>/g, ' ').replace(/&[a-z#0-9]+;/gi, ' ').replace(/\s+/g, ' ').trim();
 const POLITICAS = [
@@ -178,7 +193,7 @@ if (publicar && !PROBAR) {
         correr(process.execPath, [path.join(RAIZ, 'herramientas', 'versionar.js')]);
         JSON.parse(fs.readFileSync(RUTA_PRODUCTOS, 'utf8'));
         JSON.parse(fs.readFileSync(path.join(RAIZ, 'bot-conocimiento.json'), 'utf8'));
-        const rutas = ['productos.json', 'bot-conocimiento.json', 'p', 'c', 'guias', 'sitemap.xml', 'robots.txt', 'index.html', 'merchant', 'supabase/wo-041-emprendered.sql', 'admin.html', 'cliente.html', 'portal.html'];
+        const rutas = ['disponibilidad.json', 'productos.json', 'bot-conocimiento.json', 'p', 'c', 'guias', 'sitemap.xml', 'robots.txt', 'index.html', 'merchant', 'supabase/wo-041-emprendered.sql', 'admin.html', 'cliente.html', 'portal.html'];
         correr('git', ['add', '--', ...rutas.filter((x) => fs.existsSync(path.join(RAIZ, x)))]);
         const diff = correr('git', ['diff', '--cached']);
         if (/gsk_[a-z0-9]{10}|nvapi-[a-z0-9]{10}|sk-or-v1|AIza[0-9A-Za-z_-]{20}|ghp_[A-Za-z0-9]{20}|eyJhbGciOi/i.test(diff)) throw new Error('el cambio parece contener una clave: no se publica');
