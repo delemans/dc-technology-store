@@ -49,7 +49,7 @@ function anotar(archivo, fila) {
  * @returns { texto, ia, modelo, intentos }  · lanza Error con .fallas y .fatal (todas sin saldo o sin configurar)
  */
 export async function pedirIA(mensajes, o = {}, d = {}) {
-    const { tarea = 'general', sistema, temperatura = 0.3, maxTokens = 700, json = false, timeoutMs = 45000, presupuestoMs = 150000 } = o;
+    const { tarea = 'general', sistema, temperatura = 0.3, maxTokens = 700, json = false, timeoutMs = 45000, presupuestoMs = 150000, herramientas, eleccion } = o;
     const env = d.env ?? cargarEntorno();
     const f = d.f ?? fetch;
     const reloj = d.ahora ?? Date.now;
@@ -86,17 +86,22 @@ export async function pedirIA(mensajes, o = {}, d = {}) {
                     headers: { Authorization: `Bearer ${p.clave}`, 'Content-Type': 'application/json' },
                     body: JSON.stringify({ model: p.modelo, messages: msgs, temperature: temperatura,
                         max_tokens: Math.min(maxTokens, Number(p.maxTokens) > 0 ? Number(p.maxTokens) : maxTokens),
-                        ...(conFormato ? { response_format: { type: 'json_object' } } : {}), ...(p.extra ?? {}) }),
+                        ...(conFormato ? { response_format: { type: 'json_object' } } : {}),
+                        ...(herramientas?.length ? { tools: herramientas, ...(eleccion ? { tool_choice: eleccion } : {}) } : {}), ...(p.extra ?? {}) }),
                 });
                 codigo = Number(r.status) || 0;
                 const j = await r.json().catch(() => ({}));
-                const texto = String(j.choices?.[0]?.message?.content ?? '').replace(/<think>[\s\S]*?<\/think>/g, '').trim();
-                if (r.ok && texto) {
+                const mensaje = j.choices?.[0]?.message ?? {};
+                const texto = String(mensaje.content ?? '').replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+                // En modo agente la IA puede responder solo con herramientas a usar (tool_calls): también es una respuesta válida
+                const llamadas = Array.isArray(mensaje.tool_calls) && mensaje.tool_calls.length ? mensaje.tool_calls : null;
+                if (r.ok && (texto || llamadas)) {
                     Object.assign(s, { usos: (s.usos ?? 0) + 1, hasta: 0, motivo: null, ultimo: new Date(reloj()).toISOString() });
                     guardar();
                     anotar(archUso, { at: new Date(reloj()).toISOString(), tarea, ia: p.nombre, modelo: p.modelo, ok: true, ms: reloj() - t0,
                         entrada: j.usage?.prompt_tokens ?? null, salida: j.usage?.completion_tokens ?? null });
-                    return { texto, ia: p.nombre, modelo: p.modelo, intentos: fallas.length + 1 };
+                    return { texto, ia: p.nombre, modelo: p.modelo, intentos: fallas.length + 1, llamadas,
+                        fin: j.choices?.[0]?.finish_reason ?? (llamadas ? 'tool_calls' : 'stop'), usage: j.usage ?? null };
                 }
                 detalle = String(j.error?.message ?? j.message ?? j[0]?.error?.message ?? (r.ok ? 'respuesta vacía' : '')).replace(/\s+/g, ' ').slice(0, 160);
             } catch (err) { detalle = String(err?.name === 'TimeoutError' ? 'timeout' : err?.cause?.code ?? err?.message ?? err).slice(0, 160); }

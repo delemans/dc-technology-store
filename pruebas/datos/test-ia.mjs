@@ -101,3 +101,26 @@ const lineas = (f) => fs.readFileSync(f, 'utf8').trim().split('\n').map((l) => J
     ok(flujo.includes('iaHistorial'), 'el bot guarda su consumo diario por IA (iaHistorial)');
 }
 fs.rmSync(dir, { recursive: true, force: true });
+// Puente local compatible con OpenAI (Continue y otras herramientas): normal, por partes y con herramientas
+{
+    const { crearPuente } = await import(new URL('../../herramientas/puente-ia.mjs', import.meta.url).href);
+    let recibido = null;
+    const pedir = async (msgs, o) => { recibido = { msgs, o };
+        return o.herramientas ? { texto: '', llamadas: [{ id: 'c1', type: 'function', function: { name: 'leer', arguments: '{}' } }], ia: 'B', modelo: 'mb', fin: 'tool_calls' } : { texto: 'hola', ia: 'A', modelo: 'ma', fin: 'stop' }; };
+    const srv = crearPuente({ pedir }).listen(0, '127.0.0.1'); await new Promise((r) => srv.once('listening', r));
+    const base = `http://127.0.0.1:${srv.address().port}/v1`;
+    const post = (b) => fetch(`${base}/chat/completions`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(b) });
+    const m = await (await fetch(`${base}/models`)).json();
+    ok(m.data[0].id === 'dc-cascada', 'puente: /v1/models anuncia dc-cascada');
+    const r1 = await post({ model: 'dc-cascada', messages: [{ role: 'user', content: 'hi' }], max_tokens: 50 });
+    const j1 = await r1.json();
+    ok(j1.choices[0].message.content === 'hola' && r1.headers.get('x-dc-ia') === 'A (ma)' && recibido.o.maxTokens === 50, 'puente: respuesta normal con la IA que resolvió');
+    const r2 = await post({ model: 'dc-cascada', stream: true, messages: [{ role: 'user', content: 'x' }], tools: [{ type: 'function', function: { name: 'leer' } }] });
+    const t2 = await r2.text();
+    const partes = t2.split('\n\n').filter((l) => l.startsWith('data: {')).map((l) => JSON.parse(l.slice(6)));
+    ok(partes[0].choices[0].delta.tool_calls[0].index === 0 && partes[1].choices[0].finish_reason === 'tool_calls' && t2.trim().endsWith('data: [DONE]'), 'puente: por partes con herramientas (modo Agent) y cierre [DONE]');
+    const srv2 = crearPuente({ pedir: async () => { throw Object.assign(new Error('x'), { fallas: ['A: 402 sin saldo'] }); } }).listen(0, '127.0.0.1'); await new Promise((r) => srv2.once('listening', r));
+    const r3 = await fetch(`http://127.0.0.1:${srv2.address().port}/v1/chat/completions`, { method: 'POST', body: '{"messages":[]}' });
+    ok(r3.status === 503 && /402 sin saldo/.test((await r3.json()).error.message), 'puente: si ninguna IA responde, 503 con el motivo');
+    srv.close(); srv2.close();
+}

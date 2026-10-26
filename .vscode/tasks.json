@@ -2,18 +2,35 @@
   "version": "2.0.0",
   "tasks": [
     {
+      "label": "IA en cascada (puente local)",
+      "type": "shell",
+      "command": "node herramientas/puente-ia.mjs",
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    },
+    {
       "label": "Gemini: abrir el asistente en la terminal",
       "type": "shell",
       "command": "npx -y @google/gemini-cli",
       "problemMatcher": [],
-      "presentation": { "panel": "dedicated", "focus": true }
+      "presentation": {
+        "panel": "dedicated",
+        "focus": true
+      }
     },
     {
       "label": "Pruebas: todas (npm test)",
       "type": "shell",
       "command": "npm test",
       "problemMatcher": [],
-      "group": { "kind": "test", "isDefault": true }
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      }
     },
     {
       "label": "Pruebas: solo la web",
