@@ -1,0 +1,22 @@
+description = "Auditoría de seguridad (los hallazgos van a privado/, nunca al repo público)"
+prompt = """
+Reglas: español; trabaja en una rama gemini/<tema>; no edites a mano lo generado (estilos/tailwind.css, p/, c/, bot-conocimiento.json, flujo n8n); después de cambiar clases, npm run css; antes de entregar, node herramientas/versionar.js y npm test (0 FALLA); cero datos inventados; no toques main, .env, Supabase ni n8n en vivo.
+IMPORTANTE: el repositorio es PÚBLICO. Los hallazgos se escriben SOLO en privado/seguridad-<AAAA-MM-DD>.md (no se sube).
+Prohibido escribir fallas concretas en la bitácora, el BLUEPRINT, los commits o los nombres de rama hasta que estén corregidas.
+Revisa:
+1. Claves:
+   - git log -p --all | busca patrones sk-, gsk_, nvapi-, AIza, hf_, gz_live, service_role, eyJ (JWT largos);
+   - en archivos: grep de los mismos patrones fuera de .env.
+2. Navegador (app.js, admin*.js, carrito.js, sesion.js, soporte.js):
+   - ¿se usa innerHTML con datos del usuario o de la base sin escapar?
+   - ¿algún RPC se llama con una llave que no sea la pública?
+3. SQL (supabase/wo-*.sql):
+   - cada función security definer debe tener set search_path = '';
+   - revoke de public/anon donde no corresponde, y grant solo al rol necesario;
+   - RLS activada en tablas nuevas.
+4. Encabezados y dependencias: integridad (SRI) en scripts de CDN; npm audit --omit=dev.
+5. n8n (solo lectura del generador): comandos #ok, #no, #entregar, #guia y #stock aceptados solo desde el número del director.
+Para cada hallazgo: severidad (alta, media o baja), archivo y línea, y arreglo propuesto.
+Arregla en una rama gemini/seg-<n> SOLO los de severidad baja o media que no toquen SQL en vivo ni n8n. Usa un commit con nombre neutro («Endurece validaciones del carrito»).
+Los de severidad alta: déjalos en el archivo privado para Claude.
+"""

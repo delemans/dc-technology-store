@@ -231,6 +231,27 @@ Revisa los videos existentes con `/revisar-video`.
 ## T17 · Auditoría semanal del sitio — **Pendiente** (baja; repetible)
 `/auditar-sitio`. Convierte cada problema en una tarea nueva del BLUEPRINT, o en un arreglo pequeño con su prueba.
 
+## T18 · Estilo profesional por vistas — **Pendiente** (media; una vista por rama)
+Usa `/mejorar-estilo <vista>`, en este orden:
+1. portada (celular);
+2. catálogo y tarjetas;
+3. ficha de producto y carrito;
+4. Mis pedidos y Soporte;
+5. panel admin (ingreso, pedidos y finanzas);
+6. portal.html;
+7. páginas p/ (esas se cambian en generar_seo.js y luego npm run seo).
+
+## T19 · Flujos más claros — **Pendiente** (media)
+Usa `/mejorar-flujo <flujo>`, en este orden:
+1. compra web completa;
+2. Mis pedidos;
+3. Soporte;
+4. panel: validar un pago;
+5. menú del bot.
+
+## T20 · Seguridad — **Pendiente** (alta; los hallazgos solo en privado/)
+Usa `/auditar-seguridad`. Las reglas del skill mandan: nada de fallas concretas en archivos públicos hasta corregirlas.
+
 ---
 
 ## Bloqueadas (necesitan algo del director: no tocar)

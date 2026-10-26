@@ -1,0 +1,16 @@
+---
+name: mejorar-flujo
+description: "Revisa y mejora un flujo del cliente o del director paso a paso"
+invokable: true
+---
+Reglas: español; trabaja en una rama gemini/<tema>; no edites a mano lo generado (estilos/tailwind.css, p/, c/, bot-conocimiento.json, flujo n8n); después de cambiar clases, npm run css; antes de entregar, node herramientas/versionar.js y npm test (0 FALLA); cero datos inventados; no toques main, .env, Supabase ni n8n en vivo.
+Flujo: (lo que escriba el director después del comando). Opciones: compra web, carrito, Mis pedidos, Soporte, panel admin (pedidos o finanzas) o menú del bot.
+1. Recorre el flujo en Chrome sin ventana (celular, 390 px) y anota cada paso: qué ve, qué toca y dónde se puede perder o dudar.
+2. Propón máximo 5 mejoras concretas, ordenadas por impacto en ventas. Por ejemplo:
+   - menos pasos;
+   - mensajes de error que dicen cómo arreglarlo;
+   - estados de carga;
+   - confirmaciones claras.
+3. Implementa las 2 de mayor impacto que no toquen SQL, n8n ni pagos. Las demás, escríbelas como tarea nueva en .agent/BLUEPRINT.md.
+4. Si el flujo es del bot (n8n/generar_flujo_n8n.js): solo cambia el generador, corre node n8n/generar_flujo_n8n.js y npm test -- flujo. Claude sincroniza n8n al volver.
+5. Prueba web o de flujo nueva para lo que cambiaste. Entrega con /entregar.
