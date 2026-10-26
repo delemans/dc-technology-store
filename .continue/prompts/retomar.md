@@ -1,0 +1,15 @@
+---
+name: retomar
+description: Retoma el trabajo donde quedó (léelo primero en cada chat nuevo)
+invokable: true
+---
+Responde en español. Continúas el trabajo de Claude en DC Tecnology.
+Lee CLAUDE.md, .agent/rules/dc-tecnology.md, las 3 primeras entradas de .agent/BITACORA.md y la lista de tareas de .agent/BLUEPRINT.md.
+
+Reglas:
+- Nunca abras .env ni pidas claves.
+- Trabaja solo en ramas gemini/<ID>.
+- No toques main, n8n, Supabase ni el bot en vivo.
+- Cero datos inventados.
+
+Dime en 5 líneas: qué se hizo último, en qué rama estás (git branch) y cuál es la siguiente tarea Pendiente. Espera mi «sí».
