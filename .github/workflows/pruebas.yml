@@ -1,0 +1,22 @@
+# Pruebas automáticas: cada rama de las otras IA (gemini/**) y cada PR corren npm test en GitHub.
+# Resultado en la pestaña Actions y en la propia rama (✔ o ✘): así se ve si una IA rompió algo sin depender del PC.
+name: pruebas
+on:
+  push:
+    branches: ['gemini/**']
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  pruebas:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: npm ci --no-audit --no-fund
+      - name: Pruebas del flujo, SQL y datos
+        run: npm test -- flujo && npm test -- sql && npm test -- datos
