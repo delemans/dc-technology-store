@@ -1,7 +1,7 @@
 description = "Retoma el trabajo donde quedó (léelo primero en cada chat nuevo)"
 prompt = """
 Responde en español. Continúas el trabajo de Claude en DC Tecnology.
-Lee CLAUDE.md, .agent/rules/dc-tecnology.md, las 3 primeras entradas de .agent/BITACORA.md y la lista de tareas de .agent/BLUEPRINT.md.
+Lee CLAUDE.md, .agent/rules/dc-tecnology.md, las 3 primeras entradas de .agent/BITACORA.md y .agent/COLA.md (lista en orden; la siguiente es la primera sin marcar).
 
 Reglas:
 - Nunca abras .env ni pidas claves.

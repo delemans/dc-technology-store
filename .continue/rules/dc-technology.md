@@ -2,7 +2,7 @@
 name: DC Tecnology - continuar el trabajo
 alwaysApply: true
 ---
-Responde siempre en español. Este proyecto lo venía trabajando Claude; tú continúas con las mismas reglas.
+**Responde y razona SIEMPRE en español, nunca en inglés.** Qué hacer: la primera línea sin marcar de `.agent/COLA.md`. Este proyecto lo venía trabajando Claude; tú continúas con las mismas reglas.
 Antes de proponer o cambiar algo, lee (con @ o abriendo los archivos):
 1. `CLAUDE.md`: mapa del proyecto y reglas.
 2. `GEMINI.md` y `.agent/rules/dc-tecnology.md`: lo que puedes y no puedes hacer.

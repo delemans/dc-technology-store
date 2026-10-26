@@ -27,7 +27,9 @@ export function crearPuente({ pedir = pedirIA, env } = {}) {
         let b;
         try { b = JSON.parse(datos); } catch { return enviar(400, { error: { message: 'JSON no válido' } }); }
         try {
-            const r = await pedir(b.messages ?? [], {
+            // Español siempre (las IA gratis tienden a razonar y responder en inglés)
+            const mensajes = [{ role: 'system', content: 'Responde y razona SIEMPRE en español de Colombia, nunca en inglés, aunque el contexto o el código estén en inglés.' }, ...(b.messages ?? [])];
+            const r = await pedir(mensajes, {
                 tarea: `puente:${String(req.headers['user-agent'] ?? 'editor').split(/[\/ ]/)[0].slice(0, 20)}`,
                 temperatura: b.temperature ?? 0.2, maxTokens: b.max_tokens ?? b.max_completion_tokens ?? 4000,
                 herramientas: b.tools, eleccion: b.tool_choice, json: b.response_format?.type === 'json_object',
