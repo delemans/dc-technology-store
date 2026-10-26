@@ -6,7 +6,7 @@ Antes de empezar:
 - elige la primera tarea **Pendiente** que no esté Bloqueada, ni «Por revisar», ni «Hecha».
 
 Para CADA tarea:
-1. git switch main && git pull && git switch -c gemini/<ID>
+1. git switch main ; git pull ; git switch -c gemini/<ID>
 2. Plan corto de 3 a 5 pasos. Investiga el código existente antes de escribir; copia el estilo de lo que ya hay.
 3. Implementa en pasos pequeños. Después de cada paso corre la prueba del área (npm test -- flujo, sql, web o datos).
 4. Escribe la prueba nueva de la tarea en pruebas/.

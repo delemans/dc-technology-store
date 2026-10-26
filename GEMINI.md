@@ -51,3 +51,5 @@ Trabajas en este repositorio **mientras Claude no está disponible**. Tu trabajo
 - Usar o pedir la clave `service_role` de Supabase.
 - Inventar datos (precios, descuentos, reseñas, disponibilidad o tiempos), mencionar al proveedor (ANC, Emprende Red) al cliente o prometer lo que el negocio no cumple.
 - Tocar el estudio de videos: vive en una carpeta temporal de Claude, fuera de este repositorio.
+
+> Terminal de Windows (PowerShell 5): no uses `&&`; corre los comandos uno por uno o sepáralos con `;`.

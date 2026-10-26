@@ -16,3 +16,4 @@ Reglas:
 - Cero datos inventados.
 - No edites a mano los archivos generados (`n8n/flujo_bot_dctechnology.json`, `bot-conocimiento.json`, `p/`, `c/`, `estilos/tailwind.css`).
 - Antes de entregar, `npm test` debe dar 0 FALLA. Anota lo que hiciste en `.agent/BITACORA.md`.
+- La terminal es **PowerShell 5**: NO uses `&&` (da error). Corre los comandos uno por uno, o sepáralos con `;`.
