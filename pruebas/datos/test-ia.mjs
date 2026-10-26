@@ -124,3 +124,19 @@ fs.rmSync(dir, { recursive: true, force: true });
     ok(r3.status === 503 && /402 sin saldo/.test((await r3.json()).error.message), 'puente: si ninguna IA responde, 503 con el motivo');
     srv.close(); srv2.close();
 }
+// Modo agente: firma de Gemini, Groq no recibe pedidos que no le caben y un 404 con herramientas no pausa la IA
+{
+    const G = { nombre: 'G', url: 'https://generativelanguage.googleapis.com/v1beta/openai', modelo: 'g', clave: 'k', peso: 500 };
+    const hist = [{ role: 'user', content: 'x' }, { role: 'assistant', content: null, tool_calls: [{ id: '1', type: 'function', function: { name: 'leer', arguments: '{}' } }] }, { role: 'tool', tool_call_id: '1', content: 'ok' }];
+    const fx = m.paraGemini(G, hist);
+    ok(fx[1].tool_calls[0].extra_content.google.thought_signature === 'skip_thought_signature_validator' && m.paraGemini(A, hist) === hist, 'Gemini: agrega la firma de reemplazo solo a Gemini');
+    const Chica = { ...A, nombre: 'Chica', limite: 100 };
+    const llam = []; const f = async (url) => { llam.push(url); return bien(); };
+    const r = await m.pedirIA([{ role: 'user', content: 'y'.repeat(2000) }], {}, { lista: [Chica, B], f, ...rutas() });
+    ok(r.ia === 'B' && llam.length === 1, 'pedido grande: no se intenta la IA con límite menor (Groq gratis)');
+    const r0 = rutas();
+    const f2 = async (url) => (url.startsWith('https://a') ? resp({ error: { message: 'No endpoints found that support tool use' } }, 404) : bien());
+    await m.pedirIA('x', { herramientas: [{ type: 'function', function: { name: 'leer' } }] }, { lista: [A, B], f: f2, ...r0 });
+    const est = JSON.parse(fs.readFileSync(r0.estado, 'utf8'));
+    ok(!(est.p.A?.hasta > 0), '404 con herramientas: se salta sin pausar esa IA para los pedidos normales');
+}

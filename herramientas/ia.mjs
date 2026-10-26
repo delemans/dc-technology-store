@@ -32,6 +32,16 @@ export function clasificar(codigo, detalle) {
     return { sinSaldo, lenta, pausa };
 }
 
+// Gemini 3 exige una «firma de pensamiento» en cada llamada a herramienta del historial. Las que vienen de otra IA (o de un
+// editor que no la guarda) no la traen: Google acepta esta firma de reemplazo para no rechazar la conversación.
+export function paraGemini(p, msgs) {
+    if (!/generativelanguage\.googleapis\.com/.test(String(p.url))) return msgs;
+    return msgs.map((m) => (m.role === 'assistant' && Array.isArray(m.tool_calls) && m.tool_calls.length
+        ? { ...m, tool_calls: m.tool_calls.map((t) => (t.extra_content?.google?.thought_signature ? t
+            : { ...t, extra_content: { ...(t.extra_content ?? {}), google: { ...(t.extra_content?.google ?? {}), thought_signature: 'skip_thought_signature_validator' } } })) }
+        : m));
+}
+
 function anotar(archivo, fila) {
     try {
         fs.mkdirSync(path.dirname(archivo), { recursive: true });
@@ -56,7 +66,11 @@ export async function pedirIA(mensajes, o = {}, d = {}) {
     const archEstado = d.estado ?? ARCHIVO_ESTADO;
     const archUso = d.uso ?? ARCHIVO_USO;
     const msgs = [...(sistema ? [{ role: 'system', content: sistema }] : []), ...(typeof mensajes === 'string' ? [{ role: 'user', content: mensajes }] : mensajes)];
-    const lista = (d.lista ?? armarProveedores(env)).filter((p) => p.url && p.modelo);
+    const todas = (d.lista ?? armarProveedores(env)).filter((p) => p.url && p.modelo);
+    // Tamaño aproximado (español ≈ 3,6 caracteres por token): una IA con límite menor (Groq gratis: 8.000 por minuto) ni se intenta
+    const entrada = Math.ceil(JSON.stringify([msgs, herramientas ?? []]).length / 3.6);
+    const caben = todas.filter((p) => !(Number(p.limite) > 0) || entrada + Math.min(maxTokens, Number(p.maxTokens) || maxTokens) <= Number(p.limite));
+    const lista = caben.length ? caben : todas;
     if (!lista.length) throw Object.assign(new Error('No hay ninguna IA configurada: pon al menos una clave IA_* en .env (node herramientas/configurar-ias.mjs).'), { fatal: true, fallas: [] });
 
     const inicio = reloj();
@@ -84,7 +98,7 @@ export async function pedirIA(mensajes, o = {}, d = {}) {
                 const r = await f(`${String(p.url).replace(/\/+$/, '')}/chat/completions`, {
                     method: 'POST', signal: AbortSignal.timeout(Math.min(timeoutMs, resta)),
                     headers: { Authorization: `Bearer ${p.clave}`, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ model: p.modelo, messages: msgs, temperature: temperatura,
+                    body: JSON.stringify({ model: p.modelo, messages: paraGemini(p, msgs), temperature: temperatura,
                         max_tokens: Math.min(maxTokens, Number(p.maxTokens) > 0 ? Number(p.maxTokens) : maxTokens),
                         ...(conFormato ? { response_format: { type: 'json_object' } } : {}),
                         ...(herramientas?.length ? { tools: herramientas, ...(eleccion ? { tool_choice: eleccion } : {}) } : {}), ...(p.extra ?? {}) }),
@@ -111,7 +125,9 @@ export async function pedirIA(mensajes, o = {}, d = {}) {
         }
         const c = clasificar(codigo, detalle);
         if (!c.sinSaldo) todasSinSaldo = false;
-        Object.assign(s, { hasta: reloj() + c.pausa, motivo: `${codigo || 'sin respuesta'} ${detalle}`.trim() });
+        // Con herramientas, un 400/404 suele ser «este modelo no acepta herramientas»: se salta sin pausarla para lo demás
+        const soloHerramientas = herramientas?.length && [400, 404].includes(codigo) && !c.sinSaldo;
+        if (!soloHerramientas) Object.assign(s, { hasta: reloj() + c.pausa, motivo: `${codigo || 'sin respuesta'} ${detalle}`.trim() });
         guardar();
         anotar(archUso, { at: new Date(reloj()).toISOString(), tarea, ia: p.nombre, modelo: p.modelo, ok: false, ms: reloj() - t0, codigo, motivo: detalle.slice(0, 120) });
         fallas.push(`${p.nombre}: ${codigo || ''} ${detalle}`.replace(/\s+/g, ' ').trim());
