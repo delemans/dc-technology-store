@@ -1,6 +1,6 @@
 ---
 name: retomar
-description: Retoma el trabajo donde quedó (léelo primero en cada chat nuevo)
+description: "Retoma el trabajo donde quedó (léelo primero en cada chat nuevo)"
 invokable: true
 ---
 Responde en español. Continúas el trabajo de Claude en DC Tecnology.

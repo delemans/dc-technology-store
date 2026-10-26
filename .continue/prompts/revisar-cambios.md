@@ -1,6 +1,6 @@
 ---
 name: revisar-cambios
-description: Revisa los cambios antes de entregar (claves, generados, reglas)
+description: "Revisa los cambios antes de entregar (claves, generados, reglas)"
 invokable: true
 ---
 Corre git status y git diff (y git diff --cached). Revisa y dime en una lista corta:

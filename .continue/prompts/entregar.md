@@ -1,6 +1,6 @@
 ---
 name: entregar
-description: Cierra la tarea: pruebas, commit, push de la rama y bitácora
+description: "Cierra la tarea: pruebas, commit, push de la rama y bitácora"
 invokable: true
 ---
 1. Corre npm test. Si no termina en «0 FALLA», para y explícame la falla.
