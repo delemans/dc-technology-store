@@ -1,0 +1,148 @@
+# BLUEPRINT · tareas técnicas pendientes de DC Tecnology
+_Escrito por Claude el 26/10/2026. Lo siguen Gemini (Antigravity) u otro agente mientras Claude no está._
+
+## Cómo usar este archivo
+- **Qué tarea tomar:** la primera con estado **Pendiente**, en orden. Las **Bloqueada** no se tocan.
+- **Al empezar:** cambia su estado a **En curso (Gemini, fecha)** y crea la rama `gemini/<ID>`.
+- **Al terminar:**
+  - pon **Por revisar (Gemini) · rama gemini/<ID>** y escribe en `.agent/BITACORA.md` qué hiciste y el resultado de `npm test`;
+  - nunca la marques «Hecha»: eso lo hace Claude o el director al revisar y publicar.
+- **Criterio de terminado de cualquier tarea:**
+  - `npm test` con 0 FALLA;
+  - las pruebas nuevas de la tarea en verde;
+  - nada generado editado a mano;
+  - sin claves en el diff.
+
+## Contexto rápido (lee CLAUDE.md para el detalle)
+- **Tienda:** sitio estático (`index.html`, `app.js` y módulos). Precios en vivo desde Supabase (`precios_publicos`, llave pública).
+- **Bot y automatizaciones:**
+  - se escriben como funciones en `n8n/generar_flujo_n8n.js`, que se serializan como nodos Code;
+  - la rama «Revisar salud» corre cada 30 min;
+  - para avisar al director se arma `{ accion: 'avisar', numero, texto }` hacia el número de «Config bot» → `numero_aviso_admin`;
+  - el estado entre ejecuciones se guarda en `$getWorkflowStaticData('global')`.
+- **Base:**
+  - los SQL `supabase/wo-0NN-*.sql` los aplica el director a mano;
+  - la cola de WhatsApp es `encolar_aviso(clave, tipo, ref, destino, variables, prioridad)` (wo-032), con tipos permitidos por un CHECK (ver wo-044, que agregó RENOVACION);
+  - el horario legal está en `horario_comercial_legal(timestamptz)` (wo-048).
+- **Plantillas de mensajes al cliente:** fuente única en `plantillas-whatsapp.js` y en `generar_bot_conocimiento.js` → `plantillas`.
+- **Pruebas:** `pruebas/flujo/*.js` ejecutan el código REAL de cada nodo con `$` simulado (copia el patrón de `pruebas/flujo/test-stock.js`); `pruebas/sql/*.mjs` usan PGlite (patrón: `pruebas/sql/prueba-wo051.mjs`).
+
+---
+
+## T01 · Resumen diario de ventas a las 8 p. m. — **Pendiente** (prioridad alta)
+**Para qué:** que el director sepa cada noche cómo fue el día sin abrir el panel.
+
+**Pasos**
+1. **SQL `supabase/wo-052-resumen-dia.sql`** (requiere wo-046):
+   - función `resumen_ventas_dia(p_fecha date default (now() at time zone 'America/Bogota')::date)`, `security definer`, que devuelve un jsonb:
+     - `pedidos`: los creados ese día en `triangulaciones` sin `es_combo`;
+     - `pagados`: los de estado ESPERANDO_CREDENCIALES o ENTREGADO, o web en REVISION_MANUAL;
+     - `entregados`, `venta` (suma de precio_venta de los pagados) y `costo` (igual que en `finanzas_panel`);
+     - `margen = venta - costo`;
+     - `por_cobrar`: órdenes web ESPERANDO_PAGO o COMPROBANTE_RECIBIDO de las últimas 24 h, con cantidad y total;
+     - `top`: los 3 productos más vendidos.
+   - `revoke all … from public, anon, authenticated; grant execute … to service_role`.
+   - Prueba: `pruebas/sql/prueba-wo052.mjs` (aplica 2 veces sin error, cuentas correctas con datos de ejemplo, anon no puede ejecutarla).
+   - Luego `node herramientas/armar-pendientes.js` (agrega wo-052 a la lista ORDEN de ese script).
+2. **n8n:**
+   - en la rama de salud (busca el nodo «Revisar salud» y sus conexiones en el generador), agrega un nodo que solo actúe entre 20:00 y 20:29 hora de Bogotá, una vez por día (`memoria.resumenDia = 'AAAA-MM-DD'`);
+   - llama a la RPC con el patrón `rpcPanel(...)` que ya usa el generador y arma el texto con `🧾 *Resumen de hoy · DC Tecnology*`.
+   - Si la RPC no existe (SQL sin aplicar): una sola línea «aplica wo-052».
+3. **Pruebas** en `pruebas/flujo/test-resumen-dia.js`: fuera de hora no envía; a las 20:05 envía una vez; la segunda corrida del mismo día no repite; sin SQL avisa una vez.
+
+**Terminado cuando:** las pruebas nuevas y `npm test` estén en verde.
+**No aplicar:** el SQL en Supabase ni sincronizar n8n.
+
+## T02 · Alerta de pagos sin validar y pedidos por cobrar — **Pendiente** (alta)
+**Para qué:** que ningún pago espere más de 30 min en horario ni se olvide un pedido por cobrar.
+
+1. **En la rama de salud**, cada 30 min, dentro del horario de atención (lun–sáb 8–20):
+   - órdenes web en COMPROBANTE_RECIBIDO con más de 30 min → aviso al director con la referencia y el monto;
+   - pedidos con más de 24 h sin pago → resumen.
+   - Un solo aviso por referencia (`memoria.alertasPago[ref]`).
+2. **Si hace falta una RPC nueva** (service_role) para listar esas órdenes: `wo-053` con su prueba.
+3. **Pruebas de flujo:** avisa una vez, no repite y no avisa de noche.
+
+## T03 · Recordatorio al cliente sin comprobante (1 h) — **Pendiente** (media)
+**Para qué:** recuperar ventas de quien pidió y no pagó.
+
+1. **`wo-054`:**
+   - agrega el tipo `RECORDATORIO_PAGO` al CHECK de `notificaciones_whatsapp` (conserva todos los tipos actuales: revisa el último CHECK en wo-044 y posteriores);
+   - función service_role que encola el recordatorio para órdenes web ESPERANDO_PAGO con 60–180 min. Una sola vez por orden (clave `RECUERDA:<codigo>`), solo si `horario_comercial_legal(now())` y sin baja (`whatsapp_bajas`).
+2. **Plantilla** `recordatorioPago` en `plantillas-whatsapp.js` y `generar_bot_conocimiento.js`:
+   - tono amable, sin presionar, con el código del pedido y el enlace a www.dctecnology.xyz;
+   - sin descuentos ni plazos inventados.
+3. **Pruebas** de SQL y de la plantilla.
+
+## T04 · Cliente molesto → pasa al director al instante — **Pendiente** (media)
+**Para qué:** que un reclamo serio nunca lo atienda la IA.
+
+1. En `n8n/generar_flujo_n8n.js` (función de normalizar o enrutar el mensaje):
+   - si el texto trae señales de reclamo fuerte (estafa, robo, denuncia, SIC, superintendencia, abogado, devuélvanme, me robaron, insultos comunes), la ruta es `asesor`;
+   - motivo «Cliente molesto: atender ya» y aviso con prioridad al director.
+2. Pruebas en `pruebas/flujo/test-molesto.js`: casos positivos y negativos (por ejemplo «¿no es estafa?», pregunta legítima de confianza → también a asesor; «gracias» → no).
+
+## T05 · Origen de cada cliente (de qué red llegó) — **Pendiente** (media)
+**Para qué:** saber qué publicidad vende.
+
+1. **Tienda (`app.js`):**
+   - si la dirección trae `?de=tiktok|youtube|facebook|instagram|google|estado`, guárdalo en `localStorage` (`dc_origen`, 30 días);
+   - envíalo con la orden web (busca `crear_orden_web` en `carrito.js`, sin romper la firma actual).
+2. **`wo-055`:** columna `origen` en `ordenes_web` (nullable) y la función de crear orden que la acepta como parámetro opcional (con default).
+3. **Finanzas (`finanzas.js`):** «Ventas por origen».
+4. **`herramientas/generar_redes.js`:** los enlaces de cada publicación con `?de=<red>`.
+5. Pruebas web y SQL.
+
+## T06 · Política de uso de IA en las páginas legales — **Pendiente** (baja, fácil)
+**Para qué:** transparencia, y cubrir los videos con voz sintética y el bot con IA.
+
+1. En `herramientas/generar_legal.js`, agrega una sección clara:
+   - el asistente de WhatsApp usa IA y una persona valida pagos y entregas;
+   - los videos usan voz generada por IA;
+   - no se usan datos para entrenar modelos propios;
+   - el cliente puede pedir hablar con una persona.
+2. Regenera `legal/` con el script.
+3. Prueba simple: el HTML generado contiene la sección y los enlaces del pie siguen.
+
+## T07 · Libro de PQR en el panel — **Pendiente** (media)
+**Para qué:** cumplir plazos legales (Ley 1581: consultas 10 días hábiles, reclamos 15; Ley 1480: PQR).
+
+1. **`wo-056`:**
+   - tabla `pqr`: id, fecha, whatsapp, tipo (consulta/reclamo/datos), detalle, estado, `vence_at` calculado en días hábiles usando `festivos_colombia` de wo-048, y respuesta;
+   - RPC admin para listar, responder y cerrar; RPC service_role `registrar_pqr` para el bot;
+   - prueba PGlite.
+2. **Bot:** la ruta de «DATOS» (busca «Habeas data» en el generador) además registra la PQR.
+3. **Panel:** vista «PQR» con lo que vence primero arriba (patrón: `proveedor.js` o `finanzas.js`).
+
+## T08 · Gastos fijos y punto de equilibrio en Finanzas — **Pendiente** (baja)
+**Para qué:** ver la utilidad real del mes.
+
+- **`wo-057`:** tabla `gastos_fijos` (nombre, valor mensual, activo) con RPC solo para admin.
+- **`finanzas.js`:** sección para agregar y editar gastos; utilidad = margen − gastos; punto de equilibrio = gastos ÷ margen promedio por pedido.
+- Prueba SQL y web.
+
+## T09 · Revisión de accesibilidad y contraste — **Pendiente** (baja)
+- Recorre `index.html` y `admin.html` en celular (390 px) con Chrome sin ventana.
+- Revisa áreas táctiles de 44 px o más, foco visible y contraste suficiente en modo claro y oscuro.
+- Corrige en `estilos/corriente.css` o en `estilos/profesional.css` (último en el `<head>`).
+- Agrega `pruebas/web/prueba-accesibilidad.mjs`.
+
+---
+
+## Bloqueadas (necesitan algo del director: no tocar)
+| ID | Tarea | Qué falta |
+|---|---|---|
+| B1 | Quitar los 35 precios «antes» tachados | Decisión del director (recomendado quitarlos) |
+| B2 | Cambiar «entrega inmediata · máx. 15 min» en sitio y videos | Decisión del director (con entrega manual, ¿se cumple?) |
+| B3 | Datos legales del responsable (razón social, NIT, dirección) | RUT y Cámara de Comercio |
+| B4 | Página «Quiénes somos» | Fotos reales del director o del local |
+| B5 | Pasarela Wompi | Cuenta Wompi aprobada |
+| B6 | Pines y recargas con API (Reloadly u otro) | Cuenta y saldo |
+| B7 | Publicación automática en redes | Cuentas y claves en `.env` (las pone el director) |
+| B8 | Videos con video real | `PEXELS_API_KEY` en `.env` (el estudio es de Claude) |
+| B9 | Activar categorías de Emprende Red | Elección del director en el panel |
+
+## Para Claude al volver
+- Revisar cada rama `gemini/*`: diff, `npm test`, y fusionar a `main` lo que esté bien.
+- Aplicar lo necesario en vivo: sincronizar n8n, versionar y publicar.
+- Actualizar este archivo y CLAUDE.md.

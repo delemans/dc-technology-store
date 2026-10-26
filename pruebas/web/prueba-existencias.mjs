@@ -1,0 +1,28 @@
+import { spawn } from 'node:child_process';
+import fs from 'node:fs';
+const PUERTO = 9700 + Math.floor(Math.random() * 100);
+const chrome = spawn('C:/Program Files/Google/Chrome/Application/chrome.exe', ['--headless=new', '--disable-gpu', `--remote-debugging-port=${PUERTO}`, `--user-data-dir=${process.env.TEMP}/mej-${PUERTO}`, 'about:blank'], { stdio: 'ignore' });
+const esperar = (ms) => new Promise((r) => setTimeout(r, ms));
+let lista; for (let i = 0; i < 50; i++) { try { lista = await (await fetch(`http://127.0.0.1:${PUERTO}/json/list`)).json(); if (lista.some((t) => t.type === 'page')) break; } catch {} await esperar(200); }
+const ws = new WebSocket(lista.find((t) => t.type === 'page').webSocketDebuggerUrl); await new Promise((r) => ws.addEventListener('open', r, { once: true }));
+let id = 0; const pend = new Map(); const errs = [];
+ws.addEventListener('message', (ev) => { const m = JSON.parse(ev.data); if (m.id && pend.has(m.id)) { pend.get(m.id)(m.result ?? m.error); pend.delete(m.id); } else if (m.method === 'Runtime.exceptionThrown') errs.push(m.params.exceptionDetails.exception?.description?.slice(0, 200)); });
+const enviar = (method, params = {}) => new Promise((r) => { const n = ++id; pend.set(n, r); ws.send(JSON.stringify({ id: n, method, params })); });
+const ev = async (e) => { const r = await enviar('Runtime.evaluate', { expression: e, awaitPromise: true, returnByValue: true }); if (r.exceptionDetails) return 'ERROR ' + r.exceptionDetails.exception?.description?.slice(0, 150); return r.result?.value; };
+const ok = (c, m) => { console.log(`${c ? 'OK   ' : 'FALLA'} ${m}`); if (!c) process.exitCode = 1; };
+await enviar('Page.enable'); await enviar('Runtime.enable');
+await enviar('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 1, mobile: true });
+await enviar('Page.navigate', { url: 'http://localhost:5599/#catalogo' }); await esperar(8000);
+const p = JSON.parse(await ev(`JSON.stringify((window.DCTienda.productos()||[]).filter(x=>x.existencias>0&&x.existencias<=3).map(x=>({id:x.id,nombre:x.nombre,e:x.existencias}))[0]||null)`));
+ok(p, 'hay productos con pocas unidades (' + (p ? `${p.nombre}: ${p.e}` : 'ninguno') + ')');
+await ev(`(()=>{const i=document.getElementById('searchInput');i.value=${JSON.stringify(p.nombre.slice(0, 18))};i.dispatchEvent(new Event('input'))})()`); await esperar(800);
+ok(/Queda/.test(await ev(`[...document.querySelectorAll('#product-grid article')].find(a=>a.textContent.includes(${JSON.stringify(p.nombre)}))?.textContent ?? ''`)), 'la tarjeta muestra «Quedan N»');
+await ev(`[...document.querySelectorAll('#product-grid article')].find(a=>a.textContent.includes(${JSON.stringify(p.nombre)})).click()`); await esperar(1500);
+for (let i = 0; i < 6; i++) await ev(`document.getElementById('cantidad-mas').click()`);
+const cant = Number(await ev(`document.getElementById('cantidad').textContent`));
+ok(cant === p.e && await ev(`document.getElementById('cantidad-mas').disabled`), `la cantidad no pasa de las ${p.e} unidades disponibles (${cant})`);
+ok(/disponible/.test(await ev(`document.getElementById('cantidad-disponibles').textContent`)) && !(await ev(`document.getElementById('cantidad-disponibles').hidden`)), 'la ficha dice cuántas quedan');
+const lineas = await ev(`(()=>{const prod=window.DCTienda.productos().find(x=>x.id===${JSON.stringify(p.id)});for(let i=0;i<${p.e + 2};i++) window.Carrito.agregar(prod, prod.variantes[0], {silencioso:true});return window.Carrito.lineas().filter(l=>l.id===${JSON.stringify(p.id)}).length})()`);
+ok(lineas === p.e, `el carrito no acepta más de ${p.e} (${lineas})`);
+ok(errs.length === 0, 'sin errores ' + errs.join('|'));
+ws.close(); chrome.kill();

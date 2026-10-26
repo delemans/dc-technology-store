@@ -1,0 +1,30 @@
+// Efectos 25/10: «en vivo» del catálogo, titular por palabras (texto intacto), panel con estado del sistema y «todo al día»
+import { spawn } from 'node:child_process';
+const BASE = process.argv[2] ?? 'http://localhost:5599';
+const PUERTO = 9700 + Math.floor(Math.random() * 100);
+const chrome = spawn('C:/Program Files/Google/Chrome/Application/chrome.exe', ['--headless=new', '--disable-gpu', `--remote-debugging-port=${PUERTO}`, `--user-data-dir=${process.env.TEMP}/ef-${PUERTO}`, 'about:blank'], { stdio: 'ignore' });
+const esperar = (ms) => new Promise((r) => setTimeout(r, ms));
+let lista; for (let i = 0; i < 50; i++) { try { lista = await (await fetch(`http://127.0.0.1:${PUERTO}/json/list`)).json(); if (lista.some((t) => t.type === 'page')) break; } catch {} await esperar(200); }
+const ws = new WebSocket(lista.find((t) => t.type === 'page').webSocketDebuggerUrl); await new Promise((r) => ws.addEventListener('open', r, { once: true }));
+let id = 0; const pend = new Map(); const errs = [];
+ws.addEventListener('message', (ev) => { const m = JSON.parse(ev.data); if (m.id && pend.has(m.id)) { pend.get(m.id)(m.result ?? m.error); pend.delete(m.id); } else if (m.method === 'Runtime.exceptionThrown') errs.push(m.params.exceptionDetails.exception?.description?.slice(0, 200)); });
+const enviar = (method, params = {}) => new Promise((r) => { const n = ++id; pend.set(n, r); ws.send(JSON.stringify({ id: n, method, params })); });
+const ev = async (e) => (await enviar('Runtime.evaluate', { expression: e, awaitPromise: true, returnByValue: true })).result?.value;
+const ok = (c, m) => { console.log(`${c ? 'OK   ' : 'FALLA'} ${m}`); if (!c) process.exitCode = 1; };
+await enviar('Page.enable'); await enviar('Runtime.enable');
+await enviar('Emulation.setDeviceMetricsOverride', { width: 1366, height: 900, deviceScaleFactor: 1, mobile: false });
+await enviar('Page.navigate', { url: `${BASE}/` }); await esperar(6500);
+ok(await ev(`document.getElementById('hero-titulo').textContent.replace(/\\s+/g,' ').trim()`) === 'Streaming, licencias y tecnología sin esperas', 'el titular se lee igual (partido en palabras para la animación)');
+ok(await ev(`document.querySelectorAll('#hero-titulo .palabra').length`) >= 5, 'titular animado palabra por palabra');
+await ev(`document.querySelector('a[href="#catalogo"]').click()`); await esperar(1500);
+const chip = await ev(`document.getElementById('en-vivo')?.textContent || ''`);
+ok(/en vivo · \d/.test(chip), `catálogo con indicador «${chip}»`);
+await enviar('Page.navigate', { url: `${BASE}/admin.html` }); await esperar(4500);
+const filas = await ev(`[...document.querySelectorAll('.ll-fila')].map(f => f.textContent.trim().replace(/\\s+/g,' '))`);
+ok(filas.length === 4 && /Tienda en línea/.test(filas[0]) && /\d+ productos/.test(filas[1]), `ingreso con estado del sistema (${filas.join(' | ')})`);
+ok(await ev(`!!document.getElementById('form-login') && !!document.getElementById('clave-olvido')`), 'el formulario y «¿Olvidaste tu contraseña?» siguen ahí');
+await enviar('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 1, mobile: true });
+await esperar(500);
+ok(await ev(`getComputedStyle(document.querySelector('.login-lado')).display === 'none' && document.documentElement.scrollWidth <= innerWidth`), 'en celular solo el formulario, sin desborde');
+ok(errs.length === 0, `sin errores de JS ${errs.join(' | ')}`);
+ws.close(); chrome.kill();

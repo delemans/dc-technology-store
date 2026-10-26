@@ -14,3 +14,9 @@ docs/videos-estados/mp4/
 
 # Salidas de herramientas (catálogo del proveedor, comparaciones): se regeneran
 herramientas/salida/
+
+# Muestra de la página del proveedor para pruebas (solo local: no se publica)
+pruebas/flujo/anc/
+
+# Material privado del director (lista de pendientes para el agente): solo en este PC
+privado/
