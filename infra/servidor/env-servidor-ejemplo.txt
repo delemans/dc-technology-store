@@ -1,0 +1,27 @@
+# ==============================================================================
+# Variables de entorno de ejemplo para el paquete del servidor (infra/servidor/docker-compose.yml)
+# Copia este archivo como .env en el servidor y completa los valores.
+# NUNCA subas claves reales ni el archivo .env al repositorio.
+# ==============================================================================
+
+# Clave de encriptación interna de n8n para credenciales y datos guardados.
+# Genera una clave segura de 32 bytes en formato hex con: openssl rand -hex 32
+N8N_ENCRYPTION_KEY=
+
+# Usuario de la base de datos PostgreSQL para n8n
+POSTGRES_N8N_USER=
+
+# Contraseña de la base de datos PostgreSQL para n8n.
+# Genera una segura con: openssl rand -hex 16
+POSTGRES_N8N_PASSWORD=
+
+# Clave de API principal para autenticarse en Evolution API.
+# Genera una segura con: openssl rand -hex 32
+EVOLUTION_API_KEY=
+
+# Usuario de la base de datos PostgreSQL para Evolution API
+POSTGRES_EVO_USER=
+
+# Contraseña de la base de datos PostgreSQL para Evolution API.
+# Genera una segura con: openssl rand -hex 16
+POSTGRES_EVO_PASSWORD=

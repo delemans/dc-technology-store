@@ -1,0 +1,92 @@
+version: '3.8'
+
+services:
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - TZ=America/Bogota
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+  n8n:
+    image: n8nio/n8n:latest
+    restart: unless-stopped
+    environment:
+      - TZ=America/Bogota
+      - GENERIC_TIMEZONE=America/Bogota
+      - DB_TYPE=postgresdb
+      - DB_POSTGRESDB_HOST=postgres_n8n
+      - DB_POSTGRESDB_PORT=5432
+      - DB_POSTGRESDB_DATABASE=n8n
+      - DB_POSTGRESDB_USER=${POSTGRES_N8N_USER}
+      - DB_POSTGRESDB_PASSWORD=${POSTGRES_N8N_PASSWORD}
+      - N8N_HOST=bot.dctecnology.xyz
+      - N8N_PROTOCOL=https
+      - WEBHOOK_URL=https://bot.dctecnology.xyz/
+      - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
+    volumes:
+      - n8n_data:/home/node/.n8n
+    depends_on:
+      - postgres_n8n
+
+  postgres_n8n:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      - TZ=America/Bogota
+      - POSTGRES_DB=n8n
+      - POSTGRES_USER=${POSTGRES_N8N_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_N8N_PASSWORD}
+    volumes:
+      - pg_n8n:/var/lib/postgresql/data
+
+  evolution:
+    image: atendai/evolution-api:v2.3.7
+    restart: unless-stopped
+    environment:
+      - TZ=America/Bogota
+      - SERVER_URL=https://wa.dctecnology.xyz
+      - AUTHENTICATION_API_KEY=${EVOLUTION_API_KEY}
+      - DATABASE_PROVIDER=postgresql
+      - DATABASE_CONNECTION_URI=postgresql://${POSTGRES_EVO_USER}:${POSTGRES_EVO_PASSWORD}@postgres_evo:5432/evolution?schema=public
+      - CACHE_REDIS_ENABLED=true
+      - CACHE_REDIS_URI=redis://redis:6379/6
+    volumes:
+      - evolution_instances:/evolution/instances
+    depends_on:
+      - postgres_evo
+      - redis
+
+  postgres_evo:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      - TZ=America/Bogota
+      - POSTGRES_DB=evolution
+      - POSTGRES_USER=${POSTGRES_EVO_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_EVO_PASSWORD}
+    volumes:
+      - pg_evo:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+    restart: unless-stopped
+    environment:
+      - TZ=America/Bogota
+    volumes:
+      - redis_data:/data
+
+volumes:
+  caddy_data:
+  caddy_config:
+  n8n_data:
+  pg_n8n:
+  evolution_instances:
+  pg_evo:
+  redis_data:

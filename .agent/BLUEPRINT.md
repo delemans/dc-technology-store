@@ -189,7 +189,7 @@ La tienda (GitHub Pages) y la base (Supabase) ya están en internet.
    - prueba aparte que `cargarEntorno()` toma las variables nuevas de la terminal.
 7. **No apagues la tarea de Windows:** eso lo hace Claude cuando el workflow ya haya corrido bien una vez.
 
-## T14 · Paquete del servidor para n8n + WhatsApp — **Pendiente** (alta; el despliegue lo hace Claude)
+## T14 · Paquete del servidor para n8n + WhatsApp — **Por revisar (IA) · rama gemini/T14**
 **Para qué:** mudar el bot a un servidor en internet (VPS) de forma reproducible.
 1. **`infra/servidor/docker-compose.yml`:**
    - n8n (con Postgres) y Evolution API 2.3.7 (con su Postgres y Redis);

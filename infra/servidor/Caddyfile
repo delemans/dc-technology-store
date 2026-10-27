@@ -1,0 +1,7 @@
+bot.dctecnology.xyz {
+    reverse_proxy n8n:5678
+}
+
+wa.dctecnology.xyz {
+    reverse_proxy evolution:8080
+}
