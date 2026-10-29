@@ -7,7 +7,6 @@
   "reloj-inteligente-smartwatch-h19": "Agotado o retirado en ANC",
   "reloj-inteligente-smartwatch-m9": "ANC ya no ofrece este producto",
   "prime-video": "Agotado o retirado en ANC",
-  "crunchyroll": "Agotado o retirado en ANC",
   "iptv-smarters": "ANC ya no ofrece este producto",
   "capcut-pro": "Agotado o retirado en ANC",
   "office-365": "ANC ya no ofrece este producto",
@@ -46,6 +45,9 @@
   "hbo-max": {
    "Cuenta Completa Platino 1 Mes": "ANC ya no ofrece este plan"
   },
+  "crunchyroll": {
+   "Cuenta Completa 1 Mes": "ANC ya no ofrece este plan"
+  },
   "vix-premium": {
    "Cuenta Completa 1 Mes": "ANC ya no ofrece este plan"
   },
@@ -62,5 +64,5 @@
    "Cuenta Completa 1 Mes": "ANC ya no ofrece este plan"
   }
  },
- "actualizado": "2026-10-28T17:16:56.620Z"
+ "actualizado": "2026-10-29T17:30:33.904Z"
 }
