@@ -18,3 +18,4 @@ for (const f of archivos) {
 const v = fs.readFileSync(new URL('../../herramientas/vigilante-catalogo.mjs', import.meta.url), 'utf8');
 ok(/env\.EVOLUTION_URL && env\.EVOLUTION_API_KEY && env\.EVOLUTION_INSTANCIA/.test(v), 'sin secretos de WhatsApp el vigilante no intenta enviar el informe');
 ok(/'pull', '--rebase'/.test(v), 'el vigilante actualiza antes de subir (no choca con la tarea del PC)');
+ok(/rama !== 'main'/.test(v) && /checkout', 'HEAD'/.test(v), 'en el PC, si está en otra rama (gemini/*), el vigilante no publica ni deja commits en esa rama');

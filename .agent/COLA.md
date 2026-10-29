@@ -8,8 +8,8 @@ _Responde SIEMPRE en español. Catálogo: `docs/catalogo-resumen.md` (nunca prod
 
 ## Una vez (en este orden)
 - [x] 1. T20 · Seguridad (rama gemini/T20, 26/10/2026)
-- [ ] 2. T14 · Paquete del servidor (infra/servidor/). Seguir las órdenes 1 a 6 de `.agent/ORDENES.md` (ya estás en la rama gemini/T14: empieza por la ORDEN 2)
-- [ ] 3. T01 · Resumen diario de ventas (SQL wo-052 + prueba con el patrón de pruebas/sql/prueba-wo051.mjs + armar-pendientes)
+- [x] 2. T14 · Paquete del servidor (fusionado en main por Claude, 29/10/2026)
+- [x] 3. T01 · Resumen diario de ventas (hecho por Claude, 29/10/2026: wo-052 + nodos del bot)
 - [ ] 4. T02 · Alerta de pagos sin validar
 - [ ] 5. T21 · Google Maps: datos de la empresa en index.html (con su prueba) y enlace de reseñas en Config bot
 - [ ] 6. T10 · Redes: verificar las claves sin publicar (--verificar)

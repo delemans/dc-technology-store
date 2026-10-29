@@ -195,6 +195,17 @@ if (publicar && !PROBAR) {
         JSON.parse(fs.readFileSync(RUTA_PRODUCTOS, 'utf8'));
         JSON.parse(fs.readFileSync(path.join(RAIZ, 'bot-conocimiento.json'), 'utf8'));
         const rutas = ['disponibilidad.json', 'productos.json', 'bot-conocimiento.json', 'p', 'c', 'guias', 'sitemap.xml', 'robots.txt', 'index.html', 'merchant', 'docs/catalogo-resumen.md', 'supabase/wo-041-emprendered.sql', 'admin.html', 'cliente.html', 'portal.html'];
+        // Si el PC quedó en otra rama (p. ej. gemini/T01 de otra IA), no se publica desde ahí: se deja la rama
+        // como estaba y publica la copia de GitHub Actions (vigilante-catalogo.yml), que trabaja siempre sobre main.
+        const rama = correr('git', ['rev-parse', '--abbrev-ref', 'HEAD']).trim();
+        if (rama !== 'main') {
+            const existentes = rutas.filter((x) => fs.existsSync(path.join(RAIZ, x)));
+            const versionadas = existentes.filter((x) => correr('git', ['ls-files', '--', x]).trim());
+            if (versionadas.length) correr('git', ['checkout', 'HEAD', '--', ...versionadas]);
+            const generadas = existentes.filter((x) => ['p', 'c', 'guias', 'merchant'].includes(x));
+            if (generadas.length) correr('git', ['clean', '-fdq', '--', ...generadas]);
+            throw new Error(`el PC está en la rama ${rama}, no en main: lo publica GitHub (vigilante en la nube)`);
+        }
         correr('git', ['add', '--', ...rutas.filter((x) => fs.existsSync(path.join(RAIZ, x)))]);
         const diff = correr('git', ['diff', '--cached']);
         if (/gsk_[a-z0-9]{10}|nvapi-[a-z0-9]{10}|sk-or-v1|AIza[0-9A-Za-z_-]{20}|ghp_[A-Za-z0-9]{20}|eyJhbGciOi/i.test(diff)) throw new Error('el cambio parece contener una clave: no se publica');

@@ -29,7 +29,7 @@ _Escrito por Claude el 26/10/2026. Lo siguen Gemini (Antigravity) u otro agente 
 
 ---
 
-## T01 · Resumen diario de ventas a las 8 p. m. — **Pendiente** (prioridad alta)
+## T01 · Resumen diario de ventas a las 8 p. m. — **Hecha** (Claude, 29/10/2026; falta que el director aplique wo-052 y sincronizar n8n)
 **Para qué:** que el director sepa cada noche cómo fue el día sin abrir el panel.
 
 **Pasos**
@@ -189,7 +189,7 @@ La tienda (GitHub Pages) y la base (Supabase) ya están en internet.
    - prueba aparte que `cargarEntorno()` toma las variables nuevas de la terminal.
 7. **No apagues la tarea de Windows:** eso lo hace Claude cuando el workflow ya haya corrido bien una vez.
 
-## T14 · Paquete del servidor para n8n + WhatsApp — **Por revisar (IA) · rama gemini/T14**
+## T14 · Paquete del servidor para n8n + WhatsApp — **Hecha** (IA + revisión de Claude, 29/10/2026; falta el VPS: B10)
 **Para qué:** mudar el bot a un servidor en internet (VPS) de forma reproducible.
 1. **`infra/servidor/docker-compose.yml`:**
    - n8n (con Postgres) y Evolution API 2.3.7 (con su Postgres y Redis);
@@ -249,7 +249,7 @@ Usa `/mejorar-flujo <flujo>`, en este orden:
 4. panel: validar un pago;
 5. menú del bot.
 
-## T20 · Seguridad — **Pendiente** (alta; los hallazgos solo en privado/)
+## T20 · Seguridad — **Hecha** (IA + verificación de Claude, 29/10/2026; repetir cada mes)
 Usa `/auditar-seguridad`. Las reglas del skill mandan: nada de fallas concretas en archivos públicos hasta corregirlas.
 
 ## T21 · Google Maps y SEO local — **Pendiente** (alta)

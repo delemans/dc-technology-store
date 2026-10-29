@@ -2352,6 +2352,46 @@ function renovaciones() {
     return salida.slice(0, 20); // máx. 20 por ronda: la cola los envía de a uno con pausa
 }
 
+/* ---------- H4) Resumen del día (WO-052 · T01): a las 8 p. m. de Bogotá, una vez al día, al director ----------
+   «Hora del resumen» deja pasar solo entre 20:00 y 20:29 y si hoy no se envió; «Texto del resumen» arma el mensaje
+   con resumen_ventas_dia(). Si la base aún no tiene wo-052, avisa UNA vez «aplica wo-052». */
+function horaResumen() {
+    const memoria = $getWorkflowStaticData('global');
+    const ahora = new Date(Date.now());
+    const local = new Date(ahora.toLocaleString('en-US', { timeZone: 'America/Bogota' }));
+    const hoy = ahora.toLocaleDateString('en-CA', { timeZone: 'America/Bogota' });
+    if (local.getHours() !== 20 || local.getMinutes() >= 30 || memoria.resumenDia === hoy) return [];
+    return [{ json: { hoy } }];
+}
+
+function textoResumen() {
+    const memoria = $getWorkflowStaticData('global');
+    const numero = soloDigitos($('Config bot').first().json.numero_aviso_admin);
+    const { hoy } = $('Hora del resumen').first().json;
+    const r = $input.first().json ?? {};
+    memoria.resumenDia = hoy;
+    if (!numero) return [];
+    if (typeof r.pedidos !== 'number') {
+        if (memoria.resumenSinSql) return [];
+        memoria.resumenSinSql = hoy;
+        return [{ json: { numero, texto: '🧾 No pude armar el resumen de ventas de hoy: aplica supabase/wo-052-resumen-dia.sql en Supabase.' } }];
+    }
+    delete memoria.resumenSinSql;
+    const fecha = new Date(`${hoy}T12:00:00-05:00`).toLocaleDateString('es-CO', { timeZone: 'America/Bogota', weekday: 'long', day: 'numeric', month: 'long' });
+    const cobrar = r.por_cobrar ?? {};
+    const lineas = ['🧾 *Resumen de hoy · DC Tecnology*', fecha, ''];
+    if (!r.pedidos) lineas.push('Hoy no hubo pedidos nuevos.');
+    else lineas.push(
+        `• Pedidos: ${r.pedidos} (pagados ${r.pagados}, entregados ${r.entregados})`,
+        `• Ventas: ${cop(r.venta)}`,
+        `• Costo: ${cop(r.costo)}`,
+        `• Margen: ${cop(r.margen)}`);
+    if (Number(cobrar.cantidad)) lineas.push(`• Por cobrar en la web (24 h): ${cobrar.cantidad} por ${cop(cobrar.total)}`);
+    if (Array.isArray(r.top) && r.top.length) lineas.push('', '*Más vendidos*', ...r.top.map((x, i) => `${i + 1}. ${x.producto} × ${x.cantidad} (${cop(x.venta)})`));
+    lineas.push('', 'Detalle en el panel → Finanzas.');
+    return [{ json: { numero, texto: lineas.join('\n') } }];
+}
+
 /* ---------- I) Entrega manual (WO-042): accesos que envió ANC → cliente, con la marca DC Tecnology ----------
    Solo entrega si el usuario y la clave aparecen TEXTUALES en el mensaje y la confianza es ≥ 0,9 (si no, te pregunta). */
 async function entregaManual() {
@@ -3122,6 +3162,11 @@ nodoCodigo('Resultado del panel', [2440, -980], resultadoPanel, { conUtilidades:
 nodo('Entregas para renovar', 'n8n-nodes-base.httpRequest', 4.2, [660, 1500], rpcPanel('entregas_para_renovar', '={{ JSON.stringify({ p_dias: 400 }) }}'), { onError: 'continueRegularOutput', alwaysOutputData: true });
 nodoCodigo('Renovaciones', [880, 1500], renovaciones, { conUtilidades: true }, { executeOnce: true });
 nodo('Encolar renovación', 'n8n-nodes-base.httpRequest', 4.2, [1100, 1500], rpcPanel('encolar_renovacion', '={{ JSON.stringify($json.args) }}'), { onError: 'continueRegularOutput' });
+// WO-052 · Resumen del día al director (rama de salud, 8 p. m.)
+nodoCodigo('Hora del resumen', [660, 1820], horaResumen, {}, { executeOnce: true });
+nodo('Resumen del día', 'n8n-nodes-base.httpRequest', 4.2, [880, 1820], rpcPanel('resumen_ventas_dia', '={{ JSON.stringify({}) }}'), { onError: 'continueRegularOutput', alwaysOutputData: true });
+nodoCodigo('Texto del resumen', [1100, 1820], textoResumen, { conUtilidades: true }, { executeOnce: true });
+nodo('Enviar resumen', 'n8n-nodes-base.httpRequest', 4.2, [1320, 1820], evolutionEnviar('Config bot'), { onError: 'continueRegularOutput' });
 // WO-047 · Rastreo de envíos (rama de salud, cada 30 min)
 nodo('Guías abiertas', 'n8n-nodes-base.httpRequest', 4.2, [660, 1660], rpcPanel('rastreos_abiertos', '={{ JSON.stringify({}) }}'), { onError: 'continueRegularOutput', alwaysOutputData: true });
 nodoCodigo('Consultar rastreo', [880, 1660], consultarRastreos, {}, { executeOnce: true, onError: 'continueRegularOutput' });
@@ -3270,6 +3315,10 @@ unir('Origen', 'Entregas para renovar', 5);
 unir('Entregas para renovar', 'Renovaciones');
 unir('Renovaciones', 'Encolar renovación');
 unir('Origen', 'Guías abiertas', 5);
+unir('Origen', 'Hora del resumen', 5);
+unir('Hora del resumen', 'Resumen del día');
+unir('Resumen del día', 'Texto del resumen');
+unir('Texto del resumen', 'Enviar resumen');
 unir('Origen', 'Estado pendiente', 5);
 unir('Estado pendiente', 'Contactos para estado');
 unir('Contactos para estado', 'Lista de contactos');

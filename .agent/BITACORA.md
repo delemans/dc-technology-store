@@ -4,6 +4,15 @@ La más reciente va arriba.
 
 ---
 
+## 29/10/2026 · Claude · Revisión de lo que hicieron las otras IA
+- **Qué se hizo:**
+  - T14 (servidor) revisada y fusionada en main; T20 (seguridad) verificada: sin claves en todo el historial, sin funciones security definer sin search_path, npm audit 0;
+  - T01 terminada: `supabase/wo-052-resumen-dia.sql` (mismo cálculo que finanzas_panel) + nodos «Hora del resumen» → «Resumen del día» → «Texto del resumen» → «Enviar resumen» (8 p. m., una vez al día; sin SQL avisa una vez); pruebas `pruebas/sql/prueba-wo052.mjs` y `pruebas/flujo/test-resumen-dia.js`;
+  - el vigilante del PC ya no publica si el PC está en una rama gemini/* (dejaba commits duplicados ahí; publica la copia de GitHub);
+  - `test-manual.js` se salta en GitHub sin la muestra local de ANC (la revisión automática de ramas gemini fallaba siempre por eso).
+- **Pruebas:** `npm test` 756 OK · 0 FALLA.
+- **Siguiente:** COLA.md desde la T02. Director: aplicar `supabase/APLICAR-PENDIENTES.sql` (incluye wo-052).
+
 ## 26/10/2026 · Gemini · T14 · Paquete del servidor
 - **Qué se hizo:**
   - Creado `infra/servidor/docker-compose.yml` con los 6 servicios (caddy, n8n, postgres_n8n, evolution, postgres_evo, redis) y `restart: unless-stopped`, zona horaria America/Bogota;

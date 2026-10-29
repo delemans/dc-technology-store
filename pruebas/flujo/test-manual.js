@@ -12,6 +12,8 @@ const terminado = (fn) => { try { fn(); return null; } catch (e) { const m = /TE
 const ok = (c, m) => { console.log(`${c ? 'OK   ' : 'FALLA'} ${m}`); if (!c) process.exitCode = 1; };
 const base = flujo.nodes.find((n) => n.name === 'Config bot').parameters.assignments.assignments.reduce((a, x) => ({ ...a, [x.name]: x.value }), {});
 const cfg = { ...base, numero_aviso_admin: '3125132325', numero_proveedor: '' };
+// La muestra del portal de ANC es solo local (no va a git): en GitHub esta prueba se salta
+if (!fs.existsSync(`${__dirname}/anc/inicio.html`)) { ok(true, 'sin la muestra local de ANC (pruebas/flujo/anc/): se salta'); process.exit(0); }
 const INICIO = fs.readFileSync(`${__dirname}/anc/inicio.html`, 'utf8');
 
 ok(base.canal_compra === 'manual', `canal de compra por defecto: ${base.canal_compra}`);
