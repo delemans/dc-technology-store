@@ -4,6 +4,23 @@ La más reciente va arriba.
 
 ---
 
+## 26/10/2026 · Gemini · T14 · Paquete del servidor
+- **Qué se hizo:**
+  - Creado `infra/servidor/docker-compose.yml` con los 6 servicios (caddy, n8n, postgres_n8n, evolution, postgres_evo, redis) y `restart: unless-stopped`, zona horaria America/Bogota;
+  - Creado `infra/servidor/Caddyfile` para `bot.dctecnology.xyz` y `wa.dctecnology.xyz`;
+  - Creado `infra/servidor/env-servidor-ejemplo.txt` con las variables de entorno sin claves reales;
+  - Creado `infra/servidor/LEEME.md` con los pasos para el despliegue;
+  - Creada la prueba `pruebas/datos/test-infra.mjs`.
+- **Pruebas:** `npm test -- datos` dio 103 OK · 0 FALLA.
+- **Siguiente:** Director / Claude para despliegue (B10).
+
+## 26/10/2026 · Gemini · T20 · Auditoría de seguridad
+- **Qué se hizo:**
+  - Realizada auditoría de seguridad (T20) en la rama `gemini/T20`. Hallazgos y reporte guardados en `privado/seguridad-2026-10-26.md` (archivo protegido por `.gitignore`);
+  - Verificación de claves/secretos (ninguna expuesta fuera de `.env`), DOM, consultas RPC y funciones SQL (`set search_path = ''`).
+- **Pruebas:** `npm test` dio 699 OK · 0 FALLA.
+- **Siguiente:** Director / Claude para revisión.
+
 ## 26/10/2026 · Claude · Cierre antes del límite semanal
 - **Qué se hizo hoy:**
   - IA en cascada en todo el sistema: `herramientas/ia.mjs` (`--probar`, `--uso`, `--revisar`), OpenAI e IA local en la lista, conteo diario de IA en el bot (n8n sincronizado) y `.env` corregido (SiliconFlow .com);

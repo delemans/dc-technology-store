@@ -7,8 +7,8 @@ _Detalle de cada tarea: `.agent/BLUEPRINT.md`. Cómo hacerla: el skill indicado 
 _Responde SIEMPRE en español. Catálogo: `docs/catalogo-resumen.md` (nunca productos.json entero)._
 
 ## Una vez (en este orden)
-- [ ] 1. T20 · Seguridad. Skill: auditar-seguridad (hallazgos SOLO en privado/)
-- [ ] 2. T14 · Paquete del servidor (infra/servidor/). Seguir las órdenes 1 a 6 de «ORDENES PARA LA IA» del Escritorio
+- [x] 1. T20 · Seguridad (rama gemini/T20, 26/10/2026)
+- [ ] 2. T14 · Paquete del servidor (infra/servidor/). Seguir las órdenes 1 a 6 de `.agent/ORDENES.md` (ya estás en la rama gemini/T14: empieza por la ORDEN 2)
 - [ ] 3. T01 · Resumen diario de ventas (SQL wo-052 + prueba con el patrón de pruebas/sql/prueba-wo051.mjs + armar-pendientes)
 - [ ] 4. T02 · Alerta de pagos sin validar
 - [ ] 5. T21 · Google Maps: datos de la empresa en index.html (con su prueba) y enlace de reseñas en Config bot
