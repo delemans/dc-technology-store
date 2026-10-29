@@ -2392,6 +2392,42 @@ function textoResumen() {
     return [{ json: { numero, texto: lineas.join('\n') } }];
 }
 
+/* ---------- H5) Pagos por revisar (WO-053 · T02): cada 30 min, lun–sáb 8 a. m.–8 p. m. de Bogotá ----------
+   Comprobantes web sin #ok/#no hace más de 30 min y pedidos sin pago hace más de 24 h: un aviso por referencia
+   (memoria.alertasPago). Si la base aún no tiene wo-053, avisa UNA vez «aplica wo-053». */
+function alertasPago() {
+    const memoria = $getWorkflowStaticData('global');
+    const numero = soloDigitos($('Config bot').first().json.numero_aviso_admin);
+    const ahora = Date.now();
+    const local = new Date(new Date(ahora).toLocaleString('en-US', { timeZone: 'America/Bogota' }));
+    if (!numero || local.getDay() === 0 || local.getHours() < 8 || local.getHours() >= 20) return [];
+    const r = $input.first().json ?? {};
+    if (!Array.isArray(r.comprobantes) || !Array.isArray(r.sin_pago)) {
+        if (memoria.alertasPagoSinSql) return [];
+        memoria.alertasPagoSinSql = ahora;
+        return [{ json: { numero, texto: '⏰ No pude revisar los pagos pendientes: aplica supabase/wo-053-pagos-por-revisar.sql en Supabase.' } }];
+    }
+    delete memoria.alertasPagoSinSql;
+    const vistos = memoria.alertasPago = memoria.alertasPago || {};
+    for (const [k, t] of Object.entries(vistos)) if (ahora - t > 10 * 864e5) delete vistos[k];
+    const hace = (iso) => {
+        const min = Math.max(0, Math.round((ahora - Date.parse(iso)) / 60000));
+        return min < 90 ? `${min} min` : min < 48 * 60 ? `${Math.round(min / 60)} h` : `${Math.round(min / 1440)} días`;
+    };
+    const comp = r.comprobantes.filter((x) => x.referencia && !vistos[`c:${x.referencia}`]);
+    const sinPago = r.sin_pago.filter((x) => x.referencia && !vistos[`p:${x.referencia}`]);
+    const lineas = [];
+    if (comp.length) lineas.push('⏰ *Comprobantes sin validar*',
+        ...comp.map((x) => `• *${x.referencia}* · ${cop(x.total)} · llegó hace ${hace(x.desde)}`),
+        'Revisa el pago y responde *#ok DC-X* o *#no DC-X motivo*.');
+    if (sinPago.length) lineas.push(...(lineas.length ? [''] : []), '⌛ *Pedidos sin pago hace más de 24 h*',
+        ...sinPago.map((x) => `• *${x.referencia}* · ${cop(x.total)} · ${x.canal === 'web' ? 'web' : 'WhatsApp'} · hace ${hace(x.desde)}`));
+    if (!lineas.length) return [];
+    comp.forEach((x) => { vistos[`c:${x.referencia}`] = ahora; });
+    sinPago.forEach((x) => { vistos[`p:${x.referencia}`] = ahora; });
+    return [{ json: { numero, texto: lineas.join('\n') } }];
+}
+
 /* ---------- I) Entrega manual (WO-042): accesos que envió ANC → cliente, con la marca DC Tecnology ----------
    Solo entrega si el usuario y la clave aparecen TEXTUALES en el mensaje y la confianza es ≥ 0,9 (si no, te pregunta). */
 async function entregaManual() {
@@ -3167,6 +3203,10 @@ nodoCodigo('Hora del resumen', [660, 1820], horaResumen, {}, { executeOnce: true
 nodo('Resumen del día', 'n8n-nodes-base.httpRequest', 4.2, [880, 1820], rpcPanel('resumen_ventas_dia', '={{ JSON.stringify({}) }}'), { onError: 'continueRegularOutput', alwaysOutputData: true });
 nodoCodigo('Texto del resumen', [1100, 1820], textoResumen, { conUtilidades: true }, { executeOnce: true });
 nodo('Enviar resumen', 'n8n-nodes-base.httpRequest', 4.2, [1320, 1820], evolutionEnviar('Config bot'), { onError: 'continueRegularOutput' });
+// WO-053 · Pagos por revisar (rama de salud, cada 30 min, en horario)
+nodo('Pagos por revisar', 'n8n-nodes-base.httpRequest', 4.2, [660, 1980], rpcPanel('pagos_por_revisar', '={{ JSON.stringify({}) }}'), { onError: 'continueRegularOutput', alwaysOutputData: true });
+nodoCodigo('Alertas de pago', [880, 1980], alertasPago, { conUtilidades: true }, { executeOnce: true });
+nodo('Enviar alerta de pago', 'n8n-nodes-base.httpRequest', 4.2, [1100, 1980], evolutionEnviar('Config bot'), { onError: 'continueRegularOutput' });
 // WO-047 · Rastreo de envíos (rama de salud, cada 30 min)
 nodo('Guías abiertas', 'n8n-nodes-base.httpRequest', 4.2, [660, 1660], rpcPanel('rastreos_abiertos', '={{ JSON.stringify({}) }}'), { onError: 'continueRegularOutput', alwaysOutputData: true });
 nodoCodigo('Consultar rastreo', [880, 1660], consultarRastreos, {}, { executeOnce: true, onError: 'continueRegularOutput' });
@@ -3319,6 +3359,9 @@ unir('Origen', 'Hora del resumen', 5);
 unir('Hora del resumen', 'Resumen del día');
 unir('Resumen del día', 'Texto del resumen');
 unir('Texto del resumen', 'Enviar resumen');
+unir('Origen', 'Pagos por revisar', 5);
+unir('Pagos por revisar', 'Alertas de pago');
+unir('Alertas de pago', 'Enviar alerta de pago');
 unir('Origen', 'Estado pendiente', 5);
 unir('Estado pendiente', 'Contactos para estado');
 unir('Contactos para estado', 'Lista de contactos');

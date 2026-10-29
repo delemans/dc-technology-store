@@ -11,7 +11,8 @@ La más reciente va arriba.
   - el vigilante del PC ya no publica si el PC está en una rama gemini/* (dejaba commits duplicados ahí; publica la copia de GitHub);
   - `test-manual.js` se salta en GitHub sin la muestra local de ANC (la revisión automática de ramas gemini fallaba siempre por eso).
 - **Pruebas:** `npm test` 756 OK · 0 FALLA.
-- **Siguiente:** COLA.md desde la T02. Director: aplicar `supabase/APLICAR-PENDIENTES.sql` (incluye wo-052).
+  - T02 terminada: `supabase/wo-053-pagos-por-revisar.sql` + nodos «Pagos por revisar» → «Alertas de pago» → «Enviar alerta de pago»; pruebas `pruebas/sql/prueba-wo053.mjs` y `pruebas/flujo/test-alertas-pago.js`.
+- **Siguiente:** COLA.md desde la T21. Director: encender n8n (iniciar-bot.ps1) y aplicar `supabase/APLICAR-PENDIENTES.sql` (incluye wo-052 y wo-053); luego Claude sincroniza n8n.
 
 ## 26/10/2026 · Gemini · T14 · Paquete del servidor
 - **Qué se hizo:**

@@ -53,7 +53,7 @@ _Escrito por Claude el 26/10/2026. Lo siguen Gemini (Antigravity) u otro agente 
 **Terminado cuando:** las pruebas nuevas y `npm test` estén en verde.
 **No aplicar:** el SQL en Supabase ni sincronizar n8n.
 
-## T02 · Alerta de pagos sin validar y pedidos por cobrar — **Pendiente** (alta)
+## T02 · Alerta de pagos sin validar y pedidos por cobrar — **Hecha** (Claude, 29/10/2026; falta aplicar wo-053 y sincronizar n8n)
 **Para qué:** que ningún pago espere más de 30 min en horario ni se olvide un pedido por cobrar.
 
 1. **En la rama de salud**, cada 30 min, dentro del horario de atención (lun–sáb 8–20):
