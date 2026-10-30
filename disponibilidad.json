@@ -6,6 +6,7 @@
   "auriculares-inalambricos-m19-con-powerbank": "Agotado o retirado en ANC",
   "reloj-inteligente-smartwatch-h19": "Agotado o retirado en ANC",
   "reloj-inteligente-smartwatch-m9": "ANC ya no ofrece este producto",
+  "netflix": "Agotado o retirado en ANC",
   "prime-video": "Agotado o retirado en ANC",
   "iptv-smarters": "ANC ya no ofrece este producto",
   "capcut-pro": "Agotado o retirado en ANC",
@@ -39,9 +40,6 @@
   "er-impermeabilizante-brocha-v-2051-1964": "Emprende Red: sin unidades"
  },
  "variantes": {
-  "netflix": {
-   "Pantalla Internacional 30 días": "ANC ya no ofrece este plan"
-  },
   "hbo-max": {
    "Cuenta Completa Platino 1 Mes": "ANC ya no ofrece este plan"
   },
@@ -64,5 +62,5 @@
    "Cuenta Completa 1 Mes": "ANC ya no ofrece este plan"
   }
  },
- "actualizado": "2026-10-29T17:30:33.904Z"
+ "actualizado": "2026-10-30T17:06:40.781Z"
 }
