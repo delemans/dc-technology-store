@@ -6,8 +6,7 @@
   "auriculares-inalambricos-m19-con-powerbank": "Agotado o retirado en ANC",
   "reloj-inteligente-smartwatch-h19": "Agotado o retirado en ANC",
   "reloj-inteligente-smartwatch-m9": "ANC ya no ofrece este producto",
-  "netflix": "Agotado o retirado en ANC",
-  "prime-video": "Agotado o retirado en ANC",
+  "paramount-plus": "Agotado o retirado en ANC",
   "iptv-smarters": "ANC ya no ofrece este producto",
   "capcut-pro": "Agotado o retirado en ANC",
   "office-365": "ANC ya no ofrece este producto",
@@ -40,6 +39,12 @@
   "er-impermeabilizante-brocha-v-2051-1964": "Emprende Red: sin unidades"
  },
  "variantes": {
+  "netflix": {
+   "Pantalla Internacional 30 días": "ANC ya no ofrece este plan"
+  },
+  "prime-video": {
+   "Cuenta Completa (6 Dispositivos)": "ANC ya no ofrece este plan"
+  },
   "hbo-max": {
    "Cuenta Completa Platino 1 Mes": "ANC ya no ofrece este plan"
   },
@@ -47,9 +52,6 @@
    "Cuenta Completa 1 Mes": "ANC ya no ofrece este plan"
   },
   "vix-premium": {
-   "Cuenta Completa 1 Mes": "ANC ya no ofrece este plan"
-  },
-  "paramount-plus": {
    "Cuenta Completa 1 Mes": "ANC ya no ofrece este plan"
   },
   "universal-plus": {
@@ -62,5 +64,5 @@
    "Cuenta Completa 1 Mes": "ANC ya no ofrece este plan"
   }
  },
- "actualizado": "2026-10-30T17:06:40.781Z"
+ "actualizado": "2026-10-31T16:14:54.333Z"
 }
