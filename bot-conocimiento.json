@@ -1,5 +1,5 @@
 {
-  "version": "2026-10-31T16:14:56.548Z",
+  "version": "2026-11-01T17:13:42.064Z",
   "identidad": [
     "Eres DC TECNOLOGY: respondes el WhatsApp de la tienda (https://www.dctecnology.xyz) en nombre del equipo. Habla como la tienda (\"te ayudamos\", \"te enviamos\").",
     "En el PRIMER mensaje de la conversación saluda así: \"¡Hola! Te saluda *DC TECNOLOGY* 👋\", responde lo que preguntó y cierra con: \"Escribe *menú* para ver todas las opciones.\" Después no vuelvas a presentarte (si el contexto trae un mensaje del menú, la conversación ya empezó).",
@@ -878,7 +878,7 @@
       "marca": "DC Tecnology",
       "nombre": "Reloj Inteligente Smartwatch Z90",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-36-961981d05a751785e617696425286798-640-0.webp",
-      "url": "https://www.dctecnology.xyz/p/reloj-inteligente-smartwatch-z90.html",
+      "url": "https://www.dctecnology.xyz/?producto=reloj-inteligente-smartwatch-z90",
       "variantes": [
         {
           "nombre": "Deportivo Z90",
@@ -886,8 +886,9 @@
           "precio_anterior": 150000
         }
       ],
+      "oculto": true,
       "desde": 80000,
-      "descripcion": "Smartwatch Z90 con monitoreo de actividad, notificaciones y resistencia al agua.¡Tecnología avanzada y diseño moderno en tu muñeca! El Smartwatch Z90 es el asistente ideal para organizar tu día, mantenerte conectado y monitorear tu actividad física con precisión y estilo.Tecnología, diseño y rendimiento. El asistente inteligente que tu día a día necesita.Pantalla HD Full Touch: Disfruta de una interfaz fluida, colores vivos y excelente visibilidad en cualquier condición de luz para navegar por tus menús fácilmente.&amp;zwj; Deportes y Salud en Tiempo Real: Monitorea tu frecuencia cardíaca, oxi"
+      "descripcion": null
     },
     {
       "id": "reloj-inteligente-smartwatch-p13-de-lujo-en-acero-inoxidable",
@@ -1176,7 +1177,7 @@
       "marca": "CapCut",
       "nombre": "CapCut Pro Edición",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/con-o-sin-11-b62cd5366081340f5217534215681512-640-0.webp",
-      "url": "https://www.dctecnology.xyz/?producto=capcut-pro",
+      "url": "https://www.dctecnology.xyz/p/capcut-pro.html",
       "variantes": [
         {
           "nombre": "Suscripción 1 Mes",
@@ -1184,7 +1185,6 @@
           "precio_anterior": 45000
         }
       ],
-      "oculto": true,
       "desde": 28000,
       "descripcion": null
     },
@@ -1371,7 +1371,7 @@
         }
       ],
       "desde": 25900,
-      "descripcion": "Disfruta Disney Plus con PIN virtual para 1 dispositivo.Los planes Estándar NO incluyen deportes.Desde cualquier navegador de tu celular o computadora ingresa a: disneyplus.com/redeemEscribe el código exacto que recibiste de nuestra parte y presiona \"Canjear\".Región estricta: Este código es válido únicamente para cuentas registradas en Colombia .Sin ataduras: Al ser un método de prepago, no requiere tarjetas de crédito ni genera cobros automáticos sorpresa.Al comprar, aceptas estas condiciones. Producto original y garantizado.Los PIN son de un solo uso y válidos únicamente para cuentas de Colo"
+      "descripcion": "Disfruta Disney Plus con PIN virtual para 1 dispositivo.El PIN es de un solo uso y solo funciona en cuentas de Colombia.Antes de canjearlo, verifica que tu cuenta de Disney+ sea de Colombia: en cuentas de otro país la plataforma marca error.No compartas ni publiques el PIN antes de canjearlo: cualquiera que lo tenga lo puede usar.Estándar con Anuncios: 1 mes de Disney+ Estándar, con anuncios y sin ESPN.Estándar sin Anuncios: 1 mes de Disney+ Estándar, sin anuncios y sin ESPN.Premium Máximo: 1 mes de Disney+ Premium, con ESPN y deportes en vivo.No. Es prepago: no necesitas tarjeta de crédito y "
     },
     {
       "id": "pin-virtual-netflix",
@@ -1408,7 +1408,7 @@
         }
       ],
       "desde": 20000,
-      "descripcion": "Activa tu suscripción Netflix con PIN Virtual. Pago seguro, entrega rápida y sin tarjeta.Ingresa a netflix.com/codigo e inicia sesión.Escribe el código que te enviamos y confirma.El saldo se abona a tu cuenta.Región estricta: Este código es válido únicamente para cuentas registradas en Colombia .Sin ataduras: Al ser un método de prepago, no requiere tarjetas de crédito ni genera cobros automáticos sorpresa.Al comprar, aceptas estas condiciones. Producto original y garantizado.Los PIN son de un solo uso y válidos únicamente para cuentas de Colombia.Pagar tu plan: Usa el saldo para pagar tu susc"
+      "descripcion": "Activa tu suscripción Netflix con PIN Virtual. Pago seguro, entrega rápida y sin tarjeta.El PIN es de un solo uso y solo funciona en cuentas de Colombia.Antes de canjearlo, verifica que tu cuenta de Netflix sea de Colombia: en cuentas de otro país la plataforma marca error.No compartas ni publiques el PIN antes de canjearlo: cualquiera que lo tenga lo puede usar.PIN $20.000: Saldo de $20.000 que se abona a tu cuenta de Netflix.PIN $30.000: Saldo de $30.000 que se abona a tu cuenta de Netflix.PIN $35.000: Saldo de $35.000 que se abona a tu cuenta de Netflix.PIN $40.000: Saldo de $40.000 que se "
     },
     {
       "id": "pin-virtual-directv-go",
@@ -1440,7 +1440,7 @@
         }
       ],
       "desde": 64000,
-      "descripcion": "Recarga tu PIN Virtual Directv Go y disfruta TV en vivo, deportes y series sin contrato. Acceso inmediato y multidispositivo.Ingresa a la web o app de DirecTV GO e inicia sesión.Busca la opción para redimir código y escribe el PIN que te enviamos.Tu plan queda activo.Región estricta: Este código es válido únicamente para cuentas registradas en Colombia .Sin ataduras: Al ser un método de prepago, no requiere tarjetas de crédito ni genera cobros automáticos sorpresa.Al comprar, aceptas estas condiciones. Producto original y garantizado.Los PIN son de un solo uso y válidos únicamente para cuentas"
+      "descripcion": "Recarga tu PIN Virtual Directv Go y disfruta TV en vivo, deportes y series sin contrato. Acceso inmediato y multidispositivo.El PIN es de un solo uso y solo funciona en cuentas de Colombia.Antes de canjearlo, verifica que tu cuenta de DirecTV Go sea de Colombia: en cuentas de otro país la plataforma marca error.No compartas ni publiques el PIN antes de canjearlo: cualquiera que lo tenga lo puede usar.PIN $64.000: PIN por valor de $64.000 para recargar tu cuenta de DirecTV Go.PIN $79.900: PIN por valor de $79.900 para recargar tu cuenta de DirecTV Go.PIN $102.900: PIN por valor de $102.900 para"
     },
     {
       "id": "pin-virtual-win-play",
@@ -1457,7 +1457,7 @@
         }
       ],
       "desde": 39900,
-      "descripcion": "Disfruta Win Play con PIN Virtual para ver fútbol colombiano en vivo HD.Ingresa a winplay.co e inicia sesión.Escribe el código exacto que te enviamos y confirma.Tu suscripción queda activa por el tiempo abonado.Región estricta: Este código es válido únicamente para cuentas registradas en Colombia .Sin ataduras: Al ser un método de prepago, no requiere tarjetas de crédito ni genera cobros automáticos sorpresa.Al comprar, aceptas estas condiciones. Producto original y garantizado.Los PIN son de un solo uso y válidos únicamente para cuentas de Colombia.Partidos en vivo: Disfruta del fútbol y depo"
+      "descripcion": "Disfruta Win Play con PIN Virtual para ver fútbol colombiano en vivo HD.El PIN es de un solo uso y solo funciona en cuentas de Colombia.Antes de canjearlo, verifica que tu cuenta de Win Play sea de Colombia: en cuentas de otro país la plataforma marca error.No compartas ni publiques el PIN antes de canjearlo: cualquiera que lo tenga lo puede usar.PIN de $39.900: 1 mes de Win Play: partidos en vivo, programas y repeticiones, para ver en TV, celular y computador.No. Es prepago: no necesitas tarjeta de crédito y no hay cobros automáticos. Cuando se acaba el tiempo, el servicio se pausa y tú decid"
     },
     {
       "id": "pin-virtual-vix",
@@ -1474,7 +1474,7 @@
         }
       ],
       "desde": 22900,
-      "descripcion": "Activa tu PIN Virtual ViX Premium y disfruta series, deportes y más en 3 dispositivos sin contratos.Saldo abonado directamente a tu cuenta de ViX.El sistema te despachará el código alfanumérico de forma casi automática apenas la pasarela o nuestro equipo confirme tu pago.Toca el logo del medio de pago de tu preferencia para ver mas informacion, todos son 100% seguros.Región estricta: Este código es válido únicamente para cuentas registradas en Colombia (se abona en pesos colombianos).Sin ataduras: Al ser un método de prepago, no requiere tarjetas de crédito ni genera cobros automáticos sorpres"
+      "descripcion": "Activa tu PIN Virtual ViX Premium y disfruta series, deportes y más en 3 dispositivos sin contratos.El PIN es de un solo uso y solo funciona en cuentas de Colombia.Antes de canjearlo, verifica que tu cuenta de ViX sea de Colombia: en cuentas de otro país la plataforma marca error.No compartas ni publiques el PIN antes de canjearlo: cualquiera que lo tenga lo puede usar.PIN $22.900: 1 mes de ViX Premium: catálogo Premium y deportes en vivo, en varios dispositivos.No. Es prepago: no necesitas tarjeta de crédito y no hay cobros automáticos. Cuando se acaba el tiempo, el servicio se pausa y tú dec"
     },
     {
       "id": "pin-virtual-deezer",
@@ -1491,7 +1491,7 @@
         }
       ],
       "desde": 19500,
-      "descripcion": "Recarga tu cuenta Deezer Premium con PIN Virtual en Colombia. Música sin anuncios, modo offline y calidad HiFi.Ingresa a deezer.com/gift e inicia sesión.Escribe el código exacto que te enviamos y confirma.Tu suscripción queda activa por el tiempo abonado.Región estricta: Este código es válido únicamente para cuentas registradas en Colombia .Sin ataduras: Al ser un método de prepago, no requiere tarjetas de crédito ni genera cobros automáticos sorpresa.Al comprar, aceptas estas condiciones. Producto original y garantizado.Los PIN son de un solo uso y válidos únicamente para cuentas de Colombia."
+      "descripcion": "Recarga tu cuenta Deezer Premium con PIN Virtual en Colombia. Música sin anuncios, modo offline y calidad HiFi.El PIN es de un solo uso y solo funciona en cuentas de Colombia.Antes de canjearlo, verifica que tu cuenta de Deezer sea de Colombia: en cuentas de otro país la plataforma marca error.No compartas ni publiques el PIN antes de canjearlo: cualquiera que lo tenga lo puede usar.PIN $19.500: 1 mes de Deezer Premium: música sin anuncios y para escuchar sin conexión.No. Es prepago: no necesitas tarjeta de crédito y no hay cobros automáticos. Cuando se acaba el tiempo, el servicio se pausa y "
     },
     {
       "id": "pin-google-play",
@@ -1518,7 +1518,7 @@
         }
       ],
       "desde": 10000,
-      "descripcion": "Recarga tu saldo con el PIN Google Play y disfruta juegos, apps y entretenimiento.Toca tu foto de perfil &amp;rarr; Pagos y suscripciones &amp;rarr; Canjear código de regalo .También puedes entrar a play.google.com/redeem con tu cuenta de Google.Escribe el código y confirma.Región estricta: Este código es válido únicamente para cuentas registradas en Colombia .Sin ataduras: Al ser un método de prepago, no requiere tarjetas de crédito ni genera cobros automáticos sorpresa.Al comprar, aceptas estas condiciones. Producto original y garantizado.Los PIN son de un solo uso y válidos únicamente para "
+      "descripcion": "Recarga tu saldo con el PIN Google Play y disfruta juegos, apps y entretenimiento.El PIN es de un solo uso y solo funciona en cuentas de Colombia.Antes de canjearlo, verifica que tu cuenta de Google Play sea de Colombia: en cuentas de otro país la plataforma marca error.No compartas ni publiques el PIN antes de canjearlo: cualquiera que lo tenga lo puede usar.PIN $10.000: Saldo de $10.000 para tu cuenta de Google Play.PIN $30.000: Saldo de $30.000 para tu cuenta de Google Play.PIN $50.000: Saldo de $50.000 para tu cuenta de Google Play."
     },
     {
       "id": "pin-virtual-roblox",
@@ -1545,7 +1545,7 @@
         }
       ],
       "desde": 25000,
-      "descripcion": "Ingresa desde un navegador (no desde la app) a roblox.com/redeem e inicia sesión.Escribe el código que te enviamos y confirma.El saldo se abona a tu cuenta.Región estricta: Este código es válido únicamente para cuentas registradas en Colombia .Sin ataduras: Al ser un método de prepago, no requiere tarjetas de crédito ni genera cobros automáticos sorpresa.Al comprar, aceptas estas condiciones. Producto original y garantizado.Los PIN son de un solo uso y válidos únicamente para cuentas de Colombia.Comprar Robux: Compra Robux para tu avatar y tus experiencias favoritas.Roblox Premium: Activa tu m"
+      "descripcion": "El PIN es de un solo uso y solo funciona en cuentas de Colombia.Antes de canjearlo, verifica que tu cuenta de Roblox sea de Colombia: en cuentas de otro país la plataforma marca error.No compartas ni publiques el PIN antes de canjearlo: cualquiera que lo tenga lo puede usar.PIN $25.000: Saldo de $25.000 para tu cuenta de Roblox: úsalo en Robux, Roblox Premium o compras.PIN $50.000: Saldo de $50.000 para tu cuenta de Roblox: úsalo en Robux, Roblox Premium o compras.PIN $100.000: Saldo de $100.000 para tu cuenta de Roblox: úsalo en Robux, Roblox Premium o compras."
     },
     {
       "id": "pin-virtual-razer-gold",
@@ -1623,7 +1623,7 @@
         }
       ],
       "desde": 105900,
-      "descripcion": "Activa tu PIN Virtual McAfee y protege tus dispositivos contra virus y amenazas.No uses el serial en más dispositivos de los que incluye tu plan.No cambies el correo ni la contraseña de la cuenta entregada.No transfieras ni compartas la licencia con terceros.Equipo libre de cracks: no uses programas pirata en el equipo protegido.Al comprar, aceptas estas normas. Licencia original y garantizada.Antivirus en tiempo real: Protección contra virus, malware y amenazas.Navegación segura: Bloquea sitios peligrosos y fraudes.Multidispositivo: Protege PC, Mac, Android y iOS según tu plan.365 días: Un añ"
+      "descripcion": "Activa tu PIN Virtual McAfee y protege tus dispositivos contra virus y amenazas.Prohibido activar el código en más dispositivos de los que incluye tu plan.Prohibido usar programas pirata, cracks o activadores ilegales en el equipo.Prohibido compartir, revender o transferir la licencia a terceros.1 año, 1 dispositivo: Licencia original por 365 días para 1 dispositivo: antivirus en tiempo real y navegación segura.1 año, 5 dispositivos: Licencia original por 365 días para hasta 5 dispositivos (PC, Mac, Android e iOS).1 año, 10 dispositivos: Licencia original por 365 días para hasta 10 dispositivo"
     },
     {
       "id": "pin-virtual-uber",

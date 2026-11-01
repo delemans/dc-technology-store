@@ -1,5 +1,5 @@
 # Catálogo resumido de DC Tecnology (para las IA)
-_Generado por herramientas/resumen-catalogo.js el 31/10/2026 a partir de productos.json y disponibilidad.json. No editar a mano._
+_Generado por herramientas/resumen-catalogo.js el 1/11/2026 a partir de productos.json y disponibilidad.json. No editar a mano._
 
 Precios en pesos colombianos. Son los de productos.json: en la tienda manda el precio de la base (precios_publicos), que puede cambiar.
 **Antes de publicar un precio, confírmalo en la página del producto.** Para el detalle de un producto: busca su id en productos.json (no lo leas entero).
@@ -14,7 +14,7 @@ Precios en pesos colombianos. Son los de productos.json: en la tienda manda el p
 
 - Alquiler de Laptops y Equipos de Cómputo · desde $ 160.000 · 3 planes · id `servicio-alquiler-equipos-computo` · https://www.dctecnology.xyz/p/servicio-alquiler-equipos-computo.html
 
-## Tecnología (170)
+## Tecnología (169)
 
 - Auriculares con Cable ATH-73 · desde $ 2.000 · id `er-auriculares-con-cable-ath-73-1126` · https://www.dctecnology.xyz/p/er-auriculares-con-cable-ath-73-1126.html
 - Lampara USB LED-18 · desde $ 2.400 · id `er-lampara-usb-led-18-115` · https://www.dctecnology.xyz/p/er-lampara-usb-led-18-115.html
@@ -155,7 +155,6 @@ Precios en pesos colombianos. Son los de productos.json: en la tienda manda el p
 - Diademas de Alta Calidad EB31 · desde $ 79.400 · id `er-diademas-de-alta-calidad-eb31-125` · https://www.dctecnology.xyz/p/er-diademas-de-alta-calidad-eb31-125.html
 - Diademas Pro EB32 · desde $ 79.500 · id `er-diademas-pro-eb32-127` · https://www.dctecnology.xyz/p/er-diademas-pro-eb32-127.html
 - Diademas Gamer A3S Alámbrico · desde $ 80.000 · id `diademas-gamer-a3s-alambrico` · https://www.dctecnology.xyz/p/diademas-gamer-a3s-alambrico.html
-- Reloj Inteligente Smartwatch Z90 · desde $ 80.000 · id `reloj-inteligente-smartwatch-z90` · https://www.dctecnology.xyz/p/reloj-inteligente-smartwatch-z90.html
 - Power Bank 30.000 mAh sin Cable · desde $ 82.500 · id `er-power-bank-30000-mah-sin-cable-30` · https://www.dctecnology.xyz/p/er-power-bank-30000-mah-sin-cable-30.html
 - Audífonos Inalámbricos ANC-JM19 Traductores · desde $ 82.500 · id `er-airpods-anc-jm19-traductores-208` · https://www.dctecnology.xyz/p/er-airpods-anc-jm19-traductores-208.html
 - Mini Proyector LED Yg 300 - Esquinas Cuadradas · desde $ 82.500 · id `er-mini-proyector-led-yg-300-esquinas-cuadradas-1614` · https://www.dctecnology.xyz/p/er-mini-proyector-led-yg-300-esquinas-cuadradas-1614.html
@@ -200,10 +199,11 @@ Precios en pesos colombianos. Son los de productos.json: en la tienda manda el p
 - Netflix Premium 4K · desde $ 15.000 · id `netflix` · https://www.dctecnology.xyz/p/netflix.html
 - Disney Plus Premium · desde $ 15.000 · id `disney-plus` · https://www.dctecnology.xyz/p/disney-plus.html
 
-## Licencias (3)
+## Licencias (4)
 
 - Canva Pro · desde $ 10.000 · 2 planes · id `canva-pro` · https://www.dctecnology.xyz/p/canva-pro.html
 - Duolingo Super · desde $ 10.000 · id `duolingo-super` · https://www.dctecnology.xyz/p/duolingo-super.html
+- CapCut Pro Edición · desde $ 28.000 · id `capcut-pro` · https://www.dctecnology.xyz/p/capcut-pro.html
 - McAfee Antivirus Total Protection · desde $ 45.000 · 2 planes · id `mcafee-antivirus` · https://www.dctecnology.xyz/p/mcafee-antivirus.html
 
 ## Pines y regalos (9)
