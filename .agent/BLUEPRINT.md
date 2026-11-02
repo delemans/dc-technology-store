@@ -93,7 +93,9 @@ _Escrito por Claude el 26/10/2026. Lo siguen Gemini (Antigravity) u otro agente 
 4. **`herramientas/generar_redes.js`:** los enlaces de cada publicación con `?de=<red>`.
 5. Pruebas web y SQL.
 
-## T06 · Política de uso de IA en las páginas legales — **Pendiente** (baja, fácil)
+## T06 · Política de uso de IA en las páginas legales — **Hecha** por Claude el 01/11/2026
+> Términos → «9. Uso de inteligencia artificial» (asistente con IA, persona valida pagos y entregas, ASESOR, voz con IA en videos, sin entrenar modelos propios); fecha propia por página (`ACTUALIZADO`); prueba `pruebas/datos/test-legal.mjs`.
+
 **Para qué:** transparencia, y cubrir los videos con voz sintética y el bot con IA.
 
 1. En `herramientas/generar_legal.js`, agrega una sección clara:

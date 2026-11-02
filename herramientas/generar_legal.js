@@ -17,6 +17,8 @@ const RAIZ = path.resolve(__dirname, '..');
 const SITIO = 'https://dctecnology.xyz';
 const LOGO = `${SITIO}/img/logo-dc-192.png`;
 const VIGENCIA = '18 de octubre de 2026';
+// Fecha de la última versión de cada página que cambió después de VIGENCIA
+const ACTUALIZADO = { terminos: '1 de noviembre de 2026' }; // T06: uso de inteligencia artificial
 const GARANTIA_DIAS = 30;
 const WHATSAPP = '+57 322 328 4622';
 const DATOS_RESPONSABLE = {
@@ -65,8 +67,12 @@ const CONTENIDO = {
 <li>Si se incumplen estas reglas, la garantía se pierde y el acceso puede ser suspendido sin reembolso.</li></ul>`],
         ['7. Pines y recargas', '<p>El código o saldo se envía al número o cuenta que indiques: verifica bien tus datos antes de pagar. Una vez entregados, los pines y recargas no son reversibles. Las recargas de plataformas de apuestas son solo para <b>mayores de 18 años</b>; juega con responsabilidad.</p>'],
         ['8. Responsabilidad', '<p>Respondemos por lo que vendemos según la ley colombiana y las garantías de este sitio. No respondemos por cambios, bloqueos o caídas que dependan de la plataforma de cada marca, ni por el mal uso del producto. Si una plataforma deja de funcionar dentro de la garantía, lo resolvemos según la sección de garantías.</p>'],
-        ['9. Atención, peticiones, quejas y reclamos (PQR)', `<p>Escríbenos por WhatsApp al ${WHATSAPP} o usa <a href="${SITIO}/portal.html">Mis pedidos</a> para reportar una falla. Respondemos en el horario de atención. Si no quedas conforme, puedes acudir a la Superintendencia de Industria y Comercio (<a href="https://www.sic.gov.co" rel="noopener">sic.gov.co</a>).</p>`],
-        ['10. Ley aplicable', '<p>Estos términos se rigen por las leyes de la República de Colombia, en especial la Ley 1480 de 2011 (Estatuto del Consumidor) y la Ley 527 de 1999 (comercio electrónico). Podemos actualizarlos; la versión vigente es la publicada aquí con su fecha.</p>'],
+        ['9. Uso de inteligencia artificial', `<ul><li><b>Asistente de WhatsApp:</b> los mensajes los contesta primero un asistente automático con inteligencia artificial. <b>Una persona valida siempre los pagos y las entregas</b>; el asistente no aprueba pagos.</li>
+<li><b>Hablar con una persona:</b> cuando quieras, escribe <b>ASESOR</b> y te atiende una persona del equipo.</li>
+<li><b>Videos y anuncios:</b> la voz de nuestros videos es generada por inteligencia artificial, y algunas descripciones de productos se redactan con ayuda de IA a partir de la ficha del fabricante. En las redes que lo piden, los marcamos como contenido generado con IA.</li>
+<li><b>Tus datos:</b> no usamos tus datos para entrenar modelos de inteligencia artificial propios. Los servicios de IA reciben solo el texto de la conversación necesario para responder (ver <a href="privacidad.html">Datos personales</a>, punto 4).</li></ul>`],
+        ['10. Atención, peticiones, quejas y reclamos (PQR)', `<p>Escríbenos por WhatsApp al ${WHATSAPP} o usa <a href="${SITIO}/portal.html">Mis pedidos</a> para reportar una falla. Respondemos en el horario de atención. Si no quedas conforme, puedes acudir a la Superintendencia de Industria y Comercio (<a href="https://www.sic.gov.co" rel="noopener">sic.gov.co</a>).</p>`],
+        ['11. Ley aplicable', '<p>Estos términos se rigen por las leyes de la República de Colombia, en especial la Ley 1480 de 2011 (Estatuto del Consumidor) y la Ley 527 de 1999 (comercio electrónico). Podemos actualizarlos; la versión vigente es la publicada aquí con su fecha.</p>'],
     ],
     privacidad: [
         ['1. Responsable del tratamiento', `<p>${responsable()}. Esta política cumple la Ley 1581 de 2012 y el Decreto 1377 de 2013 (compilado en el Decreto 1074 de 2015).</p>`],
@@ -159,7 +165,7 @@ function pagina(p) {
 <main class="envoltura">
 <nav class="legal" aria-label="Documentos legales">${PAGINAS.map((x) => `<a href="${x.id}.html"${x.id === p.id ? ' aria-current="page"' : ''}>${esc(x.corto)}</a>`).join('')}</nav>
 <h1>${esc(p.titulo)}</h1>
-<p class="fecha">Última actualización: ${VIGENCIA}</p>
+<p class="fecha">Última actualización: ${ACTUALIZADO[p.id] ?? VIGENCIA}</p>
 ${CONTENIDO[p.id].map(([t, html]) => `<section><h2>${esc(t)}</h2>${html}</section>`).join('\n')}
 </main>
 <footer><div class="envoltura">© ${new Date().getFullYear()} DC Tecnology · ${esc(HORARIO)} · WhatsApp ${WHATSAPP}</div></footer>

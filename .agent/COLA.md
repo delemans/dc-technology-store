@@ -13,7 +13,7 @@ _Responde SIEMPRE en español. Catálogo: `docs/catalogo-resumen.md` (nunca prod
 - [x] 4. T02 · Alerta de pagos sin validar (hecho por Claude, 29/10/2026: wo-053 + nodo «Alertas de pago»)
 - [x] 5. T21 · Google Maps: datos de la empresa en index.html (con su prueba) y enlace de reseñas en Config bot (hecho por Claude, 01/11/2026)
 - [x] 6. T10 · Redes: verificar las claves sin publicar (--verificar) (hecho por Claude, 01/11/2026)
-- [ ] 7. T06 · Política de uso de IA en lo legal
+- [x] 7. T06 · Política de uso de IA en lo legal (hecho por Claude, 01/11/2026)
 - [ ] 8. T19 · Flujo de compra web. Skill: mejorar-flujo
 - [ ] 9. T18 · Estilo de la portada. Skill: mejorar-estilo
 - [ ] 10. T18 · Estilo del catálogo y las tarjetas. Skill: mejorar-estilo
