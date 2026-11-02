@@ -11,7 +11,7 @@ _Responde SIEMPRE en español. Catálogo: `docs/catalogo-resumen.md` (nunca prod
 - [x] 2. T14 · Paquete del servidor (fusionado en main por Claude, 29/10/2026)
 - [x] 3. T01 · Resumen diario de ventas (hecho por Claude, 29/10/2026: wo-052 + nodos del bot)
 - [x] 4. T02 · Alerta de pagos sin validar (hecho por Claude, 29/10/2026: wo-053 + nodo «Alertas de pago»)
-- [ ] 5. T21 · Google Maps: datos de la empresa en index.html (con su prueba) y enlace de reseñas en Config bot
+- [x] 5. T21 · Google Maps: datos de la empresa en index.html (con su prueba) y enlace de reseñas en Config bot (hecho por Claude, 01/11/2026)
 - [ ] 6. T10 · Redes: verificar las claves sin publicar (--verificar)
 - [ ] 7. T06 · Política de uso de IA en lo legal
 - [ ] 8. T19 · Flujo de compra web. Skill: mejorar-flujo

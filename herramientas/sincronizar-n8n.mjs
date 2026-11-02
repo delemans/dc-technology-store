@@ -88,6 +88,10 @@ const reglas = generado.nodes.filter((n) => sincronizable(n) && porNombre.has(n.
 const configBot = porNombre.get('Config bot');
 const sin57 = (configBot?.parameters?.assignments?.assignments ?? [])
     .filter((a) => ['numero_aviso_admin', 'numero_proveedor', 'anc_whatsapp'].includes(a.name) && /^3\d{9}$/.test(String(a.value ?? '').replace(/\D/g, '')));
+// Config bot: los campos nuevos del flujo generado que tu n8n aún no tiene se agregan con su valor por defecto (los tuyos no se tocan)
+const yaTiene = new Set((configBot?.parameters?.assignments?.assignments ?? []).map((a) => a.name));
+const faltanConfig = configBot ? (generado.nodes.find((n) => n.name === 'Config bot')?.parameters?.assignments?.assignments ?? []).filter((a) => !yaTiene.has(a.name))
+    .map((a) => (a.name === 'bot_responde' ? { ...a, value: 'no' } : a)) : []; // nunca enciende el bot por sincronizar
 const aristasVivo = new Set(aristas(Object.fromEntries(Object.entries(vivo.connections ?? {}).filter(([k]) => !AJENOS.includes(k)))));
 const aristasGen = new Set(aristas(generado.connections));
 const nuevas = [...aristasGen].filter((a) => !aristasVivo.has(a));
@@ -105,12 +109,13 @@ console.log(`  nodos con código nuevo: ${cambios.length ? cambios.join(', ') : 
 if (agregables.length) console.log(`  nodos nuevos que se agregan: ${agregables.map((n) => n.name + (tipoCredencial(n) ? ` (credencial ${credencialViva(tipoCredencial(n)).name})` : '')).join(', ')}`);
 if (reglas.length) console.log(`  nodos Switch/IF/Set que cambian: ${reglas.join(', ')}`);
 if (sin57.length) console.log(`  Config bot: números sin el 57 que se corrigen: ${sin57.map((a) => `${a.name} ${a.value} → 57${String(a.value).replace(/\D/g, '')}`).join(', ')}`);
+if (faltanConfig.length) console.log(`  Config bot: campos nuevos que se agregan: ${faltanConfig.map((a) => a.name).join(', ')}`);
 if (nuevas.length) console.log(`  conexiones nuevas:\n    ${nuevas.join('\n    ')}`);
 if (quitadas.length) console.log(`  conexiones que se quitan:\n    ${quitadas.join('\n    ')}`);
 if (conCredenciales.length) console.log(`  ⚠ nodos nuevos con credenciales (requieren importar el flujo completo, no se tocan): ${conCredenciales.map((n) => n.name).join(', ')}`);
 if (tocaPropios.length) console.log(`  ⚠ hay conexiones de nodos que solo existen en tu n8n: la estructura no se cambia\n    ${tocaPropios.join('\n    ')}`);
 if (sobran.length) console.log(`  · tu n8n tiene nodos que el flujo nuevo no trae (no se tocan): ${sobran.join(', ')}`);
-if (!APLICAR || (!cambios.length && !sin57.length && !reintentos.length && !(estructura && puedeEstructura))) process.exit(0);
+if (!APLICAR || (!cambios.length && !sin57.length && !faltanConfig.length && !reintentos.length && !(estructura && puedeEstructura))) process.exit(0);
 
 const carpeta = path.join(RAIZ, 'n8n', 'respaldos');
 fs.mkdirSync(carpeta, { recursive: true });
@@ -120,6 +125,7 @@ const delGenerado = (nombre) => generado.nodes.find((n) => n.name === nombre);
 for (const nombre of cambios) porNombre.get(nombre).parameters.jsCode = delGenerado(nombre).parameters.jsCode;
 for (const nombre of reintentos) for (const k of REINTENTO) if (delGenerado(nombre)[k] !== undefined) porNombre.get(nombre)[k] = delGenerado(nombre)[k];
 for (const a of sin57) a.value = `57${String(a.value).replace(/\D/g, '')}`;
+if (faltanConfig.length) configBot.parameters.assignments.assignments.push(...faltanConfig.map((a) => ({ ...a })));
 let nodos = vivo.nodes;
 let conexiones = vivo.connections;
 if (estructura && puedeEstructura) {

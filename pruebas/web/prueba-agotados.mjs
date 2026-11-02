@@ -29,7 +29,11 @@ ok(Array.isArray(ids) && ids.length > 50, `catálogo cargado (${ids?.length} pro
 ok(!ids.includes(tec.producto_id), 'agotado en la base → no sale');
 const max = await ev(`JSON.stringify(window.DCTienda.productos().find(p => p.id === 'hbo-max')?.variantes.map(v => v.nombre))`);
 ok(max && !/Pantalla Platino/.test(max) && /Pantalla Estándar/.test(max), `plan agotado no sale; los demás sí (${max})`);
-ok(!ids.includes('office-365') && !ids.includes('recargas-claro') && !ids.includes('prime-video'), 'lo que ANC ya no tiene, lo sin proveedor y lo agotado en ANC no salen');
+// Un ejemplo vigente de cada motivo (el catálogo cambia a diario: Prime Video volvió el 31/10)
+const ocultos = (await (await fetch('http://localhost:5599/disponibilidad.json')).json()).ocultos ?? {};
+const ejemplo = (re) => Object.entries(ocultos).find(([, v]) => re.test(v.motivo ?? v))?.[0];
+const muestra = [ejemplo(/ya no ofrece/), ejemplo(/Sin proveedor/), ejemplo(/Agotado/)].filter(Boolean);
+ok(muestra.length === 3 && muestra.every((x) => !ids.includes(x)), `lo que ANC ya no tiene, lo sin proveedor y lo agotado en ANC no salen (${muestra.join(', ')})`);
 const net = await ev(`JSON.stringify(window.DCTienda.productos().find(p => p.id === 'netflix')?.variantes.map(v => v.nombre))`);
 ok(net && !/Internacional/.test(net), `Netflix sin el plan internacional que ANC ya no ofrece (${net})`);
 ok(ids.includes('servicio-mantenimiento-computadores'), 'los servicios propios siguen');

@@ -252,7 +252,9 @@ Usa `/mejorar-flujo <flujo>`, en este orden:
 ## T20 · Seguridad — **Hecha** (IA + verificación de Claude, 29/10/2026; repetir cada mes)
 Usa `/auditar-seguridad`. Las reglas del skill mandan: nada de fallas concretas en archivos públicos hasta corregirlas.
 
-## T21 · Google Maps y SEO local — **Pendiente** (alta)
+## T21 · Google Maps y SEO local — **Hecha (1 y 2)** por Claude el 01/11/2026 (la 3 sigue repetible)
+> Portada: `ElectronicsStore` + `Organization` (mismo #organizacion), sin dirección ni horario (TODO B3); prueba `pruebas/web/prueba-negocio-local.mjs`. Config bot → `enlace_resena_google` (vacío = no se ofrece; https obligatorio) → la solicitud de reseña lo añade antes de SOPORTE; prueba `pruebas/flujo/test-resena-google.js`. El sincronizador agrega a Config bot los campos nuevos que falten (nunca enciende el bot).
+
 1. **Datos estructurados:**
    - agrega a index.html un `LocalBusiness` (tipo `ElectronicsStore`) con nombre, url, logo, teléfono +57 322 328 4622 y `areaServed`;
    - SIN dirección ni horario hasta que el director los dé (B3); déjalos como TODO en un comentario;

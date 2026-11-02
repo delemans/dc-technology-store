@@ -4,6 +4,16 @@ La más reciente va arriba.
 
 ---
 
+## 01/11/2026 · Claude · T21 (Google Maps) y catálogo al día
+- **Qué se hizo:**
+  - main del PC se puso al día con GitHub (vigilante en la nube del 30/10, 31/10 y 01/11); la corrida vieja del vigilante local quedó en `git stash`;
+  - T21: la portada declara la tienda local (`ElectronicsStore`) con teléfono, logo y zona atendida, sin dirección ni horario hasta B3;
+  - T21: `enlace_resena_google` en Config bot: si lo llenas (enlace «Escribir una reseña» de tu Perfil de Empresa), la solicitud de reseña lo ofrece;
+  - `sincronizar-n8n.mjs` ahora agrega a Config bot los campos nuevos que falten, sin tocar tus valores (bot_responde siempre en «no»);
+  - `prueba-agotados.mjs` toma sus ejemplos de `disponibilidad.json` (fallaba porque Prime Video volvió a ANC el 31/10).
+- **Pruebas:** `npm test` 799 OK · 0 FALLA.
+- **Siguiente:** COLA.md desde la T10. Director: encender n8n (iniciar-bot.ps1, sigue caído), aplicar `supabase/APLICAR-PENDIENTES.sql` y, cuando tenga el Perfil de Empresa, pegar su enlace de reseñas en Config bot → enlace_resena_google.
+
 ## 29/10/2026 · Claude · Revisión de lo que hicieron las otras IA
 - **Qué se hizo:**
   - T14 (servidor) revisada y fusionada en main; T20 (seguridad) verificada: sin claves en todo el historial, sin funciones security definer sin search_path, npm audit 0;

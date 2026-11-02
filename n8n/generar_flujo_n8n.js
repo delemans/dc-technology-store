@@ -932,7 +932,15 @@ function armarNotificacion() {
     const clave = base.notificaciones.plantilla_por_tipo[n.tipo];
     const plantilla = base.plantillas[clave] ?? __KB__.plantillas[clave];
     if (!plantilla) throw new Error(`Sin plantilla para ${n.tipo}`);
-    const texto = rellenar(plantilla, n.variables ?? {});
+    let texto = rellenar(plantilla, n.variables ?? {});
+    // T21: si configuraste el enlace de reseñas de Google, la solicitud de reseña también lo ofrece
+    const google = String($('Config posventa').first().json.enlace_resena_google ?? '').trim();
+    if (n.tipo === 'SOLICITUD_RESENA' && /^https:\/\/\S+$/.test(google)) {
+        const lineas = texto.split('\n');
+        const i = lineas.findIndex((l) => /SOPORTE/.test(l));
+        lineas.splice(i < 0 ? lineas.length : i, 0, `🌟 ¿Nos ayudas también en Google? Tu opinión ayuda a otros a encontrarnos: ${google}`, '');
+        texto = lineas.join('\n');
+    }
     if (texto.length < 20) throw new Error('Mensaje vacío o incompleto');
     // ADMIN_*: avisos para ti (comprobante nuevo, falla reportada) → tu número de aviso, no el del cliente
     let numero = n.destino;
@@ -2806,6 +2814,7 @@ nodo('Config bot', 'n8n-nodes-base.set', 3.4, [220, 0], set({
     consultar_proveedor: 'si',   // 'no' = no le pregunta a ANC por los productos de cada pedido nuevo          // 'no' = el bot no le contesta a nadie (tus comandos #ok/#no/#entregar y el proveedor siguen)
     leer_medios: 'no',           // 'si' = transcribe audios y lee capturas con IA de modelos abiertos (encender tras probar)
     horas_pausa_humano: '12',    // si escribes a mano en un chat, el bot se calla ahí estas horas (#bot lo reactiva)
+    enlace_resena_google: '',    // T21: enlace «Escribir una reseña» de tu Perfil de Empresa en Google (vacío = no se ofrece)
 }, { incluirEntrada: true }));
 nodoCodigo('Normalizar mensaje', [440, 0], normalizarMensaje, { conUtilidades: true });
 const historialChat = (indice) => ({
@@ -3271,6 +3280,7 @@ nodo('Config posventa', 'n8n-nodes-base.set', 3.4, [220, 700], set({
     evolution_instancia: desdeConfigBot('evolution_instancia'),
     url_conocimiento: desdeConfigBot('url_conocimiento'),
     numero_aviso_admin: desdeConfigBot('numero_aviso_admin'),
+    enlace_resena_google: desdeConfigBot('enlace_resena_google'),
     lote: '5',
 }));
 nodo('Latido posventa', 'n8n-nodes-base.httpRequest', 4.2, [330, 860], supabaseRpc('registrar_latido', {
