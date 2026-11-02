@@ -1,5 +1,5 @@
 # Catálogo resumido de DC Tecnology (para las IA)
-_Generado por herramientas/resumen-catalogo.js el 1/11/2026 a partir de productos.json y disponibilidad.json. No editar a mano._
+_Generado por herramientas/resumen-catalogo.js el 2/11/2026 a partir de productos.json y disponibilidad.json. No editar a mano._
 
 Precios en pesos colombianos. Son los de productos.json: en la tienda manda el precio de la base (precios_publicos), que puede cambiar.
 **Antes de publicar un precio, confírmalo en la página del producto.** Para el detalle de un producto: busca su id en productos.json (no lo leas entero).
@@ -190,8 +190,8 @@ Precios en pesos colombianos. Son los de productos.json: en la tienda manda el p
 
 - Max (HBO) · desde $ 8.000 · 3 planes · id `hbo-max` · https://www.dctecnology.xyz/p/hbo-max.html
 - Vix Premium · desde $ 8.000 · id `vix-premium` · https://www.dctecnology.xyz/p/vix-premium.html
-- Prime Video Ultra HD · desde $ 10.000 · id `prime-video` · https://www.dctecnology.xyz/p/prime-video.html
 - Crunchyroll Mega Fan · desde $ 10.000 · id `crunchyroll` · https://www.dctecnology.xyz/p/crunchyroll.html
+- Paramount Plus · desde $ 10.000 · id `paramount-plus` · https://www.dctecnology.xyz/p/paramount-plus.html
 - Universal Plus · desde $ 10.000 · id `universal-plus` · https://www.dctecnology.xyz/p/universal-plus.html
 - Viki Rakuten Pass · desde $ 10.000 · id `viki-rakuten` · https://www.dctecnology.xyz/p/viki-rakuten.html
 - Mubi Cinema · desde $ 10.000 · id `mubi` · https://www.dctecnology.xyz/p/mubi.html

@@ -1,5 +1,5 @@
 {
-  "version": "2026-11-01T17:13:42.064Z",
+  "version": "2026-11-02T20:52:12.123Z",
   "identidad": [
     "Eres DC TECNOLOGY: respondes el WhatsApp de la tienda (https://www.dctecnology.xyz) en nombre del equipo. Habla como la tienda (\"te ayudamos\", \"te enviamos\").",
     "En el PRIMER mensaje de la conversación saluda así: \"¡Hola! Te saluda *DC TECNOLOGY* 👋\", responde lo que preguntó y cierra con: \"Escribe *menú* para ver todas las opciones.\" Después no vuelvas a presentarte (si el contexto trae un mensaje del menú, la conversación ya empezó).",
@@ -948,14 +948,20 @@
       "marca": "Amazon",
       "nombre": "Prime Video Ultra HD",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-87-58600aa95daca5fadc17247083377668-640-0.webp",
-      "url": "https://www.dctecnology.xyz/p/prime-video.html",
+      "url": "https://www.dctecnology.xyz/?producto=prime-video",
       "variantes": [
         {
           "nombre": "Pantalla (1 Dispositivo)",
           "precio": 10000,
           "precio_anterior": 18000
+        },
+        {
+          "nombre": "Cuenta Completa (6 Dispositivos)",
+          "precio": 20000,
+          "precio_anterior": 35000
         }
       ],
+      "oculto": true,
       "desde": 10000,
       "descripcion": null
     },
@@ -1043,20 +1049,14 @@
       "marca": "Paramount",
       "nombre": "Paramount Plus",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/image-8-1-1c0fae159cffedf49d17134749124740-640-0.webp",
-      "url": "https://www.dctecnology.xyz/?producto=paramount-plus",
+      "url": "https://www.dctecnology.xyz/p/paramount-plus.html",
       "variantes": [
         {
           "nombre": "Pantalla 1 Mes",
           "precio": 10000,
           "precio_anterior": 18000
-        },
-        {
-          "nombre": "Cuenta Completa 1 Mes",
-          "precio": 20000,
-          "precio_anterior": 25500
         }
       ],
-      "oculto": true,
       "desde": 10000,
       "descripcion": null
     },
