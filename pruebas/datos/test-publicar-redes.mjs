@@ -81,3 +81,33 @@ const video = Buffer.alloc(1000, 1);
     const t = fs.readFileSync(ruta, 'utf8'); fs.rmSync(ruta);
     ok(t === 'A=1\nYOUTUBE_REFRESH_TOKEN=nu$evo\nB=$2\nTIKTOK_ACCESS_TOKEN=x\n', 'guardarEnv: cambia solo esas variables (y respeta los $)');
 }
+// T10 · --verificar: solo lectura, una línea por red, sin tokens a la vista
+{
+    const llamadas = [];
+    const env = { YOUTUBE_CLIENT_ID: 'c', YOUTUBE_CLIENT_SECRET: 's', YOUTUBE_REFRESH_TOKEN: 'r', META_PAGE_ID: '111', META_PAGE_TOKEN: 'SECRETO-META', META_IG_USER_ID: '222', TIKTOK_ACCESS_TOKEN: 'SECRETO-TT' };
+    const f = async (url, o = {}) => { llamadas.push({ url, o });
+        if (url.includes('oauth2')) return resp({ access_token: 'AT' });
+        if (url.includes('youtube/v3/channels')) return resp({ items: [{ snippet: { title: 'DC Tecnology' } }] });
+        if (url.includes('/111?')) return resp({ name: 'DC Tecnology Página' });
+        if (url.includes('/222?')) return resp({ error: { message: 'Error validating access token', type: 'OAuthException', code: 190 } }, { status: 401 });
+        if (url.includes('user/info')) return resp({ data: { user: { display_name: 'dctecnology' } }, error: { code: 'ok' } });
+        return resp({}, { status: 500 }); };
+    const r = await m.verificarRedes(env, f);
+    const de = (red) => r.find((x) => x.red === red);
+    ok(r.length === 4, 'verificar: una línea por red');
+    ok(de('youtube').ok && de('youtube').texto === 'DC Tecnology', 'verificar YouTube: token y nombre del canal');
+    ok(de('facebook').ok && de('facebook').texto === 'DC Tecnology Página' && de('tiktok').ok && de('tiktok').texto === 'dctecnology', 'verificar Facebook y TikTok: nombre de la cuenta');
+    ok(de('instagram').ok === false && /token vencido/.test(de('instagram').texto), `verificar Instagram con 401: motivo simple (${de('instagram').texto})`);
+    ok(!JSON.stringify(r).includes('SECRETO') && !JSON.stringify(r).includes('Error validating'), 'verificar: nunca muestra el token ni la respuesta cruda');
+    ok(llamadas.every((l) => !l.o.method || l.o.method === 'GET' || l.url.includes('oauth2')) && !llamadas.some((l) => /upload|publish|video_reels|media/.test(l.url)), 'verificar: solo consultas de lectura (nada de subir ni publicar)');
+    const sinClaves = await m.verificarRedes({ META_PAGE_ID: '111', META_PAGE_TOKEN: 't' }, f);
+    ok(sinClaves.filter((x) => x.ok === null).map((x) => x.red).join() === 'youtube,instagram,tiktok' && sinClaves.find((x) => x.red === 'facebook').ok, 'verificar: red sin claves se salta');
+    const r403 = await m.verificarRedes({ YOUTUBE_CLIENT_ID: 'c', YOUTUBE_CLIENT_SECRET: 's', YOUTUBE_REFRESH_TOKEN: 'r' }, async (u) => (u.includes('oauth2') ? resp({ access_token: 'AT' }) : resp({ error: { code: 403 } }, { status: 403 })));
+    ok(r403[0].ok && /solo es para subir/.test(r403[0].texto), 'verificar YouTube: con permiso solo de subida (403 al leer el canal) igual confirma las claves');
+    const vencido = await m.verificarRedes({ YOUTUBE_CLIENT_ID: 'c', YOUTUBE_CLIENT_SECRET: 's', YOUTUBE_REFRESH_TOKEN: 'r' }, async () => resp({ error: 'invalid_grant' }, { status: 400 }));
+    ok(vencido[0].ok === false && /autorización/.test(vencido[0].texto), 'verificar YouTube: permiso revocado → pide autorizar otra vez');
+}
+{
+    const r = await m.verificarRedes({ META_IG_USER_ID: '111', META_PAGE_TOKEN: 't' }, async () => resp({ id: '111' }));
+    ok(r.find((x) => x.red === 'instagram').ok === false && /no es una cuenta de Instagram/.test(r.find((x) => x.red === 'instagram').texto), 'verificar Instagram: un ID que no es de Instagram (sin username) se detecta');
+}

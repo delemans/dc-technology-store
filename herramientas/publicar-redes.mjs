@@ -1,6 +1,7 @@
 // herramientas/publicar-redes.mjs — Publica solo los videos del plan de redes (herramientas/salida/redes-plan.json, de generar_redes.js)
 // en YouTube (Shorts), Facebook (Reels de la página), Instagram (Reels) y TikTok, con sus APIs oficiales.
 //
+//   node herramientas/publicar-redes.mjs --verificar          → revisa las claves de cada red con una consulta de solo lectura (no publica)
 //   node herramientas/publicar-redes.mjs --probar             → qué saldría hoy y qué redes tienen credenciales (no publica)
 //   node herramientas/publicar-redes.mjs                      → publica lo que toca (solo con REDES_AUTOMATICAS=si en .env)
 //   node herramientas/publicar-redes.mjs --forzar             → publica una vez aunque el interruptor esté apagado
@@ -139,6 +140,48 @@ export async function renovarTiktok(env, f = fetch) {
 
 export const PUBLICAR = { youtube: publicarYoutube, facebook: publicarFacebook, instagram: publicarInstagram, tiktok: publicarTiktok };
 
+/* ---------- T10 · --verificar: una consulta de solo lectura por red (no sube nada y nunca muestra un token) ---------- */
+// El motivo en palabras simples, sin el texto de la respuesta (podría traer datos de la cuenta)
+export function motivoFalla(e) {
+    const t = String(e?.message ?? e);
+    if (t === 'IG_SIN_CUENTA') return 'META_IG_USER_ID no es una cuenta de Instagram: vincula tu Instagram profesional a la página de Facebook y usa el ID de Instagram (no el de la página)';
+    if (/invalid_grant/.test(t)) return 'el permiso se venció o se revocó: corre otra vez la autorización';
+    if (/invalid_client|unauthorized_client/.test(t)) return 'el ID o el secreto de la app no son válidos';
+    if (/"code":190|access_token_invalid|invalid_token|: 401 /.test(t)) return 'token vencido o inválido: genera uno nuevo';
+    if (/"code":(10|200|3)\b|permission|scope_not_authorized|insufficient|: 403 /i.test(t)) return 'falta un permiso en la app (revisa los permisos de la guía)';
+    if (/"code":100|: 404 /.test(t)) return 'el ID de la cuenta o de la página no existe o no es de este token';
+    if (/fetch failed|ENOTFOUND|ECONNREFUSED|ETIMEDOUT/.test(t)) return 'no se pudo conectar (internet o antivirus)';
+    return `respuesta inesperada (${(t.match(/: (\d{3}) /) ?? [])[1] ?? 'sin código'})`;
+}
+export async function verificarRedes(env, f = fetch) {
+    const pruebas = {
+        youtube: async () => {
+            const at = await tokenYoutube(env, f);
+            const r = await f('https://www.googleapis.com/youtube/v3/channels?part=snippet&mine=true', { headers: { Authorization: `Bearer ${at}` } });
+            // El permiso de la guía es solo para subir videos: leer el canal da 403, pero el token ya demostró que sirve
+            if (r.status === 403) return 'claves válidas (el permiso solo es para subir; el nombre del canal no se puede leer)';
+            const j = await json(r, 'YouTube (canal)');
+            return j.items?.[0]?.snippet?.title ?? 'claves válidas (sin canal en esta cuenta de Google)';
+        },
+        facebook: async () => (await json(await f(`${GRAPH}/${env.META_PAGE_ID}?fields=name&access_token=${encodeURIComponent(env.META_PAGE_TOKEN)}`), 'Facebook')).name,
+        instagram: async () => {
+            const j = await json(await f(`${GRAPH}/${env.META_IG_USER_ID}?fields=username&access_token=${encodeURIComponent(env.META_PAGE_TOKEN)}`), 'Instagram');
+            // Sin username no es una cuenta de Instagram (p. ej. pusieron el ID de la página de Facebook)
+            if (!j.username) throw new Error('IG_SIN_CUENTA');
+            return `@${j.username}`;
+        },
+        tiktok: async () => (await json(await f('https://open.tiktokapis.com/v2/user/info/?fields=display_name', { headers: { Authorization: `Bearer ${env.TIKTOK_ACCESS_TOKEN}` } }), 'TikTok')).data?.user?.display_name,
+    };
+    const activas = redesActivas(env);
+    const lineas = [];
+    for (const red of Object.keys(REDES)) {
+        if (!activas.includes(red)) { lineas.push({ red, ok: null, texto: 'sin claves en .env (se salta)' }); continue; }
+        try { lineas.push({ red, ok: true, texto: (await pruebas[red]()) || 'claves válidas' }); }
+        catch (e) { lineas.push({ red, ok: false, texto: motivoFalla(e) }); }
+    }
+    return lineas;
+}
+
 // Escribe o reemplaza variables en .env sin tocar las demás líneas
 export function guardarEnv(ruta, valores) {
     let t = fs.existsSync(ruta) ? fs.readFileSync(ruta, 'utf8') : '';
@@ -189,6 +232,13 @@ Register-ScheduledTask -TaskName '${tarea}' -Action $a -Trigger $t -Settings $s 
         guardarEnv(path.join(RAIZ, '.env'), { YOUTUBE_REFRESH_TOKEN: j.refresh_token });
         console.log('YOUTUBE_REFRESH_TOKEN guardado en .env. Prueba: node herramientas/publicar-redes.mjs --probar');
         process.exit(0);
+    }
+
+    if (args.includes('--verificar')) {
+        console.log('Revisando las claves de cada red (solo lectura: no se publica nada)…');
+        const lineas = await verificarRedes(env);
+        for (const l of lineas) console.log(`${l.ok === null ? '·' : l.ok ? '✅' : '❌'} ${l.red.padEnd(9)} ${l.texto}`);
+        process.exit(lineas.some((l) => l.ok === false) ? 1 : 0);
     }
 
     const planRuta = path.join(SALIDA, 'redes-plan.json');

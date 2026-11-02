@@ -12,7 +12,8 @@ La más reciente va arriba.
   - `sincronizar-n8n.mjs` ahora agrega a Config bot los campos nuevos que falten, sin tocar tus valores (bot_responde siempre en «no»);
   - `prueba-agotados.mjs` toma sus ejemplos de `disponibilidad.json` (fallaba porque Prime Video volvió a ANC el 31/10).
 - **Pruebas:** `npm test` 799 OK · 0 FALLA.
-- **Siguiente:** COLA.md desde la T10. Director: encender n8n (iniciar-bot.ps1, sigue caído), aplicar `supabase/APLICAR-PENDIENTES.sql` y, cuando tenga el Perfil de Empresa, pegar su enlace de reseñas en Config bot → enlace_resena_google.
+  - T10: `node herramientas/publicar-redes.mjs --verificar` (solo lectura, sin tokens a la vista) + pruebas; guía del Escritorio, paso 4a. Resultado real: YouTube ✅, Facebook ✅ (dctecnology), Instagram ❌ (META_IG_USER_ID es el de la página y no hay Instagram vinculado), TikTok sin claves.
+- **Siguiente:** COLA.md desde la T06. Director: encender n8n (iniciar-bot.ps1, sigue caído), aplicar `supabase/APLICAR-PENDIENTES.sql` y, cuando tenga el Perfil de Empresa, pegar su enlace de reseñas en Config bot → enlace_resena_google.
 
 ## 29/10/2026 · Claude · Revisión de lo que hicieron las otras IA
 - **Qué se hizo:**

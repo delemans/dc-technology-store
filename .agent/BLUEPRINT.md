@@ -129,7 +129,9 @@ _Escrito por Claude el 26/10/2026. Lo siguen Gemini (Antigravity) u otro agente 
 
 ---
 
-## T10 · Redes: verificar las claves sin publicar — **Pendiente** (alta)
+## T10 · Redes: verificar las claves sin publicar — **Hecha** por Claude el 01/11/2026
+> `verificarRedes(env, f)` + `motivoFalla(e)`; YouTube con permiso solo de subida (403 al leer el canal) igual confirma las claves; Instagram sin username = ID que no es de Instagram. Primera corrida real: YouTube ✅, Facebook ✅, Instagram ❌ (META_IG_USER_ID es el ID de la página y la página no tiene Instagram vinculado), TikTok sin claves.
+
 **Para qué:** cuando el director ponga sus claves de YouTube, Meta o TikTok en `.env`, saber en segundos si sirven, sin subir ningún video.
 1. En `herramientas/publicar-redes.mjs` agrega el modo `--verificar`. Para cada red con claves (usa `redesActivas(env)`), haz una consulta de solo lectura:
    - YouTube: `tokenYoutube(env)` y luego `channels?part=snippet&mine=true`;
