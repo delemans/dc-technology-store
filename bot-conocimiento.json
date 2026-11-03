@@ -1,5 +1,5 @@
 {
-  "version": "2026-11-03T13:27:32.375Z",
+  "version": "2026-11-03T20:46:02.927Z",
   "identidad": [
     "Eres DC TECNOLOGY: respondes el WhatsApp de la tienda (https://www.dctecnology.xyz) en nombre del equipo. Habla como la tienda (\"te ayudamos\", \"te enviamos\").",
     "En el PRIMER mensaje de la conversación saluda así: \"¡Hola! Te saluda *DC TECNOLOGY* 👋\", responde lo que preguntó y cierra con: \"Escribe *menú* para ver todas las opciones.\" Después no vuelvas a presentarte (si el contexto trae un mensaje del menú, la conversación ya empezó).",
@@ -971,7 +971,7 @@
       "marca": "Disney",
       "nombre": "Disney Plus Premium",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-91-9267e0a1730671bcf517247095798757-640-0.webp",
-      "url": "https://www.dctecnology.xyz/?producto=disney-plus",
+      "url": "https://www.dctecnology.xyz/p/disney-plus.html",
       "variantes": [
         {
           "nombre": "Pantalla Premium",
@@ -979,7 +979,6 @@
           "precio_anterior": 25000
         }
       ],
-      "oculto": true,
       "desde": 15000,
       "descripcion": null
     },
@@ -1178,7 +1177,7 @@
       "marca": "CapCut",
       "nombre": "CapCut Pro Edición",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/con-o-sin-11-b62cd5366081340f5217534215681512-640-0.webp",
-      "url": "https://www.dctecnology.xyz/p/capcut-pro.html",
+      "url": "https://www.dctecnology.xyz/?producto=capcut-pro",
       "variantes": [
         {
           "nombre": "Suscripción 1 Mes",
@@ -1186,6 +1185,7 @@
           "precio_anterior": 45000
         }
       ],
+      "oculto": true,
       "desde": 28000,
       "descripcion": null
     },
@@ -1380,7 +1380,7 @@
       "marca": "Netflix",
       "nombre": "PIN Virtual Netflix Colombia",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2026-07-25t230306-675-e59d09cb99d572efd717850386081961-640-0.webp",
-      "url": "https://www.dctecnology.xyz/p/pin-virtual-netflix.html",
+      "url": "https://www.dctecnology.xyz/?producto=pin-virtual-netflix",
       "variantes": [
         {
           "nombre": "PIN de $20.000",
@@ -1408,8 +1408,9 @@
           "precio_anterior": null
         }
       ],
+      "oculto": true,
       "desde": 20000,
-      "descripcion": "Activa tu suscripción Netflix con PIN Virtual. Pago seguro, entrega rápida y sin tarjeta.El PIN es de un solo uso y solo funciona en cuentas de Colombia.Antes de canjearlo, verifica que tu cuenta de Netflix sea de Colombia: en cuentas de otro país la plataforma marca error.No compartas ni publiques el PIN antes de canjearlo: cualquiera que lo tenga lo puede usar.PIN $20.000: Saldo de $20.000 que se abona a tu cuenta de Netflix.PIN $30.000: Saldo de $30.000 que se abona a tu cuenta de Netflix.PIN $35.000: Saldo de $35.000 que se abona a tu cuenta de Netflix.PIN $40.000: Saldo de $40.000 que se "
+      "descripcion": null
     },
     {
       "id": "pin-virtual-directv-go",
@@ -1500,7 +1501,7 @@
       "marca": "Google Play",
       "nombre": "PIN Virtual Google Play",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2026-07-25t221452-314-511c9925f767810a1417850358454071-640-0.webp",
-      "url": "https://www.dctecnology.xyz/p/pin-google-play.html",
+      "url": "https://www.dctecnology.xyz/?producto=pin-google-play",
       "variantes": [
         {
           "nombre": "PIN de $10.000",
@@ -1518,8 +1519,9 @@
           "precio_anterior": null
         }
       ],
+      "oculto": true,
       "desde": 10000,
-      "descripcion": "Recarga tu saldo con el PIN Google Play y disfruta juegos, apps y entretenimiento.El PIN es de un solo uso y solo funciona en cuentas de Colombia.Antes de canjearlo, verifica que tu cuenta de Google Play sea de Colombia: en cuentas de otro país la plataforma marca error.No compartas ni publiques el PIN antes de canjearlo: cualquiera que lo tenga lo puede usar.PIN $10.000: Saldo de $10.000 para tu cuenta de Google Play.PIN $30.000: Saldo de $30.000 para tu cuenta de Google Play.PIN $50.000: Saldo de $50.000 para tu cuenta de Google Play."
+      "descripcion": null
     },
     {
       "id": "pin-virtual-roblox",

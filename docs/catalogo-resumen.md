@@ -185,7 +185,7 @@ Precios en pesos colombianos. Son los de productos.json: en la tienda manda el p
 - Parlante Portatil Original Kimiso KMS-374 · desde $ 202.500 · id `er-parlante-portatil-original-kimiso-kms-374-283` · https://www.dctecnology.xyz/p/er-parlante-portatil-original-kimiso-kms-374-283.html
 - Parlante Portatil Original Kimiso KMS-325 Max · desde $ 298.500 · id `er-parlante-portatil-original-kimiso-kms-325-max-285` · https://www.dctecnology.xyz/p/er-parlante-portatil-original-kimiso-kms-325-max-285.html
 
-## Streaming (9)
+## Streaming (10)
 
 - Max (HBO) · desde $ 8.000 · 3 planes · id `hbo-max` · https://www.dctecnology.xyz/p/hbo-max.html
 - Vix Premium · desde $ 8.000 · id `vix-premium` · https://www.dctecnology.xyz/p/vix-premium.html
@@ -196,19 +196,17 @@ Precios en pesos colombianos. Son los de productos.json: en la tienda manda el p
 - Viki Rakuten Pass · desde $ 10.000 · id `viki-rakuten` · https://www.dctecnology.xyz/p/viki-rakuten.html
 - Mubi Cinema · desde $ 10.000 · id `mubi` · https://www.dctecnology.xyz/p/mubi.html
 - Apple TV Plus · desde $ 12.000 · id `apple-tv` · https://www.dctecnology.xyz/p/apple-tv.html
+- Disney Plus Premium · desde $ 15.000 · id `disney-plus` · https://www.dctecnology.xyz/p/disney-plus.html
 
-## Licencias (4)
+## Licencias (3)
 
 - Canva Pro · desde $ 10.000 · 2 planes · id `canva-pro` · https://www.dctecnology.xyz/p/canva-pro.html
 - Duolingo Super · desde $ 10.000 · id `duolingo-super` · https://www.dctecnology.xyz/p/duolingo-super.html
-- CapCut Pro Edición · desde $ 28.000 · id `capcut-pro` · https://www.dctecnology.xyz/p/capcut-pro.html
 - McAfee Antivirus Total Protection · desde $ 45.000 · 2 planes · id `mcafee-antivirus` · https://www.dctecnology.xyz/p/mcafee-antivirus.html
 
-## Pines y regalos (9)
+## Pines y regalos (7)
 
-- PIN Virtual Google Play · desde $ 10.000 · 3 planes · id `pin-google-play` · https://www.dctecnology.xyz/p/pin-google-play.html
 - PIN Virtual Deezer · desde $ 19.500 · id `pin-virtual-deezer` · https://www.dctecnology.xyz/p/pin-virtual-deezer.html
-- PIN Virtual Netflix Colombia · desde $ 20.000 · 5 planes · id `pin-virtual-netflix` · https://www.dctecnology.xyz/p/pin-virtual-netflix.html
 - PIN Virtual Vix · desde $ 22.900 · id `pin-virtual-vix` · https://www.dctecnology.xyz/p/pin-virtual-vix.html
 - PIN Virtual Roblox · desde $ 25.000 · 3 planes · id `pin-virtual-roblox` · https://www.dctecnology.xyz/p/pin-virtual-roblox.html
 - PIN Virtual Disney Plus · desde $ 25.900 · 3 planes · id `pin-virtual-disney-plus-1tpu5` · https://www.dctecnology.xyz/p/pin-virtual-disney-plus-1tpu5.html
