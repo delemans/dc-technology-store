@@ -42,7 +42,7 @@ Servicios (todos con «restart: unless-stopped» y la zona horaria America/Bogot
   · GENERIC_TIMEZONE=America/Bogota y N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY};
   · volumen n8n_data en /home/node/.n8n.
 - postgres_n8n (imagen postgres:16): base n8n; usuario y clave desde ${POSTGRES_N8N_USER} y ${POSTGRES_N8N_PASSWORD}; volumen pg_n8n.
-- evolution (imagen atendai/evolution-api:v2.3.7):
+- evolution (imagen evoapicloud/evolution-api:v2.3.7):
   · SERVER_URL=https://wa.dctecnology.xyz y AUTHENTICATION_API_KEY=${EVOLUTION_API_KEY};
   · DATABASE_PROVIDER=postgresql con DATABASE_CONNECTION_URI apuntando a postgres_evo;
   · CACHE_REDIS_ENABLED=true con CACHE_REDIS_URI=redis://redis:6379/6;

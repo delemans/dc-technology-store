@@ -47,7 +47,7 @@ services:
       - pg_n8n:/var/lib/postgresql/data
 
   evolution:
-    image: atendai/evolution-api:v2.3.7
+    image: evoapicloud/evolution-api:v2.3.7  # la imagen vieja de atendai ya no se publica: el proyecto se mudó (sirve en amd64 y arm64)
     restart: unless-stopped
     environment:
       - TZ=America/Bogota

@@ -23,3 +23,5 @@ for (const f of fs.readdirSync(dir)) {
     const conValor = f.startsWith('env-') && /^[A-Z0-9_]+=\S/m.test(t);
     ok(!/(sk-|gsk_|nvapi-|AIza|eyJ)[\w-]{10}/.test(t) && !conValor, `${f}: sin claves escritas`);
 }
+// 03/11/2026: la imagen de Evolution debe existir (atendai/ dejó de publicar; el proyecto se mudó a evoapicloud/)
+ok(/image:\s*evoapicloud\/evolution-api:v2\.3\.7/.test(compose) && !/atendai\//.test(compose), 'Evolution usa la imagen vigente (evoapicloud/evolution-api:v2.3.7, sirve en amd64 y arm64)');
