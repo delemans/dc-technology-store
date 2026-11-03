@@ -15,10 +15,36 @@ window.DCFiltrarDisponibles = (productos, disp) => {
         return variantes.length ? { ...p, variantes } : null;
     }).filter(Boolean);
 };
+// Cantidades leídas directo de los proveedores (disponibilidad.json → existencias, cada 3 h): son un TOPE. La base puede
+// llevar horas sin sincronizar (n8n apagado); si el proveedor tiene menos, manda el proveedor y nunca se vende de más.
+// Emprende Red: { id: unidades } · ANC: { id: { plan: unidades } }. Nunca sube una cantidad ni muestra algo que la base no tiene.
+window.DCTopeExistencias = (productos, disp) => {
+    const ex = disp?.existencias;
+    if (!ex || typeof ex !== 'object') return productos;
+    const menor = (a, b) => (Number.isFinite(a) ? (Number.isFinite(b) ? Math.min(a, b) : a) : b);
+    return productos.map((p) => {
+        const e = ex[p.id];
+        if (e === undefined || e === null) return p;
+        if (typeof e === 'number') {
+            const n = menor(Number(p.existencias ?? NaN), e);
+            return n <= 0 ? null : { ...p, existencias: n };
+        }
+        const variantes = (p.variantes ?? []).map((v) => {
+            const n = menor(Number(v.existencias ?? NaN), Number(e[v.nombre] ?? NaN));
+            return Number.isFinite(n) ? (n > 0 ? { ...v, existencias: n } : null) : v;
+        }).filter(Boolean);
+        if (!variantes.length) return null;
+        // Tope del producto: lo que más puede vender uno de sus planes (solo si todos traen cantidad)
+        const todas = variantes.map((v) => Number(v.existencias ?? NaN));
+        const tope = todas.every(Number.isFinite) ? Math.max(...todas) : NaN;
+        const n = menor(Number(p.existencias ?? NaN), tope);
+        return { ...p, variantes, ...(Number.isFinite(n) ? { existencias: n } : {}) };
+    }).filter(Boolean);
+};
 window.DCCatalogoCrudo = Promise.all([
     fetch('productos.json', { cache: 'no-cache' }).then((r) => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); }), // revalida: nunca el catálogo viejo
     fetch('disponibilidad.json', { cache: 'no-cache' }).then((r) => (r.ok ? r.json() : null)).catch(() => null),
-]).then(([productos, disp]) => window.DCFiltrarDisponibles(productos, disp));
+]).then(([productos, disp]) => { window.DCDisponibilidad = disp; return window.DCFiltrarDisponibles(productos, disp); });
 const SUPABASE_CLAVE_PUBLICA = 'sb_publishable_GvQiv6M7iSrlwsA90lXsOQ_5OfSYBwy';
 // La tienda funciona aunque Supabase no responda: solo se pierden cupones, reseñas y contadores
 const supabaseTienda = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_CLAVE_PUBLICA) : null;
@@ -310,7 +336,7 @@ async function cargarCatalogo() {
         : Promise.resolve([]);
     try {
         const datos = await window.DCCatalogoCrudo;
-        estado.productos = await aplicarPreciosBase(datos.map((p) => ({ ...p, tipo: clasificarCategoria(p) })));
+        estado.productos = window.DCTopeExistencias(await aplicarPreciosBase(datos.map((p) => ({ ...p, tipo: clasificarCategoria(p) }))), window.DCDisponibilidad);
         estado.conStock = new Set((await stockPublico).map((x) => x.producto_id));
     } catch (error) {
         console.error('Error al cargar productos.json', error);

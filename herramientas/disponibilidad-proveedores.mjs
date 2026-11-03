@@ -6,6 +6,9 @@
 //   · Sin proveedor: productos propios que no son servicios y no están enlazados a ANC (recargas, apuestas, pines sin
 //     proveedor…) → no salen.
 //   · Emprende Red: los agotados (sin unidades) no salen; vuelven solos cuando el proveedor repone.
+//   · Cantidades (03/11/2026): «existencias» guarda las unidades que publica cada proveedor (Emprende Red por producto, ANC
+//     por plan). La tienda las usa como TOPE sobre las de la base: si el proveedor tiene menos, manda el proveedor (nunca
+//     se vende de más aunque n8n lleve horas sin sincronizar la base). El vigilante en la nube lo recalcula cada 3 h.
 // Freno: si la lectura de ANC encuentra menos del 60 % de lo enlazado, no se cambia nada (pudo ser una falla de lectura).
 // Cuando algo vuelve a estar disponible, sale solo en la siguiente corrida (vigilante diario + cada vez que lo corras).
 //   node herramientas/disponibilidad-proveedores.mjs            → muestra el resultado
@@ -23,7 +26,7 @@ const sinDias = (x) => plano(x).replace(/\b\d+ dias?\b/g, '').replace(/\s+/g, ' 
 
 // Núcleo puro (se prueba sin red): productos, equivalencias y la lectura de ANC → qué se oculta
 export function calcular(productos, eq, anc) {
-    const ocultos = {}, variantes = {};
+    const ocultos = {}, variantes = {}, existencias = {};
     let enlazados = 0, encontrados = 0;
     const deAnc = (proveedor, plan) => {
         const filas = anc.filter((f) => plano(f.producto) === plano(proveedor));
@@ -34,6 +37,7 @@ export function calcular(productos, eq, anc) {
     for (const p of productos) {
         if (String(p.id).startsWith('er-')) {
             if (p.agotado || Number(p.existencias) === 0) ocultos[p.id] = 'Emprende Red: sin unidades';
+            else if (Number.isInteger(p.existencias)) existencias[p.id] = p.existencias;
             continue;
         }
         if (PROPIOS_SIEMPRE.includes(p.tipo) || String(p.id).startsWith('servicio-')) continue;
@@ -49,13 +53,16 @@ export function calcular(productos, eq, anc) {
             visto = true;
             if (!f) (variantes[p.id] ??= {})[v.nombre] = 'ANC ya no ofrece este plan';
             else if (f.agotado || f.stock === 0) (variantes[p.id] ??= {})[v.nombre] = 'Agotado en ANC';
-            else alguno = true;
+            else {
+                alguno = true;
+                if (Number.isInteger(f.stock) && f.stock > 0) (existencias[p.id] ??= {})[v.nombre] = f.stock;
+            }
         }
         if (visto) encontrados++;
-        if (!visto) { ocultos[p.id] = 'ANC ya no ofrece este producto'; delete variantes[p.id]; }
-        else if (!alguno) { ocultos[p.id] = 'Agotado o retirado en ANC'; delete variantes[p.id]; }
+        if (!visto) { ocultos[p.id] = 'ANC ya no ofrece este producto'; delete variantes[p.id]; delete existencias[p.id]; }
+        else if (!alguno) { ocultos[p.id] = 'Agotado o retirado en ANC'; delete variantes[p.id]; delete existencias[p.id]; }
     }
-    return { ocultos, variantes, enlazados, encontrados };
+    return { ocultos, variantes, existencias, enlazados, encontrados };
 }
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1])) {
@@ -70,6 +77,7 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.a
     const r = calcular(productos, eq, anc);
     const fuente = lectura.respaldo ? 'tienda pública de ANC (el portal no respondió)' : 'portal de ANC';
     console.log(`Fuente: ${fuente} · enlazados ${r.enlazados}, encontrados ${r.encontrados}`);
+    console.log(`Con cantidad del proveedor: ${Object.keys(r.existencias).length} productos`);
     console.log(`No salen: ${Object.keys(r.ocultos).length} productos y ${Object.values(r.variantes).reduce((s, x) => s + Object.keys(x).length, 0)} planes`);
     const porMotivo = {};
     for (const [id, m] of Object.entries(r.ocultos)) (porMotivo[m] ??= []).push(id);
@@ -80,7 +88,7 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.a
         process.exit(0);
     }
     if (process.argv.includes('--aplicar')) {
-        const nuevo = { _nota: 'Generado por herramientas/disponibilidad-proveedores.mjs: lo que no se muestra porque ya no lo hay en ANC ni en Emprende Red.', fuente, ocultos: r.ocultos, variantes: r.variantes };
+        const nuevo = { _nota: 'Generado por herramientas/disponibilidad-proveedores.mjs: lo que no se muestra porque ya no lo hay en ANC ni en Emprende Red.', fuente, ocultos: r.ocultos, variantes: r.variantes, existencias: r.existencias };
         const antes = fs.existsSync(SALIDA) ? JSON.parse(fs.readFileSync(SALIDA, 'utf8')) : null;
         const igual = antes && JSON.stringify({ ...antes, actualizado: undefined }) === JSON.stringify({ ...nuevo, actualizado: undefined });
         if (igual) { console.log('DISPONIBILIDAD: sin cambios'); process.exit(0); }

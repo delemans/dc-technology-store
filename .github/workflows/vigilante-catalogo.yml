@@ -3,10 +3,13 @@
 # si algo cambió, publica en main (el mismo script que la tarea de Windows; hace pull --rebase antes de subir).
 # El informe por WhatsApp sale solo si existen los secretos EVOLUTION_* y NUMERO_AVISO_ADMIN (cuando el bot esté en un
 # servidor); mientras tanto queda en el registro de esta ejecución (pestaña Actions).
+# 03/11/2026: además, cada 3 h el modo --rapido (solo existencias y agotados de Emprende Red y ANC → productos.json y
+# disponibilidad.json, que la tienda usa como tope de cantidades) para que nunca se venda lo que el proveedor ya no tiene.
 name: vigilante-catalogo
 on:
   schedule:
-    - cron: '30 11 * * *'   # 6:30 a. m. en Bogotá (la tarea del PC corre a las 6:00; no chocan)
+    - cron: '30 11 * * *'   # revisión completa: 6:30 a. m. en Bogotá (la tarea del PC corre a las 6:00; no chocan)
+    - cron: '0 */3 * * *'   # existencias y agotados cada 3 h (--rapido)
   workflow_dispatch:
 permissions:
   contents: write
@@ -29,7 +32,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
       - name: Vigilante del catálogo
-        run: node herramientas/vigilante-catalogo.mjs
+        run: node herramientas/vigilante-catalogo.mjs ${{ github.event.schedule == '0 */3 * * *' && '--rapido' || '' }}
         env:
           TZ: America/Bogota
           NUMERO_AVISO_ADMIN: ${{ secrets.NUMERO_AVISO_ADMIN }}

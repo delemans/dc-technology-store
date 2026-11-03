@@ -4,6 +4,14 @@ La más reciente va arriba.
 
 ---
 
+## 03/11/2026 · Claude · Existencias cada 3 h y arreglo del SQL pendiente
+- **Qué se hizo:**
+  - wo-047: `drop function` antes de crear `sincronizar_proveedor` (APLICAR-PENDIENTES daba 42P13 en una base con wo-050) + prueba;
+  - vigilante en la nube cada 3 h (`--rapido`: existencias y agotados) + revisión completa diaria; el del PC trae primero lo de GitHub;
+  - `disponibilidad.json` → `existencias`; la tienda las usa como tope (`DCTopeExistencias`): nunca muestra más unidades que el proveedor;
+  - pruebas: `pruebas/datos/test-existencias.mjs` y tope en `pruebas/web/prueba-agotados.mjs` (ya sin productos escritos a mano).
+- **Siguiente:** director: encender n8n y aplicar APLICAR-PENDIENTES.sql; luego Claude sincroniza n8n. Cola desde la T19.
+
 ## 01/11/2026 · Claude · T21 (Google Maps) y catálogo al día
 - **Qué se hizo:**
   - main del PC se puso al día con GitHub (vigilante en la nube del 30/10, 31/10 y 01/11); la corrida vieja del vigilante local quedó en `git stash`;

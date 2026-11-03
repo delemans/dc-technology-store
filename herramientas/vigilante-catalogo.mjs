@@ -1,6 +1,8 @@
 // herramientas/vigilante-catalogo.mjs — Vigilante diario de proveedores (Emprende Red y ANC) y de sus políticas.
 //   node herramientas/vigilante-catalogo.mjs              → revisa, actualiza la tienda, publica y te avisa por WhatsApp
 //   node herramientas/vigilante-catalogo.mjs --probar     → revisa y te muestra el informe aquí (no publica ni avisa)
+//   node herramientas/vigilante-catalogo.mjs --rapido     → solo existencias y agotados (Emprende Red + disponibilidad de ANC)
+//                                                            y publica si cambió: lo corre GitHub cada 3 h (vigilante-catalogo.yml)
 //   node herramientas/vigilante-catalogo.mjs --instalar   → tarea programada diaria (6:00 a. m.) en este PC
 // Qué vigila:
 //   · Emprende Red: productos nuevos, retirados (desaparecen), agotados (quedan "Agotado"), repuestos, precios, nombres
@@ -20,6 +22,7 @@ const { RAIZ, cargarEntorno } = require('./entorno.js');
 const env = cargarEntorno();
 const args = process.argv.slice(2);
 const PROBAR = args.includes('--probar');
+const RAPIDO = args.includes('--rapido');
 const SALIDA = path.join(RAIZ, 'herramientas', 'salida');
 fs.mkdirSync(SALIDA, { recursive: true });
 const ANTES_ANC = path.join(SALIDA, 'vigilante-anc.json');
@@ -44,6 +47,14 @@ Register-ScheduledTask -TaskName '${tarea}' -Action $a -Trigger $t -Settings $s 
 
 const informe = [];
 let publicar = false;
+
+// En el PC: primero lo que ya publicó GitHub (si no, el PC trabajaba sobre un catálogo viejo y su push fallaba)
+if (!PROBAR && !process.env.GITHUB_ACTIONS) {
+    try {
+        const g = (a) => execFileSync('git', a, { cwd: RAIZ, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], timeout: 120e3 }).trim();
+        if (g(['rev-parse', '--abbrev-ref', 'HEAD']) === 'main') { g(['fetch', '-q', 'origin', 'main']); g(['merge', '--ff-only', '-q', 'origin/main']); }
+    } catch (e) { log(`no pude traer lo de GitHub antes de revisar: ${String(e.stderr || e.message).trim().split('\n').pop()}`); }
+}
 
 /* ---------- 1) Emprende Red ---------- */
 const RUTA_PRODUCTOS = path.join(RAIZ, 'productos.json');
@@ -80,7 +91,7 @@ if (r.status !== 0) {
 }
 
 /* ---------- 2) ANC: TODO lo de su tienda (precios, cantidades, plazos, agotados, condiciones y productos que no vendes) ---------- */
-try {
+if (!RAPIDO) try {
     const { leerTiendaAnc, leerCondicionesAnc, diferenciasAnc } = await import('./catalogo_ancpagos.mjs');
     const t = await leerTiendaAnc();
     const ahora = Object.fromEntries((t.tienda ?? []).flatMap((p) => p.variantes.map((v) => [`${p.nombre} · ${v.nombre || 'única'}`,
@@ -124,7 +135,7 @@ try {
 }
 
 /* ---------- 2b) Descripciones de ANC (tecnología y pines enlazados): se actualizan en productos.json y se publican ---------- */
-{
+if (!RAPIDO) {
     const antes = fs.readFileSync(RUTA_PRODUCTOS, 'utf8');
     const rd = spawnSync(process.execPath, [path.join(RAIZ, 'herramientas', 'descripciones-anc.mjs'), ...(PROBAR ? [] : ['--aplicar'])], { cwd: RAIZ, encoding: 'utf8', timeout: 10 * 60e3 });
     const n = /DESCRIPCIONES ANC: (\d+)/.exec(rd.stdout || '')?.[1];
@@ -148,6 +159,7 @@ try {
 }
 
 /* ---------- 3) Políticas de los proveedores ---------- */
+if (!RAPIDO) {
 const textoPlano = (html) => String(html ?? '').replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/gi, ' ').replace(/<[^>]+>/g, ' ').replace(/&[a-z#0-9]+;/gi, ' ').replace(/\s+/g, ' ').trim();
 const POLITICAS = [
     { id: 'anc-terminos', nombre: 'Términos de ANC', url: 'https://allnecessarycolombia.com/terminos-y-condiciones/' },
@@ -182,6 +194,7 @@ for (const p of POLITICAS) {
 }
 fs.writeFileSync(ANTES_POL, JSON.stringify(polAhora, null, 1));
 if (polAhora['er-terminos'] && polAhora['er-terminos'].texto.length < 30 && !polAntes['er-terminos']) informe.push('📜 Emprende Red sigue sin términos publicados: pídeselos por escrito.');
+}
 
 /* ---------- 4) Publicar la tienda (si cambió el catálogo) ---------- */
 if (publicar && !PROBAR) {
@@ -210,7 +223,7 @@ if (publicar && !PROBAR) {
         const diff = correr('git', ['diff', '--cached']);
         if (/gsk_[a-z0-9]{10}|nvapi-[a-z0-9]{10}|sk-or-v1|AIza[0-9A-Za-z_-]{20}|ghp_[A-Za-z0-9]{20}|eyJhbGciOi/i.test(diff)) throw new Error('el cambio parece contener una clave: no se publica');
         if (diff.trim()) {
-            correr('git', ['commit', '-m', `Catálogo al día (vigilante diario ${new Date().toISOString().slice(0, 10)})`]);
+            correr('git', ['commit', '-m', RAPIDO ? `Existencias al día (vigilante cada 3 h, ${new Date().toISOString().slice(0, 16).replace('T', ' ')} UTC)` : `Catálogo al día (vigilante diario ${new Date().toISOString().slice(0, 10)})`]);
             correr('git', ['pull', '--rebase', 'origin', 'main']);
             correr('git', ['push', 'origin', 'main']);
             informe.push('✅ Tienda, páginas de Google y Shopping actualizadas y publicadas.');
@@ -221,14 +234,14 @@ if (publicar && !PROBAR) {
 }
 
 /* ---------- 4b) El sitio en vivo (páginas del sitemap, recursos, bot, Shopping y fotos) ---------- */
-{
+if (!RAPIDO) {
     const rs = spawnSync(process.execPath, [path.join(RAIZ, 'herramientas', 'revisar-sitio.mjs')], { cwd: RAIZ, encoding: 'utf8', timeout: 15 * 60e3 });
     const fallasSitio = (rs.stdout || '').split('\n').filter((l) => l.startsWith('FALLA')).map((l) => l.replace(/^FALLA\s+/, ''));
     if (rs.status !== 0) informe.push(`🌐 *El sitio tiene fallas*\n${(fallasSitio.length ? fallasSitio : ['la revisión no terminó']).map((l) => `• ${l}`).join('\n')}`);
 }
 
 /* ---------- 5) Informe ---------- */
-const texto = informe.length ? ['🛰️ *Vigilante del catálogo · DC Tecnology*', '', ...informe].join('\n\n') : null;
+const texto = informe.length ? [RAPIDO ? '🛰️ *Existencias · DC Tecnology*' : '🛰️ *Vigilante del catálogo · DC Tecnology*', '', ...informe].join('\n\n') : null;
 log(texto ? texto.replace(/\n+/g, ' | ').slice(0, 900) : 'sin cambios');
 if (PROBAR) { console.log(texto ?? 'Sin cambios en proveedores ni políticas.'); process.exit(0); }
 const admin = String(env.NUMERO_AVISO_ADMIN ?? '').replace(/\D/g, '').replace(/^(3\d{9})$/, '57$1');
