@@ -15,8 +15,10 @@ const path = require('path');
 const crypto = require('crypto');
 
 const RAIZ = path.join(__dirname, '..');
-const SALIDA = path.join(__dirname, 'flujo_bot_dctechnology.json');
-const kb = JSON.parse(fs.readFileSync(path.join(RAIZ, 'bot-conocimiento.json'), 'utf8'));
+// Pruebas (pruebas/correr.mjs): DC_KB = catálogo fijo y DC_FLUJO_SALIDA = otro archivo, así el catálogo del día (que cambia
+// cada 3 h con lo agotado) no rompe las pruebas y el flujo de prueba nunca pisa el real ni el simulador del panel
+const SALIDA = process.env.DC_FLUJO_SALIDA || path.join(__dirname, 'flujo_bot_dctechnology.json');
+const kb = JSON.parse(fs.readFileSync(process.env.DC_KB || path.join(RAIZ, 'bot-conocimiento.json'), 'utf8'));
 const WA = require(path.join(RAIZ, 'plantillas-whatsapp.js'));
 
 const MODELO = 'deepseek-ai/DeepSeek-V3';
@@ -3552,7 +3554,9 @@ const flujo = {
     meta: { templateCredsSetupCompleted: false },
     tags: [],
 };
+fs.mkdirSync(path.dirname(SALIDA), { recursive: true });
 fs.writeFileSync(SALIDA, JSON.stringify(flujo, null, 2) + '\n', 'utf8');
+if (process.env.DC_FLUJO_SALIDA) process.exit(0); // flujo de prueba: no toca el simulador del panel
 
 // Panel → Prueba del sistema: el mismo código de cada nodo Code, como funciones normales, para simular el
 // recorrido completo en el navegador sin enviar mensajes, sin cobrar y sin escribir en la base.

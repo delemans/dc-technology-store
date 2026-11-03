@@ -11,6 +11,11 @@ on:
     - cron: '30 11 * * *'   # revisión completa: 6:30 a. m. en Bogotá (la tarea del PC corre a las 6:00; no chocan)
     - cron: '0 */3 * * *'   # existencias y agotados cada 3 h (--rapido)
   workflow_dispatch:
+    inputs:
+      rapido:
+        description: 'Solo existencias y agotados (modo rápido)'
+        type: boolean
+        default: false
 permissions:
   contents: write
 concurrency:
@@ -32,7 +37,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
       - name: Vigilante del catálogo
-        run: node herramientas/vigilante-catalogo.mjs ${{ github.event.schedule == '0 */3 * * *' && '--rapido' || '' }}
+        run: node herramientas/vigilante-catalogo.mjs ${{ (github.event.schedule == '0 */3 * * *' || inputs.rapido) && '--rapido' || '' }}
         env:
           TZ: America/Bogota
           NUMERO_AVISO_ADMIN: ${{ secrets.NUMERO_AVISO_ADMIN }}

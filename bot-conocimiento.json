@@ -1,5 +1,5 @@
 {
-  "version": "2026-11-02T20:52:12.123Z",
+  "version": "2026-11-03T13:27:32.375Z",
   "identidad": [
     "Eres DC TECNOLOGY: respondes el WhatsApp de la tienda (https://www.dctecnology.xyz) en nombre del equipo. Habla como la tienda (\"te ayudamos\", \"te enviamos\").",
     "En el PRIMER mensaje de la conversación saluda así: \"¡Hola! Te saluda *DC TECNOLOGY* 👋\", responde lo que preguntó y cierra con: \"Escribe *menú* para ver todas las opciones.\" Después no vuelvas a presentarte (si el contexto trae un mensaje del menú, la conversación ya empezó).",
@@ -931,14 +931,20 @@
       "marca": "Netflix",
       "nombre": "Netflix Premium 4K",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2024-08-27t102440-663-92c3e993cc40c238fc17247722852386-640-0.webp",
-      "url": "https://www.dctecnology.xyz/p/netflix.html",
+      "url": "https://www.dctecnology.xyz/?producto=netflix",
       "variantes": [
         {
           "nombre": "Pantalla Colombia 30 días",
           "precio": 15000,
           "precio_anterior": 25000
+        },
+        {
+          "nombre": "Pantalla Internacional 30 días",
+          "precio": 17000,
+          "precio_anterior": 27000
         }
       ],
+      "oculto": true,
       "desde": 15000,
       "descripcion": null
     },
@@ -948,20 +954,14 @@
       "marca": "Amazon",
       "nombre": "Prime Video Ultra HD",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-87-58600aa95daca5fadc17247083377668-640-0.webp",
-      "url": "https://www.dctecnology.xyz/?producto=prime-video",
+      "url": "https://www.dctecnology.xyz/p/prime-video.html",
       "variantes": [
         {
           "nombre": "Pantalla (1 Dispositivo)",
           "precio": 10000,
           "precio_anterior": 18000
-        },
-        {
-          "nombre": "Cuenta Completa (6 Dispositivos)",
-          "precio": 20000,
-          "precio_anterior": 35000
         }
       ],
-      "oculto": true,
       "desde": 10000,
       "descripcion": null
     },
@@ -971,7 +971,7 @@
       "marca": "Disney",
       "nombre": "Disney Plus Premium",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-91-9267e0a1730671bcf517247095798757-640-0.webp",
-      "url": "https://www.dctecnology.xyz/p/disney-plus.html",
+      "url": "https://www.dctecnology.xyz/?producto=disney-plus",
       "variantes": [
         {
           "nombre": "Pantalla Premium",
@@ -979,6 +979,7 @@
           "precio_anterior": 25000
         }
       ],
+      "oculto": true,
       "desde": 15000,
       "descripcion": null
     },
@@ -2263,7 +2264,7 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 4,
+      "existencias": 2,
       "desde": 24000,
       "descripcion": "¡Olvídate de esperar! Carga tus dispositivos a la velocidad de la luz con el CARAGOR YOOKIE 20W. Potencia original para tu vida digital. ¿Listo para experimentar la carga rápida definitiva? ¡No te quedes atrás!"
     },
@@ -2272,7 +2273,7 @@
       "tipo": "tecnologia",
       "nombre": "Power Bank 20.000 mAh Display / 4 Cables",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/13-power-bank-20-000-mah-display-4-cables-1-1cd1afb2.webp?v=1791567828",
-      "url": "https://www.dctecnology.xyz/p/er-power-bank-20000-mah-display-4-cables-13.html",
+      "url": "https://www.dctecnology.xyz/?producto=er-power-bank-20000-mah-display-4-cables-13",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -2281,9 +2282,10 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 4,
+      "oculto": true,
+      "existencias": 0,
       "desde": 50700,
-      "descripcion": "Capacidad de 20.000 mAhDisplay indicador de carga4 cables integrados y luz LED"
+      "descripcion": null
     },
     {
       "id": "er-anc-airpods-pantalla-tactil-5",
@@ -2317,7 +2319,7 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 6,
+      "existencias": 5,
       "desde": 9300,
       "descripcion": "Convierte cualquier espacio en una fiesta con esta mini luz disco USB. Su potente iluminaci&oacute;n multicolor proyecta efectos de luces vibrantes que llenan la habitaci&oacute;n, el carro o cualquier lugar con un ambiente divertido y &uacute;nico.\r\n\r\nGracias a su cuello flexible, puedes ajustar f&aacute;cilmente la direcci&oacute;n de la luz para lograr el efecto que desees. Solo debes conectarla a un puerto USB y comenzar&aacute; a iluminar al instante.\r\n\r\nCaracter&iacute;sticas:\n\r\n&bull; Luces LED multicolores con efecto disco\n\r\n&bull; Conexi&oacute;n USB compatible con carros, computadore"
     },
@@ -2327,7 +2329,7 @@
       "marca": "Yookie",
       "nombre": "Cargador Iphone Lightning Original Yookie KL02",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/38-whatsapp-image-2026-04-09-at-124114-pm.webp?v=1775756492",
-      "url": "https://www.dctecnology.xyz/?producto=er-cargador-iphone-lightning-original-yookie-kl02-7",
+      "url": "https://www.dctecnology.xyz/p/er-cargador-iphone-lightning-original-yookie-kl02-7.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -2336,10 +2338,9 @@
         }
       ],
       "sincronizado": true,
-      "oculto": true,
-      "existencias": 0,
+      "existencias": 6,
       "desde": 24800,
-      "descripcion": null
+      "descripcion": "25W POWER ADAPTERGARANTIA 30 DIASPRODUCTO IMPORTADO DE CALIDAD"
     },
     {
       "id": "er-ventilador-usb-led-fan-05-41",
@@ -2365,7 +2366,7 @@
       "tipo": "tecnologia",
       "nombre": "Smart Wacht GUS-16",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/43-smart-wacht-gus-16-1-e865b0d6.webp?v=1788977110",
-      "url": "https://www.dctecnology.xyz/p/er-smart-wacht-gus-16-10.html",
+      "url": "https://www.dctecnology.xyz/?producto=er-smart-wacht-gus-16-10",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -2374,9 +2375,10 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 3,
+      "oculto": true,
+      "existencias": 0,
       "desde": 44900,
-      "descripcion": "Función Contestar llamadas, Cargador magnético, Material aleación de zinc, Control de presión arterial + 2 pulso. Compatible con Android y iphone"
+      "descripcion": null
     },
     {
       "id": "er-corta-unas-1-71",
@@ -2393,7 +2395,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 10,
+      "existencias": 9,
       "desde": 2900,
       "descripcion": null
     },
@@ -2411,7 +2413,7 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 10,
+      "existencias": 7,
       "desde": 43400,
       "descripcion": "1 CONTROL SE PUEDE JUGAR 2 PERSONAS AL MISMO TIEMPOCARGA PORTATILVIENE CON BANANAS PARA CONECTAR AL TV400 JUEGOS DISPONIBLES RETROEL PREFERIDO DE LOS CLIENTES"
     },
@@ -2468,7 +2470,7 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 1,
+      "existencias": 8,
       "desde": 20400,
       "descripcion": "El cargador de 45 W te permite cargar la batería de tu Galaxy a una velocidad superrápida. También obtienes un cómodo cable extralargo de 1,8 m en la caja. * La velocidad de carga puede variar según el dispositivo."
     },
@@ -2477,7 +2479,7 @@
       "tipo": "tecnologia",
       "nombre": "Power Bank Inalambrico Iphone Grande 10. 000mAh",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/101-power-bank-inalambrico-iphone-grande-10-000mah-1-407577e7.webp?v=1791490034",
-      "url": "https://www.dctecnology.xyz/?producto=er-power-bank-inalambrico-iphone-grande-10-000mah-101",
+      "url": "https://www.dctecnology.xyz/p/er-power-bank-inalambrico-iphone-grande-10-000mah-101.html",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -2486,10 +2488,9 @@
         }
       ],
       "sincronizado": true,
-      "oculto": true,
-      "existencias": 0,
+      "existencias": 1,
       "desde": 30000,
-      "descripcion": null
+      "descripcion": "🔋📱 Mantén tu iPhone con energía de forma práctica con este power bank inalámbrico de 10.000 mAh. Su formato grande ofrece una solución cómoda para llevar energía adicional contigo.\r\n⚡️ Características destacadas:\r\n• Capacidad de 10.000 mAh: proporciona energía adicional para tu dispositivo.\r\n• Carga inalámbrica: permite cargar dispositivos compatibles sin necesidad de cable.\r\n• Diseño grande: ofrece una presentación práctica para el uso diario."
     },
     {
       "id": "er-mouse-gamer-3200-dpi-20",
@@ -2523,7 +2524,7 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 2,
+      "existencias": 1,
       "desde": 39800,
       "descripcion": null
     },
@@ -2541,7 +2542,7 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 10,
+      "existencias": 1,
       "desde": 2400,
       "descripcion": "Ilumina cualquier espacio de forma pr&aacute;ctica con esta mini l&aacute;mpara nocturna USB. Su dise&ntilde;o compacto permite conectarla f&aacute;cilmente a computadores, cargadores, power bank o puertos USB, brindando una luz suave y agradable ideal para la noche.\r\n\r\nEs perfecta para leer, trabajar con el port&aacute;til, iluminar el cuarto o usarla como luz ambiental sin ocupar espacio. Solo con&eacute;ctala y tendr&aacute;s iluminaci&oacute;n instant&aacute;nea.\r\n\r\nCaracter&iacute;sticas:\n\r\n&bull; Conexi&oacute;n USB universal\n\r\n&bull; Luz LED suave y eficiente\n\r\n&bull; Dise&ntilde;o comp"
     },
@@ -2579,7 +2580,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 47,
+      "existencias": 44,
       "desde": 4400,
       "descripcion": null
     },
@@ -2617,8 +2618,27 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 22,
+      "existencias": 21,
       "desde": 4400,
+      "descripcion": null
+    },
+    {
+      "id": "er-kit-dental-para-mascota-143",
+      "tipo": "variedades",
+      "nombre": "Kit Dental para Mascota",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/143-kit-dental-para-mascota-1-befdecc3.webp?v=1793031165",
+      "url": "https://www.dctecnology.xyz/?producto=er-kit-dental-para-mascota-143",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 17600,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "oculto": true,
+      "existencias": 3,
+      "desde": 17600,
       "descripcion": null
     },
     {
@@ -2636,7 +2656,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 1,
+      "existencias": 0,
       "desde": 11700,
       "descripcion": null
     },
@@ -2709,7 +2729,7 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 4,
+      "existencias": 3,
       "desde": 82500,
       "descripcion": "🔋 Características destacadas:Capacidad de 30.000 mAh.Luz solar LED integrada.Marca JIMZI, referencia JR 309."
     },
@@ -2728,7 +2748,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 8,
+      "existencias": 7,
       "desde": 11900,
       "descripcion": null
     },
@@ -2885,25 +2905,6 @@
       "descripcion": null
     },
     {
-      "id": "er-cadena-y-dije-futbol-colombiano-deportivo-cali-180",
-      "tipo": "variedades",
-      "nombre": "Cadena y Dije Futbol Colombiano Deportivo Cali",
-      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/180-cali.webp?v=1757048166",
-      "url": "https://www.dctecnology.xyz/?producto=er-cadena-y-dije-futbol-colombiano-deportivo-cali-180",
-      "variantes": [
-        {
-          "nombre": "Unidad",
-          "precio": 9800,
-          "precio_anterior": null
-        }
-      ],
-      "sincronizado": true,
-      "oculto": true,
-      "existencias": 0,
-      "desde": 9800,
-      "descripcion": null
-    },
-    {
       "id": "er-arma-911-en-rodio-puro-brillante-186",
       "tipo": "variedades",
       "nombre": "Arma 911 en Rodio Puro Brillante",
@@ -2976,7 +2977,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 6,
+      "existencias": 4,
       "desde": 14900,
       "descripcion": null
     },
@@ -3014,7 +3015,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 14,
+      "existencias": 13,
       "desde": 23300,
       "descripcion": null
     },
@@ -3033,7 +3034,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 3,
+      "existencias": 2,
       "desde": 59900,
       "descripcion": null
     },
@@ -3071,7 +3072,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 4,
+      "existencias": 0,
       "desde": 1400,
       "descripcion": null
     },
@@ -3109,9 +3110,28 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 2,
+      "existencias": 1,
       "desde": 12800,
       "descripcion": null
+    },
+    {
+      "id": "er-audifonos-yookie-originales-etl02-259",
+      "tipo": "tecnologia",
+      "marca": "Yookie",
+      "nombre": "Audifonos Yookie Originales ETL02",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/259-airpods-max-apple-aaa-1-67cdd19c.webp?v=1793299542",
+      "url": "https://www.dctecnology.xyz/p/er-audifonos-yookie-originales-etl02-259.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 14900,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "existencias": 1,
+      "desde": 14900,
+      "descripcion": "¡Siente la música como nunca antes! Los AUDIFONOS YOOKIE ORIGINALES ETL02 te ofrecen sonido de alta definición y graves intensos. Conéctalos y disfruta. ¿Listo para una experiencia auditiva superior? ¡Descúbrelos ahora!"
     },
     {
       "id": "er-destornillador-electrico-inalambrico-264",
@@ -3128,7 +3148,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 4,
+      "existencias": 2,
       "desde": 37500,
       "descripcion": null
     },
@@ -3147,7 +3167,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 2,
+      "existencias": 0,
       "desde": 23400,
       "descripcion": null
     },
@@ -3202,7 +3222,7 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 2,
+      "existencias": 5,
       "desde": 27000,
       "descripcion": "🔊 Características destacadas:\n* Cancelación activa de ruido (ANC): ayuda a reducir los sonidos del entorno.\n* Modo de sonido ambiente: permite escuchar los sonidos exteriores en modelos compatibles.\n* Estuche con puerto USB-C: facilita la recarga mediante un cable compatible."
     },
@@ -3221,8 +3241,27 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 8,
+      "existencias": 7,
       "desde": 31400,
+      "descripcion": null
+    },
+    {
+      "id": "er-set-de-ajedrez-con-saca-corchos-dcr-018-285",
+      "tipo": "variedades",
+      "nombre": "Set de Ajedrez con Saca Corchos DCR-018",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/285-set-de-ajedrez-con-saca-corchos-dcr-018-1-eca4923a.webp?v=1793488814",
+      "url": "https://www.dctecnology.xyz/?producto=er-set-de-ajedrez-con-saca-corchos-dcr-018-285",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 39000,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "oculto": true,
+      "existencias": 6,
+      "desde": 39000,
       "descripcion": null
     },
     {
@@ -3264,6 +3303,44 @@
       "descripcion": null
     },
     {
+      "id": "er-extension-3-metros-electrica-292",
+      "tipo": "variedades",
+      "nombre": "Extension 3 Metros Electrica",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/292-extencion-3-metros-electrica-1.webp?v=1783476995",
+      "url": "https://www.dctecnology.xyz/?producto=er-extension-3-metros-electrica-292",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 9000,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "oculto": true,
+      "existencias": 9,
+      "desde": 9000,
+      "descripcion": null
+    },
+    {
+      "id": "er-extension-6-metros-electrica-293",
+      "tipo": "variedades",
+      "nombre": "Extension 6 Metros Electrica",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/293-extencion-6-metros-electrica-1.webp?v=1783465687",
+      "url": "https://www.dctecnology.xyz/?producto=er-extension-6-metros-electrica-293",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 14900,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "oculto": true,
+      "existencias": 12,
+      "desde": 14900,
+      "descripcion": null
+    },
+    {
       "id": "er-gel-2000g-gigante-296",
       "tipo": "variedades",
       "nombre": "Gel 2000G Gigante",
@@ -3278,7 +3355,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 4,
+      "existencias": 3,
       "desde": 46500,
       "descripcion": null
     },
@@ -3321,6 +3398,25 @@
       "descripcion": null
     },
     {
+      "id": "er-audifonos-tipo-c-yookie-originales-ytl09-302",
+      "tipo": "tecnologia",
+      "marca": "Yookie",
+      "nombre": "Audifonos Tipo C Yookie Originales YTL09",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/302-audifonos-tipo-c-yookie-originales-1-9558eac1.webp?v=1793300236",
+      "url": "https://www.dctecnology.xyz/p/er-audifonos-tipo-c-yookie-originales-ytl09-302.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 15500,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "existencias": 3,
+      "desde": 15500,
+      "descripcion": "1 AÑO DE GARANTIA"
+    },
+    {
       "id": "er-secadora-de-unas-309",
       "tipo": "variedades",
       "nombre": "Secadora de Uñas",
@@ -3354,7 +3450,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 2,
+      "existencias": 1,
       "desde": 18000,
       "descripcion": null
     },
@@ -3378,6 +3474,82 @@
       "descripcion": null
     },
     {
+      "id": "er-cortina-de-estrellas-276-luces-323",
+      "tipo": "variedades",
+      "nombre": "Cortina de Estrellas 276 Luces",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/323-cortina-de-estrellas-276-luces-1-17546267.webp?v=1793062206",
+      "url": "https://www.dctecnology.xyz/?producto=er-cortina-de-estrellas-276-luces-323",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 63200,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "oculto": true,
+      "existencias": 74,
+      "desde": 63200,
+      "descripcion": null
+    },
+    {
+      "id": "er-cortina-de-estrellas-138-luces-324",
+      "tipo": "variedades",
+      "nombre": "Cortina de Estrellas 138 Luces",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/324-cortina-de-estrellas-138-luces-1-2c4855a4.webp?v=1793060893",
+      "url": "https://www.dctecnology.xyz/?producto=er-cortina-de-estrellas-138-luces-324",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 29700,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "oculto": true,
+      "existencias": 56,
+      "desde": 29700,
+      "descripcion": null
+    },
+    {
+      "id": "er-cortina-led-96-luces-326",
+      "tipo": "variedades",
+      "nombre": "Cortina LED 96 Luces",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/326-redmi-aridots-2-1-c93ed98b.webp?v=1793059579",
+      "url": "https://www.dctecnology.xyz/?producto=er-cortina-led-96-luces-326",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 12500,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "oculto": true,
+      "existencias": 152,
+      "desde": 12500,
+      "descripcion": null
+    },
+    {
+      "id": "er-arbol-de-luces-con-estrella-180-cm-328",
+      "tipo": "variedades",
+      "nombre": "Arbol de Luces con Estrella 1.80 Cm",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/328-arbol-de-luces-con-estrella-1-80-cm-1-045e3cc4.webp?v=1793060232",
+      "url": "https://www.dctecnology.xyz/?producto=er-arbol-de-luces-con-estrella-180-cm-328",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 119900,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "oculto": true,
+      "existencias": 47,
+      "desde": 119900,
+      "descripcion": null
+    },
+    {
       "id": "er-lampara-de-arcoiris-atardecer-multicolores-rgb-control-330",
       "tipo": "variedades",
       "nombre": "Lampara de Arcoiris Atardecer Multicolores RGB Control",
@@ -3392,7 +3564,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 6,
+      "existencias": 2,
       "desde": 19200,
       "descripcion": null
     },
@@ -3411,7 +3583,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 3,
+      "existencias": 0,
       "desde": 7500,
       "descripcion": null
     },
@@ -3430,7 +3602,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 19,
+      "existencias": 55,
       "desde": 4500,
       "descripcion": null
     },
@@ -3449,7 +3621,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 56,
+      "existencias": 95,
       "desde": 4500,
       "descripcion": null
     },
@@ -3506,7 +3678,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 1,
+      "existencias": 0,
       "desde": 13800,
       "descripcion": null
     },
@@ -3525,7 +3697,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 8,
+      "existencias": 7,
       "desde": 24800,
       "descripcion": null
     },
@@ -3544,7 +3716,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 3,
+      "existencias": 33,
       "desde": 33000,
       "descripcion": null
     },
@@ -3601,7 +3773,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 0,
+      "existencias": 7,
       "desde": 16400,
       "descripcion": null
     },
@@ -3614,14 +3786,14 @@
       "variantes": [
         {
           "nombre": "Unidad",
-          "precio": 13800,
+          "precio": 3000,
           "precio_anterior": null
         }
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 10,
-      "desde": 13800,
+      "existencias": 7,
+      "desde": 3000,
       "descripcion": null
     },
     {
@@ -3633,33 +3805,14 @@
       "variantes": [
         {
           "nombre": "Unidad",
-          "precio": 13800,
+          "precio": 3000,
           "precio_anterior": null
         }
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 10,
-      "desde": 13800,
-      "descripcion": null
-    },
-    {
-      "id": "er-antifaz-coneja-rosa-379",
-      "tipo": "variedades",
-      "nombre": "Antifaz Coneja Rosa",
-      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/379-c0d0b139-bcb1-4187-810c-a9569d9192b1.webp?v=1760814325",
-      "url": "https://www.dctecnology.xyz/?producto=er-antifaz-coneja-rosa-379",
-      "variantes": [
-        {
-          "nombre": "Unidad",
-          "precio": 7500,
-          "precio_anterior": null
-        }
-      ],
-      "sincronizado": true,
-      "oculto": true,
-      "existencias": 9,
-      "desde": 7500,
+      "existencias": 7,
+      "desde": 3000,
       "descripcion": null
     },
     {
@@ -3671,14 +3824,14 @@
       "variantes": [
         {
           "nombre": "Unidad",
-          "precio": 4500,
+          "precio": 3000,
           "precio_anterior": null
         }
       ],
       "sincronizado": true,
       "oculto": true,
       "existencias": 8,
-      "desde": 4500,
+      "desde": 3000,
       "descripcion": null
     },
     {
@@ -3690,14 +3843,14 @@
       "variantes": [
         {
           "nombre": "Unidad",
-          "precio": 5900,
+          "precio": 3000,
           "precio_anterior": null
         }
       ],
       "sincronizado": true,
       "oculto": true,
       "existencias": 11,
-      "desde": 5900,
+      "desde": 3000,
       "descripcion": null
     },
     {
@@ -3709,14 +3862,14 @@
       "variantes": [
         {
           "nombre": "Unidad",
-          "precio": 7900,
+          "precio": 3000,
           "precio_anterior": null
         }
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 9,
-      "desde": 7900,
+      "existencias": 7,
+      "desde": 3000,
       "descripcion": null
     },
     {
@@ -3728,52 +3881,14 @@
       "variantes": [
         {
           "nombre": "Unidad",
-          "precio": 5400,
+          "precio": 3000,
           "precio_anterior": null
         }
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 11,
-      "desde": 5400,
-      "descripcion": null
-    },
-    {
-      "id": "er-sombrero-para-disfraz-negro-384",
-      "tipo": "variedades",
-      "nombre": "Sombrero para Disfraz Negro",
-      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/384-b00f15c7-cd3e-4e90-b414-21b52efd175e.webp?v=1760815909",
-      "url": "https://www.dctecnology.xyz/?producto=er-sombrero-para-disfraz-negro-384",
-      "variantes": [
-        {
-          "nombre": "Unidad",
-          "precio": 6800,
-          "precio_anterior": null
-        }
-      ],
-      "sincronizado": true,
-      "oculto": true,
-      "existencias": 11,
-      "desde": 6800,
-      "descripcion": null
-    },
-    {
-      "id": "er-alas-de-mariposa-con-diadema-y-vara-385",
-      "tipo": "variedades",
-      "nombre": "Alas de Mariposa con Diadema y Vara",
-      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/385-d0ef836d-5250-4292-8b49-9000ac18b7f3.webp?v=1760816153",
-      "url": "https://www.dctecnology.xyz/?producto=er-alas-de-mariposa-con-diadema-y-vara-385",
-      "variantes": [
-        {
-          "nombre": "Unidad",
-          "precio": 11300,
-          "precio_anterior": null
-        }
-      ],
-      "sincronizado": true,
-      "oculto": true,
-      "existencias": 6,
-      "desde": 11300,
+      "existencias": 14,
+      "desde": 3000,
       "descripcion": null
     },
     {
@@ -3886,7 +4001,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 9,
+      "existencias": 8,
       "desde": 14700,
       "descripcion": null
     },
@@ -4019,7 +4134,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 25,
+      "existencias": 22,
       "desde": 5100,
       "descripcion": null
     },
@@ -4114,7 +4229,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 63,
+      "existencias": 61,
       "desde": 800,
       "descripcion": null
     },
@@ -4133,7 +4248,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 45,
+      "existencias": 25,
       "desde": 1500,
       "descripcion": null
     },
@@ -4171,7 +4286,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 77,
+      "existencias": 75,
       "desde": 1500,
       "descripcion": null
     },
@@ -4209,7 +4324,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 23,
+      "existencias": 20,
       "desde": 3600,
       "descripcion": null
     },
@@ -4285,7 +4400,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 62,
+      "existencias": 60,
       "desde": 500,
       "descripcion": null
     },
@@ -4304,7 +4419,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 16,
+      "existencias": 13,
       "desde": 3800,
       "descripcion": null
     },
@@ -4323,7 +4438,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 53,
+      "existencias": 52,
       "desde": 800,
       "descripcion": null
     },
@@ -4380,7 +4495,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 19,
+      "existencias": 17,
       "desde": 3300,
       "descripcion": null
     },
@@ -4399,7 +4514,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 31,
+      "existencias": 30,
       "desde": 3300,
       "descripcion": null
     },
@@ -4494,7 +4609,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 48,
+      "existencias": 47,
       "desde": 2000,
       "descripcion": null
     },
@@ -4513,7 +4628,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 8,
+      "existencias": 5,
       "desde": 1800,
       "descripcion": null
     },
@@ -4532,7 +4647,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 33,
+      "existencias": 31,
       "desde": 1500,
       "descripcion": null
     },
@@ -4570,7 +4685,45 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 51,
+      "existencias": 50,
+      "desde": 2400,
+      "descripcion": null
+    },
+    {
+      "id": "er-liquido-para-lentes-grande-mediano-439",
+      "tipo": "variedades",
+      "nombre": "Liquido para Lentes Grande Mediano",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/439-liquido-para-lentes-grande-mediano-1-51a1c791.webp?v=1793030313",
+      "url": "https://www.dctecnology.xyz/?producto=er-liquido-para-lentes-grande-mediano-439",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 9800,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "oculto": true,
+      "existencias": 3,
+      "desde": 9800,
+      "descripcion": null
+    },
+    {
+      "id": "er-pastillero-semanal-x7-cuadrado-ch23090-441",
+      "tipo": "variedades",
+      "nombre": "Pastillero Semanal X7 Cuadrado CH23090",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/441-pastillero-semanal-x7-cuadrado-ch23090-1-23eae124.webp?v=1793030855",
+      "url": "https://www.dctecnology.xyz/?producto=er-pastillero-semanal-x7-cuadrado-ch23090-441",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 2400,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "oculto": true,
+      "existencias": 6,
       "desde": 2400,
       "descripcion": null
     },
@@ -4589,7 +4742,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 55,
+      "existencias": 52,
       "desde": 2400,
       "descripcion": null
     },
@@ -4608,7 +4761,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 182,
+      "existencias": 174,
       "desde": 18000,
       "descripcion": null
     },
@@ -4626,7 +4779,7 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 6,
+      "existencias": 5,
       "desde": 61500,
       "descripcion": "DISEÑO DE AIRPODS DE SEGUNDA GENERAION"
     },
@@ -4664,7 +4817,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 7,
+      "existencias": 4,
       "desde": 19400,
       "descripcion": null
     },
@@ -4702,7 +4855,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 7,
+      "existencias": 6,
       "desde": 3900,
       "descripcion": null
     },
@@ -4759,7 +4912,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 7,
+      "existencias": 3,
       "desde": 1100,
       "descripcion": null
     },
@@ -4796,7 +4949,7 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 3,
+      "existencias": 2,
       "desde": 52500,
       "descripcion": "&iexcl;Vive la m&uacute;sica con estilo y color! \n Conexi&oacute;n Bluetooth estable \n Luces RGB multicolor que brillan al ritmo \n Sonido potente con Extra Bass Dise&ntilde;o c&oacute;modo y ajustable Bater&iacute;a de larga duraci&oacute;N"
     },
@@ -4815,7 +4968,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 16,
+      "existencias": 14,
       "desde": 37400,
       "descripcion": null
     },
@@ -4834,7 +4987,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 1,
+      "existencias": 0,
       "desde": 13400,
       "descripcion": null
     },
@@ -4872,7 +5025,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 20,
+      "existencias": 19,
       "desde": 5700,
       "descripcion": null
     },
@@ -4891,7 +5044,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 45,
+      "existencias": 40,
       "desde": 4200,
       "descripcion": null
     },
@@ -4910,7 +5063,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 16,
+      "existencias": 14,
       "desde": 11900,
       "descripcion": null
     },
@@ -4948,7 +5101,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 4,
+      "existencias": 2,
       "desde": 9000,
       "descripcion": null
     },
@@ -5040,7 +5193,7 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 8,
+      "existencias": 5,
       "desde": 23300,
       "descripcion": "Mouse óptico inalámbrico, elegante, compacto y confortable, con conexión estable de 2.4GHz que alcanza hasta 10metros. Incluye receptor nano desmontable, diseño plug &amp; play sin drivers y ciclo de vida de interruptores hasta de 5 millones de clics."
     },
@@ -5114,7 +5267,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 6,
+      "existencias": 5,
       "desde": 82500,
       "descripcion": null
     },
@@ -5132,7 +5285,7 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 22,
+      "existencias": 21,
       "desde": 27800,
       "descripcion": "Convierte cualquier lugar en una fiesta con esta m&aacute;quina de karaoke Bluetooth 5.1 con micr&oacute;fono inal&aacute;mbrico y altavoz de 10W .\n Ideal para ni&ntilde;os y adultos, ofrece efectos de voz m&aacute;gicos (voz original, KTV, monstruo y beb&eacute;) y un sonido profesional con reducci&oacute;n de ruido DSP que hace brillar cada nota Con&eacute;ctala f&aacute;cil por Bluetooth, USB o tarjeta TF y disfruta donde quieras de un sonido potente, n&iacute;tido y lleno de diversi&oacute;n."
     },
@@ -5207,7 +5360,7 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 3,
+      "existencias": 1,
       "desde": 18800,
       "descripcion": null
     },
@@ -5226,7 +5379,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 2,
+      "existencias": 0,
       "desde": 36000,
       "descripcion": null
     },
@@ -5245,7 +5398,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 11,
+      "existencias": 1,
       "desde": 2300,
       "descripcion": null
     },
@@ -5264,7 +5417,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 1,
+      "existencias": 0,
       "desde": 78000,
       "descripcion": null
     },
@@ -5326,25 +5479,6 @@
       "descripcion": null
     },
     {
-      "id": "er-kairos-original-fa039m-900-hombre-554",
-      "tipo": "variedades",
-      "nombre": "Kairos Original FA039M-900 Hombre",
-      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/554-kairos-original-fa185m-900-hombre-1.webp?v=1783376472",
-      "url": "https://www.dctecnology.xyz/?producto=er-kairos-original-fa039m-900-hombre-554",
-      "variantes": [
-        {
-          "nombre": "Unidad",
-          "precio": 59900,
-          "precio_anterior": null
-        }
-      ],
-      "sincronizado": true,
-      "oculto": true,
-      "existencias": 1,
-      "desde": 59900,
-      "descripcion": null
-    },
-    {
       "id": "er-kairos-original-fa034m-003b-hombre-556",
       "tipo": "variedades",
       "nombre": "Kairos Original FA034M-003B Hombre",
@@ -5397,7 +5531,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 43,
+      "existencias": 30,
       "desde": 1500,
       "descripcion": null
     },
@@ -5416,7 +5550,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 39,
+      "existencias": 38,
       "desde": 1900,
       "descripcion": null
     },
@@ -5435,7 +5569,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 1,
+      "existencias": 0,
       "desde": 7500,
       "descripcion": null
     },
@@ -5454,7 +5588,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 5,
+      "existencias": 3,
       "desde": 4500,
       "descripcion": null
     },
@@ -5530,7 +5664,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 40,
+      "existencias": 37,
       "desde": 11700,
       "descripcion": null
     },
@@ -5625,7 +5759,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 3,
+      "existencias": 0,
       "desde": 37400,
       "descripcion": null
     },
@@ -5644,7 +5778,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 12,
+      "existencias": 0,
       "desde": 5900,
       "descripcion": null
     },
@@ -5663,7 +5797,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 39,
+      "existencias": 29,
       "desde": 9000,
       "descripcion": null
     },
@@ -5682,7 +5816,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 36,
+      "existencias": 34,
       "desde": 8300,
       "descripcion": null
     },
@@ -5701,7 +5835,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 1,
+      "existencias": 6,
       "desde": 23300,
       "descripcion": null
     },
@@ -5720,7 +5854,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 1,
+      "existencias": 0,
       "desde": 12900,
       "descripcion": null
     },
@@ -5739,7 +5873,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 4,
+      "existencias": 3,
       "desde": 21300,
       "descripcion": null
     },
@@ -5758,7 +5892,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 4,
+      "existencias": 1,
       "desde": 21800,
       "descripcion": null
     },
@@ -5777,7 +5911,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 5,
+      "existencias": 1,
       "desde": 87000,
       "descripcion": null
     },
@@ -5815,7 +5949,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 16,
+      "existencias": 15,
       "desde": 52500,
       "descripcion": null
     },
@@ -5834,7 +5968,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 1,
+      "existencias": 0,
       "desde": 89900,
       "descripcion": null
     },
@@ -5853,7 +5987,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 1,
+      "existencias": 0,
       "desde": 59900,
       "descripcion": null
     },
@@ -5936,7 +6070,7 @@
       "tipo": "tecnologia",
       "nombre": "Audífonos Inalámbricos ANC Enc YW08",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/624-61f866c2-b5fc-4257-b9f9-2aae0941b137.webp?v=1763648828",
-      "url": "https://www.dctecnology.xyz/p/er-airpods-anc-enc-yw08-83.html",
+      "url": "https://www.dctecnology.xyz/?producto=er-airpods-anc-enc-yw08-83",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -5945,9 +6079,10 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 1,
+      "oculto": true,
+      "existencias": 0,
       "desde": 85200,
-      "descripcion": "•Versión Bluetooth: V5.4\n•Tiempo De Reproducción De Música: 6H\n•Tiempo De Conversación: 6H\n•Tiempo de espera (estuche de carga): 180 días\n•Tiempo De Carga (Estuche De Carga): 1,5H\n•Profundidad de reducción de ruido: 37dB\n•Capacidad de la batería: 40mAh\n•Capacidad del estuche de carga: 530mAh\n•Tiempo De Carga (Auricular): 1H\n•Distancia de transmisión: 10 m\n•Potencia nominal: 25 mW"
+      "descripcion": null
     },
     {
       "id": "er-airpods-manos-libres-tws-xg23-84",
@@ -5963,7 +6098,7 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 7,
+      "existencias": 6,
       "desde": 72800,
       "descripcion": "Versión inalámbrica: V5.4\nRango de transmisión: 10M\nPotencia de transmisión: 2,402 GHz-2,480 GHz\nBatería del estuche de carga: 200mAh\nBatería de auriculares: 40 mAh\nTiempos de conversación: alrededor de 5H\nTiempo de música: alrededor de 6H\nVoltaje de carga: DC 5V"
     },
@@ -5990,7 +6125,7 @@
       "id": "er-afeitadora-recargable-3-en-1-628",
       "tipo": "variedades",
       "nombre": "Afeitadora Recargable 3 en 1",
-      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/628-whatsapp-image-2026-03-01-at-54325-pm.webp?v=1772405295",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/628-afeitadora-recargable-3-en-1-1-0b2671be.webp?v=1793487312",
       "url": "https://www.dctecnology.xyz/?producto=er-afeitadora-recargable-3-en-1-628",
       "variantes": [
         {
@@ -6001,7 +6136,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 1,
+      "existencias": 7,
       "desde": 35900,
       "descripcion": null
     },
@@ -6039,7 +6174,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 7,
+      "existencias": 3,
       "desde": 1500,
       "descripcion": null
     },
@@ -6058,7 +6193,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 3,
+      "existencias": 2,
       "desde": 2700,
       "descripcion": null
     },
@@ -6076,7 +6211,7 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 17,
+      "existencias": 12,
       "desde": 3800,
       "descripcion": "COLORES AL AZAR"
     },
@@ -6152,7 +6287,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 9,
+      "existencias": 8,
       "desde": 22500,
       "descripcion": null
     },
@@ -6247,7 +6382,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 38,
+      "existencias": 0,
       "desde": 2200,
       "descripcion": null
     },
@@ -6304,7 +6439,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 2,
+      "existencias": 0,
       "desde": 10500,
       "descripcion": null
     },
@@ -6323,7 +6458,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 15,
+      "existencias": 13,
       "desde": 2700,
       "descripcion": null
     },
@@ -6342,7 +6477,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 23,
+      "existencias": 22,
       "desde": 2900,
       "descripcion": null
     },
@@ -6361,7 +6496,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 24,
+      "existencias": 18,
       "desde": 3200,
       "descripcion": null
     },
@@ -6380,7 +6515,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 13,
+      "existencias": 8,
       "desde": 3600,
       "descripcion": null
     },
@@ -6399,7 +6534,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 10,
+      "existencias": 2,
       "desde": 4400,
       "descripcion": null
     },
@@ -6437,7 +6572,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 10,
+      "existencias": 7,
       "desde": 9600,
       "descripcion": null
     },
@@ -6606,7 +6741,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 1,
+      "existencias": 0,
       "desde": 8400,
       "descripcion": null
     },
@@ -6625,7 +6760,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 1,
+      "existencias": 0,
       "desde": 96000,
       "descripcion": null
     },
@@ -6644,7 +6779,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 5,
+      "existencias": 4,
       "desde": 14900,
       "descripcion": null
     },
@@ -6720,7 +6855,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 8,
+      "existencias": 7,
       "desde": 5100,
       "descripcion": null
     },
@@ -6758,7 +6893,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 22,
+      "existencias": 19,
       "desde": 2700,
       "descripcion": null
     },
@@ -6834,7 +6969,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 13,
+      "existencias": 10,
       "desde": 2000,
       "descripcion": null
     },
@@ -6853,7 +6988,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 2,
+      "existencias": 0,
       "desde": 25400,
       "descripcion": null
     },
@@ -6872,7 +7007,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 8,
+      "existencias": 7,
       "desde": 4800,
       "descripcion": null
     },
@@ -6947,7 +7082,7 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 8,
+      "existencias": 2,
       "desde": 4500,
       "descripcion": "* Potencia: 30 W m&aacute;x.\n\r\n* Material: TPE con n&uacute;cleo de alta calidad\n\r\n* Longitud: 1 m\n\r\n* Modelo compatible: Tipo C\n\r\n* Transmisi&oacute;n de datos\n\r\n* Carga estable"
     },
@@ -6965,7 +7100,7 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 1,
+      "existencias": 5,
       "desde": 11700,
       "descripcion": "¡Libera la potencia! Este cable Tipo-C a Tipo-C de 60W carga tus dispositivos a velocidad luz. Olvida las esperas y sumérgete en la acción. ¿Listo para la carga más rápida de tu vida? ¡Hazlo tuyo!"
     },
@@ -6985,7 +7120,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 19,
+      "existencias": 17,
       "desde": 14900,
       "descripcion": null
     },
@@ -7060,7 +7195,7 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 3,
+      "existencias": 2,
       "desde": 36000,
       "descripcion": "Funci&oacute;n contestar llamadas, conexi&oacute;n inal&aacute;mbrica v5.0, controles y cancelaci&oacute;n de ruido, audio HD, compatible con Android y iPhone, cable de carga y led indicador de carga."
     },
@@ -7079,7 +7214,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 25,
+      "existencias": 11,
       "desde": 6600,
       "descripcion": null
     },
@@ -7134,7 +7269,7 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 3,
+      "existencias": 1,
       "desde": 54800,
       "descripcion": "100% ORIGINAL RESISTENTE AL AGUA CON GARANTIA DE 3 MESES \r\n\r\nBUEN SONIDO Y BAJO"
     },
@@ -7206,9 +7341,27 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 2,
+      "existencias": 1,
       "desde": 39000,
       "descripcion": "100% ORIGINAL \r\n\r\nINCLUYE TODO LO DE LA IMAGEN"
+    },
+    {
+      "id": "er-tv-box-model-3-8gb128gb-826",
+      "tipo": "tecnologia",
+      "nombre": "TV Box Model 3 8GB+128GB",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/826-tv-box-model-3-8gb-128gb-2-ceddf3b3.webp?v=1793296086",
+      "url": "https://www.dctecnology.xyz/p/er-tv-box-model-3-8gb128gb-826.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 104900,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "existencias": 1,
+      "desde": 104900,
+      "descripcion": "TV BOX POTENTE Y RAPIDO"
     },
     {
       "id": "er-hielera-con-bocina-luces-rgb-827",
@@ -7244,7 +7397,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 13,
+      "existencias": 7,
       "desde": 7100,
       "descripcion": null
     },
@@ -7263,27 +7416,8 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 6,
+      "existencias": 5,
       "desde": 11900,
-      "descripcion": null
-    },
-    {
-      "id": "er-impermeable-zapatos-838",
-      "tipo": "variedades",
-      "nombre": "Impermeable Zapatos",
-      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/838-00abd762-98b3-4f2a-9a50-4f4ad524678b.webp?v=1766189290",
-      "url": "https://www.dctecnology.xyz/?producto=er-impermeable-zapatos-838",
-      "variantes": [
-        {
-          "nombre": "Unidad",
-          "precio": 5300,
-          "precio_anterior": null
-        }
-      ],
-      "sincronizado": true,
-      "oculto": true,
-      "existencias": 8,
-      "desde": 5300,
       "descripcion": null
     },
     {
@@ -7339,7 +7473,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 12,
+      "existencias": 11,
       "desde": 6900,
       "descripcion": null
     },
@@ -7358,7 +7492,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 6,
+      "existencias": 2,
       "desde": 9800,
       "descripcion": null
     },
@@ -7376,7 +7510,7 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 5,
+      "existencias": 2,
       "desde": 19500,
       "descripcion": "Micr&oacute;fono: marca digital de silicona\r\n \r\n \r\n Capacidad de la bater&iacute;a: 60mAh\r\n \r\n \r\n Duraci&oacute;n de la bater&iacute;a: 5-6 horas\r\n \r\n \r\n Relaci&oacute;n se&ntilde;al-ruido: 60dB\r\n \r\n \r\n Caracter&iacute;sticas: reducci&oacute;n de ruido, Cable de carga\r\n \r\n \r\n Conector de salida: tipo C"
     },
@@ -7400,6 +7534,25 @@
       "descripcion": null
     },
     {
+      "id": "er-pro-425-cepillo-860",
+      "tipo": "variedades",
+      "nombre": "Pro 425 Cepillo",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/860-9004fcca-be49-44af-81c2-7b4feb7bfb67.webp?v=1766762070",
+      "url": "https://www.dctecnology.xyz/?producto=er-pro-425-cepillo-860",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 3000,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "oculto": true,
+      "existencias": 15,
+      "desde": 3000,
+      "descripcion": null
+    },
+    {
       "id": "er-colgate-triple-accion-x3-pack-125ml-861",
       "tipo": "variedades",
       "nombre": "Colgate Triple Accion X3 Pack 125ML",
@@ -7414,7 +7567,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 4,
+      "existencias": 2,
       "desde": 39000,
       "descripcion": null
     },
@@ -7471,7 +7624,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 12,
+      "existencias": 11,
       "desde": 9000,
       "descripcion": null
     },
@@ -7490,7 +7643,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 20,
+      "existencias": 15,
       "desde": 9200,
       "descripcion": null
     },
@@ -7528,7 +7681,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 4,
+      "existencias": 0,
       "desde": 1500,
       "descripcion": null
     },
@@ -7547,7 +7700,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 1,
+      "existencias": 0,
       "desde": 3000,
       "descripcion": null
     },
@@ -7604,7 +7757,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 8,
+      "existencias": 5,
       "desde": 15800,
       "descripcion": null
     },
@@ -7623,7 +7776,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 2,
+      "existencias": 0,
       "desde": 9000,
       "descripcion": null
     },
@@ -7660,7 +7813,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 69,
+      "existencias": 64,
       "desde": 500,
       "descripcion": null
     },
@@ -7755,7 +7908,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 9,
+      "existencias": 7,
       "desde": 14300,
       "descripcion": null
     },
@@ -7774,7 +7927,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 6,
+      "existencias": 2,
       "desde": 31200,
       "descripcion": null
     },
@@ -7831,7 +7984,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 23,
+      "existencias": 20,
       "desde": 4400,
       "descripcion": null
     },
@@ -7869,7 +8022,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 22,
+      "existencias": 12,
       "desde": 1700,
       "descripcion": null
     },
@@ -7888,8 +8041,27 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 5,
+      "existencias": 3,
       "desde": 100,
+      "descripcion": null
+    },
+    {
+      "id": "er-vitamina-c-la-sante-x1-unidad-904",
+      "tipo": "variedades",
+      "nombre": "Vitamina C la Sante X1 Unidad",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/904-fca25692-69f8-49d0-a8b6-a54a91bc9831.webp?v=1767123868",
+      "url": "https://www.dctecnology.xyz/?producto=er-vitamina-c-la-sante-x1-unidad-904",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 600,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "oculto": true,
+      "existencias": 161,
+      "desde": 600,
       "descripcion": null
     },
     {
@@ -7907,7 +8079,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 1,
+      "existencias": 36,
       "desde": 3100,
       "descripcion": null
     },
@@ -7926,7 +8098,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 40,
+      "existencias": 38,
       "desde": 2500,
       "descripcion": null
     },
@@ -7945,7 +8117,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 4,
+      "existencias": 3,
       "desde": 10800,
       "descripcion": null
     },
@@ -7983,7 +8155,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 6,
+      "existencias": 4,
       "desde": 23000,
       "descripcion": null
     },
@@ -8078,7 +8250,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 8,
+      "existencias": 4,
       "desde": 20700,
       "descripcion": null
     },
@@ -8097,7 +8269,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 1,
+      "existencias": 6,
       "desde": 23400,
       "descripcion": null
     },
@@ -8135,7 +8307,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 6,
+      "existencias": 0,
       "desde": 19800,
       "descripcion": null
     },
@@ -8210,7 +8382,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 4,
+      "existencias": 3,
       "desde": 23400,
       "descripcion": null
     },
@@ -8248,7 +8420,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 2,
+      "existencias": 0,
       "desde": 6800,
       "descripcion": null
     },
@@ -8286,7 +8458,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 3,
+      "existencias": 2,
       "desde": 19400,
       "descripcion": null
     },
@@ -8324,7 +8496,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 19,
+      "existencias": 7,
       "desde": 9000,
       "descripcion": null
     },
@@ -8342,7 +8514,7 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 2,
+      "existencias": 1,
       "desde": 44900,
       "descripcion": "Mouse Ergon&oacute;mico Vertical M1688 Dile adi&oacute;s al dolor de mu&ntilde;eca y evita el t&uacute;nel carpiano. Dise&ntilde;o vertical saludable, 100% inal&aacute;mbrico y con velocidad ajustable. &iexcl;Trabaja c&oacute;modo por horas! ????"
     },
@@ -8380,7 +8552,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 1,
+      "existencias": 3,
       "desde": 23900,
       "descripcion": null
     },
@@ -8475,7 +8647,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 31,
+      "existencias": 19,
       "desde": 900,
       "descripcion": null
     },
@@ -8494,7 +8666,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 1,
+      "existencias": 0,
       "desde": 9300,
       "descripcion": null
     },
@@ -8532,7 +8704,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 6,
+      "existencias": 5,
       "desde": 5100,
       "descripcion": null
     },
@@ -8570,27 +8742,8 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 2,
+      "existencias": 1,
       "desde": 33000,
-      "descripcion": null
-    },
-    {
-      "id": "er-reflector-solar-portatil-993",
-      "tipo": "variedades",
-      "nombre": "Reflector Solar Portatil",
-      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/993-bbb97d53-dc26-455d-8c8a-dd3d31bb721f.webp?v=1768408598",
-      "url": "https://www.dctecnology.xyz/?producto=er-reflector-solar-portatil-993",
-      "variantes": [
-        {
-          "nombre": "Unidad",
-          "precio": 41300,
-          "precio_anterior": null
-        }
-      ],
-      "sincronizado": true,
-      "oculto": true,
-      "existencias": 5,
-      "desde": 41300,
       "descripcion": null
     },
     {
@@ -8608,7 +8761,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 12,
+      "existencias": 10,
       "desde": 17300,
       "descripcion": null
     },
@@ -8665,7 +8818,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 8,
+      "existencias": 7,
       "desde": 6000,
       "descripcion": null
     },
@@ -8737,7 +8890,7 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 3,
+      "existencias": 1,
       "desde": 43200,
       "descripcion": "VARIEDAD DE COLORES"
     },
@@ -8773,7 +8926,7 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 10,
+      "existencias": 9,
       "desde": 39700,
       "descripcion": "Rat&oacute;n Inal&aacute;mbrico Profesional (Modelo YE03)\r\n\r\nEs un mouse ergon&oacute;mico con bater&iacute;a recargable de 500mAh (sin pilas) e iluminaci&oacute;n LED. Destaca por su conectividad dual (Bluetooth 5.0 + 2.4G) que garantiza una respuesta r&aacute;pida y estable. Es compatible con pr&aacute;cticamente todas las versiones de Windows."
     },
@@ -8846,7 +8999,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 3,
+      "existencias": 2,
       "desde": 67400,
       "descripcion": null
     },
@@ -8940,7 +9093,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 6,
+      "existencias": 5,
       "desde": 63000,
       "descripcion": null
     },
@@ -8959,7 +9112,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 2,
+      "existencias": 1,
       "desde": 13700,
       "descripcion": null
     },
@@ -8978,7 +9131,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 22,
+      "existencias": 19,
       "desde": 4100,
       "descripcion": null
     },
@@ -9033,7 +9186,7 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 6,
+      "existencias": 5,
       "desde": 86300,
       "descripcion": "¡Lleva tu estilo al máximo nivel! El P9 ULTRA COMBO te sorprende con 7 correas para cada ocasión. ¡Descubre la versatilidad que te hará destacar sin límites! ¿Listo para transformar tu look?"
     },
@@ -9052,7 +9205,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 9,
+      "existencias": 7,
       "desde": 8200,
       "descripcion": null
     },
@@ -9164,7 +9317,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 5,
+      "existencias": 3,
       "desde": 7500,
       "descripcion": null
     },
@@ -9245,25 +9398,6 @@
       "descripcion": null
     },
     {
-      "id": "er-bolsa-termica-siliconada-1068",
-      "tipo": "variedades",
-      "nombre": "Bolsa Termica Siliconada",
-      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1068-2f670c38-bcd4-43e7-ba01-6a0b85cce7b3.webp?v=1769725006",
-      "url": "https://www.dctecnology.xyz/?producto=er-bolsa-termica-siliconada-1068",
-      "variantes": [
-        {
-          "nombre": "Unidad",
-          "precio": 12600,
-          "precio_anterior": null
-        }
-      ],
-      "sincronizado": true,
-      "oculto": true,
-      "existencias": 1,
-      "desde": 12600,
-      "descripcion": null
-    },
-    {
       "id": "er-metro-costurero-1069",
       "tipo": "variedades",
       "nombre": "Metro Costurero",
@@ -9278,7 +9412,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 14,
+      "existencias": 11,
       "desde": 800,
       "descripcion": null
     },
@@ -9392,7 +9526,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 45,
+      "existencias": 44,
       "desde": 7200,
       "descripcion": null
     },
@@ -9468,7 +9602,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 7,
+      "existencias": 6,
       "desde": 4300,
       "descripcion": null
     },
@@ -9476,7 +9610,7 @@
       "id": "er-plancha-para-cabello-3d-1086",
       "tipo": "variedades",
       "nombre": "Plancha para Cabello 3D",
-      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1086-563d01e7-4a64-47f6-a2a8-a904e9061386.webp?v=1769821329",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1086-plancha-para-cabello-3d-1-92f36095.webp?v=1793483029",
       "url": "https://www.dctecnology.xyz/?producto=er-plancha-para-cabello-3d-1086",
       "variantes": [
         {
@@ -9487,7 +9621,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 0,
+      "existencias": 7,
       "desde": 42800,
       "descripcion": null
     },
@@ -9541,7 +9675,7 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 5,
+      "existencias": 4,
       "desde": 89900,
       "descripcion": "PRODUCTO ORIGINAL CON GARANTIA"
     },
@@ -9560,7 +9694,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 21,
+      "existencias": 19,
       "desde": 11700,
       "descripcion": null
     },
@@ -9636,9 +9770,27 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 39,
+      "existencias": 29,
       "desde": 1500,
       "descripcion": null
+    },
+    {
+      "id": "er-game-retro-500-juegos-tradicional-1108",
+      "tipo": "tecnologia",
+      "nombre": "Game Retro 500 Juegos Tradicional",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1108-game-retro-500-juegos-tradicional-1.webp?v=1783710722",
+      "url": "https://www.dctecnology.xyz/p/er-game-retro-500-juegos-tradicional-1108.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 37400,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "existencias": 3,
+      "desde": 37400,
+      "descripcion": "SOLO PUEDE JUGAR UNA PERSONA AL TIEMPO"
     },
     {
       "id": "er-aceite-semilla-de-cannabis-250-ml-grande-1109",
@@ -9655,7 +9807,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 8,
+      "existencias": 7,
       "desde": 21500,
       "descripcion": null
     },
@@ -9674,7 +9826,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 36,
+      "existencias": 35,
       "desde": 4800,
       "descripcion": null
     },
@@ -9692,7 +9844,7 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 188,
+      "existencias": 172,
       "desde": 5900,
       "descripcion": "Caracter&iacute;sticas:\r\n\r\nEspacio libre para el puerto de carga.\r\n\r\nSe ajusta a m&uacute;ltiples &aacute;ngulos.\r\n\r\nAltura m&aacute;xima de 32 cm."
     },
@@ -9782,7 +9934,7 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 5,
+      "existencias": 6,
       "desde": 9500,
       "descripcion": "Caracter&iacute;sticas:\r\n\r\n&bull; Mini tr&iacute;pode flexible.\n\r\n&bull; Alto de 24 cm (tr&iacute;pode en estado cerrado incluyendo el soporte del celular).\n\r\n&bull; Fabricado en ABS y espuma de alta densidad, compacto y ligero.\n\r\n&bull; Universal para tel&eacute;fono o para c&aacute;mara."
     },
@@ -9818,7 +9970,7 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 1,
+      "existencias": 4,
       "desde": 68100,
       "descripcion": "Los aud&iacute;fonos Yooki ofrecen una experiencia de sonido de alta fidelidad, con un micr&oacute;fono de alta definici&oacute;n para llamadas claras. Son c&oacute;modos de llevar durante todo el d&iacute;a, con una amplia compatibilidad con diversos dispositivos. Su dise&ntilde;o elegante y moderno los convierte en la opci&oacute;n perfecta para quienes buscan calidad y estilo."
     },
@@ -9836,7 +9988,7 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 25,
+      "existencias": 24,
       "desde": 3200,
       "descripcion": "Caracter&iacute;sticas:\r\n\r\n\r\n \r\n Hecho de material ABS de alta calidad, duradero y liviano.\r\n \r\n \r\n F&aacute;cil de ajustar y transportar.\r\n \r\n \r\n Soporte de celular o tablet.\r\n \r\n \r\n Con un dise&ntilde;o plegable y ajustable, puede ajustar el &aacute;ngulo dentro de 270 grados a voluntad."
     },
@@ -9872,7 +10024,7 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 12,
+      "existencias": 6,
       "desde": 4100,
       "descripcion": "100% ORIGINAL"
     },
@@ -9890,7 +10042,7 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 50,
+      "existencias": 48,
       "desde": 2000,
       "descripcion": "100% ORIGINAL"
     },
@@ -9908,7 +10060,7 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 30,
+      "existencias": 28,
       "desde": 3600,
       "descripcion": "Caracter&iacute;sticas:\r\n\r\n&bull; Soporte fijo y de aluminio.\n\r\n&bull; Cuenta con una articulaci&oacute;n flexible que permite ajustar el &aacute;ngulo de 5&deg; a 45&deg;.\n\r\n&bull; Se adapta a dispositivos de entre 4.0 y 7.9 pulgadas."
     },
@@ -10093,7 +10245,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 40,
+      "existencias": 39,
       "desde": 4100,
       "descripcion": null
     },
@@ -10131,7 +10283,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 5,
+      "existencias": 3,
       "desde": 25800,
       "descripcion": null
     },
@@ -10150,7 +10302,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 6,
+      "existencias": 3,
       "desde": 13000,
       "descripcion": null
     },
@@ -10169,7 +10321,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 6,
+      "existencias": 5,
       "desde": 9900,
       "descripcion": null
     },
@@ -10207,7 +10359,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 17,
+      "existencias": 16,
       "desde": 2300,
       "descripcion": null
     },
@@ -10319,7 +10471,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 15,
+      "existencias": 12,
       "desde": 14900,
       "descripcion": null
     },
@@ -10343,22 +10495,22 @@
       "descripcion": null
     },
     {
-      "id": "er-humidificador-nave-espacial-1168",
+      "id": "er-x120-marcadores-doble-punta-1169",
       "tipo": "variedades",
-      "nombre": "Humidificador Nave Espacial",
-      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1168-whatsapp-image-2026-02-18-at-53848-pm.webp?v=1771454460",
-      "url": "https://www.dctecnology.xyz/?producto=er-humidificador-nave-espacial-1168",
+      "nombre": "X120 Marcadores Doble Punta",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1169-whatsapp-image-2026-02-19-at-13957-pm.webp?v=1771526492",
+      "url": "https://www.dctecnology.xyz/?producto=er-x120-marcadores-doble-punta-1169",
       "variantes": [
         {
           "nombre": "Unidad",
-          "precio": 30000,
+          "precio": 62400,
           "precio_anterior": null
         }
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 2,
-      "desde": 30000,
+      "existencias": 6,
+      "desde": 62400,
       "descripcion": null
     },
     {
@@ -10376,7 +10528,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 5,
+      "existencias": 4,
       "desde": 37100,
       "descripcion": null
     },
@@ -10395,7 +10547,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 10,
+      "existencias": 8,
       "desde": 11700,
       "descripcion": null
     },
@@ -10476,6 +10628,25 @@
       "descripcion": null
     },
     {
+      "id": "er-cepillo-alisador-de-cabello-1176",
+      "tipo": "variedades",
+      "nombre": "Cepillo Alisador de Cabello",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1176-whatsapp-image-2026-02-19-at-103715-pm.webp?v=1771558765",
+      "url": "https://www.dctecnology.xyz/?producto=er-cepillo-alisador-de-cabello-1176",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 19400,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "oculto": true,
+      "existencias": 11,
+      "desde": 19400,
+      "descripcion": null
+    },
+    {
       "id": "er-masajeador-facial-frio-roller-1177",
       "tipo": "variedades",
       "nombre": "Masajeador Facial Frio Roller",
@@ -10509,7 +10680,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 2,
+      "existencias": 0,
       "desde": 58200,
       "descripcion": null
     },
@@ -10546,7 +10717,7 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 3,
+      "existencias": 1,
       "desde": 51000,
       "descripcion": "Eleva tu estilo y productividad con este exclusivo combo de 8 piezas. Incluye un reloj inteligente Smart Ultra con dise&ntilde;o met&aacute;lico, un power bank inal&aacute;mbrico, un cargador MagSafe, aud&iacute;fonos Bluetooth, y m&aacute;s. Recibe llamadas, notificaciones de WhatsApp y Facebook, y monitorea tu salud. &iexcl;Todo lo que necesitas para estar conectado!"
     },
@@ -10565,7 +10736,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 13,
+      "existencias": 9,
       "desde": 5100,
       "descripcion": null
     },
@@ -10584,7 +10755,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 7,
+      "existencias": 6,
       "desde": 25200,
       "descripcion": null
     },
@@ -10646,25 +10817,6 @@
       "descripcion": null
     },
     {
-      "id": "er-gorro-de-natacion-1192",
-      "tipo": "variedades",
-      "nombre": "Gorro de Natacion",
-      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1192-whatsapp-image-2026-02-23-at-44541-pm.webp?v=1771883162",
-      "url": "https://www.dctecnology.xyz/?producto=er-gorro-de-natacion-1192",
-      "variantes": [
-        {
-          "nombre": "Unidad",
-          "precio": 5700,
-          "precio_anterior": null
-        }
-      ],
-      "sincronizado": true,
-      "oculto": true,
-      "existencias": 1,
-      "desde": 5700,
-      "descripcion": null
-    },
-    {
       "id": "er-metro-3mt-1195",
       "tipo": "variedades",
       "nombre": "Metro 3MT",
@@ -10679,7 +10831,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 11,
+      "existencias": 10,
       "desde": 5400,
       "descripcion": null
     },
@@ -10698,7 +10850,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 12,
+      "existencias": 6,
       "desde": 3000,
       "descripcion": null
     },
@@ -10717,7 +10869,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 2,
+      "existencias": 1,
       "desde": 35700,
       "descripcion": null
     },
@@ -10736,7 +10888,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 2,
+      "existencias": 0,
       "desde": 37400,
       "descripcion": null
     },
@@ -10754,7 +10906,7 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 9,
+      "existencias": 8,
       "desde": 8300,
       "descripcion": "Conector USB Tipo C\n\r\nCompatible con la mayor&iacute;a de dispositivos Android\r\n\r\nSonido Est&eacute;reo HD\n\r\nDisfruta de graves potentes y agudos claros\r\n\r\nControl integrado\n\r\nLlamadas, m&uacute;sica y ajuste de volumen con facilidad\r\n\r\nCOLORES VARIOS DISPPNIBLES"
     },
@@ -10763,7 +10915,7 @@
       "tipo": "tecnologia",
       "nombre": "Mouse Inalambrico DJ-125",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1210-whatsapp-image-2026-03-02-at-122634-pm.webp?v=1772472413",
-      "url": "https://www.dctecnology.xyz/p/er-mouse-inalambrico-dj-125-1210.html",
+      "url": "https://www.dctecnology.xyz/?producto=er-mouse-inalambrico-dj-125-1210",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -10772,9 +10924,10 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 1,
+      "oculto": true,
+      "existencias": 0,
       "desde": 29400,
-      "descripcion": "CONEXION A BLUETOOH RECARGABLE"
+      "descripcion": null
     },
     {
       "id": "er-smart-watch-gamebox-correa-pro-hot-5-167",
@@ -10827,7 +10980,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 47,
+      "existencias": 46,
       "desde": 3200,
       "descripcion": null
     },
@@ -10846,7 +10999,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 1,
+      "existencias": 0,
       "desde": 9800,
       "descripcion": null
     },
@@ -10865,27 +11018,8 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 18,
+      "existencias": 17,
       "desde": 3800,
-      "descripcion": null
-    },
-    {
-      "id": "er-pulsera-corazon-de-jesus-tejido-en-rodio-150-1221",
-      "tipo": "variedades",
-      "nombre": "Pulsera Corazon de Jesus Tejido en Rodio 150",
-      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1221-whatsapp-image-2026-03-04-at-54757-pm.webp?v=1772664504",
-      "url": "https://www.dctecnology.xyz/?producto=er-pulsera-corazon-de-jesus-tejido-en-rodio-150-1221",
-      "variantes": [
-        {
-          "nombre": "Unidad",
-          "precio": 18800,
-          "precio_anterior": null
-        }
-      ],
-      "sincronizado": true,
-      "oculto": true,
-      "existencias": 1,
-      "desde": 18800,
       "descripcion": null
     },
     {
@@ -10922,7 +11056,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 2,
+      "existencias": 1,
       "desde": 11300,
       "descripcion": null
     },
@@ -10960,7 +11094,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 3,
+      "existencias": 1,
       "desde": 16500,
       "descripcion": null
     },
@@ -10979,7 +11113,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 7,
+      "existencias": 2,
       "desde": 9800,
       "descripcion": null
     },
@@ -11092,7 +11226,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 4,
+      "existencias": 3,
       "desde": 17700,
       "descripcion": null
     },
@@ -11187,7 +11321,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 6,
+      "existencias": 8,
       "desde": 52500,
       "descripcion": null
     },
@@ -11262,7 +11396,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 6,
+      "existencias": 5,
       "desde": 29300,
       "descripcion": null
     },
@@ -11281,7 +11415,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 9,
+      "existencias": 8,
       "desde": 13400,
       "descripcion": null
     },
@@ -11300,7 +11434,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 11,
+      "existencias": 8,
       "desde": 16400,
       "descripcion": null
     },
@@ -11319,7 +11453,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 10,
+      "existencias": 5,
       "desde": 6900,
       "descripcion": null
     },
@@ -11355,7 +11489,7 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 10,
+      "existencias": 9,
       "desde": 104900,
       "descripcion": "AIRPODS PRO SONIDO EXCELENTE\r\n\r\nGARANTIA DE 6 MESES"
     },
@@ -11522,7 +11656,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 2,
+      "existencias": 1,
       "desde": 23400,
       "descripcion": null
     },
@@ -11559,7 +11693,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 3,
+      "existencias": 1,
       "desde": 12000,
       "descripcion": null
     },
@@ -11615,7 +11749,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 8,
+      "existencias": 7,
       "desde": 2400,
       "descripcion": null
     },
@@ -11634,7 +11768,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 3,
+      "existencias": 1,
       "desde": 10200,
       "descripcion": null
     },
@@ -11653,7 +11787,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 2,
+      "existencias": 1,
       "desde": 6800,
       "descripcion": null
     },
@@ -11690,7 +11824,7 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 4,
+      "existencias": 3,
       "desde": 35100,
       "descripcion": "Mejora la se&ntilde;al de internet en tu hogar u oficina con este Repetidor WiFi Inal&aacute;mbrico-N. Ampl&iacute;a la cobertura de tu red, ayuda a reducir zonas con se&ntilde;al d&eacute;bil y permite conectar equipos por WiFi o puerto LAN. Su bot&oacute;n WPS facilita la configuraci&oacute;n y su dise&ntilde;o compacto se adapta a cualquier espacio. Ideal para habitaciones, salas, oficinas y puntos alejados del router."
     },
@@ -11709,7 +11843,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 2,
+      "existencias": 1,
       "desde": 74900,
       "descripcion": null
     },
@@ -11756,7 +11890,7 @@
       "tipo": "tecnologia",
       "nombre": "Maquina de Verificacion de Billetes",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1346-08b5884f-ef30-496e-b184-1e536b70c790.webp?v=1777233857",
-      "url": "https://www.dctecnology.xyz/p/er-maquina-de-verificacion-de-billetes-201.html",
+      "url": "https://www.dctecnology.xyz/?producto=er-maquina-de-verificacion-de-billetes-201",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -11765,16 +11899,17 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 1,
+      "oculto": true,
+      "existencias": 0,
       "desde": 29900,
-      "descripcion": "Protege tu negocio con este verificador de billetes UV, ideal para revisar billetes de forma r&aacute;pida y confiable. Su luz ultravioleta permite detectar marcas de seguridad, cuenta con regla de medici&oacute;n integrada y dise&ntilde;o compacto para caja, mostrador u oficina. F&aacute;cil de usar, resistente y &uacute;til para comercios, ventas y manejo diario de efectivo."
+      "descripcion": null
     },
     {
       "id": "er-audifonos-m10-202",
       "tipo": "tecnologia",
       "nombre": "Audifonos M10",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1347-86fd242b-4f70-487c-988d-132d23c2db6b.webp?v=1777235192",
-      "url": "https://www.dctecnology.xyz/p/er-audifonos-m10-202.html",
+      "url": "https://www.dctecnology.xyz/?producto=er-audifonos-m10-202",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -11783,9 +11918,10 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 2,
+      "oculto": true,
+      "existencias": 0,
       "desde": 18800,
-      "descripcion": "Aud&iacute;fonos inal&aacute;mbricos M10 con estuche de carga, dise&ntilde;o compacto y pantalla indicadora de bater&iacute;a. Ideales para llamadas, m&uacute;sica y uso diario, con conexi&oacute;n Bluetooth y formato pr&aacute;ctico para llevar en el bolsillo. Una opci&oacute;n moderna, funcional y f&aacute;cil de vender por su presentaci&oacute;n llamativa."
+      "descripcion": null
     },
     {
       "id": "er-maleta-de-mascotass-1348",
@@ -11802,7 +11938,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 3,
+      "existencias": 1,
       "desde": 67400,
       "descripcion": null
     },
@@ -11878,7 +12014,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 2,
+      "existencias": 0,
       "desde": 8900,
       "descripcion": null
     },
@@ -11916,7 +12052,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 8,
+      "existencias": 6,
       "desde": 8800,
       "descripcion": null
     },
@@ -11953,7 +12089,7 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 15,
+      "existencias": 14,
       "desde": 13500,
       "descripcion": "BAFLE ECONOMICO\r\n\r\nParlante port&aacute;til\n\r\nMedidas aproximadas del producto: 13 x 8 cm.\n\r\nIncluye cable USB de carga.\n\r\nConexi&oacute;n: bluetooth / USB / Micro SD.\n\r\nCompatible con todos los dispositivos.\n\r\nColor: rojo y negro"
     },
@@ -11991,7 +12127,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 2,
+      "existencias": 0,
       "desde": 39000,
       "descripcion": null
     },
@@ -12010,7 +12146,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 1,
+      "existencias": 0,
       "desde": 18800,
       "descripcion": null
     },
@@ -12048,7 +12184,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 7,
+      "existencias": 6,
       "desde": 21500,
       "descripcion": null
     },
@@ -12162,7 +12298,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 4,
+      "existencias": 0,
       "desde": 8700,
       "descripcion": null
     },
@@ -12200,7 +12336,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 63,
+      "existencias": 0,
       "desde": 2900,
       "descripcion": null
     },
@@ -12219,7 +12355,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 11,
+      "existencias": 0,
       "desde": 5400,
       "descripcion": null
     },
@@ -12275,7 +12411,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 10,
+      "existencias": 7,
       "desde": 16200,
       "descripcion": null
     },
@@ -12293,7 +12429,7 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 10,
+      "existencias": 7,
       "desde": 14900,
       "descripcion": "Auriculares 100% inal&aacute;mbricos con un dise&ntilde;o compacto y elegante, sonido n&iacute;tido y bater&iacute;a de larga duraci&oacute;n. Su estuche de carga digital te muestra el nivel de bater&iacute;a en tiempo real, y el dise&ntilde;o dividido permite usar cada auricular por separado. Perfectos para m&uacute;sica, llamadas y tu d&iacute;a a d&iacute;a sin cables ni complicaciones."
     },
@@ -12330,7 +12466,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 7,
+      "existencias": 1,
       "desde": 8300,
       "descripcion": null
     },
@@ -12348,9 +12484,47 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 2,
+      "existencias": 1,
       "desde": 54000,
       "descripcion": "Smartwatch con dise&ntilde;o moderno y funciones avanzadas para el d&iacute;a a d&iacute;a. Cuenta con llamadas Bluetooth, modo deportivo, carga inal&aacute;mbrica y monitoreo inteligente. Incluye 7 correas para combinar con cualquier estilo.\r\n\r\nTecnolog&iacute;a, elegancia y versatilidad en un solo producto."
+    },
+    {
+      "id": "er-corrector-electrico-de-postura-unisex-1430",
+      "tipo": "variedades",
+      "nombre": "Corrector Electrico de Postura Unisex",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1430-whatsapp-image-2026-05-16-at-24901-pm.webp?v=1778961107",
+      "url": "https://www.dctecnology.xyz/?producto=er-corrector-electrico-de-postura-unisex-1430",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 17300,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "oculto": true,
+      "existencias": 10,
+      "desde": 17300,
+      "descripcion": null
+    },
+    {
+      "id": "er-cortina-led-192-luces-1476",
+      "tipo": "variedades",
+      "nombre": "Cortina LED 192 Luces",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1476-cortina-led-192-luces-1-2f5af0af.webp?v=1793061621",
+      "url": "https://www.dctecnology.xyz/?producto=er-cortina-led-192-luces-1476",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 23100,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "oculto": true,
+      "existencias": 80,
+      "desde": 23100,
+      "descripcion": null
     },
     {
       "id": "er-conector-multiple-de-3-con-polo-a-tierra-3-patas-fino-1489",
@@ -12481,7 +12655,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 7,
+      "existencias": 6,
       "desde": 6600,
       "descripcion": null
     },
@@ -12556,7 +12730,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 5,
+      "existencias": 4,
       "desde": 100,
       "descripcion": null
     },
@@ -12575,7 +12749,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 23,
+      "existencias": 21,
       "desde": 600,
       "descripcion": null
     },
@@ -12594,7 +12768,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 4,
+      "existencias": 3,
       "desde": 7200,
       "descripcion": null
     },
@@ -12689,7 +12863,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 5,
+      "existencias": 2,
       "desde": 10200,
       "descripcion": null
     },
@@ -12717,7 +12891,7 @@
       "tipo": "tecnologia",
       "nombre": "Smartwacht Serie 11 Mini",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1511-smartwacht-serie-11-mini-2-640c0324.webp?v=1788980533",
-      "url": "https://www.dctecnology.xyz/p/er-smartwacht-serie-11-mini-213.html",
+      "url": "https://www.dctecnology.xyz/?producto=er-smartwacht-serie-11-mini-213",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -12726,9 +12900,10 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 1,
+      "oculto": true,
+      "existencias": 0,
       "desde": 52400,
-      "descripcion": "Función Contestar Ilamadas, Cargador magnético, Material aleación de zinc,\r\nControl de presión arterial + 2 pulso. Compatible con Android y iphone"
+      "descripcion": null
     },
     {
       "id": "er-cine-colombia-pin-entrada-1518",
@@ -12802,7 +12977,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 17,
+      "existencias": 10,
       "desde": 9000,
       "descripcion": null
     },
@@ -12859,7 +13034,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 6,
+      "existencias": 0,
       "desde": 7500,
       "descripcion": null
     },
@@ -12878,8 +13053,27 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 5,
+      "existencias": 4,
       "desde": 12900,
+      "descripcion": null
+    },
+    {
+      "id": "er-luces-lineal-92-luces-1553",
+      "tipo": "variedades",
+      "nombre": "Luces Lineal 92 Luces",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1553-1-1-hombre-mercedes-benz-intense-1-ca279f0c.webp?v=1793123978",
+      "url": "https://www.dctecnology.xyz/?producto=er-luces-lineal-92-luces-1553",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 6800,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "oculto": true,
+      "existencias": 58,
+      "desde": 6800,
       "descripcion": null
     },
     {
@@ -12897,7 +13091,7 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 5,
+      "existencias": 2,
       "desde": 21500,
       "descripcion": "Yookie Ei32 &ndash; Carga r&aacute;pida 18W \r\n\r\n1 A&Ntilde;O DE GARANTIA\r\n\r\nDisfruta de carga r&aacute;pida QC3.0 con reconocimiento inteligente para tus dispositivos. Con salida USB-C, alta potencia y protecci&oacute;n m&uacute;ltiple, tu equipo estar&aacute; seguro mientras se carga r&aacute;pidamente. Incluye cable USB a Tipo C para empezar a usarlo de inmediato. Ideal para smartphones, tablets y otros dispositivos modernos."
     },
@@ -12970,7 +13164,7 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 2,
+      "existencias": 1,
       "desde": 9800,
       "descripcion": "Graba audio y video con calidad profesional de manera sencilla. Con conexi&oacute;n Tipo C, compacto y port&aacute;til, ideal para entrevistas, vlogs, clases online y transmisiones en vivo. Incluye accesorios para un uso c&oacute;modo y vers&aacute;til."
     },
@@ -13025,7 +13219,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 16,
+      "existencias": 11,
       "desde": 51000,
       "descripcion": null
     },
@@ -13044,7 +13238,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 2,
+      "existencias": 1,
       "desde": 7400,
       "descripcion": null
     },
@@ -13082,7 +13276,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 10,
+      "existencias": 9,
       "desde": 7600,
       "descripcion": null
     },
@@ -13177,7 +13371,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 151,
+      "existencias": 142,
       "desde": 13400,
       "descripcion": null
     },
@@ -13252,7 +13446,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 3,
+      "existencias": 2,
       "desde": 29900,
       "descripcion": null
     },
@@ -13271,7 +13465,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 5,
+      "existencias": 4,
       "desde": 52400,
       "descripcion": null
     },
@@ -13289,7 +13483,7 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 9,
+      "existencias": 5,
       "desde": 59900,
       "descripcion": "Smart Watch D200 Ultra 2 es un combo completo y moderno: incluye reloj inteligente, aud&iacute;fonos inal&aacute;mbricos y varias correas intercambiables para combinar con tu estilo.\r\n\r\nIdeal para llamadas, m&uacute;sica, notificaciones, deporte y uso diario. Una excelente opci&oacute;n para quienes buscan tecnolog&iacute;a, practicidad y variedad en un solo kit."
     },
@@ -13298,7 +13492,7 @@
       "tipo": "tecnologia",
       "nombre": "Smart Watch + Audifonos I20",
       "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1607-792dedf8-0fcd-41c7-ab01-c70ca4ade4fd-1.webp?v=1781137795",
-      "url": "https://www.dctecnology.xyz/p/er-smart-watch-audifonos-i20-230.html",
+      "url": "https://www.dctecnology.xyz/?producto=er-smart-watch-audifonos-i20-230",
       "variantes": [
         {
           "nombre": "Unidad",
@@ -13307,9 +13501,10 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 3,
+      "oculto": true,
+      "existencias": 0,
       "desde": 52500,
-      "descripcion": "Smart Watch i20 Ultra Max Suit es un kit completo y pr&aacute;ctico: incluye reloj inteligente, aud&iacute;fonos, cargador y varias correas para cambiar de estilo cuando quieras.\r\n\r\nIdeal para llamadas, notificaciones, m&uacute;sica, deporte y uso diario. Todo en una sola presentaci&oacute;n, moderno, funcional y perfecto para regalar o revender."
+      "descripcion": null
     },
     {
       "id": "er-paleta-acuarelas-med-1609",
@@ -13382,7 +13577,7 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 3,
+      "existencias": 1,
       "desde": 82500,
       "descripcion": "Cuando buscamos un proyector port&aacute;til, lo imprescindible es que sea peque&ntilde;o y poco pesado. En este caso, el proyector YG 300 cumple estas premisas, con unas dimensiones de 12.50 x 8.50 x 4.50 cm y un peso de 245 g. No es de tama&ntilde;o de bolsillo, pero entra sin ninguna dificultad dentro de cualquier bolso o mochila, para acompa&ntilde;arte en todo momento. El proyector est&aacute; realizado en material pl&aacute;stico ABS, robusto y una combinaci&oacute;n de color blanco y amarillo que le aporta un toque desenfadado.\n\r\n\n\r\nProyector LCD YG-300\n\r\nReproductor multimedia con 320 "
     },
@@ -13401,7 +13596,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 4,
+      "existencias": 3,
       "desde": 186800,
       "descripcion": null
     },
@@ -13420,7 +13615,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 2,
+      "existencias": 0,
       "desde": 19500,
       "descripcion": null
     },
@@ -13458,7 +13653,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 6,
+      "existencias": 5,
       "desde": 14300,
       "descripcion": null
     },
@@ -13477,7 +13672,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 1,
+      "existencias": 0,
       "desde": 21800,
       "descripcion": null
     },
@@ -13496,7 +13691,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 8,
+      "existencias": 5,
       "desde": 6900,
       "descripcion": null
     },
@@ -13515,7 +13710,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 185,
+      "existencias": 183,
       "desde": 2100,
       "descripcion": null
     },
@@ -13534,7 +13729,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 20,
+      "existencias": 2,
       "desde": 4800,
       "descripcion": null
     },
@@ -13553,7 +13748,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 49,
+      "existencias": 42,
       "desde": 4800,
       "descripcion": null
     },
@@ -13629,7 +13824,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 32,
+      "existencias": 31,
       "desde": 1500,
       "descripcion": null
     },
@@ -13648,7 +13843,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 0,
+      "existencias": 11,
       "desde": 112400,
       "descripcion": null
     },
@@ -13672,6 +13867,24 @@
       "descripcion": null
     },
     {
+      "id": "er-luz-led-potente-para-celular-corazon-1642",
+      "tipo": "tecnologia",
+      "nombre": "Luz LED Potente para Celular Corazon",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1642-07ec2791-cdcd-481f-8879-917ea184fe48-1.webp?v=1782340334",
+      "url": "https://www.dctecnology.xyz/p/er-luz-led-potente-para-celular-corazon-1642.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 22400,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "existencias": 6,
+      "desde": 22400,
+      "descripcion": "Luz LED en forma de coraz&oacute;n con tecnolog&iacute;a RGB (modelo M85RGB), ofrece colores vibrantes, efectos din&aacute;micos y tonos blanco fr&iacute;o/c&aacute;lido. Su dise&ntilde;o proporciona iluminaci&oacute;n amplia y uniforme. Es recargable para uso inal&aacute;mbrico e incluye un clip de sujeci&oacute;n universal para smartphones."
+    },
+    {
       "id": "er-cuello-de-refrigeracion-1644",
       "tipo": "variedades",
       "nombre": "Cuello de Refrigeracion",
@@ -13686,7 +13899,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 4,
+      "existencias": 3,
       "desde": 9000,
       "descripcion": null
     },
@@ -13705,7 +13918,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 2,
+      "existencias": 1,
       "desde": 9000,
       "descripcion": null
     },
@@ -13724,7 +13937,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 21,
+      "existencias": 20,
       "desde": 2400,
       "descripcion": null
     },
@@ -13781,7 +13994,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 7,
+      "existencias": 6,
       "desde": 3600,
       "descripcion": null
     },
@@ -13800,7 +14013,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 5,
+      "existencias": 4,
       "desde": 22400,
       "descripcion": null
     },
@@ -13819,7 +14032,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 3,
+      "existencias": 0,
       "desde": 4400,
       "descripcion": null
     },
@@ -13875,7 +14088,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 39,
+      "existencias": 38,
       "desde": 3200,
       "descripcion": null
     },
@@ -13894,7 +14107,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 3,
+      "existencias": 2,
       "desde": 24000,
       "descripcion": null
     },
@@ -14007,7 +14220,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 3,
+      "existencias": 1,
       "desde": 14900,
       "descripcion": null
     },
@@ -14026,7 +14239,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 3,
+      "existencias": 0,
       "desde": 16800,
       "descripcion": null
     },
@@ -14064,7 +14277,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 5,
+      "existencias": 4,
       "desde": 5700,
       "descripcion": null
     },
@@ -14102,7 +14315,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 31,
+      "existencias": 29,
       "desde": 3200,
       "descripcion": null
     },
@@ -14121,7 +14334,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 6,
+      "existencias": 2,
       "desde": 5000,
       "descripcion": null
     },
@@ -14177,7 +14390,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 4,
+      "existencias": 2,
       "desde": 82500,
       "descripcion": null
     },
@@ -14234,7 +14447,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 6,
+      "existencias": 5,
       "desde": 6500,
       "descripcion": null
     },
@@ -14272,7 +14485,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 3,
+      "existencias": 0,
       "desde": 13900,
       "descripcion": null
     },
@@ -14291,7 +14504,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 8,
+      "existencias": 4,
       "desde": 15600,
       "descripcion": null
     },
@@ -14348,7 +14561,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 5,
+      "existencias": 4,
       "desde": 31500,
       "descripcion": null
     },
@@ -14367,7 +14580,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 8,
+      "existencias": 1,
       "desde": 14000,
       "descripcion": null
     },
@@ -14386,7 +14599,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 1,
+      "existencias": 0,
       "desde": 22500,
       "descripcion": null
     },
@@ -14405,7 +14618,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 12,
+      "existencias": 10,
       "desde": 13700,
       "descripcion": null
     },
@@ -14443,7 +14656,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 2,
+      "existencias": 1,
       "desde": 32100,
       "descripcion": null
     },
@@ -14462,7 +14675,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 1,
+      "existencias": 0,
       "desde": 13400,
       "descripcion": null
     },
@@ -14500,7 +14713,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 4,
+      "existencias": 2,
       "desde": 119900,
       "descripcion": null
     },
@@ -14519,7 +14732,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 15,
+      "existencias": 13,
       "desde": 52400,
       "descripcion": null
     },
@@ -14557,7 +14770,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 9,
+      "existencias": 0,
       "desde": 1500,
       "descripcion": null
     },
@@ -14595,7 +14808,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 2,
+      "existencias": 1,
       "desde": 10500,
       "descripcion": null
     },
@@ -14633,7 +14846,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 4,
+      "existencias": 2,
       "desde": 27800,
       "descripcion": null
     },
@@ -14707,7 +14920,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 13,
+      "existencias": 5,
       "desde": 29900,
       "descripcion": null
     },
@@ -14726,7 +14939,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 1,
+      "existencias": 0,
       "desde": 34500,
       "descripcion": null
     },
@@ -14783,7 +14996,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 1,
+      "existencias": 0,
       "desde": 66000,
       "descripcion": null
     },
@@ -14820,7 +15033,7 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 3,
+      "existencias": 2,
       "desde": 52500,
       "descripcion": "¡Eleva tu estilo y tu rendimiento! Descubre el **SMART WATCH ULTRA COMBO PRO**. Monitoriza tu salud, conecta tus llamadas y disfruta de tu música, todo en un solo dispositivo elegante y funcional. ¡La tecnología y el diseño que necesitas para conquistar tu día!"
     },
@@ -14858,7 +15071,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 4,
+      "existencias": 0,
       "desde": 39000,
       "descripcion": null
     },
@@ -14877,7 +15090,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 8,
+      "existencias": 7,
       "desde": 16100,
       "descripcion": null
     },
@@ -14896,7 +15109,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 7,
+      "existencias": 6,
       "desde": 14900,
       "descripcion": null
     },
@@ -14914,7 +15127,7 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 70,
+      "existencias": 63,
       "desde": 24800,
       "descripcion": "✅ Iluminación profesional\n✅ Soporte para dos celulares\n✅ Altura ajustable\n✅ Rotación de 360°\n✅ Control de intensidad\n✅ Conexión USB\n✅ Base estable y resistente¡Haz que cada video y fotografía se vea más profesional! Pide el tuyo hoy."
     },
@@ -14951,7 +15164,7 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 75,
+      "existencias": 72,
       "desde": 20300,
       "descripcion": "¡Descubre el sonido con estilo! Los AUDIFONOS TWS S510 con pantalla digital te ofrecen una experiencia auditiva inmersiva con cancelación de ruido activa. Controla tu música y llamadas de forma inteligente. ¡Prepárate para escuchar la diferencia!"
     },
@@ -14970,7 +15183,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 305,
+      "existencias": 304,
       "desde": 4500,
       "descripcion": null
     },
@@ -14989,7 +15202,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 7,
+      "existencias": 8,
       "desde": 61500,
       "descripcion": null
     },
@@ -15008,7 +15221,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 2,
+      "existencias": 1,
       "desde": 19500,
       "descripcion": null
     },
@@ -15027,7 +15240,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 1,
+      "existencias": 0,
       "desde": 11400,
       "descripcion": null
     },
@@ -15046,7 +15259,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 7,
+      "existencias": 6,
       "desde": 9800,
       "descripcion": null
     },
@@ -15101,7 +15314,7 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 15,
+      "existencias": 13,
       "desde": 57000,
       "descripcion": "✅ Cancelación de ruido ANC/ENC\n✅ Pantalla táctil a color\n✅ Control de música y volumen\n✅ Visualización del nivel de batería\n✅ Estuche de carga recargable\n✅ Diseño cómodo y moderno\n✅ Excelente calidad de sonido"
     },
@@ -15158,7 +15371,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 5,
+      "existencias": 4,
       "desde": 82500,
       "descripcion": null
     },
@@ -15177,7 +15390,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 9,
+      "existencias": 8,
       "desde": 48800,
       "descripcion": null
     },
@@ -15195,7 +15408,7 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 5,
+      "existencias": 4,
       "desde": 99000,
       "descripcion": "🔋 BATERÍA EXTERNA MAGNÉTICA YOOKIE YO111Carga tu celular donde quieras, sin cables y con total comodidad. ⚡📱✅ 5000mAh\n✅ Carga inalámbrica de 15W\n✅ Carga rápida Tipo-C de 22.5W\n✅ Fuerte imán magnético\n✅ Soporte integrado para usar el celular mientras carga🔥 Compacta, potente y perfecta para llevar a todas partes."
     },
@@ -15305,7 +15518,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 8,
+      "existencias": 0,
       "desde": 14000,
       "descripcion": null
     },
@@ -15381,7 +15594,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 14,
+      "existencias": 11,
       "desde": 5300,
       "descripcion": null
     },
@@ -15457,7 +15670,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 10,
+      "existencias": 11,
       "desde": 9800,
       "descripcion": null
     },
@@ -15476,7 +15689,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 3,
+      "existencias": 1,
       "desde": 3000,
       "descripcion": null
     },
@@ -15533,7 +15746,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 6,
+      "existencias": 5,
       "desde": 19500,
       "descripcion": null
     },
@@ -15552,7 +15765,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 2,
+      "existencias": 0,
       "desde": 49500,
       "descripcion": null
     },
@@ -15571,7 +15784,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 5,
+      "existencias": 4,
       "desde": 29900,
       "descripcion": null
     },
@@ -15609,7 +15822,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 14,
+      "existencias": 13,
       "desde": 10400,
       "descripcion": null
     },
@@ -15647,7 +15860,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 7,
+      "existencias": 6,
       "desde": 10400,
       "descripcion": null
     },
@@ -15703,8 +15916,46 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 3,
+      "existencias": 2,
       "desde": 59900,
+      "descripcion": null
+    },
+    {
+      "id": "er-utensilios-cocina-x12-und-1830",
+      "tipo": "variedades",
+      "nombre": "Utensilios Cocina X12 Und",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1830-utensilios-cocina-x12-und-1-6070386d.webp?v=1788227871",
+      "url": "https://www.dctecnology.xyz/?producto=er-utensilios-cocina-x12-und-1830",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 42000,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "oculto": true,
+      "existencias": 18,
+      "desde": 42000,
+      "descripcion": null
+    },
+    {
+      "id": "er-set-cuchillos-x13-und-1831",
+      "tipo": "variedades",
+      "nombre": "Set Cuchillos X13 Und",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1831-set-cuchillos-x13-und-1-65f3d826.webp?v=1788229067",
+      "url": "https://www.dctecnology.xyz/?producto=er-set-cuchillos-x13-und-1831",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 50900,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "oculto": true,
+      "existencias": 12,
+      "desde": 50900,
       "descripcion": null
     },
     {
@@ -15722,7 +15973,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 1,
+      "existencias": 0,
       "desde": 79400,
       "descripcion": null
     },
@@ -15760,7 +16011,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 8,
+      "existencias": 5,
       "desde": 27800,
       "descripcion": null
     },
@@ -15779,7 +16030,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 1,
+      "existencias": 0,
       "desde": 24900,
       "descripcion": null
     },
@@ -15836,7 +16087,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 67,
+      "existencias": 64,
       "desde": 22400,
       "descripcion": null
     },
@@ -15854,7 +16105,7 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 162,
+      "existencias": 160,
       "desde": 7400,
       "descripcion": "¡Captura la luz perfecta en cada foto! Con esta MINI LUZ LED RECARGABLE, tus selfies y videos brillarán como nunca antes. Olvídate de la poca luz y luce espectacular al instante. ¡Descubre el secreto de la iluminación profesional!"
     },
@@ -15873,7 +16124,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 24,
+      "existencias": 17,
       "desde": 7800,
       "descripcion": null
     },
@@ -15892,7 +16143,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 24,
+      "existencias": 23,
       "desde": 7800,
       "descripcion": null
     },
@@ -16060,7 +16311,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 15,
+      "existencias": 14,
       "desde": 7800,
       "descripcion": null
     },
@@ -16193,7 +16444,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 18,
+      "existencias": 16,
       "desde": 3900,
       "descripcion": null
     },
@@ -16231,7 +16482,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 10,
+      "existencias": 8,
       "desde": 134900,
       "descripcion": null
     },
@@ -16396,7 +16647,7 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 10,
+      "existencias": 9,
       "desde": 298500,
       "descripcion": "El altavoz portátil KIMISO (modelo KMS-325 Max) ofrece una potencia pico de 120W con tecnología Extra Bass, batería de 8000 mAh (3.7V), certificación IPX6 de resistencia al agua, iluminación RGB LED y correa para transporte al hombro, junto con múltiples opciones de conectividad."
     },
@@ -16434,7 +16685,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 2,
+      "existencias": 0,
       "desde": 19400,
       "descripcion": null
     },
@@ -16509,7 +16760,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 7,
+      "existencias": 6,
       "desde": 29900,
       "descripcion": null
     },
@@ -16546,7 +16797,7 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 19,
+      "existencias": 12,
       "desde": 6500,
       "descripcion": "¡Cansado de cables que se enredan y rompen! Descubre la elegancia y durabilidad del CABLE TIPO C TRENZADO FINO. Su diseño trenzado no solo luce increíble, sino que garantiza una carga rápida y segura. ¡Transforma tu experiencia de carga!"
     },
@@ -16584,7 +16835,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 12,
+      "existencias": 11,
       "desde": 4700,
       "descripcion": null
     },
@@ -16603,7 +16854,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 14,
+      "existencias": 13,
       "desde": 3300,
       "descripcion": null
     },
@@ -16624,6 +16875,25 @@
       "oculto": true,
       "existencias": 11,
       "desde": 3800,
+      "descripcion": null
+    },
+    {
+      "id": "er-aspiradora-portatil-3-en-1-1912",
+      "tipo": "variedades",
+      "nombre": "Aspiradora Portatil 3 en 1",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1912-aspiradora-portatil-3-en-1-1-6185c1f5.webp?v=1789598918",
+      "url": "https://www.dctecnology.xyz/?producto=er-aspiradora-portatil-3-en-1-1912",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 20600,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "oculto": true,
+      "existencias": 18,
+      "desde": 20600,
       "descripcion": null
     },
     {
@@ -16660,7 +16930,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 6,
+      "existencias": 4,
       "desde": 44900,
       "descripcion": null
     },
@@ -16698,7 +16968,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 2,
+      "existencias": 7,
       "desde": 44900,
       "descripcion": null
     },
@@ -16717,7 +16987,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 4,
+      "existencias": 3,
       "desde": 89900,
       "descripcion": null
     },
@@ -16735,7 +17005,7 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 6,
+      "existencias": 5,
       "desde": 44900,
       "descripcion": "¡Sumérgete en un sonido estéreo inmersivo! Los Audífonos Tuka XH-648 te ofrecen libertad inalámbrica y una batería que no te abandonará. ¿Listo para disfrutar tu música sin límites? ¡Descúbrelos!"
     },
@@ -16754,7 +17024,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 8,
+      "existencias": 6,
       "desde": 39000,
       "descripcion": null
     },
@@ -16797,24 +17067,6 @@
       "descripcion": null
     },
     {
-      "id": "er-audifonos-de-conduccion-osea-298",
-      "tipo": "tecnologia",
-      "nombre": "Audifonos de Conduccion Osea",
-      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1928-audifonos-de-conduccion-osea-1-bcaa8c2e.webp?v=1790372652",
-      "url": "https://www.dctecnology.xyz/p/er-audifonos-de-conduccion-osea-298.html",
-      "variantes": [
-        {
-          "nombre": "Unidad",
-          "precio": 47900,
-          "precio_anterior": null
-        }
-      ],
-      "sincronizado": true,
-      "existencias": 2,
-      "desde": 47900,
-      "descripcion": "¡Libera tus oídos y siente la música! Con los auriculares de conducción ósea OKMAX, disfruta de un sonido envolvente y total conciencia de tu entorno. Perfectos para deportistas, su diseño ligero y seguro te permite moverte libremente. ¡Descubre una nueva forma de escuchar!"
-    },
-    {
       "id": "er-teclado-inalambrico-tactil-yookie-ye36-299",
       "tipo": "tecnologia",
       "marca": "Yookie",
@@ -16829,7 +17081,7 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 10,
+      "existencias": 9,
       "desde": 89900,
       "descripcion": "1 AÑO GARANTIA"
     },
@@ -16847,7 +17099,7 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 9,
+      "existencias": 8,
       "desde": 59900,
       "descripcion": "1 año garantia"
     },
@@ -16866,7 +17118,7 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 7,
+      "existencias": 6,
       "desde": 87800,
       "descripcion": "1 AÑO GARANTIA"
     },
@@ -16885,7 +17137,7 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 4,
+      "existencias": 2,
       "desde": 18900,
       "descripcion": "¡Adiós esperas! Carga tus dispositivos al instante con el YOOKIE EC27. Un solo cable 4 en 1, 120W de potencia y transferencia de datos ultrarrápida. ¿Listo para revolucionar tu carga? ¡Descubre la velocidad que te mereces!"
     },
@@ -16961,7 +17213,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 5,
+      "existencias": 4,
       "desde": 7500,
       "descripcion": null
     },
@@ -16999,7 +17251,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 3,
+      "existencias": 2,
       "desde": 11100,
       "descripcion": null
     },
@@ -17018,7 +17270,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 1,
+      "existencias": 0,
       "desde": 11600,
       "descripcion": null
     },
@@ -17056,7 +17308,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 7,
+      "existencias": 5,
       "desde": 12800,
       "descripcion": null
     },
@@ -17113,7 +17365,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 33,
+      "existencias": 31,
       "desde": 14900,
       "descripcion": null
     },
@@ -17132,7 +17384,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 2,
+      "existencias": 1,
       "desde": 20700,
       "descripcion": null
     },
@@ -17151,7 +17403,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 12,
+      "existencias": 6,
       "desde": 14700,
       "descripcion": null
     },
@@ -17170,7 +17422,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 3,
+      "existencias": 0,
       "desde": 39000,
       "descripcion": null
     },
@@ -17189,7 +17441,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 8,
+      "existencias": 4,
       "desde": 45000,
       "descripcion": null
     },
@@ -17264,7 +17516,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 4,
+      "existencias": 2,
       "desde": 14400,
       "descripcion": null
     },
@@ -17283,7 +17535,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 2,
+      "existencias": 1,
       "desde": 25200,
       "descripcion": null
     },
@@ -17302,7 +17554,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 0,
+      "existencias": 12,
       "desde": 14900,
       "descripcion": null
     },
@@ -17340,7 +17592,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 2,
+      "existencias": 6,
       "desde": 44900,
       "descripcion": null
     },
@@ -17358,7 +17610,7 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 3,
+      "existencias": 1,
       "desde": 141800,
       "descripcion": "Conexión Bluetooth Reproductor de música Sensor Ritmo Cardiaco РАСА X 100 NWT MACtive pro GPS 10 SAT Contestar y Realizar Llamadas Cargador Magnético Tipo USB Función Deportes • Cámara Remota por Bluetooth Alarma-Función Anti-perdida Calendario Contador de Pasos Notificación Redes Sociales Asistente de vOZ Grabación de vOZ Almacenamiento de fotos Medidor de decibeles Traductor - Brújul"
     },
@@ -17394,7 +17646,7 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 5,
+      "existencias": 2,
       "desde": 24800,
       "descripcion": "✅ Proyección de estrellas y figuras\n✅ Efecto de luces de colores\n✅ Ideal para habitaciones y decoración\n✅ Diseño compacto y fácil de usar\n✅ Incluye cable de alimentación\n✅ Disponible en azul, rosado y morado"
     },
@@ -17413,7 +17665,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 27,
+      "existencias": 24,
       "desde": 59900,
       "descripcion": null
     },
@@ -17432,7 +17684,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 58,
+      "existencias": 35,
       "desde": 9800,
       "descripcion": null
     },
@@ -17451,7 +17703,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 43,
+      "existencias": 41,
       "desde": 7500,
       "descripcion": null
     },
@@ -17470,7 +17722,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 92,
+      "existencias": 90,
       "desde": 22400,
       "descripcion": null
     },
@@ -17489,7 +17741,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 12,
+      "existencias": 11,
       "desde": 9800,
       "descripcion": null
     },
@@ -17508,7 +17760,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 3,
+      "existencias": 2,
       "desde": 52400,
       "descripcion": null
     },
@@ -17527,7 +17779,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 33,
+      "existencias": 27,
       "desde": 29900,
       "descripcion": null
     },
@@ -17546,7 +17798,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 73,
+      "existencias": 58,
       "desde": 12800,
       "descripcion": null
     },
@@ -17565,7 +17817,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 216,
+      "existencias": 204,
       "desde": 2300,
       "descripcion": null
     },
@@ -17603,7 +17855,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 41,
+      "existencias": 27,
       "desde": 44900,
       "descripcion": null
     },
@@ -17657,7 +17909,7 @@
         }
       ],
       "sincronizado": true,
-      "existencias": 5,
+      "existencias": 4,
       "desde": 84000,
       "descripcion": "Función Contestar llamadas, Cargador magnético, Material aleación de zinc, Control de presión arterial + 1 pulso , Compatible con Android y iphone"
     },
@@ -17676,7 +17928,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 10,
+      "existencias": 8,
       "desde": 4200,
       "descripcion": null
     },
@@ -17714,7 +17966,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 5,
+      "existencias": 4,
       "desde": 28100,
       "descripcion": null
     },
@@ -17734,7 +17986,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 4,
+      "existencias": 1,
       "desde": 157500,
       "descripcion": null
     },
@@ -17753,7 +18005,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 5,
+      "existencias": 4,
       "desde": 88500,
       "descripcion": null
     },
@@ -17809,27 +18061,27 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 6,
+      "existencias": 2,
       "desde": 12000,
       "descripcion": null
     },
     {
-      "id": "er-gorra-yeison-jimenez-negrogris-2000",
+      "id": "er-ejercitador-respiratorio-1997",
       "tipo": "variedades",
-      "nombre": "Gorra Yeison Jimenez Negro/gris",
-      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/2000-gorra-yeison-jimenez-negro-gris-1-d0bcac15.webp?v=1792110679",
-      "url": "https://www.dctecnology.xyz/?producto=er-gorra-yeison-jimenez-negrogris-2000",
+      "nombre": "Ejercitador Respiratorio",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/1997-ejercitador-respiratorio-1-143c5d8e.webp?v=1791909666",
+      "url": "https://www.dctecnology.xyz/?producto=er-ejercitador-respiratorio-1997",
       "variantes": [
         {
           "nombre": "Unidad",
-          "precio": 52400,
+          "precio": 5700,
           "precio_anterior": null
         }
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 2,
-      "desde": 52400,
+      "existencias": 6,
+      "desde": 5700,
       "descripcion": null
     },
     {
@@ -17866,7 +18118,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 10,
+      "existencias": 7,
       "desde": 103500,
       "descripcion": null
     },
@@ -17885,7 +18137,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 91,
+      "existencias": 69,
       "desde": 1500,
       "descripcion": null
     },
@@ -17904,7 +18156,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 8,
+      "existencias": 4,
       "desde": 2100,
       "descripcion": null
     },
@@ -17923,7 +18175,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 7,
+      "existencias": 4,
       "desde": 2100,
       "descripcion": null
     },
@@ -17942,7 +18194,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 5,
+      "existencias": 4,
       "desde": 37400,
       "descripcion": null
     },
@@ -17961,7 +18213,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 4,
+      "existencias": 8,
       "desde": 39000,
       "descripcion": null
     },
@@ -17980,7 +18232,7 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 4,
+      "existencias": 1,
       "desde": 5900,
       "descripcion": null
     },
@@ -18018,8 +18270,463 @@
       ],
       "sincronizado": true,
       "oculto": true,
-      "existencias": 4,
+      "existencias": 1,
       "desde": 39000,
+      "descripcion": null
+    },
+    {
+      "id": "er-manguera-led-10-metros-2018",
+      "tipo": "variedades",
+      "nombre": "Manguera LED 10 Metros",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/2018-manguera-led-10-metros-1-6dd2ef65.webp?v=1793063635",
+      "url": "https://www.dctecnology.xyz/?producto=er-manguera-led-10-metros-2018",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 34600,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "oculto": true,
+      "existencias": 63,
+      "desde": 34600,
+      "descripcion": null
+    },
+    {
+      "id": "er-malla-computarizada-240-luces-2019",
+      "tipo": "variedades",
+      "nombre": "Malla Computarizada 240 Luces",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/2019-malla-computarizada-240-luces-1-ea498e31.webp?v=1793064285",
+      "url": "https://www.dctecnology.xyz/?producto=er-malla-computarizada-240-luces-2019",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 41700,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "oculto": true,
+      "existencias": 31,
+      "desde": 41700,
+      "descripcion": null
+    },
+    {
+      "id": "er-tubos-led-juego-de-8-piezas-2021",
+      "tipo": "variedades",
+      "nombre": "Tubos LED Juego de 8 Piezas",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/2021-tubos-led-juego-de-8-piezas-1-d88716d7.webp?v=1793144399",
+      "url": "https://www.dctecnology.xyz/?producto=er-tubos-led-juego-de-8-piezas-2021",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 22200,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "oculto": true,
+      "existencias": 53,
+      "desde": 22200,
+      "descripcion": null
+    },
+    {
+      "id": "er-lineal-led-192-luces-2022",
+      "tipo": "variedades",
+      "nombre": "Lineal LED 192 Luces",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/2022-lineal-led-192-luces-1-1b07eb18.webp?v=1793218076",
+      "url": "https://www.dctecnology.xyz/?producto=er-lineal-led-192-luces-2022",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 15000,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "oculto": true,
+      "existencias": 189,
+      "desde": 15000,
+      "descripcion": null
+    },
+    {
+      "id": "er-lineal-luces-480-luces-2023",
+      "tipo": "variedades",
+      "nombre": "Lineal Luces 480 Luces",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/2023-lineal-luces-480-luces-1-b804472f.webp?v=1793218472",
+      "url": "https://www.dctecnology.xyz/?producto=er-lineal-luces-480-luces-2023",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 46800,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "oculto": true,
+      "existencias": 145,
+      "desde": 46800,
+      "descripcion": null
+    },
+    {
+      "id": "er-cortina-led-con-flasher-360-luces-2026",
+      "tipo": "variedades",
+      "nombre": "Cortina LED con Flasher 360 Luces",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/2026-cortina-led-con-flasher-360-luces-1-3f201d42.webp?v=1793297859",
+      "url": "https://www.dctecnology.xyz/?producto=er-cortina-led-con-flasher-360-luces-2026",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 54000,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "oculto": true,
+      "existencias": 99,
+      "desde": 54000,
+      "descripcion": null
+    },
+    {
+      "id": "er-luces-led-tubos-azules-2027",
+      "tipo": "variedades",
+      "nombre": "Luces LED Tubos Azules",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/2027-luces-led-tubos-azules-1-5625dddd.webp?v=1793301558",
+      "url": "https://www.dctecnology.xyz/?producto=er-luces-led-tubos-azules-2027",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 26100,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "oculto": true,
+      "existencias": 34,
+      "desde": 26100,
+      "descripcion": null
+    },
+    {
+      "id": "er-figura-de-campana-38cm-alto-2028",
+      "tipo": "variedades",
+      "nombre": "Figura de Campana 38CM Alto",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/2028-figura-de-campana-38cm-alto-1-4aceb871.webp?v=1793302792",
+      "url": "https://www.dctecnology.xyz/?producto=er-figura-de-campana-38cm-alto-2028",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 25400,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "oculto": true,
+      "existencias": 50,
+      "desde": 25400,
+      "descripcion": null
+    },
+    {
+      "id": "er-parlante-pc-d-05a-2029",
+      "tipo": "tecnologia",
+      "nombre": "Parlante Pc D-05A",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/2029-parlante-pc-d-05a-1-294d463a.webp?v=1793377876",
+      "url": "https://www.dctecnology.xyz/p/er-parlante-pc-d-05a-2029.html",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 19500,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "existencias": 4,
+      "desde": 19500,
+      "descripcion": "¡Transforma tu PC con un sonido vibrante! Los PARLANTE PC D-05A te ofrecen una experiencia auditiva potente y clara en un diseño compacto. Descubre cómo tus películas, música y juegos cobran vida. ¡No te quedes sin el tuyo y sumérgete en un audio excepcional!"
+    },
+    {
+      "id": "er-gorra-yeison-jimenez-dama-2031",
+      "tipo": "variedades",
+      "nombre": "Gorra Yeison Jimenez Dama",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/2031-gorra-yeison-jimenez-dama-1-c6a891ee.webp?v=1793379666",
+      "url": "https://www.dctecnology.xyz/?producto=er-gorra-yeison-jimenez-dama-2031",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 52400,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "oculto": true,
+      "existencias": 1,
+      "desde": 52400,
+      "descripcion": null
+    },
+    {
+      "id": "er-megafono-mp-19-2032",
+      "tipo": "variedades",
+      "nombre": "Megafono MP-19",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/2032-megafono-mp-19-1-49be5d68.webp?v=1793567748",
+      "url": "https://www.dctecnology.xyz/?producto=er-megafono-mp-19-2032",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 55500,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "oculto": true,
+      "existencias": 6,
+      "desde": 55500,
+      "descripcion": null
+    },
+    {
+      "id": "er-limpia-vidrios-jot-10-2033",
+      "tipo": "variedades",
+      "nombre": "Limpia Vidrios JOT-10",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/2033-limpia-vidrios-jot-10-1-975ce621.webp?v=1793568218",
+      "url": "https://www.dctecnology.xyz/?producto=er-limpia-vidrios-jot-10-2033",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 9800,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "oculto": true,
+      "existencias": 3,
+      "desde": 9800,
+      "descripcion": null
+    },
+    {
+      "id": "er-bolso-pechero-ch-m818-2034",
+      "tipo": "variedades",
+      "nombre": "Bolso Pechero CH-M818",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/2034-bolso-pechero-ch-m818-1-02744837.webp?v=1793568966",
+      "url": "https://www.dctecnology.xyz/?producto=er-bolso-pechero-ch-m818-2034",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 74900,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "oculto": true,
+      "existencias": 5,
+      "desde": 74900,
+      "descripcion": null
+    },
+    {
+      "id": "er-bolso-pechero-ch-m802-2035",
+      "tipo": "variedades",
+      "nombre": "Bolso Pechero CH-M802",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/2035-bolso-pechero-ch-m802-1-96b09de0.webp?v=1793570575",
+      "url": "https://www.dctecnology.xyz/?producto=er-bolso-pechero-ch-m802-2035",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 58500,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "oculto": true,
+      "existencias": 5,
+      "desde": 58500,
+      "descripcion": null
+    },
+    {
+      "id": "er-parlante-tocadiscos-h5-2036",
+      "tipo": "variedades",
+      "nombre": "Parlante Tocadiscos H5",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/2036-parlante-tocadiscos-h5-1-b0038d94.webp?v=1793571271",
+      "url": "https://www.dctecnology.xyz/?producto=er-parlante-tocadiscos-h5-2036",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 39000,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "oculto": true,
+      "existencias": 6,
+      "desde": 39000,
+      "descripcion": null
+    },
+    {
+      "id": "er-gafas-lupa-9892b2c-2037",
+      "tipo": "variedades",
+      "nombre": "Gafas Lupa 9892B2C",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/2037-gafas-lupa-9892b2c-1-6c7c63ee.webp?v=1793572485",
+      "url": "https://www.dctecnology.xyz/?producto=er-gafas-lupa-9892b2c-2037",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 48000,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "oculto": true,
+      "existencias": 5,
+      "desde": 48000,
+      "descripcion": null
+    },
+    {
+      "id": "er-escurridor-de-loza-qfy-0060-2039",
+      "tipo": "variedades",
+      "nombre": "Escurridor de Loza QFY-0060",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/2039-escurridor-de-loza-qfy-0060-1-4e060c9d.webp?v=1793576572",
+      "url": "https://www.dctecnology.xyz/?producto=er-escurridor-de-loza-qfy-0060-2039",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 29300,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "oculto": true,
+      "existencias": 6,
+      "desde": 29300,
+      "descripcion": null
+    },
+    {
+      "id": "er-utensilio-corta-pizza-stcr08-2040",
+      "tipo": "variedades",
+      "nombre": "Utensilio Corta Pizza STCR08",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/2040-utensilio-corta-pizza-stcr08-1-d23ba45c.webp?v=1793644709",
+      "url": "https://www.dctecnology.xyz/?producto=er-utensilio-corta-pizza-stcr08-2040",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 9800,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "oculto": true,
+      "existencias": 6,
+      "desde": 9800,
+      "descripcion": null
+    },
+    {
+      "id": "er-organizador-org-178-2041",
+      "tipo": "variedades",
+      "nombre": "Organizador ORG-178",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/2041-organizador-org-178-1-4118e144.webp?v=1793644930",
+      "url": "https://www.dctecnology.xyz/?producto=er-organizador-org-178-2041",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 5900,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "oculto": true,
+      "existencias": 9,
+      "desde": 5900,
+      "descripcion": null
+    },
+    {
+      "id": "er-herramienta-levanta-muebles-bj866-2042",
+      "tipo": "variedades",
+      "nombre": "Herramienta Levanta Muebles BJ866",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/2042-herramienta-levanta-muebles-bj866-1-f26f08a1.webp?v=1793645132",
+      "url": "https://www.dctecnology.xyz/?producto=er-herramienta-levanta-muebles-bj866-2042",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 23300,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "oculto": true,
+      "existencias": 4,
+      "desde": 23300,
+      "descripcion": null
+    },
+    {
+      "id": "er-afeitadora-tres-cabezas-nt-806-2043",
+      "tipo": "variedades",
+      "nombre": "Afeitadora Tres Cabezas NT-806",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/2043-afeitadora-tres-cabezas-nt-806-1-9506ad26.webp?v=1793645345",
+      "url": "https://www.dctecnology.xyz/?producto=er-afeitadora-tres-cabezas-nt-806-2043",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 23300,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "oculto": true,
+      "existencias": 4,
+      "desde": 23300,
+      "descripcion": null
+    },
+    {
+      "id": "er-afeitadora-mini-p10-2044",
+      "tipo": "variedades",
+      "nombre": "Afeitadora Mini P10",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/2044-afeitadora-mini-p10-1-c54f4ac1.webp?v=1793645623",
+      "url": "https://www.dctecnology.xyz/?producto=er-afeitadora-mini-p10-2044",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 11700,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "oculto": true,
+      "existencias": 5,
+      "desde": 11700,
+      "descripcion": null
+    },
+    {
+      "id": "er-gorra-ch47854-2046",
+      "tipo": "variedades",
+      "nombre": "Gorra CH47854",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/2046-gorra-ch47854-1-40ea4fac.webp?v=1793647401",
+      "url": "https://www.dctecnology.xyz/?producto=er-gorra-ch47854-2046",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 52400,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "oculto": true,
+      "existencias": 1,
+      "desde": 52400,
+      "descripcion": null
+    },
+    {
+      "id": "er-gorra-yeison-jimenez-ch557-2047",
+      "tipo": "variedades",
+      "nombre": "Gorra Yeison Jimenez CH557",
+      "imagen": "https://emprendered.com.co/storage/shop/front/img/products/2047-gorra-yeison-jimenez-ch557-1-5d819cd9.webp?v=1793647903",
+      "url": "https://www.dctecnology.xyz/?producto=er-gorra-yeison-jimenez-ch557-2047",
+      "variantes": [
+        {
+          "nombre": "Unidad",
+          "precio": 52400,
+          "precio_anterior": null
+        }
+      ],
+      "sincronizado": true,
+      "oculto": true,
+      "existencias": 1,
+      "desde": 52400,
       "descripcion": null
     }
   ]

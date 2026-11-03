@@ -10,7 +10,10 @@ import { fileURLToPath } from 'node:url';
 
 const AQUI = path.dirname(fileURLToPath(import.meta.url));
 const RAIZ = path.resolve(AQUI, '..');
-const FLUJO = path.join(RAIZ, 'n8n', 'flujo_bot_dctechnology.json');
+// El flujo de prueba se genera con un catálogo FIJO (pruebas/fijo/bot-conocimiento.json): el del día cambia cada 3 h con
+// lo agotado en los proveedores y no debe romper las pruebas. El flujo real (n8n/) no se toca.
+const FIJO = path.join(AQUI, 'fijo');
+const FLUJO = path.join(FIJO, 'n8n', 'flujo_bot_dctechnology.json');
 const pedidos = process.argv.slice(2);
 const grupos = pedidos.length ? pedidos : ['flujo', 'datos', 'sql', 'web'];
 const resumen = [];
@@ -30,7 +33,7 @@ const lista = (g) => (fs.existsSync(path.join(AQUI, g)) ? fs.readdirSync(path.jo
 
 if (grupos.includes('flujo')) {
     console.log('\n— Flujo del bot (código real de cada nodo, sin enviar nada) —');
-    spawnSync(process.execPath, [path.join(RAIZ, 'n8n', 'generar_flujo_n8n.js')], { cwd: RAIZ });
+    spawnSync(process.execPath, [path.join(RAIZ, 'n8n', 'generar_flujo_n8n.js')], { cwd: RAIZ, env: { ...process.env, DC_KB: path.join(FIJO, 'bot-conocimiento.json'), DC_FLUJO_SALIDA: FLUJO } });
     for (const f of lista('flujo')) correr(f, [FLUJO]);
 }
 if (grupos.includes('datos')) {

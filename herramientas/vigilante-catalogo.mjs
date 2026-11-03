@@ -229,6 +229,7 @@ if (publicar && !PROBAR) {
             informe.push('✅ Tienda, páginas de Google y Shopping actualizadas y publicadas.');
         }
     } catch (e) {
+        log(`publicar falló: ${String(e.stderr || e.message).trim().slice(0, 600)}`);
         informe.push(`⚠️ No pude publicar la actualización: ${String(e.stderr || e.message).trim().split('\n').pop()?.slice(0, 160)}. Queda en el PC para revisarla.`);
     }
 }

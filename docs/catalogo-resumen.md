@@ -1,5 +1,5 @@
 # Catálogo resumido de DC Tecnology (para las IA)
-_Generado por herramientas/resumen-catalogo.js el 2/11/2026 a partir de productos.json y disponibilidad.json. No editar a mano._
+_Generado por herramientas/resumen-catalogo.js el 3/11/2026 a partir de productos.json y disponibilidad.json. No editar a mano._
 
 Precios en pesos colombianos. Son los de productos.json: en la tienda manda el precio de la base (precios_publicos), que puede cambiar.
 **Antes de publicar un precio, confírmalo en la página del producto.** Para el detalle de un producto: busca su id en productos.json (no lo leas entero).
@@ -14,7 +14,7 @@ Precios en pesos colombianos. Son los de productos.json: en la tienda manda el p
 
 - Alquiler de Laptops y Equipos de Cómputo · desde $ 160.000 · 3 planes · id `servicio-alquiler-equipos-computo` · https://www.dctecnology.xyz/p/servicio-alquiler-equipos-computo.html
 
-## Tecnología (169)
+## Tecnología (168)
 
 - Auriculares con Cable ATH-73 · desde $ 2.000 · id `er-auriculares-con-cable-ath-73-1126` · https://www.dctecnology.xyz/p/er-auriculares-con-cable-ath-73-1126.html
 - Lampara USB LED-18 · desde $ 2.400 · id `er-lampara-usb-led-18-115` · https://www.dctecnology.xyz/p/er-lampara-usb-led-18-115.html
@@ -46,15 +46,17 @@ Precios en pesos colombianos. Son los de productos.json: en la tienda manda el p
 - Soporte Portatil para Celular o Tablet Moderno · desde $ 13.800 · id `er-soporte-portatil-para-celular-o-tablet-moderno-1023` · https://www.dctecnology.xyz/p/er-soporte-portatil-para-celular-o-tablet-moderno-1023.html
 - Palo de Selfie · desde $ 13.800 · id `er-palo-de-selfie-132` · https://www.dctecnology.xyz/p/er-palo-de-selfie-132.html
 - Cargador de Coche Rapido Original PC17 · desde $ 14.000 · id `er-cargador-de-coche-rapido-original-pc17-118` · https://www.dctecnology.xyz/p/er-cargador-de-coche-rapido-original-pc17-118.html
+- Audifonos Yookie Originales ETL02 · desde $ 14.900 · id `er-audifonos-yookie-originales-etl02-259` · https://www.dctecnology.xyz/p/er-audifonos-yookie-originales-etl02-259.html
 - Audifonos E6S Inalambricos · desde $ 14.900 · id `er-audifonos-e6s-inalambricos-1410` · https://www.dctecnology.xyz/p/er-audifonos-e6s-inalambricos-1410.html
 - Ampliador de Pantalla Celular · desde $ 14.900 · id `er-ampliador-de-pantalla-celular-1586` · https://www.dctecnology.xyz/p/er-ampliador-de-pantalla-celular-1586.html
 - Mouse M30 Depi 1600 · desde $ 15.000 · id `er-mouse-m30-depi-1600-62` · https://www.dctecnology.xyz/p/er-mouse-m30-depi-1600-62.html
+- Audifonos Tipo C Yookie Originales YTL09 · desde $ 15.500 · id `er-audifonos-tipo-c-yookie-originales-ytl09-302` · https://www.dctecnology.xyz/p/er-audifonos-tipo-c-yookie-originales-ytl09-302.html
 - Mouse Gamer RGB X6 · desde $ 16.500 · id `er-mouse-gamer-rgb-x6-316` · https://www.dctecnology.xyz/p/er-mouse-gamer-rgb-x6-316.html
 - Soporte Astronauta Celular · desde $ 17.600 · id `er-soporte-astronauta-celular-142` · https://www.dctecnology.xyz/p/er-soporte-astronauta-celular-142.html
 - Bombillo Parlante LED RGB · desde $ 18.800 · id `er-bombillo-parlante-led-rgb-69` · https://www.dctecnology.xyz/p/er-bombillo-parlante-led-rgb-69.html
-- Audifonos M10 · desde $ 18.800 · id `er-audifonos-m10-202` · https://www.dctecnology.xyz/p/er-audifonos-m10-202.html
 - Cable de Carga Rapida y Datos 4 en 1 Yookie EC27 120W · desde $ 18.900 · id `er-cable-de-carga-rapida-y-datos-4-en-1-yookie-ec27-120w-303` · https://www.dctecnology.xyz/p/er-cable-de-carga-rapida-y-datos-4-en-1-yookie-ec27-120w-303.html
 - Microfono de Solapa · desde $ 19.500 · id `er-microfono-de-solapa-108` · https://www.dctecnology.xyz/p/er-microfono-de-solapa-108.html
+- Parlante Pc D-05A · desde $ 19.500 · id `er-parlante-pc-d-05a-2029` · https://www.dctecnology.xyz/p/er-parlante-pc-d-05a-2029.html
 - Soporte para Moto · desde $ 19.800 · id `er-soporte-para-moto-65` · https://www.dctecnology.xyz/p/er-soporte-para-moto-65.html
 - Cargador Pro Ultra Rapido Carro PC19 Original · desde $ 19.900 · id `er-cargador-pro-ultra-rapido-carro-pc19-original-119` · https://www.dctecnology.xyz/p/er-cargador-pro-ultra-rapido-carro-pc19-original-119.html
 - Smart Watch Fit Economico FD68 · desde $ 20.300 · id `er-smart-watch-fit-economico-fd68-157` · https://www.dctecnology.xyz/p/er-smart-watch-fit-economico-fd68-157.html
@@ -64,8 +66,10 @@ Precios en pesos colombianos. Son los de productos.json: en la tienda manda el p
 - Original Cargador USB a Tipo C Yookie EI32 · desde $ 21.500 · id `er-original-cargador-usb-a-tipo-c-yookie-ei32-217` · https://www.dctecnology.xyz/p/er-original-cargador-usb-a-tipo-c-yookie-ei32-217.html
 - Soporte Giratorio para Tablet · desde $ 22.400 · id `er-soporte-giratorio-para-tablet-133` · https://www.dctecnology.xyz/p/er-soporte-giratorio-para-tablet-133.html
 - Base para Portatil en Aluminio HOLD-406 · desde $ 22.400 · id `er-base-para-portatil-en-aluminio-hold-406-192` · https://www.dctecnology.xyz/p/er-base-para-portatil-en-aluminio-hold-406-192.html
+- Luz LED Potente para Celular Corazon · desde $ 22.400 · id `er-luz-led-potente-para-celular-corazon-1642` · https://www.dctecnology.xyz/p/er-luz-led-potente-para-celular-corazon-1642.html
 - Mouse Inalambrico Hp W10 · desde $ 23.300 · id `er-mouse-inalambrico-hp-w10-520` · https://www.dctecnology.xyz/p/er-mouse-inalambrico-hp-w10-520.html
 - Cargador con Cable Original Yookie 20W Rapido · desde $ 24.000 · id `er-cargador-con-cable-original-yookie-20w-rapido-2` · https://www.dctecnology.xyz/p/er-cargador-con-cable-original-yookie-20w-rapido-2.html
+- Cargador Iphone Lightning Original Yookie KL02 · desde $ 24.800 · id `er-cargador-iphone-lightning-original-yookie-kl02-7` · https://www.dctecnology.xyz/p/er-cargador-iphone-lightning-original-yookie-kl02-7.html
 - Aro de Luz Tik Tok con Soporte para 2 Celulares · desde $ 24.800 · id `er-aro-de-luz-tik-tok-con-soporte-para-2-celulares-254` · https://www.dctecnology.xyz/p/er-aro-de-luz-tik-tok-con-soporte-para-2-celulares-254.html
 - Lampara Proyectora de Estrellas Star Master · desde $ 24.800 · id `er-lampara-proyectora-de-estrellas-star-master-310` · https://www.dctecnology.xyz/p/er-lampara-proyectora-de-estrellas-star-master-310.html
 - Teclado TV Original · desde $ 25.400 · id `er-teclado-tv-original-99` · https://www.dctecnology.xyz/p/er-teclado-tv-original-99.html
@@ -75,10 +79,9 @@ Precios en pesos colombianos. Son los de productos.json: en la tienda manda el p
 - Mouse Ergonomico Alambrico · desde $ 28.500 · id `er-mouse-ergonomico-alambrico-239` · https://www.dctecnology.xyz/p/er-mouse-ergonomico-alambrico-239.html
 - Soporte Microfono de Solapa · desde $ 29.300 · id `er-soporte-microfono-de-solapa-137` · https://www.dctecnology.xyz/p/er-soporte-microfono-de-solapa-137.html
 - Microfono Condensador SF-666 · desde $ 29.300 · id `er-microfono-condensador-sf-666-158` · https://www.dctecnology.xyz/p/er-microfono-condensador-sf-666-158.html
-- Mouse Inalambrico DJ-125 · desde $ 29.400 · id `er-mouse-inalambrico-dj-125-1210` · https://www.dctecnology.xyz/p/er-mouse-inalambrico-dj-125-1210.html
 - Audífonos Inalámbricos Pro 6 · desde $ 29.900 · id `er-airpods-pro-6-131` · https://www.dctecnology.xyz/p/er-airpods-pro-6-131.html
 - Base para Portatil y Tablet HOLDPC-102 · desde $ 29.900 · id `er-base-para-portatil-y-tablet-holdpc-102-188` · https://www.dctecnology.xyz/p/er-base-para-portatil-y-tablet-holdpc-102-188.html
-- Maquina de Verificacion de Billetes · desde $ 29.900 · id `er-maquina-de-verificacion-de-billetes-201` · https://www.dctecnology.xyz/p/er-maquina-de-verificacion-de-billetes-201.html
+- Power Bank Inalambrico Iphone Grande 10. 000mAh · desde $ 30.000 · id `er-power-bank-inalambrico-iphone-grande-10-000mah-101` · https://www.dctecnology.xyz/p/er-power-bank-inalambrico-iphone-grande-10-000mah-101.html
 - Parlante Bluetooh RGB · desde $ 30.800 · id `er-parlante-bluetooh-rgb-110` · https://www.dctecnology.xyz/p/er-parlante-bluetooh-rgb-110.html
 - Cable de Datos y Carga Rapida Yookie CB108 100W · desde $ 31.100 · id `er-cable-de-datos-y-carga-rapida-yookie-cb108-100w-304` · https://www.dctecnology.xyz/p/er-cable-de-datos-y-carga-rapida-yookie-cb108-100w-304.html
 - Repetidor de Wifi WR03T · desde $ 35.100 · id `er-repetidor-de-wifi-wr03t-199` · https://www.dctecnology.xyz/p/er-repetidor-de-wifi-wr03t-199.html
@@ -86,6 +89,7 @@ Precios en pesos colombianos. Son los de productos.json: en la tienda manda el p
 - Soporte para Carro HOLD-372 · desde $ 35.600 · id `er-soporte-para-carro-hold-372-287` · https://www.dctecnology.xyz/p/er-soporte-para-carro-hold-372-287.html
 - Gafas Bluetooh Recargable · desde $ 36.000 · id `er-gafas-bluetooh-recargable-98` · https://www.dctecnology.xyz/p/er-gafas-bluetooh-recargable-98.html
 - Soporte para Tablet y Celular HOLD-356 · desde $ 36.800 · id `er-soporte-para-tablet-y-celular-hold-356-187` · https://www.dctecnology.xyz/p/er-soporte-para-tablet-y-celular-hold-356-187.html
+- Game Retro 500 Juegos Tradicional · desde $ 37.400 · id `er-game-retro-500-juegos-tradicional-1108` · https://www.dctecnology.xyz/p/er-game-retro-500-juegos-tradicional-1108.html
 - Funda para Portatil Na-bag 105 · desde $ 37.400 · id `er-funda-para-portatil-na-bag-105-193` · https://www.dctecnology.xyz/p/er-funda-para-portatil-na-bag-105-193.html
 - Smart Watch 10PRO Original · desde $ 39.000 · id `er-smart-watch-10pro-original-819` · https://www.dctecnology.xyz/p/er-smart-watch-10pro-original-819.html
 - Mouse Original Inalambrico Pro · desde $ 39.700 · id `er-mouse-original-inalambrico-pro-124` · https://www.dctecnology.xyz/p/er-mouse-original-inalambrico-pro-124.html
@@ -96,7 +100,6 @@ Precios en pesos colombianos. Son los de productos.json: en la tienda manda el p
 - Audífonos Inalámbricos KT30 · desde $ 42.900 · id `er-airpods-kt30-154` · https://www.dctecnology.xyz/p/er-airpods-kt30-154.html
 - Audífonos Inalámbricos TWS ES45 · desde $ 43.200 · id `er-airpods-tws-original-es45-121` · https://www.dctecnology.xyz/p/er-airpods-tws-original-es45-121.html
 - Game Retro 400 Juegos (2) Jugadores · desde $ 43.400 · id `er-game-retro-400-juegos-2-jugadores-16` · https://www.dctecnology.xyz/p/er-game-retro-400-juegos-2-jugadores-16.html
-- Smart Wacht GUS-16 · desde $ 44.900 · id `er-smart-wacht-gus-16-10` · https://www.dctecnology.xyz/p/er-smart-wacht-gus-16-10.html
 - Lampara de Escritorio Astronauta Y-598 · desde $ 44.900 · id `er-lampara-de-escritorio-astronauta-y-598-149` · https://www.dctecnology.xyz/p/er-lampara-de-escritorio-astronauta-y-598-149.html
 - Mouse Ergonomico Inalambrico · desde $ 44.900 · id `er-mouse-ergonomico-inalambrico-115` · https://www.dctecnology.xyz/p/er-mouse-ergonomico-inalambrico-115.html
 - Buscador Inteligente Original · desde $ 44.900 · id `er-buscador-inteligente-original-186` · https://www.dctecnology.xyz/p/er-buscador-inteligente-original-186.html
@@ -105,21 +108,17 @@ Precios en pesos colombianos. Son los de productos.json: en la tienda manda el p
 - Parlante Bluetooth con Luz RGB KTS-2310 · desde $ 44.900 · id `er-parlante-bluetooth-con-luz-rgb-kts-2310-307` · https://www.dctecnology.xyz/p/er-parlante-bluetooth-con-luz-rgb-kts-2310-307.html
 - Combo Teclado Inalámbrico · desde $ 45.000 · id `er-combo-teclado-inalambrico-64` · https://www.dctecnology.xyz/p/er-combo-teclado-inalambrico-64.html
 - Kit Labubu · desde $ 45.000 · id `er-kit-labubu-177` · https://www.dctecnology.xyz/p/er-kit-labubu-177.html
-- Audifonos de Conduccion Osea · desde $ 47.900 · id `er-audifonos-de-conduccion-osea-298` · https://www.dctecnology.xyz/p/er-audifonos-de-conduccion-osea-298.html
 - Aro de Luz RGB 26CTMS · desde $ 48.000 · id `er-aro-de-luz-rgb-26ctms-1115` · https://www.dctecnology.xyz/p/er-aro-de-luz-rgb-26ctms-1115.html
 - Cargador Inalambrico KI90 · desde $ 48.300 · id `er-cargador-inalambrico-ki90-128` · https://www.dctecnology.xyz/p/er-cargador-inalambrico-ki90-128.html
 - Audifonos Bluetooth YX29 con Pantalla Tactil · desde $ 49.500 · id `er-audifonos-bluetooth-yx29-con-pantalla-tactil-244` · https://www.dctecnology.xyz/p/er-audifonos-bluetooth-yx29-con-pantalla-tactil-244.html
 - Audífonos Inalámbricos ES53 · desde $ 50.300 · id `er-original-airpods-es53-181` · https://www.dctecnology.xyz/p/er-original-airpods-es53-181.html
-- Power Bank 20.000 mAh Display / 4 Cables · desde $ 50.700 · id `er-power-bank-20000-mah-display-4-cables-13` · https://www.dctecnology.xyz/p/er-power-bank-20000-mah-display-4-cables-13.html
 - Combo X8 Smart Wacht · desde $ 51.000 · id `er-combo-x8-smart-wacht-162` · https://www.dctecnology.xyz/p/er-combo-x8-smart-wacht-162.html
 - Audífonos Inalámbricos ES57 · desde $ 51.000 · id `er-airpods-originales-es57-263` · https://www.dctecnology.xyz/p/er-airpods-originales-es57-263.html
 - Parlante Portatil de 3PLG · desde $ 52.400 · id `er-parlante-portatil-de-3plg-816` · https://www.dctecnology.xyz/p/er-parlante-portatil-de-3plg-816.html
-- Smartwacht Serie 11 Mini · desde $ 52.400 · id `er-smartwacht-serie-11-mini-213` · https://www.dctecnology.xyz/p/er-smartwacht-serie-11-mini-213.html
 - Smart Watch Big 3 · desde $ 52.400 · id `er-smart-watch-big-3-1560` · https://www.dctecnology.xyz/p/er-smart-watch-big-3-1560.html
 - Smart Watch ACE-180 · desde $ 52.400 · id `er-smart-watch-ace-180-312` · https://www.dctecnology.xyz/p/er-smart-watch-ace-180-312.html
 - Diadema Bluetooh B31 · desde $ 52.500 · id `er-diadema-bluetooh-b31-468` · https://www.dctecnology.xyz/p/er-diadema-bluetooh-b31-468.html
 - Audífonos Inalámbricos ES48 · desde $ 52.500 · id `er-airpods-original-es48-122` · https://www.dctecnology.xyz/p/er-airpods-original-es48-122.html
-- Smart Watch + Audifonos I20 · desde $ 52.500 · id `er-smart-watch-audifonos-i20-230` · https://www.dctecnology.xyz/p/er-smart-watch-audifonos-i20-230.html
 - Smartwacht Ultra Combo Pro · desde $ 52.500 · id `er-smartwacht-ultra-combo-pro-253` · https://www.dctecnology.xyz/p/er-smartwacht-ultra-combo-pro-253.html
 - Blafle Smart Speaker App · desde $ 53.900 · id `er-blafle-smart-speaker-app-145` · https://www.dctecnology.xyz/p/er-blafle-smart-speaker-app-145.html
 - Smart Watch S11 KZ-W42 · desde $ 54.000 · id `er-smart-watch-s11-kz-w42-1429` · https://www.dctecnology.xyz/p/er-smart-watch-s11-kz-w42-1429.html
@@ -159,7 +158,6 @@ Precios en pesos colombianos. Son los de productos.json: en la tienda manda el p
 - Audífonos Inalámbricos ANC-JM19 Traductores · desde $ 82.500 · id `er-airpods-anc-jm19-traductores-208` · https://www.dctecnology.xyz/p/er-airpods-anc-jm19-traductores-208.html
 - Mini Proyector LED Yg 300 - Esquinas Cuadradas · desde $ 82.500 · id `er-mini-proyector-led-yg-300-esquinas-cuadradas-1614` · https://www.dctecnology.xyz/p/er-mini-proyector-led-yg-300-esquinas-cuadradas-1614.html
 - Smart Watch X10 Pro Max · desde $ 84.000 · id `er-smart-watch-x10-pro-max-314` · https://www.dctecnology.xyz/p/er-smart-watch-x10-pro-max-314.html
-- Audífonos Inalámbricos ANC Enc YW08 · desde $ 85.200 · id `er-airpods-anc-enc-yw08-83` · https://www.dctecnology.xyz/p/er-airpods-anc-enc-yw08-83.html
 - M50 Combo 7 Correas · desde $ 86.300 · id `er-m50-combo-7-correas-1044` · https://www.dctecnology.xyz/p/er-m50-combo-7-correas-1044.html
 - Cargador Superrapido 60W KI275 · desde $ 87.000 · id `er-cargador-superrapido-60w-ki275-265` · https://www.dctecnology.xyz/p/er-cargador-superrapido-60w-ki275-265.html
 - Power Bank 22.5W Yookie Original · desde $ 87.800 · id `er-power-bank-225w-yookie-original-301` · https://www.dctecnology.xyz/p/er-power-bank-225w-yookie-original-301.html
@@ -171,6 +169,7 @@ Precios en pesos colombianos. Son los de productos.json: en la tienda manda el p
 - Smart Watch + Gamebox + Correa Pro HOT-5 · desde $ 96.000 · id `er-smart-watch-gamebox-correa-pro-hot-5-167` · https://www.dctecnology.xyz/p/er-smart-watch-gamebox-correa-pro-hot-5-167.html
 - Power Bank Magnetico 10.000 mAh YO11 · desde $ 99.000 · id `er-power-bank-magnetico-10000-mah-yo11-261` · https://www.dctecnology.xyz/p/er-power-bank-magnetico-10000-mah-yo11-261.html
 - Diademas Inalámbricas CR-8 con Luces LED · desde $ 100.000 · id `diademas-inalambricas-cr-8-con-luces-r9s7x` · https://www.dctecnology.xyz/p/diademas-inalambricas-cr-8-con-luces-r9s7x.html
+- TV Box Model 3 8GB+128GB · desde $ 104.900 · id `er-tv-box-model-3-8gb128gb-826` · https://www.dctecnology.xyz/p/er-tv-box-model-3-8gb128gb-826.html
 - Audífonos Inalámbricos Abiertos Pro V12 · desde $ 104.900 · id `er-airpods-abiertos-pro-v12-original-185` · https://www.dctecnology.xyz/p/er-airpods-abiertos-pro-v12-original-185.html
 - Kit Gamer X4 Articulos · desde $ 104.900 · id `er-kit-gamer-x4-articulos-245` · https://www.dctecnology.xyz/p/er-kit-gamer-x4-articulos-245.html
 - Aibimy MY262BT Original IPX6 · desde $ 113.300 · id `er-aibimy-my262bt-original-ipx6-101` · https://www.dctecnology.xyz/p/er-aibimy-my262bt-original-ipx6-101.html
@@ -186,18 +185,17 @@ Precios en pesos colombianos. Son los de productos.json: en la tienda manda el p
 - Parlante Portatil Original Kimiso KMS-374 · desde $ 202.500 · id `er-parlante-portatil-original-kimiso-kms-374-283` · https://www.dctecnology.xyz/p/er-parlante-portatil-original-kimiso-kms-374-283.html
 - Parlante Portatil Original Kimiso KMS-325 Max · desde $ 298.500 · id `er-parlante-portatil-original-kimiso-kms-325-max-285` · https://www.dctecnology.xyz/p/er-parlante-portatil-original-kimiso-kms-325-max-285.html
 
-## Streaming (10)
+## Streaming (9)
 
 - Max (HBO) · desde $ 8.000 · 3 planes · id `hbo-max` · https://www.dctecnology.xyz/p/hbo-max.html
 - Vix Premium · desde $ 8.000 · id `vix-premium` · https://www.dctecnology.xyz/p/vix-premium.html
+- Prime Video Ultra HD · desde $ 10.000 · id `prime-video` · https://www.dctecnology.xyz/p/prime-video.html
 - Crunchyroll Mega Fan · desde $ 10.000 · id `crunchyroll` · https://www.dctecnology.xyz/p/crunchyroll.html
 - Paramount Plus · desde $ 10.000 · id `paramount-plus` · https://www.dctecnology.xyz/p/paramount-plus.html
 - Universal Plus · desde $ 10.000 · id `universal-plus` · https://www.dctecnology.xyz/p/universal-plus.html
 - Viki Rakuten Pass · desde $ 10.000 · id `viki-rakuten` · https://www.dctecnology.xyz/p/viki-rakuten.html
 - Mubi Cinema · desde $ 10.000 · id `mubi` · https://www.dctecnology.xyz/p/mubi.html
 - Apple TV Plus · desde $ 12.000 · id `apple-tv` · https://www.dctecnology.xyz/p/apple-tv.html
-- Netflix Premium 4K · desde $ 15.000 · id `netflix` · https://www.dctecnology.xyz/p/netflix.html
-- Disney Plus Premium · desde $ 15.000 · id `disney-plus` · https://www.dctecnology.xyz/p/disney-plus.html
 
 ## Licencias (4)
 

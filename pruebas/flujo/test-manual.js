@@ -56,7 +56,7 @@ const CW = ejecutar('Crear combo', [{ numero: '573001115555', combo: { items: [{
 datos = { ...datos, 'Crear combo': [CW] };
 ok(!CW.manual && ejecutar('Combo manual', [{ x: 1 }]).length === 1, 'canal whatsapp: el combo sigue al proveedor como antes');
 // 6) Cupón DCTECH2026: solo si el cliente lo escribió; el precio lo calcula el sistema
-const kb = require(__RAIZ + '/bot-conocimiento.json');
+const kb = require(require('path').join(process.argv[2], '..', '..', 'bot-conocimiento.json')); // catálogo fijo de pruebas (pruebas/fijo/)
 const revisar = (texto, output, numero = '573001117000') => {
     datos = { 'Config bot': [cfg], 'Normalizar mensaje': [{ numero, texto, nombre: 'Leo' }], 'Base de conocimiento': [kb], 'Metodos de pago': [], 'Reglas combo': [] };
     return ejecutar('Revisar respuesta', [{ output }]);

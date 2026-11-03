@@ -21,3 +21,5 @@ pruebas/flujo/anc/
 # Material privado del director (lista de pendientes para el agente): solo en este PC
 privado/
 .env.respaldo-*
+# Flujo generado para las pruebas con el catálogo fijo (se regenera en cada npm test)
+pruebas/fijo/n8n/
