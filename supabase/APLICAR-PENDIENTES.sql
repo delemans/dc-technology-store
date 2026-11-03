@@ -1,5 +1,5 @@
 -- =====================================================================
--- APLICAR PENDIENTES (29/10/2026): 042 (pedidos por WhatsApp) → 043 (stock de pines) → 044 (renovaciones) → 025 (promociones del día) → 045 (permisos de medios de pago) → 046 (centro financiero) → 047 (categorías del proveedor, existencias y rastreo) → 041 (Emprende Red al 50 %) → 048 (horario legal) → 049 (Netflix 30 días) → 050 (agotados y repuestos) → 051 (cantidades de ANC) → 052 (resumen diario de ventas) → 053 (alertas de pagos sin validar)
+-- APLICAR PENDIENTES (03/11/2026): 042 (pedidos por WhatsApp) → 043 (stock de pines) → 044 (renovaciones) → 025 (promociones del día) → 045 (permisos de medios de pago) → 046 (centro financiero) → 047 (categorías del proveedor, existencias y rastreo) → 041 (Emprende Red al 50 %) → 048 (horario legal) → 049 (Netflix 30 días) → 050 (agotados y repuestos) → 051 (cantidades de ANC) → 052 (resumen diario de ventas) → 053 (alertas de pagos sin validar)
 -- Supabase → SQL Editor → New query → pegar todo → Run. Es idempotente: si se corre dos veces no pasa nada.
 -- Si sale un error que empieza por "Nada se aplicó", copia el mensaje y me lo pasas.
 -- Generado con: node herramientas/armar-pendientes.js (no editar a mano).
@@ -752,7 +752,9 @@ grant execute on function public.precios_publicos() to anon, authenticated, serv
 
 -- 4) Sincronización del proveedor con categoría ------------------------------------------------------------
 -- p_items: [{producto_id, variante, producto, tipo, costo, precio, stock, ref, categoria}]
-create or replace function public.sincronizar_proveedor(p_proveedor text, p_items jsonb)
+-- drop antes de crear: si ya existe la versión de wo-050 (devuelve más columnas), «create or replace» falla (42P13)
+drop function if exists public.sincronizar_proveedor(text, jsonb);
+create function public.sincronizar_proveedor(p_proveedor text, p_items jsonb)
 returns table (insertados integer, actualizados integer, inactivados integer)
 language plpgsql
 volatile

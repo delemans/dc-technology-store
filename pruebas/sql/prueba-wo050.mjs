@@ -25,6 +25,13 @@ ok(true, 'se aplica dos veces sin error');
 const q = async (s) => (await db.query(s)).rows;
 for (const vez of [1, 2]) { try { await db.exec(fs.readFileSync((process.argv[2] ?? new URL('../../', import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1').replace(/%20/g, ' ').replace(/\/$/, '')) + '/supabase/wo-050-disponibilidad.sql', 'utf8')); } catch (e) { console.log('ERROR 050 (vez ' + vez + '):', e.message); process.exit(1); } }
 ok(true, 'wo-050 se aplica dos veces sin error');
+// Base con wo-050 ya aplicado y se vuelve a correr APLICAR-PENDIENTES (047 → … → 050): «create or replace» daba 42P13
+{
+    const raiz = (process.argv[2] ?? new URL('../../', import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1').replace(/%20/g, ' ').replace(/\/$/, ''));
+    let error = null;
+    try { for (const f of ['wo-047-proveedor-y-rastreo.sql', 'wo-050-disponibilidad.sql']) await db.exec(fs.readFileSync(`${raiz}/supabase/${f}`, 'utf8')); } catch (e) { error = e.message; }
+    ok(!error, `con wo-050 ya en la base, wo-047 y wo-050 se vuelven a aplicar sin error${error ? ` (${error})` : ''}`);
+}
 const sync = async (items) => (await q("select * from public.sincronizar_proveedor('emprendered', '" + JSON.stringify(items) + "'::jsonb)"))[0];
 const it = (id, stock, cat = 'TECNOLOGIA') => ({ producto_id: id, variante: 'Unidad', producto: id, tipo: 'tecnologia', costo: 10000, precio: 15000, stock, ref: '1', categoria: cat });
 let r = await sync([it('er-a-1', 5), it('er-b-2', 3), it('er-c-3', 2), it('er-oculto-4', 4, 'HOGAR')]);

@@ -81,7 +81,9 @@ grant execute on function public.precios_publicos() to anon, authenticated, serv
 
 -- 4) Sincronización del proveedor con categoría ------------------------------------------------------------
 -- p_items: [{producto_id, variante, producto, tipo, costo, precio, stock, ref, categoria}]
-create or replace function public.sincronizar_proveedor(p_proveedor text, p_items jsonb)
+-- drop antes de crear: si ya existe la versión de wo-050 (devuelve más columnas), «create or replace» falla (42P13)
+drop function if exists public.sincronizar_proveedor(text, jsonb);
+create function public.sincronizar_proveedor(p_proveedor text, p_items jsonb)
 returns table (insertados integer, actualizados integer, inactivados integer)
 language plpgsql
 volatile
