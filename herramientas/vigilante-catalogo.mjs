@@ -46,6 +46,7 @@ Register-ScheduledTask -TaskName '${tarea}' -Action $a -Trigger $t -Settings $s 
 }
 
 const informe = [];
+const lectura = []; // qué se leyó de cada proveedor: queda en el registro de cada corrida (también en GitHub Actions)
 let publicar = false;
 
 // En el PC: primero lo que ya publicó GitHub (si no, el PC trabajaba sobre un catálogo viejo y su push fallaba)
@@ -70,6 +71,7 @@ if (r.status !== 0) {
         fs.writeFileSync(RUTA_PRODUCTOS, crudoAntes);
         informe.push(`⚠️ Emprende Red devolvió ${despues.length} productos (antes ${antes.length}): parece una caída a medias. No cambié nada; reviso mañana.`);
     } else {
+        lectura.push(`Emprende Red: ${despues.length} productos (antes ${antes.length}), ${despues.filter((p) => !p.agotado && !p.oculto).length} visibles con unidades`);
         const A = new Map(antes.map((p) => [p.id, p])), D = new Map(despues.map((p) => [p.id, p]));
         const visible = (p) => !p.oculto;
         const precio = (p) => Number(p?.variantes?.[0]?.precio) || 0;
@@ -148,6 +150,7 @@ if (!RAPIDO) {
     const antes = fs.existsSync(path.join(RAIZ, 'disponibilidad.json')) ? fs.readFileSync(path.join(RAIZ, 'disponibilidad.json'), 'utf8') : '';
     const rd = spawnSync(process.execPath, [path.join(RAIZ, 'herramientas', 'disponibilidad-proveedores.mjs'), ...(PROBAR ? [] : ['--aplicar'])], { cwd: RAIZ, encoding: 'utf8', timeout: 10 * 60e3 });
     const ahora = fs.existsSync(path.join(RAIZ, 'disponibilidad.json')) ? fs.readFileSync(path.join(RAIZ, 'disponibilidad.json'), 'utf8') : '';
+    lectura.push(...String(rd.stdout || '').split(/\r?\n/).filter((l) => /^(Fuente|Con cantidad|No salen|DISPONIBILIDAD)/.test(l)));
     if (/DISPONIBILIDAD: actualizada/.test(rd.stdout || '') && ahora !== antes) {
         publicar = true;
         const leer = (t) => { try { const j = JSON.parse(t); return new Set([...Object.keys(j.ocultos ?? {}), ...Object.entries(j.variantes ?? {}).flatMap(([id, v]) => Object.keys(v).map((x) => `${id} · ${x}`))]); } catch { return new Set(); } };
@@ -243,6 +246,7 @@ if (!RAPIDO) {
 
 /* ---------- 5) Informe ---------- */
 const texto = informe.length ? [RAPIDO ? '🛰️ *Existencias · DC Tecnology*' : '🛰️ *Vigilante del catálogo · DC Tecnology*', '', ...informe].join('\n\n') : null;
+log(`lectura · ${lectura.join(' · ') || 'nada leído'}`);
 log(texto ? texto.replace(/\n+/g, ' | ').slice(0, 900) : 'sin cambios');
 if (PROBAR) { console.log(texto ?? 'Sin cambios en proveedores ni políticas.'); process.exit(0); }
 const admin = String(env.NUMERO_AVISO_ADMIN ?? '').replace(/\D/g, '').replace(/^(3\d{9})$/, '57$1');
