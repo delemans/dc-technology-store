@@ -7,7 +7,7 @@
   "reloj-inteligente-smartwatch-h19": "ANC ya no ofrece este producto",
   "reloj-inteligente-smartwatch-z90": "ANC ya no ofrece este producto",
   "reloj-inteligente-smartwatch-m9": "ANC ya no ofrece este producto",
-  "netflix": "Agotado o retirado en ANC",
+  "crunchyroll": "Agotado o retirado en ANC",
   "iptv-smarters": "ANC ya no ofrece este producto",
   "capcut-pro": "Agotado o retirado en ANC",
   "office-365": "ANC ya no ofrece este producto",
@@ -97,14 +97,14 @@
   "er-maleta-antirobo-h142-1953": "Emprende Red: sin unidades"
  },
  "variantes": {
+  "netflix": {
+   "Pantalla Internacional 30 días": "ANC ya no ofrece este plan"
+  },
   "prime-video": {
    "Cuenta Completa (6 Dispositivos)": "ANC ya no ofrece este plan"
   },
   "hbo-max": {
    "Cuenta Completa Platino 1 Mes": "ANC ya no ofrece este plan"
-  },
-  "crunchyroll": {
-   "Cuenta Completa 1 Mes": "ANC ya no ofrece este plan"
   },
   "vix-premium": {
    "Cuenta Completa 1 Mes": "ANC ya no ofrece este plan"
@@ -956,5 +956,5 @@
   "er-gorra-ch47854-2046": 1,
   "er-gorra-yeison-jimenez-ch557-2047": 1
  },
- "actualizado": "2026-11-03T20:46:01.673Z"
+ "actualizado": "2026-11-04T18:46:15.361Z"
 }
