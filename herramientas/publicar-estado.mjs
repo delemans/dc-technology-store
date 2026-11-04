@@ -5,7 +5,8 @@
 //   node herramientas/publicar-estado.mjs --instalar → tarea programada diaria (12:30 p. m.) en este PC
 //
 // Qué publica (herramientas/estados-plan.json):
-//   · Cada día, el siguiente video de la rotación (alterna voz de mujer / de hombre si existen las dos versiones).
+//   · Cada día, el video del día de la campaña (alterna las versiones de voz), sin repetir un video en 28 días
+//     ni un tema dos días seguidos (herramientas/rotacion.js).
 //   · El día de la promo semanal (lunes por defecto), además, un estado de texto con la promo de la semana.
 // Los estados los ven los contactos del WhatsApp del bot (como cualquier estado). Los videos vienen de
 // docs/videos-estados/mp4 (no van a git) y se le entregan a Evolution por un servidor local temporal.
@@ -19,6 +20,7 @@ import { fileURLToPath } from 'node:url';
 
 const require = createRequire(import.meta.url);
 const { cargarEntorno, requerir } = require('./entorno.js');
+const { elegirVideo } = require('./rotacion.js');
 const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const env = cargarEntorno();
 const args = process.argv.slice(2);
@@ -89,9 +91,9 @@ const textoDe = (id) => plan.videos.find((v) => v.archivo === id)?.texto ?? '';
 const dias = Math.floor((Date.parse(`${hoy}T12:00:00-05:00`) - Date.parse(`${plan.inicio_campanas}T12:00:00-05:00`)) / 864e5);
 const semana = Math.floor(Math.max(0, dias) / 7), diaCampana = ((dias % 7) + 7) % 7;
 const campana = plan.campanas[semana % plan.campanas.length];
-const candidatos = [...campana.videos.slice(diaCampana), ...campana.videos.slice(0, diaCampana)].filter((id) => versionesDe(id).length);
-if (!candidatos.length) { console.error(`No hay videos de la campaña "${campana.nombre}" en ${carpeta}.`); process.exit(1); }
-const elegidoId = candidatos[0];
+// El video del día de la campaña, salvo que ya haya salido hace poco o su tema haya salido ayer/anteayer (rotacion.js)
+const elegidoId = elegirVideo({ plan, campana, diaCampana, historial: registro.publicados.filter((p) => p.tipo === 'video'), hoy, disponible: (id) => versionesDe(id).length > 0 });
+if (!elegidoId) { console.error(`No hay videos de la campaña "${campana.nombre}" en ${carpeta}.`); process.exit(1); }
 const versiones = versionesDe(elegidoId);
 const archivo = versiones[(semana + diaCampana) % versiones.length]; // la voz cambia de un día a otro y de una semana a otra
 const yaHoy = registro.publicados.some((p) => p.fecha === hoy && p.tipo === 'video');
@@ -129,7 +131,7 @@ if (!yaHoy) {
     const servidor = await servirUnaVez(archivo);
     try {
         await evo(`/message/sendStatus/${INST}`, { type: 'video', content: `http://127.0.0.1:${servidor.address().port}/estado.mp4`, caption: leyenda, statusJidList: lista });
-        registro.publicados.push({ fecha: hoy, tipo: 'video', archivo: path.basename(archivo), contactos: lista.length });
+        registro.publicados.push({ fecha: hoy, tipo: 'video', video: elegidoId, archivo: path.basename(archivo), contactos: lista.length });
         registro.indice += 1;
         console.log(`Estado publicado: ${path.basename(archivo)} → ${lista.length} contactos`);
     } finally { servidor.close(); }

@@ -464,6 +464,14 @@ function productosFiltrados() {
     }), orden).sort((a, b) => Number(Boolean(a.agotado)) - Number(Boolean(b.agotado))); // agotados al final
 }
 
+// Sugerencias cuando una búsqueda no encuentra nada: solo lo que HOY se puede comprar (04/11/2026: se sugería Netflix,
+// Windows y Office cuando estaban ocultos por agotados o por el portal del proveedor caído, y al tocarlos no salía nada)
+const SUGERENCIAS = ['Netflix', 'Disney', 'Prime Video', 'Windows', 'Office', 'Audífonos', 'Reloj', 'Parlante', 'Cargador', 'Roblox', 'Google Play', 'Mantenimiento'];
+function sugerenciasDisponibles(max = 6) {
+    const hay = (s) => estado.productos.some((p) => !p.agotado && `${p.nombre} ${p.marca ?? ''} ${p.tipo}`.toLowerCase().includes(s.toLowerCase()));
+    return SUGERENCIAS.filter(hay).slice(0, max);
+}
+
 function pintarModulos() {
     document.querySelectorAll('[data-modulo]').forEach((btn) => {
         const activo = !estado.filtro.busqueda && btn.dataset.modulo === estado.filtro.modulo;
@@ -517,7 +525,7 @@ function renderizar() {
                 <i class="fa-solid fa-magnifying-glass text-3xl mb-3" aria-hidden="true"></i>
                 <p class="font-bold">No encontramos “${escaparHTML(busqueda || 'productos')}”.</p>
                 <p class="text-xs mt-1">Prueba con una de estas búsquedas o escríbenos por WhatsApp.</p>
-                <div class="mt-4 flex flex-wrap justify-center gap-2">${['Netflix', 'Windows', 'Office', 'Audífonos', 'Reloj', 'Roblox'].map((s) => `<button type="button" class="vacio-sugerencia" data-sugerencia="${s}">${s}</button>`).join('')}</div>
+                <div class="mt-4 flex flex-wrap justify-center gap-2">${sugerenciasDisponibles().map((s) => `<button type="button" class="vacio-sugerencia" data-sugerencia="${s}">${s}</button>`).join('')}</div>
             </div>`;
         grid.querySelectorAll('[data-sugerencia]').forEach((b) => b.addEventListener('click', () => {
             const input = $('searchInput');

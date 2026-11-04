@@ -1,271 +1,337 @@
 {
- "_nota": "Esquema de campañas (herramientas/publicar-estado.mjs y generar_redes.js). Cada semana (lunes a domingo) corre UNA campaña; rotan en orden desde inicio_campanas. Cada día sale el video del día de esa campaña, alternando las versiones de voz; los lunes, además, la promo de la campaña en texto. Los textos solo usan hechos del negocio (nada de descuentos ni disponibilidad inventados). Videos de más de 60 s no van a estados (WhatsApp los corta): se usa el siguiente de la lista.",
+ "_nota": "Esquema de campañas (herramientas/publicar-estado.mjs y generar_redes.js). Cada semana (lunes a domingo) corre UNA campaña; rotan en orden desde inicio_campanas. Cada día sale el video del día de esa campaña, alternando las versiones de voz; los lunes, además, la promo de la campaña en texto. Los textos solo usan hechos del negocio (nada de descuentos ni disponibilidad inventados). No se repite un video en 28 días ni un tema (videos[].tema) dos días seguidos: herramientas/rotacion.js. Videos de más de 60 s no van a estados (WhatsApp los corta): se usa el siguiente de la lista.",
  "carpeta": "docs/videos-estados/mp4",
  "pie": "🛒 www.dctecnology.xyz · 💬 322 328 4622",
  "videos": [
   {
    "archivo": "bienvenida",
-   "texto": "Somos DC Tecnology: streaming, licencias, pines, recargas, tecnología y servicio técnico. Trabajamos para darte el mejor servicio."
+   "texto": "Somos DC Tecnology: streaming, licencias, pines, recargas, tecnología y servicio técnico. Trabajamos para darte el mejor servicio.",
+   "tema": "marca"
   },
   {
    "archivo": "streaming-desde",
-   "texto": "📺 Netflix, Disney, Max, Prime Video y más, con garantía de 30 días. Elige tu plan en la tienda."
+   "texto": "📺 Netflix, Disney, Max, Prime Video y más, con garantía de 30 días. Elige tu plan en la tienda.",
+   "tema": "streaming"
   },
   {
    "archivo": "compra-3-toques",
-   "texto": "Comprar es así de fácil: eliges, pagas con Nequi, Daviplata o Llave Bre-B y te llega por WhatsApp."
+   "texto": "Comprar es así de fácil: eliges, pagas con Nequi, Daviplata o Llave Bre-B y te llega por WhatsApp.",
+   "tema": "como-comprar"
   },
   {
    "archivo": "primera-compra",
-   "texto": "🎁 Tu primera compra con 10% de descuento: cupón DCTECH2026."
+   "texto": "🎁 Tu primera compra con 10% de descuento: cupón DCTECH2026.",
+   "tema": "cupon"
   },
   {
    "archivo": "relojes-audifonos",
-   "texto": "⌚🎧 Relojes inteligentes, audífonos y más, con garantía de 30 días y envío a todo el país."
+   "texto": "⌚🎧 Relojes inteligentes, audífonos y más, con garantía de 30 días y envío a todo el país.",
+   "tema": "relojes-audifonos"
   },
   {
    "archivo": "combo-ahorra",
-   "texto": "Arma tu combo: 2 plataformas -10%, 3 o más -15%."
+   "texto": "Arma tu combo: 2 plataformas -10%, 3 o más -15%.",
+   "tema": "combos"
   },
   {
    "archivo": "pines-recargas",
-   "texto": "📱 Recargas Claro, Movistar, Tigo, Wom, ETB y Éxito, diamantes de Free Fire y pines virtuales."
+   "texto": "📱 Recargas Claro, Movistar, Tigo, Wom, ETB y Éxito, diamantes de Free Fire y pines virtuales.",
+   "tema": "recargas"
   },
   {
    "archivo": "desarrollos-completo",
-   "texto": "🤖 Automatizamos tu negocio: dashboards, POS, inventarios, catálogos web y bots de WhatsApp con IA. Cotiza sin compromiso."
+   "texto": "🤖 Automatizamos tu negocio: dashboards, POS, inventarios, catálogos web y bots de WhatsApp con IA. Cotiza sin compromiso.",
+   "tema": "desarrollos"
   },
   {
    "archivo": "tutorial-compra-entrega",
-   "texto": "Así funciona una compra, paso a paso, desde que eliges hasta que recibes."
+   "texto": "Así funciona una compra, paso a paso, desde que eliges hasta que recibes.",
+   "tema": "como-comprar"
   },
   {
    "archivo": "servicio-tecnico",
-   "texto": "🛠️ Mantenimiento, reparación de computadores y repuestos. Cotiza por WhatsApp."
+   "texto": "🛠️ Mantenimiento, reparación de computadores y repuestos. Cotiza por WhatsApp.",
+   "tema": "servicio-tecnico"
   },
   {
    "archivo": "por-que-dc",
-   "texto": "Entrega rápida, garantía de 30 días, pagos locales y personas reales. Compra con confianza."
+   "texto": "Entrega rápida, garantía de 30 días, pagos locales y personas reales. Compra con confianza.",
+   "tema": "marca"
   },
   {
    "archivo": "licencias",
-   "texto": "🔑 Windows, Office y antivirus. Y si quieres, te lo instalamos."
+   "texto": "🔑 Windows, Office y antivirus. Y si quieres, te lo instalamos.",
+   "tema": "licencias"
   },
   {
    "archivo": "comprobante-web",
-   "texto": "Paga directo en la página y sube tu comprobante: te avisamos por WhatsApp."
+   "texto": "Paga directo en la página y sube tu comprobante: te avisamos por WhatsApp.",
+   "tema": "pago-web"
   },
   {
    "archivo": "pedidos-whatsapp",
-   "texto": "Mira tus pedidos y tu garantía sin contraseñas, solo con tu WhatsApp."
+   "texto": "Mira tus pedidos y tu garantía sin contraseñas, solo con tu WhatsApp.",
+   "tema": "mis-pedidos"
   },
   {
    "archivo": "soporte-garantia",
-   "texto": "¿Algo falla? Repórtalo desde Mis pedidos y te atiende una persona real."
+   "texto": "¿Algo falla? Repórtalo desde Mis pedidos y te atiende una persona real.",
+   "tema": "garantia"
   },
   {
    "archivo": "alquiler-equipos",
-   "texto": "💻 Alquiler de portátiles y equipos de cómputo para empresas, eventos y proyectos."
+   "texto": "💻 Alquiler de portátiles y equipos de cómputo para empresas, eventos y proyectos.",
+   "tema": "alquiler"
   },
   {
    "archivo": "renueva-tu-plan",
-   "texto": "⏰ ¿Tu plan está por vencer? Te avisamos 3 días antes: responde RENOVAR y te lo dejamos listo para pagar."
+   "texto": "⏰ ¿Tu plan está por vencer? Te avisamos 3 días antes: responde RENOVAR y te lo dejamos listo para pagar.",
+   "tema": "renovacion"
   },
   {
    "archivo": "apps-premium",
-   "texto": "🎨 Canva Pro, CapCut Pro, Duolingo Super y Gemini IA Pro, con garantía de 30 días."
+   "texto": "🎨 Canva Pro, CapCut Pro, Duolingo Super y Gemini IA Pro, con garantía de 30 días.",
+   "tema": "apps-premium"
   },
   {
    "archivo": "free-fire-diamantes",
-   "texto": "💎 Diamantes de Free Fire desde 100, directo a tu cuenta."
+   "texto": "💎 Diamantes de Free Fire desde 100, directo a tu cuenta.",
+   "tema": "free-fire"
   },
   {
    "archivo": "regala-un-pin",
-   "texto": "🎁 Regala un pin virtual de Google Play, Roblox, Netflix o Disney: el código te llega por WhatsApp."
+   "texto": "🎁 Regala un pin virtual de Google Play, Roblox, Netflix o Disney: el código te llega por WhatsApp.",
+   "tema": "pin-regalo"
   },
   {
    "archivo": "antivirus-mcafee",
-   "texto": "🛡️ McAfee Total Protection: licencia de 1 año para 1 o 5 computadores, desde $45.000, con garantía."
+   "texto": "🛡️ McAfee Total Protection: licencia de 1 año para 1 o 5 computadores, desde $45.000, con garantía.",
+   "tema": "antivirus"
   },
   {
    "archivo": "office-365",
-   "texto": "📄 Office 365 por un año (1 o 5 equipos) u Office Pro Plus vitalicio 2016–2024. Si quieres, te lo instalamos."
+   "texto": "📄 Office 365 por un año (1 o 5 equipos) u Office Pro Plus vitalicio 2016–2024. Si quieres, te lo instalamos.",
+   "tema": "office"
   },
   {
    "archivo": "windows-pro",
-   "texto": "🪟 Licencias de Windows 10 Pro y 11 Pro, y servicio de instalación con Office y programas básicos."
+   "texto": "🪟 Licencias de Windows 10 Pro y 11 Pro, y servicio de instalación con Office y programas básicos.",
+   "tema": "windows"
   },
   {
    "archivo": "mantenimiento-preventivo",
-   "texto": "🧹 Mantenimiento preventivo (optimización y limpieza) y correctivo con cambio de pasta térmica."
+   "texto": "🧹 Mantenimiento preventivo (optimización y limpieza) y correctivo con cambio de pasta térmica.",
+   "tema": "mantenimiento"
   },
   {
    "archivo": "reparacion-computadores",
-   "texto": "🛠️ Reparamos computadores de escritorio y portátiles, y conseguimos tus repuestos. Cotiza por WhatsApp."
+   "texto": "🛠️ Reparamos computadores de escritorio y portátiles, y conseguimos tus repuestos. Cotiza por WhatsApp.",
+   "tema": "reparacion"
   },
   {
    "archivo": "desarrollo-pos",
-   "texto": "🍻 Sistemas POS para bares y restaurantes: mesas en tiempo real, pedidos por mesa, caja, inventario y reportes."
+   "texto": "🍻 Sistemas POS para bares y restaurantes: mesas en tiempo real, pedidos por mesa, caja, inventario y reportes.",
+   "tema": "pos"
   },
   {
    "archivo": "desarrollo-rifas",
-   "texto": "🏆 Plataformas de pollas, rifas y juegos con usuarios, tabla de posiciones, premios y cuenta regresiva."
+   "texto": "🏆 Plataformas de pollas, rifas y juegos con usuarios, tabla de posiciones, premios y cuenta regresiva.",
+   "tema": "rifas"
   },
   {
    "archivo": "desarrollo-finanzas",
-   "texto": "💰 Gestor financiero: ingresos, gastos, pagos recurrentes, ventas y solicitudes de gasto en un solo tablero."
+   "texto": "💰 Gestor financiero: ingresos, gastos, pagos recurrentes, ventas y solicitudes de gasto en un solo tablero.",
+   "tema": "finanzas"
   },
   {
    "archivo": "desarrollo-dashboards",
-   "texto": "📊 Dashboards con indicadores en tiempo real, cronogramas, gestión por proceso y matrices."
+   "texto": "📊 Dashboards con indicadores en tiempo real, cronogramas, gestión por proceso y matrices.",
+   "tema": "dashboards"
   },
   {
    "archivo": "desarrollo-tienda-bot",
-   "texto": "🤖 Tu tienda web con catálogo, carrito y pagos locales, más un bot de WhatsApp con IA que toma pedidos."
+   "texto": "🤖 Tu tienda web con catálogo, carrito y pagos locales, más un bot de WhatsApp con IA que toma pedidos.",
+   "tema": "tienda-bot"
   },
   {
    "archivo": "tip-mantenimiento",
-   "texto": "🧰 ¿Cada cuánto hacerle mantenimiento a tu PC? Lo recomendable es 1 vez al año (o cada 6 meses con polvo o uso diario). Preventivo desde $50.000."
+   "texto": "🧰 ¿Cada cuánto hacerle mantenimiento a tu PC? Lo recomendable es 1 vez al año (o cada 6 meses con polvo o uso diario). Preventivo desde $50.000.",
+   "tema": "mantenimiento"
   },
   {
    "archivo": "tip-office",
-   "texto": "📄 Office 365 vs vitalicio: 365 se paga por año y siempre está al día; el vitalicio es un solo pago y se queda en su versión."
+   "texto": "📄 Office 365 vs vitalicio: 365 se paga por año y siempre está al día; el vitalicio es un solo pago y se queda en su versión.",
+   "tema": "office"
   },
   {
    "archivo": "tip-windows",
-   "texto": "🪟 Windows 10 no recibe actualizaciones de seguridad gratuitas desde octubre de 2025. Pásate a Windows 11 (si tu equipo es compatible): licencia + instalación."
+   "texto": "🪟 Windows 10 no recibe actualizaciones de seguridad gratuitas desde octubre de 2025. Pásate a Windows 11 (si tu equipo es compatible): licencia + instalación.",
+   "tema": "windows"
   },
   {
    "archivo": "tip-antivirus",
-   "texto": "🛡️ 4 consejos: programas solo de sitios oficiales, cuidado con enlaces que piden datos, copias de seguridad y antivirus actualizado."
+   "texto": "🛡️ 4 consejos: programas solo de sitios oficiales, cuidado con enlaces que piden datos, copias de seguridad y antivirus actualizado.",
+   "tema": "antivirus"
   },
   {
    "archivo": "tip-pantalla-vs-cuenta",
-   "texto": "📺 ¿Pantalla o cuenta completa? Pantalla = un perfil en un dispositivo a la vez. Cuenta completa = todos los perfiles para tu hogar."
+   "texto": "📺 ¿Pantalla o cuenta completa? Pantalla = un perfil en un dispositivo a la vez. Cuenta completa = todos los perfiles para tu hogar.",
+   "tema": "pantalla-o-cuenta"
   },
   {
    "archivo": "satira-catalogo",
-   "texto": "😅 ¿40 fotos de productos al día en tus estados? Tus contactos ya te silenciaron. Mejor un catálogo virtual: un solo enlace, con precios, carrito y pedido a tu WhatsApp."
+   "texto": "😅 ¿40 fotos de productos al día en tus estados? Tus contactos ya te silenciaron. Mejor un catálogo virtual: un solo enlace, con precios, carrito y pedido a tu WhatsApp.",
+   "tema": "estados-llenos"
   },
   {
    "archivo": "tip-automatiza",
-   "texto": "⚙️ ¿Horas copiando pedidos y respondiendo lo mismo? Automatízalo: bot que atiende y toma pedidos + inventario al día. Tú con el control."
+   "texto": "⚙️ ¿Horas copiando pedidos y respondiendo lo mismo? Automatízalo: bot que atiende y toma pedidos + inventario al día. Tú con el control.",
+   "tema": "automatizar"
   },
   {
    "archivo": "tip-control-negocio",
-   "texto": "📊 ¿Sabes cuánto ganaste este mes? Ventas, gastos e inventario en un solo tablero. Decide con datos."
+   "texto": "📊 ¿Sabes cuánto ganaste este mes? Ventas, gastos e inventario en un solo tablero. Decide con datos.",
+   "tema": "finanzas"
   },
   {
    "archivo": "tip-por-que-antivirus",
-   "texto": "🛡️ Las amenazas llegan por correo, WhatsApp o USB: roban claves, secuestran archivos y ponen lento el equipo. Un antivirus actualizado las detiene."
+   "texto": "🛡️ Las amenazas llegan por correo, WhatsApp o USB: roban claves, secuestran archivos y ponen lento el equipo. Un antivirus actualizado las detiene.",
+   "tema": "antivirus"
   },
   {
    "archivo": "no-aburras-estados",
-   "texto": "🙈 ¿30 fotos de productos al día en tus estados? Tus contactos ya las pasan sin ver… o te silencian. Mejor un catálogo virtual: un solo enlace con fotos, precios y pedido por WhatsApp."
+   "texto": "🙈 ¿30 fotos de productos al día en tus estados? Tus contactos ya las pasan sin ver… o te silencian. Mejor un catálogo virtual: un solo enlace con fotos, precios y pedido por WhatsApp.",
+   "tema": "estados-llenos"
   },
   {
    "archivo": "satira-precio-al-privado",
-   "texto": "😅 \"¿Precio?\" \"Al privado\"… y 3 horas después ya compró en otro lado. Con un catálogo virtual el precio está a la vista, de día y de noche."
+   "texto": "😅 \"¿Precio?\" \"Al privado\"… y 3 horas después ya compró en otro lado. Con un catálogo virtual el precio está a la vista, de día y de noche.",
+   "tema": "precio-visible"
   },
   {
    "archivo": "catalogo-un-enlace",
-   "texto": "🔗 Un enlace vale más que cien fotos: tu cliente busca, ordena por precio y ve la ficha completa sin esperar."
+   "texto": "🔗 Un enlace vale más que cien fotos: tu cliente busca, ordena por precio y ve la ficha completa sin esperar.",
+   "tema": "catalogo-enlace"
   },
   {
    "archivo": "catalogo-pedido-whatsapp",
-   "texto": "🛒 Menos \"precio?\" y \"visto\". En un catálogo virtual el cliente arma su pedido y te llega completo a WhatsApp."
+   "texto": "🛒 Menos \"precio?\" y \"visto\". En un catálogo virtual el cliente arma su pedido y te llega completo a WhatsApp.",
+   "tema": "catalogo-pedido"
   },
   {
    "archivo": "estados-que-venden",
-   "texto": "📌 3 reglas para estados que venden: máximo 3 al día, algo útil y siempre precio claro con enlace para pedir."
+   "texto": "📌 3 reglas para estados que venden: máximo 3 al día, algo útil y siempre precio claro con enlace para pedir.",
+   "tema": "estados-que-venden"
   },
   {
    "archivo": "catalogo-tu-negocio",
-   "texto": "🏪 Ropa, comida, accesorios o servicios: tu catálogo virtual con tu marca, buscador, pedido por WhatsApp y bot opcional."
+   "texto": "🏪 Ropa, comida, accesorios o servicios: tu catálogo virtual con tu marca, buscador, pedido por WhatsApp y bot opcional.",
+   "tema": "catalogo-negocio"
   },
   {
    "archivo": "ing-antivirus",
-   "texto": "🛡️ Por qué tener antivirus: los virus entran por correos, enlaces y memorias USB. McAfee original por 1 año, con garantía de 30 días."
+   "texto": "🛡️ Por qué tener antivirus: los virus entran por correos, enlaces y memorias USB. McAfee original por 1 año, con garantía de 30 días.",
+   "tema": "antivirus"
   },
   {
    "archivo": "ing-franquicias",
-   "texto": "🎬 ¿Qué ves en cada plataforma? Disney Plus: Marvel, Star Wars y Pixar. HBO Max: series de HBO y películas de DC. Netflix y Prime Video con sus series originales. El catálogo puede variar según el país."
+   "texto": "🎬 ¿Qué ves en cada plataforma? Disney Plus: Marvel, Star Wars y Pixar. HBO Max: series de HBO y películas de DC. Netflix y Prime Video con sus series originales. El catálogo puede variar según el país.",
+   "tema": "que-ver"
   },
   {
    "archivo": "ing-mantenimiento",
-   "texto": "🧹 ¿Tu computador suena como un avión? Es el polvo. Te contamos cada cuánto hacer mantenimiento. Valor final tras el diagnóstico."
+   "texto": "🧹 ¿Tu computador suena como un avión? Es el polvo. Te contamos cada cuánto hacer mantenimiento. Valor final tras el diagnóstico.",
+   "tema": "mantenimiento"
   },
   {
    "archivo": "ing-combos",
-   "texto": "🧩 Arma tu combo de plataformas: 2 distintas con 10 % y 3 o más con 15 % de descuento. Garantía de 30 días."
+   "texto": "🧩 Arma tu combo de plataformas: 2 distintas con 10 % y 3 o más con 15 % de descuento. Garantía de 30 días.",
+   "tema": "combos"
   },
   {
    "archivo": "ing-windows11",
-   "texto": "🪟 Windows 10 ya no recibe actualizaciones de seguridad gratuitas desde octubre de 2025. Revisamos si tu equipo es compatible con Windows 11 y te lo dejamos con licencia original."
+   "texto": "🪟 Windows 10 ya no recibe actualizaciones de seguridad gratuitas desde octubre de 2025. Revisamos si tu equipo es compatible con Windows 11 y te lo dejamos con licencia original.",
+   "tema": "windows"
   },
   {
    "archivo": "ing-innovador",
-   "texto": "🤖 Catálogo web con tus productos y un asistente con IA que responde y toma pedidos. Tú confirmas el pago y entregas. Lo hacemos a la medida de tu negocio."
+   "texto": "🤖 Catálogo web con tus productos y un asistente con IA que responde y toma pedidos. Tú confirmas el pago y entregas. Lo hacemos a la medida de tu negocio.",
+   "tema": "tienda-bot"
   },
   {
    "archivo": "srv-mantenimiento",
-   "texto": "🛠️ Mantenimiento de computadores: limpieza interna, revisión del software y cambio de pasta térmica. Valor de referencia y precio final tras el diagnóstico."
+   "texto": "🛠️ Mantenimiento de computadores: limpieza interna, revisión del software y cambio de pasta térmica. Valor de referencia y precio final tras el diagnóstico.",
+   "tema": "mantenimiento"
   },
   {
    "archivo": "srv-instalacion",
-   "texto": "💻 Te dejamos el computador listo: Windows 10 u 11 Pro, Office y software base. Licencias originales disponibles."
+   "texto": "💻 Te dejamos el computador listo: Windows 10 u 11 Pro, Office y software base. Licencias originales disponibles.",
+   "tema": "windows"
   },
   {
    "archivo": "srv-reparacion",
-   "texto": "🔧 Reparación de computadores de escritorio y portátiles, y repuestos. Cuéntanos la falla por WhatsApp y te cotizamos."
+   "texto": "🔧 Reparación de computadores de escritorio y portátiles, y repuestos. Cuéntanos la falla por WhatsApp y te cotizamos.",
+   "tema": "reparacion"
   },
   {
    "archivo": "srv-alquiler",
-   "texto": "🏢 Alquiler de portátiles por meses para tu equipo o proyecto. Entre más tiempo, menor la cuota mensual."
+   "texto": "🏢 Alquiler de portátiles por meses para tu equipo o proyecto. Entre más tiempo, menor la cuota mensual.",
+   "tema": "alquiler"
   },
   {
    "archivo": "srv-asesoria",
-   "texto": "🎓 Asesoría y tutoría técnica personalizada, a tu ritmo. Sesiones de 1 hora."
+   "texto": "🎓 Asesoría y tutoría técnica personalizada, a tu ritmo. Sesiones de 1 hora.",
+   "tema": "asesoria"
   },
   {
    "archivo": "srv-catalogo-web",
-   "texto": "🛍️ Tu catálogo web con tus productos y un asistente con IA que atiende por WhatsApp. Proyecto a la medida."
+   "texto": "🛍️ Tu catálogo web con tus productos y un asistente con IA que atiende por WhatsApp. Proyecto a la medida.",
+   "tema": "tienda-bot"
   },
   {
    "archivo": "srv-automatizaciones",
-   "texto": "📊 Tableros en tiempo real, inventarios, sistemas para bares y supermercados y automatización de macros."
+   "texto": "📊 Tableros en tiempo real, inventarios, sistemas para bares y supermercados y automatización de macros.",
+   "tema": "dashboards"
   },
   {
    "archivo": "t-audifonos",
-   "texto": "🎧 Audífonos con garantía de 30 días por defectos de fábrica. Envíos a todo el país con número de guía."
+   "texto": "🎧 Audífonos con garantía de 30 días por defectos de fábrica. Envíos a todo el país con número de guía.",
+   "tema": "audifonos"
   },
   {
    "archivo": "t-relojes-inteligentes",
-   "texto": "⌚ Relojes inteligentes con garantía de 30 días. Unidades limitadas: mira los precios de hoy en la tienda."
+   "texto": "⌚ Relojes inteligentes con garantía de 30 días. Unidades limitadas: mira los precios de hoy en la tienda.",
+   "tema": "relojes"
   },
   {
    "archivo": "t-powerbank-cargadores",
-   "texto": "🔋 Power banks y cargadores para que nunca te quedes sin batería. Garantía de 30 días."
+   "texto": "🔋 Power banks y cargadores para que nunca te quedes sin batería. Garantía de 30 días.",
+   "tema": "cargadores"
   },
   {
    "archivo": "t-parlantes",
-   "texto": "🔊 Parlantes con garantía de 30 días y envío a todo el país."
+   "texto": "🔊 Parlantes con garantía de 30 días y envío a todo el país.",
+   "tema": "parlantes"
   },
   {
    "archivo": "t-gamer",
-   "texto": "🎮 Accesorios gamer con garantía de 30 días. Pídelo en la tienda o por WhatsApp."
+   "texto": "🎮 Accesorios gamer con garantía de 30 días. Pídelo en la tienda o por WhatsApp.",
+   "tema": "gamer"
   },
   {
    "archivo": "p-pin-google-play",
-   "texto": "🎮 Pin de Google Play: juegos, apps y más. El código te llega por WhatsApp apenas validamos tu pago."
+   "texto": "🎮 Pin de Google Play: juegos, apps y más. El código te llega por WhatsApp apenas validamos tu pago.",
+   "tema": "pin-google-play"
   },
   {
    "archivo": "p-pin-virtual-roblox",
-   "texto": "🟥 Pin de Roblox para Robux o Premium. Te llega por WhatsApp; válido para cuentas de Colombia."
+   "texto": "🟥 Pin de Roblox para Robux o Premium. Te llega por WhatsApp; válido para cuentas de Colombia.",
+   "tema": "pin-roblox"
   },
   {
    "archivo": "p-pin-virtual-disney-plus-1tpu5",
-   "texto": "🏰 Pin de Disney Plus: Marvel, Star Wars y Pixar. Válido para cuentas de Colombia."
+   "texto": "🏰 Pin de Disney Plus: Marvel, Star Wars y Pixar. Válido para cuentas de Colombia.",
+   "tema": "pin-disney"
   }
  ],
  "inicio_campanas": "2026-10-19",
@@ -294,7 +360,7 @@
     "ing-combos",
     "t-parlantes",
     "ing-innovador",
-    "tip-pantalla-vs-cuenta"
+    "ing-windows11"
    ],
    "promo": "🛠️ Semana de consejos DC\nConsejos reales para tu tecnología: antivirus, mantenimiento, Windows 11 y qué ver en cada plataforma.\nPregúntanos por WhatsApp o en la tienda.\n🛒 www.dctecnology.xyz"
   },
@@ -303,11 +369,11 @@
    "nombre": "Servicios DC",
    "videos": [
     "srv-mantenimiento",
-    "reparacion-computadores",
-    "srv-reparacion",
     "srv-alquiler",
-    "srv-asesoria",
+    "srv-reparacion",
     "srv-catalogo-web",
+    "srv-instalacion",
+    "srv-asesoria",
     "srv-automatizaciones"
    ],
    "promo": "🛠️ Semana de servicios DC\nMantenimiento, reparación, instalación, alquiler de portátiles, asesorías y soluciones para tu negocio.\nPersonas reales, cotización por WhatsApp.\n🛒 www.dctecnology.xyz"
@@ -350,7 +416,7 @@
     "p-pin-virtual-disney-plus-1tpu5",
     "t-gamer",
     "comprobante-web",
-    "primera-compra"
+    "pedidos-whatsapp"
    ],
    "promo": "🎁 Semana de pines y regalos\nGoogle Play, Roblox, Disney Plus, Netflix y más: el código te llega por WhatsApp apenas validamos tu pago.\n🛒 www.dctecnology.xyz"
   },
@@ -372,13 +438,13 @@
    "id": "automatiza",
    "nombre": "Automatiza y protege tu negocio",
    "videos": [
-    "satira-catalogo",
     "tip-automatiza",
     "tip-control-negocio",
     "tip-por-que-antivirus",
-    "desarrollo-tienda-bot",
-    "desarrollo-dashboards",
-    "antivirus-mcafee"
+    "desarrollo-rifas",
+    "tip-office",
+    "srv-automatizaciones",
+    "licencias"
    ],
    "promo": "⚙️ Semana para automatizar y proteger tu negocio\nCatálogo virtual con bot de WhatsApp, tableros de control, licencias y antivirus.\nCotiza sin compromiso: 💬 322 328 4622"
   }

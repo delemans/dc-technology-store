@@ -202,7 +202,8 @@ if (polAhora['er-terminos'] && polAhora['er-terminos'].texto.length < 30 && !pol
 /* ---------- 4) Publicar la tienda (si cambió el catálogo) ---------- */
 if (publicar && !PROBAR) {
     try {
-        const correr = (cmd, a) => execFileSync(cmd, a, { cwd: RAIZ, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], timeout: 10 * 60e3 });
+        // maxBuffer: el diff del catálogo pasa de 1 MB (04/11/2026 falló con «spawnSync git ENOBUFS» y no publicó)
+        const correr = (cmd, a) => execFileSync(cmd, a, { cwd: RAIZ, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], timeout: 10 * 60e3, maxBuffer: 512 * 1024 * 1024 });
         correr(process.execPath, [path.join(RAIZ, 'herramientas', 'generar_seo.js')]);
         correr(process.execPath, [path.join(RAIZ, 'herramientas', 'generar_feed_google.js')]);
         correr(process.execPath, [path.join(RAIZ, 'herramientas', 'resumen-catalogo.js')]); // resumen para las IA (docs/catalogo-resumen.md)
@@ -227,7 +228,15 @@ if (publicar && !PROBAR) {
         if (/gsk_[a-z0-9]{10}|nvapi-[a-z0-9]{10}|sk-or-v1|AIza[0-9A-Za-z_-]{20}|ghp_[A-Za-z0-9]{20}|eyJhbGciOi/i.test(diff)) throw new Error('el cambio parece contener una clave: no se publica');
         if (diff.trim()) {
             correr('git', ['commit', '-m', RAPIDO ? `Existencias al día (vigilante cada 3 h, ${new Date().toISOString().slice(0, 16).replace('T', ' ')} UTC)` : `Catálogo al día (vigilante diario ${new Date().toISOString().slice(0, 10)})`]);
-            correr('git', ['pull', '--rebase', 'origin', 'main']);
+            try { correr('git', ['pull', '--rebase', 'origin', 'main']); } catch (e) {
+                // El vigilante de GitHub publicó lo mismo antes (los dos regeneran los mismos archivos): se deja lo de GitHub
+                // y lo de este PC queda guardado en un stash, para que la próxima corrida arranque limpia.
+                try { correr('git', ['rebase', '--abort']); } catch { /* no había rebase */ }
+                correr('git', ['reset', '--soft', 'HEAD~1']);
+                correr('git', ['stash', 'push', '-m', `vigilante ${new Date().toISOString().slice(0, 10)}: GitHub ya había publicado`, '--', ...rutas.filter((x) => fs.existsSync(path.join(RAIZ, x)))]);
+                correr('git', ['merge', '--ff-only', '-q', 'origin/main']);
+                throw new Error('GitHub ya había publicado el catálogo de hoy: se dejó el de GitHub (lo de este PC quedó en git stash)');
+            }
             correr('git', ['push', 'origin', 'main']);
             informe.push('✅ Tienda, páginas de Google y Shopping actualizadas y publicadas.');
         }

@@ -24,9 +24,11 @@ for (const [ancho, alto, movil, tanda] of [[390, 844, true, 12], [1366, 900, fal
   ok(await n() === tanda, 'cambiar el orden vuelve a la primera tanda');
   ok(/\d+ productos/.test(await ev(`document.getElementById('product-count').textContent`)), 'el conteo sigue mostrando el total');
   await ev(`(()=>{const i=document.getElementById('searchInput');i.value='zzzqqq';i.dispatchEvent(new Event('input'))})()`); await esperar(600);
-  ok(await ev(`document.querySelectorAll('[data-sugerencia]').length`) === 6 && await ev(`document.getElementById('catalogo-mas').hidden`) === true, 'sin resultados → 6 sugerencias y sin "Ver más"');
-  await ev(`document.querySelector('[data-sugerencia="Netflix"]').click()`); await esperar(500);
-  ok(await ev(`[...document.querySelectorAll('#product-grid article')].some(a=>/Netflix/.test(a.textContent))`) && await ev(`document.getElementById('searchInput').value`) === 'Netflix', 'tocar una sugerencia busca ese producto');
+  const nSug = await ev(`document.querySelectorAll('[data-sugerencia]').length`);
+  ok(nSug >= 1 && nSug <= 6 && await ev(`document.getElementById('catalogo-mas').hidden`) === true, `sin resultados → ${nSug} sugerencias (máx. 6) y sin "Ver más"`);
+  const sug = await ev(`document.querySelector('[data-sugerencia]').dataset.sugerencia`);
+  await ev(`document.querySelector('[data-sugerencia]').click()`); await esperar(500);
+  ok(await ev(`document.querySelectorAll('#product-grid article').length`) > 0 && await ev(`document.getElementById('searchInput').value`) === sug, `tocar una sugerencia («${sug}») busca ese producto y sí trae resultados`);
   await ev(`(()=>{const i=document.getElementById('searchInput');i.value='';i.dispatchEvent(new Event('input'))})()`); await esperar(500);
   ok(await ev(`document.querySelector('.volver-arriba').hidden`) === true, 'arriba: sin botón de volver');
   await ev(`document.querySelector('.catalogo-mas__boton')?.click(); scrollTo(0, 3000)`); await esperar(400);

@@ -1,0 +1,40 @@
+# Construye Evolution API 2.3.7 con el parche @bot de DC Tecnology y la publica en ghcr.io/delemans/dc-evolution.
+# Northflank (herramientas/northflank.mjs) despliega esa imagen. Se corre sola al cambiar infra/northflank/evolution/
+# o a mano (Actions → «Imagen de Evolution» → Run workflow).
+name: Imagen de Evolution
+
+on:
+  push:
+    branches: [main]
+    paths: ['infra/northflank/evolution/**', '.github/workflows/imagen-evolution.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  imagen:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: infra/northflank/evolution
+          platforms: linux/amd64
+          push: true
+          tags: |
+            ghcr.io/delemans/dc-evolution:2.3.7-dc1
+            ghcr.io/delemans/dc-evolution:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Comprobar el parche dentro de la imagen
+        run: |
+          docker run --rm --entrypoint sh ghcr.io/delemans/dc-evolution:2.3.7-dc1 -c "grep -rl \"endsWith('@bot')\" dist | head -1" | grep -q . && echo "parche @bot presente"

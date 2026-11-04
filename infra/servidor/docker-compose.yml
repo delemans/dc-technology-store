@@ -15,7 +15,7 @@ services:
       - caddy_config:/config
 
   n8n:
-    image: n8nio/n8n:latest
+    image: n8nio/n8n:2.43.8  # la misma versión que el PC (npx n8n 2.43.x); latest podría saltar de versión y romper el flujo
     restart: unless-stopped
     environment:
       - TZ=America/Bogota

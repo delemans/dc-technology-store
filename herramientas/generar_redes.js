@@ -140,10 +140,15 @@ const fechaTexto = (d) => d.toLocaleDateString('es-CO', { timeZone: 'America/Bog
 // Un video diario durante DIAS (28 = las 4 campañas): la campaña de cada semana sale de estados-plan.json
 const textoDe = (id) => plan.videos.find((v) => v.archivo === id)?.texto ?? '';
 const desdeInicio = Math.round((inicio.getTime() - Date.parse(`${plan.inicio_campanas}T12:30:00-05:00`)) / 864e5);
+// Historial para no repetir: lo que ya salió en estados (mismos videos) y lo que este plan va eligiendo
+const { elegirVideo } = require('./rotacion.js');
+const historial = (() => { try { return JSON.parse(fs.readFileSync(path.join(RAIZ, 'herramientas', 'salida', 'estados.json'), 'utf8')).publicados.filter((p) => p.tipo === 'video'); } catch { return []; } })();
 const publicaciones = Array.from({ length: DIAS }, (_, d) => {
     const n = Math.max(0, desdeInicio + d), semana = Math.floor(n / 7), dia = n % 7;
     const campana = plan.campanas[semana % plan.campanas.length];
-    const id = campana.videos[dia];
+    const hoy = new Date(inicio.getTime() + d * 864e5).toLocaleDateString('en-CA', { timeZone: 'America/Bogota' });
+    const id = elegirVideo({ plan, campana, diaCampana: dia, historial, hoy, disponible: (x) => versionesDe(x).length > 0 }) ?? campana.videos[dia];
+    historial.push({ fecha: hoy, video: id });
     const versiones = versionesDe(id);
     const archivo = versiones.length ? versiones[(semana + dia) % versiones.length] : null;
     const fecha = new Date(inicio.getTime() + d * 864e5);
