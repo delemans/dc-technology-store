@@ -1,5 +1,5 @@
 {
- "_nota": "Esquema de campañas (herramientas/publicar-estado.mjs y generar_redes.js). Cada semana (lunes a domingo) corre UNA campaña; rotan en orden desde inicio_campanas. Cada día sale el video del día de esa campaña, alternando las versiones de voz; los lunes, además, la promo de la campaña en texto. Los textos solo usan hechos del negocio (nada de descuentos ni disponibilidad inventados). No se repite un video en 28 días ni un tema (videos[].tema) dos días seguidos: herramientas/rotacion.js. Videos de más de 60 s no van a estados (WhatsApp los corta): se usa el siguiente de la lista.",
+ "_nota": "Esquema de campañas (herramientas/publicar-estado.mjs y generar_redes.js). Cada semana (lunes a domingo) corre UNA campaña; rotan en orden desde inicio_campanas. Cada día sale el video del día de esa campaña, alternando las versiones de voz; los lunes, además, la promo de la campaña en texto. Los textos solo usan hechos del negocio (nada de descuentos ni disponibilidad inventados). No se repite un video en 28 días ni un tema (videos[].tema) dos días seguidos: herramientas/rotacion.js. Videos de más de 60 s no van a estados (WhatsApp los corta): se usa el siguiente de la lista. Campaña «Regalos de tecnología» (05/11/2026, set real-*: productos reales con precio vigente, scratchpad pro/set-real.mjs; si un producto se agota sale otro y el video se regraba, y si no se puede armar se retira).",
  "carpeta": "docs/videos-estados/mp4",
  "pie": "🛒 www.dctecnology.xyz · 💬 322 328 4622",
  "videos": [
@@ -332,6 +332,51 @@
    "archivo": "p-pin-virtual-disney-plus-1tpu5",
    "texto": "🏰 Pin de Disney Plus: Marvel, Star Wars y Pixar. Válido para cuentas de Colombia.",
    "tema": "pin-disney"
+  },
+  {
+   "archivo": "real-regalos-50",
+   "texto": "🎁 Regalos de tecnología por menos de $50.000. Mira los precios de hoy en la tienda; envío a todo el país con número de guía.",
+   "tema": "regalos"
+  },
+  {
+   "archivo": "real-regalos-100",
+   "texto": "🎁 Regalos de tecnología entre $50.000 y $100.000: parlantes, audífonos, teclados y más. Envío a todo el país con número de guía.",
+   "tema": "regalos"
+  },
+  {
+   "archivo": "real-audio",
+   "texto": "🎧 Tres audífonos para cada bolsillo, con garantía de 30 días por defectos de fábrica. ¿Con cuál te quedas?",
+   "tema": "audifonos"
+  },
+  {
+   "archivo": "real-bateria",
+   "texto": "🔋 ¿Cuánta batería necesitas? Power banks de 10.000 y 30.000 mAh y cargador para el carro. Precios de hoy en la tienda.",
+   "tema": "cargadores"
+  },
+  {
+   "archivo": "real-gamer",
+   "texto": "🎮 Arma tu rincón gamer: teclado, mouse y consola retro. Garantía de 30 días y envío a todo el país.",
+   "tema": "gamer"
+  },
+  {
+   "archivo": "real-oficina",
+   "texto": "💻 Tu escritorio más cómodo: teclado y mouse inalámbricos, base para portátil y repetidor de wifi. Envío a todo el país.",
+   "tema": "escritorio"
+  },
+  {
+   "archivo": "real-fiesta",
+   "texto": "🔊 Prende la fiesta de diciembre: parlante con karaoke y parlantes de todos los tamaños. Garantía de 30 días.",
+   "tema": "parlantes"
+  },
+  {
+   "archivo": "real-relojes",
+   "texto": "⌚ Tres relojes inteligentes, de menor a mayor precio, con garantía de 30 días por defectos de fábrica.",
+   "tema": "relojes"
+  },
+  {
+   "archivo": "real-creadores",
+   "texto": "📱 ¿Grabas videos con tu celular? Aro de luz, trípode y micrófono de solapa. Envío a todo el país.",
+   "tema": "creadores"
   }
  ],
  "inicio_campanas": "2026-10-19",
@@ -379,6 +424,20 @@
    "promo": "🛠️ Semana de servicios DC\nMantenimiento, reparación, instalación, alquiler de portátiles, asesorías y soluciones para tu negocio.\nPersonas reales, cotización por WhatsApp.\n🛒 www.dctecnology.xyz"
   },
   {
+   "id": "regalos",
+   "nombre": "Regalos de tecnología",
+   "videos": [
+    "real-regalos-50",
+    "real-audio",
+    "real-gamer",
+    "real-regalos-100",
+    "real-fiesta",
+    "real-relojes",
+    "real-creadores"
+   ],
+   "promo": "🎁 Semana de regalos de tecnología\nAudífonos, relojes, parlantes, gamer y más, con garantía de 30 días por defectos de fábrica.\nEnvío a todo el país con número de guía.\n🛒 www.dctecnology.xyz"
+  },
+  {
    "id": "entretenimiento",
    "nombre": "Entretenimiento en casa",
    "videos": [
@@ -397,12 +456,12 @@
    "nombre": "Tecnología, licencias y soporte",
    "videos": [
     "tip-mantenimiento",
+    "real-bateria",
     "t-audifonos",
-    "tip-windows",
+    "real-oficina",
     "t-relojes-inteligentes",
-    "t-powerbank-cargadores",
-    "mantenimiento-preventivo",
-    "tip-antivirus"
+    "tip-antivirus",
+    "t-powerbank-cargadores"
    ],
    "promo": "🪟 Semana de licencias y soporte técnico\nWindows, Office y McAfee originales, mantenimiento y reparación de computadores.\nRelojes y audífonos con garantía de 30 días.\n🛒 www.dctecnology.xyz"
   },

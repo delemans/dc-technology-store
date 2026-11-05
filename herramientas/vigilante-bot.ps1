@@ -1,4 +1,4 @@
-# herramientas/vigilante-bot.ps1 — Vigila el bot cada 10 minutos (tarea programada "DC Tecnology · vigilante del bot").
+﻿# herramientas/vigilante-bot.ps1 — Vigila el bot cada 10 minutos (tarea programada "DC Tecnology · vigilante del bot").
 #   Instalar la tarea (una sola vez):  powershell -ExecutionPolicy Bypass -File herramientas\vigilante-bot.ps1 -Instalar
 #   Revisar a mano:                    powershell -ExecutionPolicy Bypass -File herramientas\vigilante-bot.ps1
 #
@@ -6,19 +6,45 @@
 #    consulta real que NO envía mensajes (/chat/whatsappNumbers). Si falla dos veces seguidas, reinicia Evolution (la sesión
 #    está en su base: se reconecta sin QR).
 # 2) Etiquetas de WhatsApp Business (BAENAMORA): las recarga en el bot (herramientas/sincronizar-etiquetas.mjs --aplicar).
-# 3) n8n: si no responde, lo deja anotado (n8n corre como administrador: se enciende con herramientas\iniciar-bot.ps1).
-# Registro: herramientas\salida\vigilante.log (no va a git).
-param([switch]$Instalar)
+# 3) n8n: si no responde, lo enciende con SU carpeta de datos (la .n8n más reciente de C:\Users, o N8N_CARPETA en .env) y la
+#    versión que ya tiene descargada; si no arranca, te avisa por WhatsApp directo por Evolution (máx. 1 vez cada 6 h).
+#    Solo como SYSTEM o administrador: con otra cuenta abriría un n8n vacío o viejo (del 2 al 5/11/2026 estuvo caído 3 días).
+# 0) Al prender el PC enciende Evolution y n8n sin que nadie inicie sesión (tarea como SYSTEM; -Instalar pide permiso una vez).
+# Registro: herramientas\salida\vigilante.log (no va a git). Salida de n8n: herramientas\salida\n8n.log.
+#   Ver qué haría sin tocar nada: vigilante-bot.ps1 -Probar
+param([switch]$Instalar, [switch]$Probar)
 $ErrorActionPreference = 'Continue'
 $raiz = Split-Path $PSScriptRoot -Parent
 $tarea = 'DC Tecnology - vigilante del bot'
+$identidad = [Security.Principal.WindowsIdentity]::GetCurrent()
+$esSistema = $identidad.IsSystem
+$esAdmin = ([Security.Principal.WindowsPrincipal]$identidad).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 
 if ($Instalar) {
+    if (-not $esAdmin) {
+        Write-Host 'Pidiendo permiso de administrador para instalar el vigilante (una sola vez)…' -ForegroundColor Yellow
+        Start-Process powershell -Verb RunAs -ArgumentList '-NoProfile', '-ExecutionPolicy', 'Bypass', '-NoExit', '-File', "`"$PSCommandPath`"", '-Instalar'
+        exit 0
+    }
+    # La cuenta administradora es la que abre n8n con iniciar-bot.ps1: su carpeta queda fija en .env (N8N_CARPETA)
+    $archivoEnv = Join-Path $raiz '.env'
+    $lineasEnv = @(Get-Content $archivoEnv -Encoding utf8 -ErrorAction SilentlyContinue)
+    if (-not ($lineasEnv -match '^N8N_CARPETA=')) {
+        if (Test-Path (Join-Path $env:USERPROFILE '.n8n\database.sqlite')) {
+            Add-Content $archivoEnv "`nN8N_CARPETA=$env:USERPROFILE" -Encoding utf8
+            Write-Host "Datos de n8n: $env:USERPROFILE\.n8n (anotado en .env como N8N_CARPETA)" -ForegroundColor Green
+        } else { Write-Host "Esta cuenta no tiene n8n ($env:USERPROFILE\.n8n): el vigilante usará la base más reciente de C:\Users. Si no es la tuya, pon N8N_CARPETA en .env." -ForegroundColor Yellow }
+    }
     $accion = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument "-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File `"$PSCommandPath`""
-    $disparo = New-ScheduledTaskTrigger -Once -At (Get-Date).AddMinutes(1) -RepetitionInterval (New-TimeSpan -Minutes 10)
-    $ajustes = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable -ExecutionTimeLimit (New-TimeSpan -Minutes 8) -MultipleInstances IgnoreNew
-    Register-ScheduledTask -TaskName $tarea -Action $accion -Trigger $disparo -Settings $ajustes -Description 'Revisa WhatsApp (Evolution), recarga etiquetas y deja registro. Proyecto DC Tecnology.' -Force | Out-Null
-    Write-Host "Tarea '$tarea' instalada: corre cada 10 minutos." -ForegroundColor Green
+    $cada10 = New-ScheduledTaskTrigger -Once -At (Get-Date).AddMinutes(1) -RepetitionInterval (New-TimeSpan -Minutes 10)
+    $alPrender = New-ScheduledTaskTrigger -AtStartup
+    $alPrender.Delay = 'PT2M'   # deja que arranquen la red y Kaspersky
+    $quien = New-ScheduledTaskPrincipal -UserId 'SYSTEM' -LogonType ServiceAccount -RunLevel Highest
+    $ajustes = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable -ExecutionTimeLimit (New-TimeSpan -Minutes 12) -MultipleInstances IgnoreNew
+    Register-ScheduledTask -TaskName $tarea -Action $accion -Trigger @($cada10, $alPrender) -Principal $quien -Settings $ajustes -Description 'Enciende y vigila el bot (Evolution + n8n), recarga etiquetas y deja registro. Corre como SYSTEM: funciona sin iniciar sesión. Proyecto DC Tecnology.' -Force | Out-Null
+    Write-Host "Tarea '$tarea' instalada: al prender el PC y cada 10 minutos, sin necesidad de iniciar sesión." -ForegroundColor Green
+    Start-ScheduledTask -TaskName $tarea
+    Write-Host 'Ya quedó corriendo. En 5 minutos mira herramientas\salida\vigilante.log. Puedes cerrar esta ventana.' -ForegroundColor Cyan
     exit 0
 }
 
@@ -55,6 +81,69 @@ function ReiniciarEvolution {
     return $false
 }
 
+function Escucha($puerto) { [bool](Get-NetTCPConnection -LocalPort $puerto -State Listen -ErrorAction SilentlyContinue) }
+function N8nVivo { try { (Invoke-WebRequest 'http://localhost:5678/healthz' -UseBasicParsing -TimeoutSec 8).StatusCode -eq 200 } catch { $false } }
+$versionN8n = '2.43.5'   # la misma del PC: el flujo se probó con ella
+
+# La carpeta de datos de n8n (flujos y credenciales): N8N_CARPETA en .env o la .n8n con la base más reciente de C:\Users
+function CarpetaN8n {
+    if ($envVars['N8N_CARPETA']) { return [pscustomobject]@{ Perfil = $envVars['N8N_CARPETA']; Fecha = '?'; Origen = 'N8N_CARPETA' } }
+    $bases = Get-ChildItem 'C:\Users' -Directory -Force -ErrorAction SilentlyContinue | ForEach-Object {
+        Get-Item (Join-Path $_.FullName '.n8n\database.sqlite') -Force -ErrorAction SilentlyContinue
+    } | Where-Object { $_ } | Sort-Object LastWriteTime -Descending
+    if (-not $bases) { return $null }
+    $b = $bases | Select-Object -First 1
+    [pscustomobject]@{ Perfil = $b.Directory.Parent.FullName; Fecha = $b.LastWriteTime.ToString('yyyy-MM-dd HH:mm'); Origen = 'la base más reciente' }
+}
+# El n8n que ya está descargado en ese perfil (npx o instalación global): así no cambia de versión al encender
+function ProgramaN8n($perfil) {
+    $candidatos = @(Get-ChildItem (Join-Path $perfil 'AppData\Local\npm-cache\_npx') -Directory -ErrorAction SilentlyContinue | ForEach-Object { Join-Path $_.FullName 'node_modules\n8n' })
+    $candidatos += Join-Path $perfil 'AppData\Roaming\npm\node_modules\n8n'
+    $hallados = foreach ($c in $candidatos) {
+        $pkg = Join-Path $c 'package.json'
+        if ((Test-Path $pkg) -and (Test-Path (Join-Path $c 'bin\n8n'))) {
+            [pscustomobject]@{ Bin = (Join-Path $c 'bin\n8n'); Version = (Get-Content $pkg -Raw | ConvertFrom-Json).version; Fecha = (Get-Item $pkg).LastWriteTime }
+        }
+    }
+    $hallados | Sort-Object Fecha -Descending | Select-Object -First 1
+}
+function EncenderN8n {
+    $c = CarpetaN8n
+    if (-not $c) { Anotar 'n8n no responde y no encontré su carpeta (.n8n\database.sqlite) en C:\Users'; return $false }
+    $p = ProgramaN8n $c.Perfil
+    $como = if ($p) { "n8n $($p.Version) ya descargado" } else { "npx n8n@$versionN8n (no estaba descargado)" }
+    if ($Probar) { Write-Host "Encendería n8n con los datos de $($c.Perfil) ($($c.Origen), base del $($c.Fecha)) usando $como"; return $true }
+    Anotar "n8n no responde: lo enciendo con los datos de $($c.Perfil) ($($c.Origen)) y $como"
+    $env:N8N_USER_FOLDER = $c.Perfil
+    $logN8n = Join-Path $salida 'n8n.log'
+    foreach ($f in @($logN8n, "$logN8n.err")) { if (Test-Path $f) { Move-Item $f "$f.anterior" -Force } }
+    if ($p) { Start-Process 'node' -ArgumentList "`"$($p.Bin)`"" -WorkingDirectory $c.Perfil -WindowStyle Hidden -RedirectStandardOutput $logN8n -RedirectStandardError "$logN8n.err" }
+    else { Start-Process 'cmd.exe' -ArgumentList '/c', "npx --yes n8n@$versionN8n" -WorkingDirectory $c.Perfil -WindowStyle Hidden -RedirectStandardOutput $logN8n -RedirectStandardError "$logN8n.err" }
+    $fin = (Get-Date).AddSeconds(240)
+    while ((Get-Date) -lt $fin) { Start-Sleep -Seconds 5; if (N8nVivo) { Anotar 'n8n encendido: responde'; return $true } }
+    Anotar "n8n no arrancó en 4 minutos: revisa $logN8n.err"
+    return $false
+}
+function AvisarDirector($clave, $texto) {
+    $r = & node (Join-Path $raiz 'herramientas\avisar-director.mjs') --clave $clave --horas 6 $texto 2>&1 | Out-String
+    if ($r -notmatch 'enviado|no se repite') { Anotar "Aviso por WhatsApp: $($r.Trim() -replace '\s+', ' ')" }
+}
+
+if ($Probar) {
+    Write-Host "Cuenta: $($identidad.Name) (SYSTEM: $esSistema, administrador: $esAdmin)"
+    Write-Host "Evolution escucha en 8080: $(Escucha 8080) · n8n responde: $(N8nVivo)"
+    [void](EncenderN8n)
+    if (-not ($esSistema -or $esAdmin)) { Write-Host 'Con esta cuenta NO lo encendería (vería un n8n viejo): instala la tarea con -Instalar, que corre como SYSTEM.' -ForegroundColor Yellow }
+    exit 0
+}
+
+# 0) Al prender el PC (o si alguien cerró la ventana): Evolution apagado → se enciende ya, sin esperar dos fallas
+if (-not (Escucha 8080)) {
+    Anotar 'Evolution estaba apagado: lo enciendo'
+    $ok = ReiniciarEvolution
+    Anotar ($(if ($ok) { 'Evolution encendido: WhatsApp responde' } else { 'Evolution encendido pero WhatsApp aún no responde' }))
+}
+
 # 1) WhatsApp
 if (WhatsAppSirve) {
     if ($estado.fallos -gt 0) { Anotar 'WhatsApp volvió a responder' }
@@ -87,9 +176,13 @@ if ($estado.fallos -eq 0) {
 $estado | ConvertTo-Json | Set-Content $estadoArchivo -Encoding utf8
 
 # 2) Etiquetas (solo si WhatsApp y n8n responden)
-$n8nVivo = $false
-try { $n8nVivo = (Invoke-WebRequest 'http://localhost:5678/healthz' -UseBasicParsing -TimeoutSec 8).StatusCode -eq 200 } catch {}
-if (-not $n8nVivo) { Anotar 'n8n no responde: enciéndelo con herramientas\iniciar-bot.ps1' }
+$n8nVivo = N8nVivo
+if (-not $n8nVivo) {
+    if ($esSistema -or $esAdmin) {
+        $n8nVivo = EncenderN8n
+        if (-not $n8nVivo) { AvisarDirector 'n8n-caido' "⚠️ *n8n (el flujo del bot) está caído y no pude encenderlo.*`nSin él no salen avisos, resumen de ventas ni alertas de pago. En el PC de la oficina abre herramientas\iniciar-bot.ps1." }
+    } else { Anotar 'n8n no responde: enciéndelo con herramientas\iniciar-bot.ps1 (o instala el vigilante con -Instalar para que lo encienda solo)' }
+}
 elseif ($estado.fallos -eq 0) {
     $res = & node (Join-Path $raiz 'herramientas\sincronizar-etiquetas.mjs') --aplicar 2>&1 | Out-String
     if ($res -notmatch 'bot actualizado') { Anotar "Etiquetas: $($res.Trim() -replace '\s+', ' ')" }

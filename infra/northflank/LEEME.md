@@ -1,5 +1,7 @@
 # El bot en Northflank (gratis, sin tarjeta)
 
+> **05/11/2026: en pausa.** Northflank no deja crear cuentas nuevas («El registro está actualmente deshabilitado», con correo, GitHub y Google). Todo queda listo por si vuelven a abrir. Mientras tanto el bot sigue en el PC, protegido por el vigilante (`herramientas/vigilante-bot.ps1 -Instalar`: lo enciende solo al prender el PC y si n8n o Evolution se caen).
+
 El bot (n8n + Evolution/WhatsApp) deja de depender de este PC. Northflank, plan **Sandbox**: 2 servicios siempre encendidos y 1 base de datos, sin tarjeta (hasta US$20/mes de recursos).
 
 | Pieza | Dónde |
