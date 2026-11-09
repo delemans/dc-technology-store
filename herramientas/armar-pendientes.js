@@ -19,6 +19,7 @@ const ORDEN = [
     ['wo-051-cantidades-anc.sql', 'cantidades de ANC'],
     ['wo-052-resumen-dia.sql', 'resumen diario de ventas'],
     ['wo-053-pagos-por-revisar.sql', 'alertas de pagos sin validar'],
+    ['wo-054-recordatorio-pago.sql', 'recordatorio al cliente sin comprobante'],
 ];
 const hoy = new Date().toLocaleDateString('es-CO', { timeZone: 'America/Bogota', day: '2-digit', month: '2-digit', year: 'numeric' });
 const partes = [

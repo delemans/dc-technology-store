@@ -63,7 +63,7 @@ _Escrito por Claude el 26/10/2026. Lo siguen Gemini (Antigravity) u otro agente 
 2. **Si hace falta una RPC nueva** (service_role) para listar esas órdenes: `wo-053` con su prueba.
 3. **Pruebas de flujo:** avisa una vez, no repite y no avisa de noche.
 
-## T03 · Recordatorio al cliente sin comprobante (1 h) — **Pendiente** (media)
+## T03 · Recordatorio al cliente sin comprobante (1 h) — **Hecho 09/11/2026 (Claude): wo-054, plantilla recordatorio_pago, nodos «Recordar pagos» → «Encolar recordatorios» (solo con el bot encendido)** (media)
 **Para qué:** recuperar ventas de quien pidió y no pagó.
 
 1. **`wo-054`:**

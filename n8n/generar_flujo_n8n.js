@@ -2365,6 +2365,14 @@ function renovaciones() {
 /* ---------- H4) Resumen del día (WO-052 · T01): a las 8 p. m. de Bogotá, una vez al día, al director ----------
    «Hora del resumen» deja pasar solo entre 20:00 y 20:29 y si hoy no se envió; «Texto del resumen» arma el mensaje
    con resumen_ventas_dia(). Si la base aún no tiene wo-052, avisa UNA vez «aplica wo-052». */
+// T03 · Recordatorio de pago (WO-054): la base elige las órdenes web sin comprobante (1–3 h) y respeta el horario legal.
+// Con el bot apagado (pruebas) no se le escribe a ningún cliente.
+function recordarPagos() {
+    const cfg = $('Config bot').first().json;
+    if (String(cfg.bot_responde ?? 'si').trim().toLowerCase() === 'no') return [];
+    return [{ json: {} }];
+}
+
 function horaResumen() {
     const memoria = $getWorkflowStaticData('global');
     const ahora = new Date(Date.now());
@@ -3218,6 +3226,9 @@ nodo('Enviar resumen', 'n8n-nodes-base.httpRequest', 4.2, [1320, 1820], evolutio
 nodo('Pagos por revisar', 'n8n-nodes-base.httpRequest', 4.2, [660, 1980], rpcPanel('pagos_por_revisar', '={{ JSON.stringify({}) }}'), { onError: 'continueRegularOutput', alwaysOutputData: true });
 nodoCodigo('Alertas de pago', [880, 1980], alertasPago, { conUtilidades: true }, { executeOnce: true });
 nodo('Enviar alerta de pago', 'n8n-nodes-base.httpRequest', 4.2, [1100, 1980], evolutionEnviar('Config bot'), { onError: 'continueRegularOutput' });
+// WO-054 · Recordatorio al cliente sin comprobante (rama de salud, cada 30 min; la cola lo envía)
+nodoCodigo('Recordar pagos', [660, 2140], recordarPagos, {}, { executeOnce: true });
+nodo('Encolar recordatorios', 'n8n-nodes-base.httpRequest', 4.2, [880, 2140], rpcPanel('encolar_recordatorios_pago', '={{ JSON.stringify({}) }}'), { onError: 'continueRegularOutput' });
 // WO-047 · Rastreo de envíos (rama de salud, cada 30 min)
 nodo('Guías abiertas', 'n8n-nodes-base.httpRequest', 4.2, [660, 1660], rpcPanel('rastreos_abiertos', '={{ JSON.stringify({}) }}'), { onError: 'continueRegularOutput', alwaysOutputData: true });
 nodoCodigo('Consultar rastreo', [880, 1660], consultarRastreos, {}, { executeOnce: true, onError: 'continueRegularOutput' });
@@ -3373,6 +3384,8 @@ unir('Resumen del día', 'Texto del resumen');
 unir('Texto del resumen', 'Enviar resumen');
 unir('Origen', 'Pagos por revisar', 5);
 unir('Pagos por revisar', 'Alertas de pago');
+unir('Origen', 'Recordar pagos', 5);
+unir('Recordar pagos', 'Encolar recordatorios');
 unir('Alertas de pago', 'Enviar alerta de pago');
 unir('Origen', 'Estado pendiente', 5);
 unir('Estado pendiente', 'Contactos para estado');

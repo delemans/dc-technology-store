@@ -73,6 +73,7 @@ const plantillas = {
     entrega_pin: WA.entregaPin({ pedido: '{pedido}', producto: '{producto}', pin: '{pin}' }),
     renovacion: WA.renovacion({ producto: '{producto}', variante: '{variante}', vence: '{vence}' }),
     rastreo: WA.rastreo({ pedido: '{pedido}', estado: '{estado}', transportadora: '{transportadora}', guia: '{guia}' }),
+    recordatorio_pago: WA.recordatorioPago({ codigo: '{codigo}', total: '{total}' }),
 };
 
 // Cola de posventa (supabase/wo-015.sql → public.notificaciones_whatsapp). n8n la vacía con estas reglas.
@@ -83,6 +84,7 @@ const notificaciones = {
         SOLICITUD_RESENA: 'solicitud_resena',     // 24 h después de la entrega, en horario
         RENOVACION: 'renovacion',                 // WO-044: 3 días antes de que venza el plan
         RASTREO: 'rastreo',                       // WO-047: cambio de estado del envío (transportadora)
+        RECORDATORIO_PAGO: 'recordatorio_pago',   // WO-054: pidió en la web y a la 1–3 h no hay comprobante (1 vez, horario legal)
         OTP: 'codigo_acceso',                     // WO-028: código del portal (prioridad 0, vence en 5 min)
         ORDEN_VALIDADA: 'orden_validada',         // WO-032: el admin validó el comprobante web
         ORDEN_RECHAZADA: 'orden_rechazada',       // WO-032: comprobante rechazado (con motivo)

@@ -374,6 +374,18 @@
             'Responde *RENOVAR* y te dejo el mismo plan listo para pagar.',
         ].join('\n'),
 
+        // T03 · Recordatorio amable (1 sola vez, 1–3 h después de pedir en la web sin comprobante, en horario legal)
+        recordatorioPago: ({ codigo, total }) => [
+            `🛒 *Tu pedido #${codigo} te espera* · ${FIRMA}`,
+            '',
+            `Vimos que tu pedido por *$${total}* aún no tiene comprobante de pago.`,
+            '',
+            'Si ya pagaste, sube el comprobante en *www.dctecnology.xyz* → Pedidos o envíanos la captura por este chat.',
+            '¿Tienes alguna duda o quieres cambiar algo? Respóndenos aquí y te ayudamos 🙌',
+            '',
+            'Si ya no lo necesitas, no tienes que hacer nada.',
+        ].join('\n'),
+
         // Pines virtuales (Google Play, Roblox, Disney…): un código para canjear, sin usuario ni clave
         entregaPin: ({ pedido, producto, pin }) => [
             `🎁 *¡Tu PIN está listo!* · ${FIRMA}`,

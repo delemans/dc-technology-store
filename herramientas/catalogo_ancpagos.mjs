@@ -65,9 +65,10 @@ export async function leerTiendaAnc() {
         const re = /data-variants="([^"]+)"[\s\S]*?product-item-name-\d+">([^<]+)/g;
         for (let m; (m = re.exec(html));) {
             const variantes = JSON.parse(m[1].replace(/&quot;/g, '"').replace(/&amp;/g, '&'));
-            // URL del producto: el último enlace /productos/<slug>/ antes del nombre (la tarjeta lo trae junto)
+            // URL del producto: el último enlace /productos/<slug>/ antes del nombre (la tarjeta lo trae junto).
+            // Desde la página 2 el enlace trae ?entry_path=category: se guarda sin eso.
             const antesDelNombre = html.slice(Math.max(0, m.index - 4000), m.index + m[0].length);
-            const url = [...antesDelNombre.matchAll(/href="(https:\/\/allnecessarycolombia\.com\/productos\/[^"/]+\/)"/g)].pop()?.[1] ?? null;
+            const url = [...antesDelNombre.matchAll(/href="(https:\/\/allnecessarycolombia\.com\/productos\/[^"/?]+\/)(?:\?[^"]*)?"/g)].pop()?.[1] ?? null;
             productos.push({ nombre: m[2].trim(), url, variantes: variantes.map((v) => {
                 const nombre = [v.option0, v.option1, v.option2].filter(Boolean).join(' / ');
                 return { nombre, precio: Number(v.price_number) || null, disponible: v.available !== false,
