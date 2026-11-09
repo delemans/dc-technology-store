@@ -252,6 +252,9 @@
         const total = Number(r.total) > 0 ? Number(r.total) : totalNavegador;
         if (total !== totalNavegador) mostrarToast(`Actualizamos el total con los precios vigentes: ${precioCOP(total)}.`, 'info', 6000);
         if (r.detalle?.cupon_mensaje) mostrarToast(r.detalle.cupon_mensaje, 'info', 6000);
+        // T05 (wo-055): de qué red llegó; si la base aún no lo tiene, no pasa nada
+        const origen = window.DCOrigen?.();
+        if (origen) window.DC.sb.rpc('marcar_origen_orden', { p_codigo: r.codigo, p_secreto: r.secreto, p_origen: origen }).then(() => {}, () => {});
         const orden = { codigo: r.codigo, secreto: r.secreto, total, pago: r.pago, items: r.detalle?.lineas ?? items, estado: 'ESPERANDO_PAGO', creado: new Date().toISOString() };
         guardarOrden(orden);
         lineas = [];

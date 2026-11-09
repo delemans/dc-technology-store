@@ -83,7 +83,16 @@
             <line x1="${M.l}" x2="${W - M.r}" y1="${H - M.b}" y2="${H - M.b}" class="fin-base"/>${barras}${etiquetas}</svg>`;
     }
 
-    function pintar(caja, r, { periodoTexto }) {
+    // T05 · Tienda web por origen (wo-055): de qué red llegaron las órdenes y cuánto se cobró
+    const NOMBRES_ORIGEN = { tiktok: 'TikTok', youtube: 'YouTube', facebook: 'Facebook', instagram: 'Instagram', google: 'Google', estado: 'Estados de WhatsApp', directo: 'Directo (sin enlace de red)' };
+    function tablaOrigen(filas) {
+        if (!Array.isArray(filas)) return '<section class="fin-bloque"><h3>Tienda web por origen</h3><p class="fin-vacio">Para ver de qué red llegan los clientes aplica <b>supabase/wo-055-origen-clientes.sql</b> en Supabase.</p></section>';
+        return `<section class="fin-bloque"><h3>Tienda web por origen</h3>${filas.length ? `<table class="fin-tabla"><thead><tr><th></th><th>Órdenes</th><th>Pagadas</th><th>Cobrado</th></tr></thead><tbody>
+            ${filas.map((f) => `<tr><td>${esc(NOMBRES_ORIGEN[f.origen] ?? f.origen)}</td><td>${Number(f.ordenes) || 0}</td><td>${Number(f.pagadas) || 0}</td><td>${COP(f.cobrado)}</td></tr>`).join('')}</tbody></table>` : '<p class="fin-vacio">Sin órdenes web en el periodo.</p>'}
+            <p class="fin-nota">Los enlaces de redes y estados llevan ?de=red; cuenta la red por la que entró el cliente en los 30 días antes de comprar.</p></section>`;
+    }
+
+    function pintar(caja, r, { periodoTexto, origen }) {
         const tile = (titulo, valor, detalle, tono = '') => `<div class="fin-tile ${tono}"><p class="fin-tile-t">${esc(titulo)}</p><p class="fin-tile-v">${valor}</p>${detalle ? `<p class="fin-tile-d">${detalle}</p>` : ''}</div>`;
         const tabla = (titulo, filas) => `<section class="fin-bloque"><h3>${esc(titulo)}</h3>${filas.length ? `<table class="fin-tabla"><thead><tr><th></th><th>Pedidos</th><th>Ventas</th><th>Margen</th></tr></thead><tbody>
             ${filas.map((f) => `<tr><td>${esc(f.clave)}</td><td>${f.pedidos}</td><td>${COP(f.ventas)}</td><td>${f.conCosto ? COP(f.margen) : '—'}</td></tr>`).join('')}</tbody></table>` : '<p class="fin-vacio">Sin ventas cobradas en el periodo.</p>'}</section>`;
@@ -99,6 +108,7 @@
             <section class="fin-bloque"><h3>Ventas cobradas por día · ${esc(periodoTexto)}</h3><div class="fin-grafico">${grafico(r.serie, (caja.clientWidth || 760) - 38)}<div class="fin-tip" hidden></div></div></section>
             <div class="fin-columnas">${tabla('Por categoría', r.porCategoria)}${tabla('Por canal', r.porCanal)}</div>
             ${tabla('Productos que más venden', r.productos)}
+            ${tablaOrigen(origen)}
             <div class="fin-acciones"><button type="button" class="fin-btn" data-fin-csv><i class="fa-solid fa-file-csv"></i> Exportar movimientos (CSV)</button>
             <span class="fin-nota">Venta = precio del pedido. Costo = costo real registrado de la compra o, si falta, el cotizado al proveedor. Margen solo de pedidos con costo.</span></div>`;
         const tip = caja.querySelector('.fin-tip');
@@ -135,8 +145,9 @@
             return;
         }
         const textos = { hoy: 'hoy', '7d': 'últimos 7 días', '30d': 'últimos 30 días', mes: 'este mes' };
-        pintar(caja, resumir(data, tipos, { desde, hasta }), { periodoTexto: textos[periodo] });
+        const porOrigen = await sb.rpc('ventas_por_origen', { p_desde: desde.toISOString(), p_hasta: hasta.toISOString() }).then((x) => (x.error ? null : x.data), () => null);
+        pintar(caja, resumir(data, tipos, { desde, hasta }), { periodoTexto: textos[periodo], origen: porOrigen });
     }
 
-    window.Finanzas = { resumir, rango, csv, cargar };
+    window.Finanzas = { resumir, rango, csv, cargar, tablaOrigen };
 })();

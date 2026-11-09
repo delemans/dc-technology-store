@@ -82,7 +82,7 @@ _Escrito por Claude el 26/10/2026. Lo siguen Gemini (Antigravity) u otro agente 
    - motivo «Cliente molesto: atender ya» y aviso con prioridad al director.
 2. Pruebas en `pruebas/flujo/test-molesto.js`: casos positivos y negativos (por ejemplo «¿no es estafa?», pregunta legítima de confianza → también a asesor; «gracias» → no).
 
-## T05 · Origen de cada cliente (de qué red llegó) — **Pendiente** (media)
+## T05 · Origen de cada cliente (de qué red llegó) — **Hecho 09/11/2026 (Claude): wo-055 (columna origen, marcar_origen_orden tras crear la orden, ventas_por_origen), ?de= en app.js/carrito.js, Finanzas «Tienda web por origen», enlaces ?de= en redes y estados** (media)
 **Para qué:** saber qué publicidad vende.
 
 1. **Tienda (`app.js`):**

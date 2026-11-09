@@ -82,7 +82,7 @@ export async function publicarFacebook(p, video, env, f = fetch) {
     const ini = await json(await f(`${base}?upload_phase=start&access_token=${encodeURIComponent(env.META_PAGE_TOKEN)}`, { method: 'POST' }), 'Facebook (inicio)');
     await json(await f(ini.upload_url ?? `https://rupload.facebook.com/video-upload/v21.0/${ini.video_id}`, { method: 'POST',
         headers: { Authorization: `OAuth ${env.META_PAGE_TOKEN}`, offset: '0', file_size: String(video.length) }, body: video }), 'Facebook (subida)');
-    const q = new URLSearchParams({ upload_phase: 'finish', video_id: ini.video_id, video_state: 'PUBLISHED', description: p.instagram_facebook, access_token: env.META_PAGE_TOKEN });
+    const q = new URLSearchParams({ upload_phase: 'finish', video_id: ini.video_id, video_state: 'PUBLISHED', description: p.facebook ?? p.instagram_facebook, access_token: env.META_PAGE_TOKEN });
     await json(await f(`${base}?${q}`, { method: 'POST' }), 'Facebook (publicar)');
     return { id: ini.video_id, url: `https://www.facebook.com/reel/${ini.video_id}` };
 }
@@ -90,7 +90,7 @@ export async function publicarFacebook(p, video, env, f = fetch) {
 /* ---------- Instagram (Reels, carga reanudable: el video no necesita estar en una URL pública) ---------- */
 export async function publicarInstagram(p, video, env, f = fetch, pausa = 5000) {
     const tk = encodeURIComponent(env.META_PAGE_TOKEN);
-    const q = new URLSearchParams({ media_type: 'REELS', upload_type: 'resumable', caption: p.instagram_facebook, share_to_feed: 'true' });
+    const q = new URLSearchParams({ media_type: 'REELS', upload_type: 'resumable', caption: p.instagram ?? p.instagram_facebook, share_to_feed: 'true' });
     const c = await json(await f(`${GRAPH}/${env.META_IG_USER_ID}/media?${q}&access_token=${tk}`, { method: 'POST' }), 'Instagram (contenedor)');
     await json(await f(c.uri ?? `https://rupload.facebook.com/ig-api-upload/v21.0/${c.id}`, { method: 'POST',
         headers: { Authorization: `OAuth ${env.META_PAGE_TOKEN}`, offset: '0', file_size: String(video.length) }, body: video }), 'Instagram (subida)');

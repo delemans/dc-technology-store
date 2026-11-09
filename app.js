@@ -1221,6 +1221,15 @@ function inyectarSEO() {
     document.head.appendChild(script);
 }
 
+// T05 · Origen del cliente (?de=…): solo estas redes; vence a los 30 días
+const ORIGENES = ['tiktok', 'youtube', 'facebook', 'instagram', 'google', 'estado'];
+window.DCOrigen = () => {
+    try {
+        const o = JSON.parse(localStorage.getItem('dc_origen') ?? 'null');
+        return o && ORIGENES.includes(o.de) && Date.now() - Number(o.t) < 30 * 864e5 ? o.de : null;
+    } catch { return null; }
+};
+
 // Enlace directo: ?producto=netflix abre el producto (lo usan el Copiloto y los mensajes)
 function abrirDesdeEnlace() {
     const id = new URLSearchParams(location.search).get('producto');
@@ -1308,6 +1317,15 @@ document.addEventListener('DOMContentLoaded', () => {
         $('searchInput').value = '';
         renderizar();
     }));
+
+    // T05 · dctecnology.xyz/?de=tiktok: de qué red llegó (30 días en este navegador; carrito.js lo pega a la orden web)
+    const deUrl = String(new URLSearchParams(location.search).get('de') ?? '').trim().toLowerCase();
+    if (deUrl) {
+        if (ORIGENES.includes(deUrl)) try { localStorage.setItem('dc_origen', JSON.stringify({ de: deUrl, t: Date.now() })); } catch { /* sin almacenamiento */ }
+        const params = new URLSearchParams(location.search);
+        params.delete('de');
+        history.replaceState(history.state, '', location.pathname + (params.toString() ? `?${params}` : '') + location.hash);
+    }
 
     // dctecnology.xyz/?buscar=roblox (página 404, Google y enlaces de redes): abre el Catálogo ya filtrado
     const buscarUrl = new URLSearchParams(location.search).get('buscar');

@@ -152,17 +152,17 @@ const publicaciones = Array.from({ length: DIAS }, (_, d) => {
     const versiones = versionesDe(id);
     const archivo = versiones.length ? versiones[(semana + dia) % versiones.length] : null;
     const fecha = new Date(inicio.getTime() + d * 864e5);
-    const texto = `${textoDe(id)}
+    // T05: cada red con su enlace ?de=<red> (Finanzas → «Tienda web por origen» dice qué publicidad vende)
+    const texto = (red) => `${textoDe(id)}
 
-🛒 www.dctecnology.xyz
-💬 WhatsApp 322 328 4622`;
+🛒 www.dctecnology.xyz/?de=${red}
+💬 WhatsApp 322 328 4622
+
+${etiquetas(id)}`;
     return { fecha: fecha.toISOString(), campana: campana.nombre, video: id, archivo, titulo: TITULOS[id] ?? id,
-        youtube: { titulo: `${TITULOS[id] ?? id} #Shorts`.slice(0, 100), descripcion: `${texto}
-
-${etiquetas(id)}` },
-        instagram_facebook: `${texto}
-
-${etiquetas(id)}`, tiktok: `${textoDe(id)} ${etiquetas(id)}`.slice(0, 2200) };
+        youtube: { titulo: `${TITULOS[id] ?? id} #Shorts`.slice(0, 100), descripcion: texto('youtube') },
+        facebook: texto('facebook'), instagram: texto('instagram'), instagram_facebook: texto('instagram'),
+        tiktok: `${textoDe(id)} ${etiquetas(id)}`.slice(0, 2200) };
 });
 
 fs.mkdirSync(path.join(RAIZ, 'herramientas', 'salida'), { recursive: true });

@@ -97,8 +97,10 @@ if (!elegidoId) { console.error(`No hay videos de la campaña "${campana.nombre}
 const versiones = versionesDe(elegidoId);
 const archivo = versiones[(semana + diaCampana) % versiones.length]; // la voz cambia de un día a otro y de una semana a otra
 const yaHoy = registro.publicados.some((p) => p.fecha === hoy && p.tipo === 'video');
-const leyenda = `${textoDe(elegidoId)}\n\n${plan.pie}`;
-const promo = diaSemana === plan.promo_dia ? campana.promo : null;
+// T05: el enlace de la tienda en los estados lleva ?de=estado (Finanzas → «Tienda web por origen»)
+const conOrigen = (t) => String(t ?? '').replace(/www\.dctecnology\.xyz(?![/\w])/g, 'www.dctecnology.xyz/?de=estado');
+const leyenda = conOrigen(`${textoDe(elegidoId)}\n\n${plan.pie}`);
+const promo = diaSemana === plan.promo_dia && campana.promo ? conOrigen(campana.promo) : null;
 const promoHoy = registro.publicados.some((p) => p.fecha === hoy && p.tipo === 'promo');
 
 // Contactos reales (con nombre, número de WhatsApp; sin grupos ni @lid)
