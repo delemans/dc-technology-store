@@ -25,7 +25,7 @@ const escalar = (msg, motivo, cfg, plantillas) => {
     const aviso = soloDigitos(cfg.numero_aviso_admin);
     if (aviso) {
         salida.push({ json: { numero: aviso, texto: [
-            '🔔 *Escalamiento a asesor*',
+            msg.urgente ? '🚨 *URGENTE · Cliente molesto: atender ya*' : '🔔 *Escalamiento a asesor*',
             `Cliente: +${msg.numero}${msg.nombre ? ` (${limpiar(msg.nombre)})` : ''}`,
             `Motivo: ${limpiar(motivo)}`,
             `Último mensaje: ${String(msg.texto ?? '').slice(0, 300)}`,
@@ -231,6 +231,11 @@ else if (/^(renovar|renuevo|quiero renovar|si renovar|si quiero renovar|renovar 
     const ren = memoria.renovaciones[numero];
     Object.assign(salida, { ruta: 'ia', texto: `Quiero renovar ${ren.producto}${ren.variante ? ` – ${ren.variante}` : ''}. ¿Cuál es el total y cómo pago?` });
 }
+// T04 · Reclamo fuerte (estafa, robo, denuncia, SIC, abogado, devuélvanme, insultos): nunca lo atiende la IA; pasa a ti ya.
+// Una duda de confianza («¿no es estafa?») también va a una persona: la responde mejor un humano.
+else if (/\b(estafa\w*|estafador\w*|fraude\w*|robo|robaron|me roban|ladron\w*|rata|ratas|denuncia\w*|denunciar\w*|sic|superintendencia|abogad\w*|demandar\w*|devuelvanme|devuelvame|devuelvan mi (plata|dinero)|quiero mi (plata|dinero)|me enganaron|enganados?|hp|hijueputa\w*|hijo de puta|malparid\w*|gonorrea|careverga|pirob\w*|mierda|basura|sinverguenza\w*|sin verguenza|ratero\w*)\b/.test(limpio)) {
+    Object.assign(salida, { ruta: 'asesor', urgente: true, motivo: 'Cliente molesto: atender ya' });
+}
 // Habeas data (Ley 1581): "DATOS" o "borrar mis datos" → pasa a ti con el plazo legal (lo anuncia legal/privacidad.html)
 else if (/^(datos|mis datos|datos personales|borrar mis datos|eliminar mis datos|borren mis datos|eliminen mis datos)$/.test(limpio)) {
     Object.assign(salida, { ruta: 'asesor', motivo: 'Solicitud sobre datos personales (Ley 1581): consulta → responder en máx. 10 días hábiles; reclamo/borrado → 15 días hábiles' });
@@ -301,7 +306,7 @@ const escalar = (msg, motivo, cfg, plantillas) => {
     const aviso = soloDigitos(cfg.numero_aviso_admin);
     if (aviso) {
         salida.push({ json: { numero: aviso, texto: [
-            '🔔 *Escalamiento a asesor*',
+            msg.urgente ? '🚨 *URGENTE · Cliente molesto: atender ya*' : '🔔 *Escalamiento a asesor*',
             `Cliente: +${msg.numero}${msg.nombre ? ` (${limpiar(msg.nombre)})` : ''}`,
             `Motivo: ${limpiar(motivo)}`,
             `Último mensaje: ${String(msg.texto ?? '').slice(0, 300)}`,
@@ -578,7 +583,7 @@ const escalar = (msg, motivo, cfg, plantillas) => {
     const aviso = soloDigitos(cfg.numero_aviso_admin);
     if (aviso) {
         salida.push({ json: { numero: aviso, texto: [
-            '🔔 *Escalamiento a asesor*',
+            msg.urgente ? '🚨 *URGENTE · Cliente molesto: atender ya*' : '🔔 *Escalamiento a asesor*',
             `Cliente: +${msg.numero}${msg.nombre ? ` (${limpiar(msg.nombre)})` : ''}`,
             `Motivo: ${limpiar(motivo)}`,
             `Último mensaje: ${String(msg.texto ?? '').slice(0, 300)}`,
@@ -711,7 +716,7 @@ const escalar = (msg, motivo, cfg, plantillas) => {
     const aviso = soloDigitos(cfg.numero_aviso_admin);
     if (aviso) {
         salida.push({ json: { numero: aviso, texto: [
-            '🔔 *Escalamiento a asesor*',
+            msg.urgente ? '🚨 *URGENTE · Cliente molesto: atender ya*' : '🔔 *Escalamiento a asesor*',
             `Cliente: +${msg.numero}${msg.nombre ? ` (${limpiar(msg.nombre)})` : ''}`,
             `Motivo: ${limpiar(motivo)}`,
             `Último mensaje: ${String(msg.texto ?? '').slice(0, 300)}`,
@@ -845,7 +850,7 @@ const escalar = (msg, motivo, cfg, plantillas) => {
     const aviso = soloDigitos(cfg.numero_aviso_admin);
     if (aviso) {
         salida.push({ json: { numero: aviso, texto: [
-            '🔔 *Escalamiento a asesor*',
+            msg.urgente ? '🚨 *URGENTE · Cliente molesto: atender ya*' : '🔔 *Escalamiento a asesor*',
             `Cliente: +${msg.numero}${msg.nombre ? ` (${limpiar(msg.nombre)})` : ''}`,
             `Motivo: ${limpiar(motivo)}`,
             `Último mensaje: ${String(msg.texto ?? '').slice(0, 300)}`,
@@ -1038,7 +1043,7 @@ const escalar = (msg, motivo, cfg, plantillas) => {
     const aviso = soloDigitos(cfg.numero_aviso_admin);
     if (aviso) {
         salida.push({ json: { numero: aviso, texto: [
-            '🔔 *Escalamiento a asesor*',
+            msg.urgente ? '🚨 *URGENTE · Cliente molesto: atender ya*' : '🔔 *Escalamiento a asesor*',
             `Cliente: +${msg.numero}${msg.nombre ? ` (${limpiar(msg.nombre)})` : ''}`,
             `Motivo: ${limpiar(motivo)}`,
             `Último mensaje: ${String(msg.texto ?? '').slice(0, 300)}`,
@@ -1297,7 +1302,7 @@ const escalar = (msg, motivo, cfg, plantillas) => {
     const aviso = soloDigitos(cfg.numero_aviso_admin);
     if (aviso) {
         salida.push({ json: { numero: aviso, texto: [
-            '🔔 *Escalamiento a asesor*',
+            msg.urgente ? '🚨 *URGENTE · Cliente molesto: atender ya*' : '🔔 *Escalamiento a asesor*',
             `Cliente: +${msg.numero}${msg.nombre ? ` (${limpiar(msg.nombre)})` : ''}`,
             `Motivo: ${limpiar(motivo)}`,
             `Último mensaje: ${String(msg.texto ?? '').slice(0, 300)}`,
@@ -1388,7 +1393,7 @@ const escalar = (msg, motivo, cfg, plantillas) => {
     const aviso = soloDigitos(cfg.numero_aviso_admin);
     if (aviso) {
         salida.push({ json: { numero: aviso, texto: [
-            '🔔 *Escalamiento a asesor*',
+            msg.urgente ? '🚨 *URGENTE · Cliente molesto: atender ya*' : '🔔 *Escalamiento a asesor*',
             `Cliente: +${msg.numero}${msg.nombre ? ` (${limpiar(msg.nombre)})` : ''}`,
             `Motivo: ${limpiar(motivo)}`,
             `Último mensaje: ${String(msg.texto ?? '').slice(0, 300)}`,
@@ -1504,7 +1509,7 @@ const escalar = (msg, motivo, cfg, plantillas) => {
     const aviso = soloDigitos(cfg.numero_aviso_admin);
     if (aviso) {
         salida.push({ json: { numero: aviso, texto: [
-            '🔔 *Escalamiento a asesor*',
+            msg.urgente ? '🚨 *URGENTE · Cliente molesto: atender ya*' : '🔔 *Escalamiento a asesor*',
             `Cliente: +${msg.numero}${msg.nombre ? ` (${limpiar(msg.nombre)})` : ''}`,
             `Motivo: ${limpiar(motivo)}`,
             `Último mensaje: ${String(msg.texto ?? '').slice(0, 300)}`,
@@ -1613,7 +1618,7 @@ const escalar = (msg, motivo, cfg, plantillas) => {
     const aviso = soloDigitos(cfg.numero_aviso_admin);
     if (aviso) {
         salida.push({ json: { numero: aviso, texto: [
-            '🔔 *Escalamiento a asesor*',
+            msg.urgente ? '🚨 *URGENTE · Cliente molesto: atender ya*' : '🔔 *Escalamiento a asesor*',
             `Cliente: +${msg.numero}${msg.nombre ? ` (${limpiar(msg.nombre)})` : ''}`,
             `Motivo: ${limpiar(motivo)}`,
             `Último mensaje: ${String(msg.texto ?? '').slice(0, 300)}`,
@@ -1720,7 +1725,7 @@ const escalar = (msg, motivo, cfg, plantillas) => {
     const aviso = soloDigitos(cfg.numero_aviso_admin);
     if (aviso) {
         salida.push({ json: { numero: aviso, texto: [
-            '🔔 *Escalamiento a asesor*',
+            msg.urgente ? '🚨 *URGENTE · Cliente molesto: atender ya*' : '🔔 *Escalamiento a asesor*',
             `Cliente: +${msg.numero}${msg.nombre ? ` (${limpiar(msg.nombre)})` : ''}`,
             `Motivo: ${limpiar(motivo)}`,
             `Último mensaje: ${String(msg.texto ?? '').slice(0, 300)}`,
@@ -1842,7 +1847,7 @@ const escalar = (msg, motivo, cfg, plantillas) => {
     const aviso = soloDigitos(cfg.numero_aviso_admin);
     if (aviso) {
         salida.push({ json: { numero: aviso, texto: [
-            '🔔 *Escalamiento a asesor*',
+            msg.urgente ? '🚨 *URGENTE · Cliente molesto: atender ya*' : '🔔 *Escalamiento a asesor*',
             `Cliente: +${msg.numero}${msg.nombre ? ` (${limpiar(msg.nombre)})` : ''}`,
             `Motivo: ${limpiar(motivo)}`,
             `Último mensaje: ${String(msg.texto ?? '').slice(0, 300)}`,

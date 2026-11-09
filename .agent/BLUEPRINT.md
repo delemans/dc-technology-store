@@ -74,7 +74,7 @@ _Escrito por Claude el 26/10/2026. Lo siguen Gemini (Antigravity) u otro agente 
    - sin descuentos ni plazos inventados.
 3. **Pruebas** de SQL y de la plantilla.
 
-## T04 · Cliente molesto → pasa al director al instante — **Pendiente** (media)
+## T04 · Cliente molesto → pasa al director al instante — **Hecho 09/11/2026 (Claude): regla en «Normalizar mensaje» (ruta asesor, urgente) y aviso 🚨 URGENTE; pruebas/flujo/test-molesto.js** (media)
 **Para qué:** que un reclamo serio nunca lo atienda la IA.
 
 1. En `n8n/generar_flujo_n8n.js` (función de normalizar o enrutar el mensaje):
