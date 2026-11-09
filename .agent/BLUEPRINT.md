@@ -106,7 +106,7 @@ _Escrito por Claude el 26/10/2026. Lo siguen Gemini (Antigravity) u otro agente 
 2. Regenera `legal/` con el script.
 3. Prueba simple: el HTML generado contiene la sección y los enlaces del pie siguen.
 
-## T07 · Libro de PQR en el panel — **Pendiente** (media)
+## T07 · Libro de PQR en el panel — **Hecho 09/11/2026 (Claude): wo-056 (pqr, días hábiles con festivos, registrar_pqr/pqr_panel/crear_pqr/responder_pqr), nodos «PQR del chat» → «Registrar PQR», pqr.js en «Pagos & Agente Bot»** (media)
 **Para qué:** cumplir plazos legales (Ley 1581: consultas 10 días hábiles, reclamos 15; Ley 1480: PQR).
 
 1. **`wo-056`:**

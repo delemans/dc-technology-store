@@ -300,7 +300,7 @@ function normalizarMensaje() {
     }
     // Habeas data (Ley 1581): "DATOS" o "borrar mis datos" → pasa a ti con el plazo legal (lo anuncia legal/privacidad.html)
     else if (/^(datos|mis datos|datos personales|borrar mis datos|eliminar mis datos|borren mis datos|eliminen mis datos)$/.test(limpio)) {
-        Object.assign(salida, { ruta: 'asesor', motivo: 'Solicitud sobre datos personales (Ley 1581): consulta → responder en máx. 10 días hábiles; reclamo/borrado → 15 días hábiles' });
+        Object.assign(salida, { ruta: 'asesor', pqr: 'datos', motivo: 'Solicitud sobre datos personales (Ley 1581): consulta → responder en máx. 10 días hábiles; reclamo/borrado → 15 días hábiles. Quedó en el libro de PQR del panel' });
     }
     else {
         // Menú con números (WO-040): opciones del último menú (30 min), saludos y atajos de una o dos palabras
@@ -350,6 +350,13 @@ function rutaAsesor() {
     const msg = $input.first().json;
     const kb = __KB__;
     return escalar(msg, msg.motivo || 'El cliente pidió un asesor o reportó un problema', cfg, kb.plantillas);
+}
+
+// A2b · T07: lo que es PQR (hoy, «DATOS») queda en el libro de PQR del panel con su plazo legal (wo-056)
+function pqrDelChat() {
+    const msg = $input.first().json;
+    if (!msg?.pqr) return [];
+    return [{ json: { args: { p_whatsapp: msg.numero, p_tipo: msg.pqr, p_detalle: String(msg.texto ?? '').slice(0, 2000) } } }];
 }
 
 // A3 · Rutas sin IA: baja confirmada, audios y mensajes sin texto. Si quien escribe no viene de una conversación de
@@ -2894,6 +2901,7 @@ nodo('Registrar baja', 'n8n-nodes-base.httpRequest', 4.2, [900, -300], supabaseR
 }), { onError: 'continueRegularOutput' });
 nodoCodigo('Respuesta fija', [1120, -200], respuestaFija);
 nodoCodigo('Escalar a asesor', [900, -100], rutaAsesor, { conUtilidades: true });
+nodoCodigo('PQR del chat', [900, -220], pqrDelChat, {}, { executeOnce: true });
 nodoCodigo('Comprobante recibido', [900, 0], comprobanteRecibido, { conUtilidades: true });
 nodo('Base de conocimiento', 'n8n-nodes-base.httpRequest', 4.2, [900, 140], {
     url: "={{ $('Config bot').first().json.url_conocimiento }}",
@@ -3231,6 +3239,8 @@ nodo('Enviar resumen', 'n8n-nodes-base.httpRequest', 4.2, [1320, 1820], evolutio
 nodo('Pagos por revisar', 'n8n-nodes-base.httpRequest', 4.2, [660, 1980], rpcPanel('pagos_por_revisar', '={{ JSON.stringify({}) }}'), { onError: 'continueRegularOutput', alwaysOutputData: true });
 nodoCodigo('Alertas de pago', [880, 1980], alertasPago, { conUtilidades: true }, { executeOnce: true });
 nodo('Enviar alerta de pago', 'n8n-nodes-base.httpRequest', 4.2, [1100, 1980], evolutionEnviar('Config bot'), { onError: 'continueRegularOutput' });
+// T07 · Libro de PQR (wo-056): lo que el cliente pide por «DATOS» queda registrado con su plazo legal
+nodo('Registrar PQR', 'n8n-nodes-base.httpRequest', 4.2, [1120, -220], rpcPanel('registrar_pqr', '={{ JSON.stringify($json.args) }}'), { onError: 'continueRegularOutput' });
 // WO-054 · Recordatorio al cliente sin comprobante (rama de salud, cada 30 min; la cola lo envía)
 nodoCodigo('Recordar pagos', [660, 2140], recordarPagos, {}, { executeOnce: true });
 nodo('Encolar recordatorios', 'n8n-nodes-base.httpRequest', 4.2, [880, 2140], rpcPanel('encolar_recordatorios_pago', '={{ JSON.stringify({}) }}'), { onError: 'continueRegularOutput' });
@@ -3438,6 +3448,8 @@ unir('Historial del chat (lid)', '¿Lo atiende una persona?');
 unir('¿Lo atiende una persona?', 'Ruta');
 unir('Ruta', 'Registrar baja', 0);
 unir('Ruta', 'Escalar a asesor', 1);
+unir('Ruta', 'PQR del chat', 1);
+unir('PQR del chat', 'Registrar PQR');
 unir('Ruta', 'Respuesta fija', 2);
 unir('Ruta', 'Comprobante recibido', 3);
 unir('Ruta', 'Base de conocimiento', 5);              // salida extra (fallback) = IA

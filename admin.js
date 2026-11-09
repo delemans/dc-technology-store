@@ -242,6 +242,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('comprobantes-web-recargar').addEventListener('click', cargarComprobantesWeb);
     document.getElementById('combos-validar-recargar').addEventListener('click', cargarCombosPorValidar);
     document.getElementById('reportes-falla-recargar').addEventListener('click', cargarReportesFalla);
+    document.getElementById('pqr-recargar').addEventListener('click', cargarPqr);
+    document.getElementById('pqr-nueva').addEventListener('submit', (e) => {
+        e.preventDefault();
+        window.Pqr?.crear(supabaseClient, e.target, document.getElementById('pqr-lista'), { avisar: (m, t) => mostrarToast(m, t, 5000) });
+    });
     document.getElementById('precios-buscar').addEventListener('input', pintarPrecios);
     document.getElementById('combo-regla-nueva').addEventListener('click', () => { reglasCombo.nueva = true; pintarReglasCombo(); document.querySelector('#combo-reglas-lista form:last-child [name="min"]')?.focus(); });
     document.getElementById('bot-buscar').addEventListener('input', pintarCatalogoBot);
@@ -1195,7 +1200,7 @@ function mostrarVista(vista) {
     ui.vista = vista;
     document.getElementById('vista-pedidos').hidden = vista !== 'pedidos';
     document.getElementById('vista-pagos-bot').hidden = vista !== 'pagos-bot';
-    if (vista === 'pagos-bot') { cargarComprobantesWeb(); cargarCombosPorValidar(); cargarReportesFalla(); }
+    if (vista === 'pagos-bot') { cargarComprobantesWeb(); cargarCombosPorValidar(); cargarReportesFalla(); cargarPqr(); }
     document.getElementById('vista-productos').hidden = vista !== 'productos';
     if (vista === 'productos') { cargarPromociones(); cargarReglasCombo(); cargarPrecios(); window.Proveedor?.cargar(supabaseClient, document.getElementById('proveedor-contenido')); }
     document.getElementById('vista-finanzas').hidden = vista !== 'finanzas';
@@ -1588,6 +1593,12 @@ async function cargarReportesFalla() {
         });
         return t;
     }));
+}
+
+/* ==================== LIBRO DE PQR (pqr.js · wo-056) ==================== */
+
+function cargarPqr() {
+    window.Pqr?.cargar(supabaseClient, document.getElementById('pqr-lista'), { avisar: (m, t) => mostrarToast(m, t, 5000) });
 }
 
 /* ==================== DESCUENTO POR COMBO (public.reglas_combo · wo-029) ==================== */
