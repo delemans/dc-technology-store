@@ -22,6 +22,7 @@ const ORDEN = [
     ['wo-054-recordatorio-pago.sql', 'recordatorio al cliente sin comprobante'],
     ['wo-055-origen-clientes.sql', 'de qué red llegó cada cliente'],
     ['wo-056-libro-pqr.sql', 'libro de PQR'],
+    ['wo-057-gastos-fijos.sql', 'gastos fijos'],
 ];
 const hoy = new Date().toLocaleDateString('es-CO', { timeZone: 'America/Bogota', day: '2-digit', month: '2-digit', year: 'numeric' });
 const partes = [

@@ -116,7 +116,7 @@ _Escrito por Claude el 26/10/2026. Lo siguen Gemini (Antigravity) u otro agente 
 2. **Bot:** la ruta de «DATOS» (busca «Habeas data» en el generador) además registra la PQR.
 3. **Panel:** vista «PQR» con lo que vence primero arriba (patrón: `proveedor.js` o `finanzas.js`).
 
-## T08 · Gastos fijos y punto de equilibrio en Finanzas — **Pendiente** (baja)
+## T08 · Gastos fijos y punto de equilibrio en Finanzas — **Hecho 09/11/2026 (Claude): wo-057 + bloque «Gastos fijos y utilidad real» en finanzas.js (utilidad, bloqueGastos)** (baja)
 **Para qué:** ver la utilidad real del mes.
 
 - **`wo-057`:** tabla `gastos_fijos` (nombre, valor mensual, activo) con RPC solo para admin.

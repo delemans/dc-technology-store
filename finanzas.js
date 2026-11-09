@@ -83,6 +83,35 @@
             <line x1="${M.l}" x2="${W - M.r}" y1="${H - M.b}" y2="${H - M.b}" class="fin-base"/>${barras}${etiquetas}</svg>`;
     }
 
+    // T08 · Gastos fijos (wo-057): utilidad real del periodo y punto de equilibrio (puras)
+    //   gastos del periodo = gastos mensuales activos × días del periodo / 30; utilidad = margen − gastos del periodo;
+    //   punto de equilibrio = pedidos al mes para cubrir los gastos con el margen promedio por pedido (con costo)
+    function utilidad(r, gastos = [], dias = 30) {
+        const mensual = gastos.filter((g) => g.activo).reduce((a, g) => a + (Number(g.valor_mensual) || 0), 0);
+        const periodo = Math.round(mensual * dias / 30);
+        const conCosto = r.pedidos - r.sinCosto;
+        const margenPedido = conCosto > 0 ? r.margen / conCosto : 0;
+        return { mensual, periodo, utilidad: r.margen - periodo, margenPedido, equilibrio: mensual > 0 && margenPedido > 0 ? Math.ceil(mensual / margenPedido) : null };
+    }
+    function bloqueGastos(r, gastos, dias) {
+        if (!Array.isArray(gastos)) return '<section class="fin-bloque"><h3>Gastos fijos y utilidad real</h3><p class="fin-vacio">Para registrar tus gastos fijos aplica <b>supabase/wo-057-gastos-fijos.sql</b> en Supabase.</p></section>';
+        const u = utilidad(r, gastos, dias);
+        const fila = (g) => `<tr data-gasto="${esc(g.id ?? '')}"><td><input name="nombre" maxlength="60" value="${esc(g.nombre ?? '')}" placeholder="Ej.: internet, contador" aria-label="Nombre del gasto" class="fin-campo"></td>
+            <td><input name="valor" inputmode="numeric" value="${g.valor_mensual ?? ''}" placeholder="Valor al mes" aria-label="Valor mensual" class="fin-campo fin-num"></td>
+            <td><label class="fin-check"><input type="checkbox" name="activo" ${g.activo !== false ? 'checked' : ''}> Activo</label></td>
+            <td><button type="button" class="fin-btn" data-guardar-gasto>Guardar</button></td></tr>`;
+        return `<section class="fin-bloque"><h3>Gastos fijos y utilidad real</h3>
+            <div class="fin-tiles">
+                ${[['Gastos fijos del periodo', COP(u.periodo), `${COP(u.mensual)} al mes`],
+                   ['Utilidad real', COP(u.utilidad), 'Margen bruto − gastos fijos', u.utilidad < 0 ? 'fin-mal' : 'fin-bien'],
+                   ['Punto de equilibrio', u.equilibrio ? `${u.equilibrio} pedidos` : '—', u.equilibrio ? `al mes, con margen promedio de ${COP(u.margenPedido)} por pedido` : (u.mensual ? 'Aún no hay ventas con costo para calcularlo' : 'Registra tus gastos fijos')]]
+                  .map(([t, v, d, tono = '']) => `<div class="fin-tile ${tono}"><p class="fin-tile-t">${esc(t)}</p><p class="fin-tile-v">${v}</p><p class="fin-tile-d">${esc(d)}</p></div>`).join('')}
+            </div>
+            <div class="fin-grafico"><table class="fin-tabla fin-gastos"><thead><tr><th>Gasto</th><th>Valor mensual</th><th></th><th></th></tr></thead>
+            <tbody>${gastos.map(fila).join('')}${fila({ activo: true })}</tbody></table></div>
+            <p class="fin-nota">Solo lo que escribas aquí (arriendo, internet, hosting, contador, publicidad…). Para quitar uno, desmárcalo como activo.</p></section>`;
+    }
+
     // T05 · Tienda web por origen (wo-055): de qué red llegaron las órdenes y cuánto se cobró
     const NOMBRES_ORIGEN = { tiktok: 'TikTok', youtube: 'YouTube', facebook: 'Facebook', instagram: 'Instagram', google: 'Google', estado: 'Estados de WhatsApp', directo: 'Directo (sin enlace de red)' };
     function tablaOrigen(filas) {
@@ -92,7 +121,7 @@
             <p class="fin-nota">Los enlaces de redes y estados llevan ?de=red; cuenta la red por la que entró el cliente en los 30 días antes de comprar.</p></section>`;
     }
 
-    function pintar(caja, r, { periodoTexto, origen }) {
+    function pintar(caja, r, { periodoTexto, origen, gastos, dias = 30 }) {
         const tile = (titulo, valor, detalle, tono = '') => `<div class="fin-tile ${tono}"><p class="fin-tile-t">${esc(titulo)}</p><p class="fin-tile-v">${valor}</p>${detalle ? `<p class="fin-tile-d">${detalle}</p>` : ''}</div>`;
         const tabla = (titulo, filas) => `<section class="fin-bloque"><h3>${esc(titulo)}</h3>${filas.length ? `<table class="fin-tabla"><thead><tr><th></th><th>Pedidos</th><th>Ventas</th><th>Margen</th></tr></thead><tbody>
             ${filas.map((f) => `<tr><td>${esc(f.clave)}</td><td>${f.pedidos}</td><td>${COP(f.ventas)}</td><td>${f.conCosto ? COP(f.margen) : '—'}</td></tr>`).join('')}</tbody></table>` : '<p class="fin-vacio">Sin ventas cobradas en el periodo.</p>'}</section>`;
@@ -107,6 +136,7 @@
             </div>
             <section class="fin-bloque"><h3>Ventas cobradas por día · ${esc(periodoTexto)}</h3><div class="fin-grafico">${grafico(r.serie, (caja.clientWidth || 760) - 38)}<div class="fin-tip" hidden></div></div></section>
             <div class="fin-columnas">${tabla('Por categoría', r.porCategoria)}${tabla('Por canal', r.porCanal)}</div>
+            ${bloqueGastos(r, gastos, dias)}
             ${tabla('Productos que más venden', r.productos)}
             ${tablaOrigen(origen)}
             <div class="fin-acciones"><button type="button" class="fin-btn" data-fin-csv><i class="fa-solid fa-file-csv"></i> Exportar movimientos (CSV)</button>
@@ -146,8 +176,19 @@
         }
         const textos = { hoy: 'hoy', '7d': 'últimos 7 días', '30d': 'últimos 30 días', mes: 'este mes' };
         const porOrigen = await sb.rpc('ventas_por_origen', { p_desde: desde.toISOString(), p_hasta: hasta.toISOString() }).then((x) => (x.error ? null : x.data), () => null);
-        pintar(caja, resumir(data, tipos, { desde, hasta }), { periodoTexto: textos[periodo], origen: porOrigen });
+        const gastos = await sb.rpc('gastos_fijos_panel').then((x) => (x.error ? null : x.data ?? []), () => null);
+        pintar(caja, resumir(data, tipos, { desde, hasta }), { periodoTexto: textos[periodo], origen: porOrigen, gastos, dias: Math.round((hasta - desde) / 864e5) });
+        // Guardar un gasto (nuevo o editado) y volver a calcular
+        caja.querySelectorAll('[data-guardar-gasto]').forEach((b) => b.addEventListener('click', async () => {
+            const tr = b.closest('tr');
+            const valor = Number(String(tr.querySelector('[name=valor]').value).replace(/\D/g, ''));
+            b.disabled = true;
+            const { data: x, error: err } = await sb.rpc('guardar_gasto_fijo', { p_id: tr.dataset.gasto ? Number(tr.dataset.gasto) : null, p_nombre: tr.querySelector('[name=nombre]').value, p_valor: valor, p_activo: tr.querySelector('[name=activo]').checked });
+            const r = x?.[0];
+            if (window.mostrarToast) window.mostrarToast(r?.mensaje ?? err?.message ?? 'No se pudo guardar.', r?.ok ? 'ok' : 'error', 4000);
+            if (r?.ok) cargar(sb, caja, periodo); else b.disabled = false;
+        }));
     }
 
-    window.Finanzas = { resumir, rango, csv, cargar, tablaOrigen };
+    window.Finanzas = { resumir, rango, csv, cargar, tablaOrigen, utilidad, bloqueGastos };
 })();

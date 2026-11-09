@@ -187,6 +187,12 @@ header[class*="backdrop-blur"], .cab { background-color: rgb(var(--fondo)) !impo
 .fin-acciones { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
 .fin-btn { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px; border-radius: 12px; font-size: 13px; font-weight: 700; background: rgb(var(--tarjeta)); box-shadow: inset 0 0 0 1px rgb(var(--borde)); }
 .fin-nota { font-size: 12px; opacity: .6; max-width: 70ch; }
+/* T08 · Gastos fijos (finanzas.js) */
+.fin-campo { width: 100%; min-height: 44px; padding: 0 12px; border-radius: 10px; font-size: 14px; color: inherit; background: transparent; box-shadow: inset 0 0 0 1px rgb(var(--borde)); }
+.fin-campo:focus-visible { outline: 2px solid var(--acento); outline-offset: 1px; }
+.fin-num { text-align: right; font-variant-numeric: tabular-nums; min-width: 8rem; }
+.fin-check { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; font-size: 12px; white-space: nowrap; }
+.fin-gastos td { vertical-align: middle; } .fin-gastos td:first-child { min-width: 10rem; }
 
 /* ---------- Panel: categorías del proveedor (proveedor.js) ---------- */
 .prov-cabeza { display: grid; gap: 10px; margin-bottom: 14px; }
