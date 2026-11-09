@@ -16,7 +16,7 @@
 //              (llega a la bandeja de la app para publicarlo con un toque) o publicación directa con TIKTOK_PRIVACIDAD
 //              (SELF_ONLY mientras la app no pase la auditoría de TikTok; después PUBLIC_TO_EVERYONE)
 // Cada red es independiente: si una falla o no tiene credenciales, las demás siguen. Registro: herramientas/salida/redes-publicadas.json
-// (no repite) y redes.log. Los videos llevan la marca de contenido hecho con IA (voz sintética y animación) donde la red la pide.
+// (no repite) y redes.log. El plan se renueva solo cuando le quedan menos de 3 días (T11). Los videos llevan la marca de contenido hecho con IA (voz sintética y animación) donde la red la pide.
 import fs from 'node:fs';
 import path from 'node:path';
 import http from 'node:http';
@@ -46,6 +46,27 @@ export function pendientes(plan, registro, ahora, redes) {
         if (!(t <= ahora && ahora - t < VENTANA_H * 3600e3) || !p.archivo) return [];
         return redes.filter((r) => !registro[`${p.fecha}|${r}`]).map((red) => ({ red, p }));
     });
+}
+
+// T11 · El plan se renueva solo: sin plan, vencido o con menos de 3 días por delante → lunes desde el que se genera el
+// siguiente (AAAA-MM-DD, hora de Colombia); con plan suficiente → null (no se toca)
+const diaBogota = (t) => new Date(t).toLocaleDateString('en-CA', { timeZone: 'America/Bogota' });
+const lunesDe = (dia, despues) => {
+    const d = new Date(`${dia}T12:00:00Z`);
+    const dow = d.getUTCDay();
+    d.setUTCDate(d.getUTCDate() + (despues ? ((8 - dow) % 7) || 7 : -((dow + 6) % 7)));
+    return d.toISOString().slice(0, 10);
+};
+export function inicioPlanSiguiente(plan, ahora) {
+    const ultima = Math.max(...(plan ?? []).map((p) => new Date(p.fecha).getTime()).filter(Number.isFinite));
+    if (!Number.isFinite(ultima) || ultima < ahora) return lunesDe(diaBogota(ahora), false); // sin plan o vencido: desde esta semana
+    if (ultima - ahora >= 3 * 864e5) return null;
+    return lunesDe(diaBogota(ultima), true);
+}
+// Lo que queda del plan anterior (antes del primer día del nuevo) + el nuevo; las fechas ya publicadas no cambian de clave
+export function unirPlanes(viejo, nuevo) {
+    const desde = Math.min(...nuevo.map((p) => new Date(p.fecha).getTime()));
+    return [...(viejo ?? []).filter((p) => new Date(p.fecha).getTime() < desde), ...nuevo];
 }
 
 const esperar = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -242,8 +263,23 @@ Register-ScheduledTask -TaskName '${tarea}' -Action $a -Trigger $t -Settings $s 
     }
 
     const planRuta = path.join(SALIDA, 'redes-plan.json');
+    const leerPlan = () => { try { return JSON.parse(fs.readFileSync(planRuta, 'utf8')); } catch { return []; } };
+    // T11: si el plan se acaba en menos de 3 días (o no hay), se genera el siguiente (en --probar solo se dice)
+    const siguiente = inicioPlanSiguiente(leerPlan(), Date.now());
+    if (siguiente && PROBAR) console.log(`El plan se acaba pronto: al publicar se genera el siguiente desde el ${siguiente}.`);
+    else if (siguiente) {
+        const viejo = leerPlan();
+        try {
+            execFileSync(process.execPath, [path.join(RAIZ, 'herramientas', 'generar_redes.js'), siguiente], { cwd: RAIZ, stdio: 'ignore', timeout: 120000 });
+            fs.writeFileSync(planRuta, JSON.stringify(unirPlanes(viejo, leerPlan()), null, 2));
+            log(`plan renovado desde el ${siguiente}`);
+        } catch (e) {
+            fs.writeFileSync(planRuta, JSON.stringify(viejo, null, 2));
+            log(`no pude renovar el plan (${e.message.slice(0, 200)})`);
+        }
+    }
     if (!fs.existsSync(planRuta)) { console.error('Falta el plan: node herramientas/generar_redes.js'); process.exit(1); }
-    const plan = JSON.parse(fs.readFileSync(planRuta, 'utf8'));
+    const plan = leerPlan();
     const regRuta = path.join(SALIDA, 'redes-publicadas.json');
     const registro = fs.existsSync(regRuta) ? JSON.parse(fs.readFileSync(regRuta, 'utf8')) : {};
     const activas = redesActivas(env);

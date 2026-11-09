@@ -111,3 +111,18 @@ const video = Buffer.alloc(1000, 1);
     const r = await m.verificarRedes({ META_IG_USER_ID: '111', META_PAGE_TOKEN: 't' }, async () => resp({ id: '111' }));
     ok(r.find((x) => x.red === 'instagram').ok === false && /no es una cuenta de Instagram/.test(r.find((x) => x.red === 'instagram').texto), 'verificar Instagram: un ID que no es de Instagram (sin username) se detecta');
 }
+
+// T11 · El plan se renueva solo
+{
+    const dia = (f) => ({ fecha: `${f}T17:30:00.000Z` });
+    const plan28 = Array.from({ length: 28 }, (_, i) => dia(new Date(Date.parse('2026-11-16T12:00:00Z') + i * 864e5).toISOString().slice(0, 10))); // lun 16/11 → dom 13/12
+    ok(m.inicioPlanSiguiente(plan28, Date.parse('2026-12-03T15:00:00Z')) === null, 'con 10 días por delante no cambia nada');
+    ok(m.inicioPlanSiguiente(plan28, Date.parse('2026-12-12T15:00:00Z')) === '2026-12-14', 'si vence mañana → el siguiente desde el lunes después (14/12)');
+    ok(m.inicioPlanSiguiente(plan28, Date.parse('2026-12-20T15:00:00Z')) === '2026-12-14', 'si ya venció → desde el lunes de esta semana');
+    ok(m.inicioPlanSiguiente([], Date.parse('2026-11-11T15:00:00Z')) === '2026-11-09', 'sin plan → desde el lunes de esta semana');
+    const nuevo = Array.from({ length: 28 }, (_, i) => dia(new Date(Date.parse('2026-12-14T12:00:00Z') + i * 864e5).toISOString().slice(0, 10)));
+    const unido = m.unirPlanes(plan28, nuevo);
+    ok(unido.length === 56 && unido[27].fecha.startsWith('2026-12-13') && unido[28].fecha.startsWith('2026-12-14'), 'conserva los días que quedaban del plan anterior y suma las 4 semanas nuevas');
+    const solapado = m.unirPlanes(plan28, nuevo.map((x) => ({ fecha: x.fecha.replace('2026-12-14', '2026-12-10') })).slice(0, 1));
+    ok(solapado.filter((x) => x.fecha.startsWith('2026-12-1')).length === 1, 'el plan nuevo manda desde su primer día (sin fechas repetidas)');
+}

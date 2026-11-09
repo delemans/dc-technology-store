@@ -1,6 +1,6 @@
 // herramientas/generar_redes.js — Kit de publicación en redes con los 32 videos (16 × voz de mujer / de hombre).
 //
-//   node herramientas/generar_redes.js [AAAA-MM-DD]   (lunes de inicio; por defecto el próximo lunes)
+//   node herramientas/generar_redes.js [AAAA-MM-DD]   (lunes de inicio; por defecto el lunes de esta semana)
 //
 // Sale: herramientas/salida/redes-plan.json (para una futura publicación por API) y "PUBLICAR EN REDES.txt" en la
 // carpeta del Escritorio "Anuncios DC Tecnology" (listo para copiar y pegar al programar en Meta Business Suite,
@@ -132,7 +132,8 @@ const DIAS = Number(process.env.DIAS) > 0 ? Number(process.env.DIAS) : 28;
 const inicio = (() => {
     if (process.argv[2]) return new Date(`${process.argv[2]}T12:30:00-05:00`);
     const d = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Bogota' }));
-    d.setDate(d.getDate() + (((8 - d.getDay()) % 7) || 7)); // próximo lunes
+    // Lunes de esta semana (antes el próximo: la tarea de las 3 a. m. lo regeneraba a diario y el plan nunca cubría hoy)
+    d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
     return new Date(`${d.toLocaleDateString('en-CA')}T12:30:00-05:00`);
 })();
 const fechaTexto = (d) => d.toLocaleDateString('es-CO', { timeZone: 'America/Bogota', weekday: 'long', day: 'numeric', month: 'long' });

@@ -145,13 +145,13 @@ _Escrito por Claude el 26/10/2026. Lo siguen Gemini (Antigravity) u otro agente 
 4. **Prueba:** amplía `pruebas/datos/test-publicar-redes.mjs` con casos OK, 401 y red sin claves.
 5. **Guía:** en «Anuncios DC Tecnology/REDES - CONFIGURAR UNA VEZ.txt» (Escritorio), paso 4, agrega `--verificar` antes de `--probar`.
 
-## T11 · Redes: el plan se renueva solo — **Pendiente** (media)
+## T11 · Redes: el plan se renueva solo — **Hecho 09/11/2026 (Claude): inicioPlanSiguiente + unirPlanes en publicar-redes.mjs; generar_redes arranca el lunes de esta semana** (media)
 **Para qué:** hoy, cada 4 semanas, hay que correr `node herramientas/generar_redes.js AAAA-MM-DD` a mano; si se olvida, las redes se quedan sin publicar.
 1. En `publicar-redes.mjs`, antes de publicar: si la última fecha de `redes-plan.json` está a menos de 3 días, genera el plan siguiente desde el lunes después de esa fecha (reutiliza la función de `generar_redes.js` sin cambiar su salida).
 2. Lo ya publicado no se repite: `redes-publicadas.json` manda.
 3. **Prueba:** un plan que vence mañana debe generar las 4 semanas siguientes, y uno con 10 días por delante no debe cambiar nada.
 
-## T12 · Redes y estados: resumen semanal por WhatsApp — **Pendiente** (media)
+## T12 · Redes y estados: resumen semanal por WhatsApp — **Hecho 09/11/2026 (Claude): herramientas/resumen-redes.mjs; la tarea la instala el director con --instalar** (media)
 **Para qué:** que el director sepa cada lunes qué salió en cada red y en los estados, sin abrir archivos.
 1. Script nuevo `herramientas/resumen-redes.mjs`:
    - lee `herramientas/salida/redes-publicadas.json` y `herramientas/salida/estados.json` de los últimos 7 días;
