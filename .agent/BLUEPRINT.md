@@ -123,7 +123,7 @@ _Escrito por Claude el 26/10/2026. Lo siguen Gemini (Antigravity) u otro agente 
 - **`finanzas.js`:** sección para agregar y editar gastos; utilidad = margen − gastos; punto de equilibrio = gastos ÷ margen promedio por pedido.
 - Prueba SQL y web.
 
-## T09 · Revisión de accesibilidad y contraste — **Pendiente** (baja)
+## T09 · Revisión de accesibilidad y contraste — **Hecho 09/11/2026 (Claude): rojo de texto #EB4A59 en oscuro y fondo de botones #C8102E (--acento-fondo), grises y verdes AA, pie y avisos de 44 px, foco visible; pruebas/web/prueba-accesibilidad.mjs** (baja)
 - Recorre `index.html` y `admin.html` en celular (390 px) con Chrome sin ventana.
 - Revisa áreas táctiles de 44 px o más, foco visible y contraste suficiente en modo claro y oscuro.
 - Corrige en `estilos/corriente.css` o en `estilos/profesional.css` (último en el `<head>`).

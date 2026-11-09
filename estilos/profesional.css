@@ -8,9 +8,10 @@
     --fondo: 13 16 21;          /* #0D1015 grafito */
     --tarjeta: 21 25 32;        /* #151920 */
     --borde: 44 50 60;
-    --rojo: 224 52 69;          /* #E03445: rojo de marca con contraste sobre grafito */
+    --rojo: 235 74 89;          /* #EB4A59: rojo de marca para texto sobre grafito (AA ≥ 4.5; el #E03445 daba 4.3) */
     --acento: rgb(var(--rojo));
-    --acento-hover: rgb(200 35 52);
+    --acento-fondo: rgb(200 16 46); /* #C8102E: fondo de botones con letra blanca (5.9:1; el #E03445 daba 4.4) */
+    --acento-hover: rgb(168 12 38);
     --sombra-1: 0 1px 2px rgb(0 0 0 / .35);
     --sombra-2: 0 1px 2px rgb(0 0 0 / .3), 0 12px 28px -16px rgb(0 0 0 / .6);
     --radio: 14px;
@@ -53,7 +54,7 @@ h1 { font-weight: 800 !important; line-height: 1.08 !important; }
 .btn-cyber:hover, .btn-cyber:focus-visible, .btn-cyber.ancho:hover, .btn-cyber.verde:hover { transform: none !important; box-shadow: var(--sombra-1) !important; }
 .btn-cyber:active { transform: translateY(1px) !important; }
 .btn-neon, .btn-p, .prod .agregar, .menu-inferior .central, .pasos-inicio i, .categoria i, .desc-paso-icono {
-    background: var(--acento) !important;
+    background: var(--acento-fondo) !important;
     box-shadow: var(--sombra-1) !important;
     text-shadow: none !important;
     filter: none !important;
@@ -85,7 +86,7 @@ h1 { font-weight: 800 !important; line-height: 1.08 !important; }
 
 /* Insignias y cintas: planas */
 .insignia-desc, .cinta-promo, .prod .desc, .sello-combo, .reglas-combo span.alcanzada, .chip[aria-selected="true"] {
-    background: var(--acento) !important; box-shadow: none !important; animation: none !important;
+    background: var(--acento-fondo) !important; box-shadow: none !important; animation: none !important;
 }
 .tarjeta-3d:hover .insignia-desc { transform: none !important; box-shadow: none !important; }
 .tarjeta-3d:hover .insignia { box-shadow: none !important; }
@@ -158,7 +159,7 @@ header[class*="backdrop-blur"], .cab { background-color: rgb(var(--fondo)) !impo
 /* ---------- Centro financiero (admin · finanzas.js) ---------- */
 .fin-periodos { display: inline-flex; gap: 4px; padding: 4px; border-radius: 14px; background: rgb(var(--tarjeta)); box-shadow: inset 0 0 0 1px rgb(var(--borde)); }
 .fin-periodos button { min-height: 40px; padding: 0 14px; border-radius: 10px; font-size: 12px; font-weight: 700; color: rgb(var(--tinta, 243 244 246) / .7); }
-.fin-periodos button[aria-selected="true"] { background: var(--acento); color: #fff; }
+.fin-periodos button[aria-selected="true"] { background: var(--acento-fondo); color: #fff; }
 .fin-tiles { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 210px), 1fr)); margin-bottom: 16px; }
 .fin-tile { padding: 16px 18px; border-radius: 18px; background: rgb(var(--tarjeta)); box-shadow: inset 0 0 0 1px rgb(var(--borde)); }
 .fin-tile-t { font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; opacity: .6; }
@@ -212,3 +213,11 @@ header[class*="backdrop-blur"], .cab { background-color: rgb(var(--fondo)) !impo
 .prov-switch:checked::after { transform: translateX(20px); }
 .prov-switch:focus-visible { outline: 2px solid rgb(var(--rojo)); outline-offset: 2px; }
 .prov-switch:disabled { opacity: .5; }
+
+/* ---------- T09 · Accesibilidad (09/11/2026): contraste AA y áreas táctiles ---------- */
+.bg-dcRed { background-color: var(--acento-fondo) !important; }           /* botones con letra blanca */
+html:not(.tema-claro) .text-neutral-500 { color: rgb(145 145 150) !important; } /* gris pequeño sobre grafito: 4.0 → 5.6 */
+.tema-claro .text-dcNeon { color: rgb(var(--rojo)) !important; }           /* #FF2A5F sobre blanco daba 3.6 */
+.tema-claro .text-emerald-400 { color: #047857 !important; }               /* verde sobre blanco roto: 3.5 → 5.2 */
+.tema-claro .text-emerald-400:hover { color: #065F46 !important; }
+:focus-visible { outline: 2px solid rgb(var(--rojo)); outline-offset: 2px; }
