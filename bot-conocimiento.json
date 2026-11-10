@@ -1,5 +1,5 @@
 {
-  "version": "2026-11-09T21:53:51.716Z",
+  "version": "2026-11-10T21:11:02.728Z",
   "identidad": [
     "Eres DC TECNOLOGY: respondes el WhatsApp de la tienda (https://www.dctecnology.xyz) en nombre del equipo. Habla como la tienda (\"te ayudamos\", \"te enviamos\").",
     "En el PRIMER mensaje de la conversación saluda así: \"¡Hola! Te saluda *DC TECNOLOGY* 👋\", responde lo que preguntó y cierra con: \"Escribe *menú* para ver todas las opciones.\" Después no vuelvas a presentarte (si el contexto trae un mensaje del menú, la conversación ya empezó).",
@@ -792,7 +792,7 @@
       "marca": "DC Tecnology",
       "nombre": "Powerbank Portátil Recargable 20.000 mAh",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2026-08-05t131148-996-0889ddb93403eb4b7c17859537418984-640-0.webp",
-      "url": "https://www.dctecnology.xyz/p/powerbank-portatil-recargable-20-000-mah.html",
+      "url": "https://www.dctecnology.xyz/?producto=powerbank-portatil-recargable-20-000-mah",
       "variantes": [
         {
           "nombre": "Carga Rápida 20.000 mAh",
@@ -800,8 +800,9 @@
           "precio_anterior": 180000
         }
       ],
+      "oculto": true,
       "desde": 120000,
-      "descripcion": "Powerbank portátil recargable 20.000 mAh con carga rápida y diseño compacto. Ideal para mantener tus dispositivos siempre conectados.¡Nunca más te quedes sin batería en el momento equivocado! Con el Powerbank de 20.000 mAh tendrás energía de sobra para mantener todos tus dispositivos cargados durante viajes, largas jornadas de trabajo o emergencias, todo en un diseño compacto y fácil de llevar.El aliado perfecto para tus viajes y largas jornadas: energía confiable, rápida y portátil vayas donde vayas.Alta Capacidad (20.000 mAh): Potencia suficiente para cargar un smartphone promedio entre 4 y "
+      "descripcion": null
     },
     {
       "id": "auriculares-inalambricos-de-gancho-sp16",
@@ -1376,7 +1377,7 @@
       "marca": "Netflix",
       "nombre": "PIN Virtual Netflix Colombia",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2026-07-25t230306-675-e59d09cb99d572efd717850386081961-640-0.webp",
-      "url": "https://www.dctecnology.xyz/?producto=pin-virtual-netflix",
+      "url": "https://www.dctecnology.xyz/p/pin-virtual-netflix.html",
       "variantes": [
         {
           "nombre": "PIN de $20.000",
@@ -1404,9 +1405,8 @@
           "precio_anterior": null
         }
       ],
-      "oculto": true,
       "desde": 20000,
-      "descripcion": null
+      "descripcion": "Activa tu suscripción Netflix con PIN Virtual. Pago seguro, entrega rápida y sin tarjeta.El PIN es de un solo uso y solo funciona en cuentas de Colombia.Antes de canjearlo, verifica que tu cuenta de Netflix sea de Colombia: en cuentas de otro país la plataforma marca error.No compartas ni publiques el PIN antes de canjearlo: cualquiera que lo tenga lo puede usar.PIN $20.000: Saldo de $20.000 que se abona a tu cuenta de Netflix.PIN $30.000: Saldo de $30.000 que se abona a tu cuenta de Netflix.PIN $35.000: Saldo de $35.000 que se abona a tu cuenta de Netflix.PIN $40.000: Saldo de $40.000 que se "
     },
     {
       "id": "pin-virtual-directv-go",
@@ -1429,11 +1429,6 @@
         {
           "nombre": "PIN de $102.900",
           "precio": 102900,
-          "precio_anterior": null
-        },
-        {
-          "nombre": "PIN de $110.000",
-          "precio": 110000,
           "precio_anterior": null
         }
       ],

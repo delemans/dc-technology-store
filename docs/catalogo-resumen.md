@@ -1,5 +1,5 @@
 # Catálogo resumido de DC Tecnology (para las IA)
-_Generado por herramientas/resumen-catalogo.js el 9/11/2026 a partir de productos.json y disponibilidad.json. No editar a mano._
+_Generado por herramientas/resumen-catalogo.js el 10/11/2026 a partir de productos.json y disponibilidad.json. No editar a mano._
 
 Precios en pesos colombianos. Son los de productos.json: en la tienda manda el precio de la base (precios_publicos), que puede cambiar.
 **Antes de publicar un precio, confírmalo en la página del producto.** Para el detalle de un producto: busca su id en productos.json (no lo leas entero).
@@ -14,7 +14,7 @@ Precios en pesos colombianos. Son los de productos.json: en la tienda manda el p
 
 - Alquiler de Laptops y Equipos de Cómputo · desde $ 160.000 · 3 planes · id `servicio-alquiler-equipos-computo` · https://www.dctecnology.xyz/p/servicio-alquiler-equipos-computo.html
 
-## Tecnología (168)
+## Tecnología (167)
 
 - Auriculares con Cable ATH-73 · desde $ 2.000 · id `er-auriculares-con-cable-ath-73-1126` · https://www.dctecnology.xyz/p/er-auriculares-con-cable-ath-73-1126.html
 - Lampara USB LED-18 · desde $ 2.400 · id `er-lampara-usb-led-18-115` · https://www.dctecnology.xyz/p/er-lampara-usb-led-18-115.html
@@ -173,7 +173,6 @@ Precios en pesos colombianos. Son los de productos.json: en la tienda manda el p
 - Audífonos Inalámbricos Abiertos Pro V12 · desde $ 104.900 · id `er-airpods-abiertos-pro-v12-original-185` · https://www.dctecnology.xyz/p/er-airpods-abiertos-pro-v12-original-185.html
 - Kit Gamer X4 Articulos · desde $ 104.900 · id `er-kit-gamer-x4-articulos-245` · https://www.dctecnology.xyz/p/er-kit-gamer-x4-articulos-245.html
 - Aibimy MY262BT Original IPX6 · desde $ 113.300 · id `er-aibimy-my262bt-original-ipx6-101` · https://www.dctecnology.xyz/p/er-aibimy-my262bt-original-ipx6-101.html
-- Powerbank Portátil Recargable 20.000 mAh · desde $ 120.000 · id `powerbank-portatil-recargable-20-000-mah` · https://www.dctecnology.xyz/p/powerbank-portatil-recargable-20-000-mah.html
 - Parlante + Audífonos Inalámbricos RGB Profesional · desde $ 123.000 · id `er-parlante-airpods-rgb-profesional-1144` · https://www.dctecnology.xyz/p/er-parlante-airpods-rgb-profesional-1144.html
 - Reloj Inteligente Smartwatch P13 de Lujo en Acero Inoxidable · desde $ 130.000 · id `reloj-inteligente-smartwatch-p13-de-lujo-en-acero-inoxidable` · https://www.dctecnology.xyz/p/reloj-inteligente-smartwatch-p13-de-lujo-en-acero-inoxidable.html
 - Parlante Portatil Original Kimiso KMS-323 · desde $ 132.000 · id `er-parlante-portatil-original-kimiso-kms-323-284` · https://www.dctecnology.xyz/p/er-parlante-portatil-original-kimiso-kms-323-284.html
@@ -205,12 +204,13 @@ Precios en pesos colombianos. Son los de productos.json: en la tienda manda el p
 - Duolingo Super · desde $ 10.000 · id `duolingo-super` · https://www.dctecnology.xyz/p/duolingo-super.html
 - McAfee Antivirus Total Protection · desde $ 45.000 · 2 planes · id `mcafee-antivirus` · https://www.dctecnology.xyz/p/mcafee-antivirus.html
 
-## Pines y regalos (7)
+## Pines y regalos (8)
 
 - PIN Virtual Deezer · desde $ 19.500 · id `pin-virtual-deezer` · https://www.dctecnology.xyz/p/pin-virtual-deezer.html
+- PIN Virtual Netflix Colombia · desde $ 20.000 · 5 planes · id `pin-virtual-netflix` · https://www.dctecnology.xyz/p/pin-virtual-netflix.html
 - PIN Virtual Vix · desde $ 22.900 · id `pin-virtual-vix` · https://www.dctecnology.xyz/p/pin-virtual-vix.html
 - PIN Virtual Roblox · desde $ 25.000 · 3 planes · id `pin-virtual-roblox` · https://www.dctecnology.xyz/p/pin-virtual-roblox.html
 - PIN Virtual Disney Plus · desde $ 25.900 · 3 planes · id `pin-virtual-disney-plus-1tpu5` · https://www.dctecnology.xyz/p/pin-virtual-disney-plus-1tpu5.html
 - PIN Virtual Win Play · desde $ 39.900 · id `pin-virtual-win-play` · https://www.dctecnology.xyz/p/pin-virtual-win-play.html
-- PIN Virtual Directv Go · desde $ 64.000 · 4 planes · id `pin-virtual-directv-go` · https://www.dctecnology.xyz/p/pin-virtual-directv-go.html
+- PIN Virtual Directv Go · desde $ 64.000 · 3 planes · id `pin-virtual-directv-go` · https://www.dctecnology.xyz/p/pin-virtual-directv-go.html
 - PIN Virtual McAfee · desde $ 105.900 · 3 planes · id `pin-virtual-mcafee` · https://www.dctecnology.xyz/p/pin-virtual-mcafee.html
