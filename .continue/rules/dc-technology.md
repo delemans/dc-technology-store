@@ -18,3 +18,9 @@ Reglas:
 - Antes de entregar, `npm test` debe dar 0 FALLA. Anota lo que hiciste en `.agent/BITACORA.md`.
 - Terminal: el proyecto usa **Git Bash** (grep, head, && funcionan). Si un comando dice «no se reconoce» estás en PowerShell: usa `Select-String -Path archivo -Pattern texto` en vez de grep, y `;` en vez de &&.
 - Catálogo: lee `docs/catalogo-resumen.md`; NO abras productos.json entero (650 KB). Para la foto o el detalle de UN producto: grep su id en productos.json.
+
+**Estado al 09/11/2026 (no rehacer):** T01–T14, T20 y T21 ya están en main (mira la sección «Estado» de `.agent/COLA.md`). La rama local `gemini/T01` es vieja: ignórala. Siguiente: **T19 · flujo de compra web**.
+- Antes de crear la rama: `git switch main ; git pull` y confirma con `git log --oneline -5` que tienes lo último.
+- Colores (T09, accesibilidad): todo botón con letra blanca usa `bg-dcRed` o `var(--acento-fondo)` (#C8102E); el rojo de TEXTO es `rgb(var(--rojo))`. No uses #E03445 de fondo con letra blanca. Áreas táctiles de 44 px. `pruebas/web/prueba-accesibilidad.mjs` debe seguir en verde.
+- Pruebas SQL con PGlite: para varios comandos seguidos usa `db.exec(sql)`; `db.query()` acepta UNO solo («cannot insert multiple commands into a prepared statement»). Copia el arranque de `pruebas/sql/prueba-wo057.mjs`.
+- Si el modelo «DC Cascada» no responde: Terminal → Run Task… → «IA en cascada (puente local)».

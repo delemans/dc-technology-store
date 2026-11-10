@@ -5,12 +5,12 @@ invokable: true
 ---
 Reglas: español; trabaja en una rama gemini/<tema>; no edites a mano lo generado (estilos/tailwind.css, p/, c/, bot-conocimiento.json, flujo n8n); después de cambiar clases, npm run css; antes de entregar, node herramientas/versionar.js y npm test (0 FALLA); cero datos inventados; no toques main, .env, Supabase ni n8n en vivo.
 Vista o sección: (lo que escriba el director después del comando) (si está vacío, empieza por la portada de index.html en celular).
-1. Lee estilos/profesional.css (tokens: grafito/blanco roto, rojo de marca #C8102E/#E03445 solo como acento, letra Inter), estilos/corriente.css y la fila «Estilo corporativo» de CLAUDE.md.
+1. Lee estilos/profesional.css (tokens: grafito/blanco roto, rojo de marca solo como acento: botones con letra blanca en --acento-fondo #C8102E, texto rojo en rgb(var(--rojo)); letra Inter), estilos/corriente.css y la fila «Estilo corporativo» de CLAUDE.md.
 2. Toma capturas antes del cambio en 390 px y 1366 px con Chrome sin ventana (mira cómo lo hacen pruebas/web/*.mjs).
 3. Mejora solo con esos tokens:
    - jerarquía de títulos y espaciado uniforme;
    - tarjetas consistentes y botones con estados hover, foco y deshabilitado;
-   - contraste AA en claro y oscuro;
+   - contraste AA en claro y oscuro (pruebas/web/prueba-accesibilidad.mjs debe seguir en verde);
    - áreas táctiles de 44 px o más;
    - nada de neón ni animaciones decorativas, y respetar «reducir movimiento».
 4. Toma capturas después y compáralas. No cambies textos con precios ni la lógica de app.js.

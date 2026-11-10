@@ -6,6 +6,11 @@ _Escrita por Claude el 26/10/2026. La IA toma la primera línea `[ ]`:_
 _Detalle de cada tarea: `.agent/BLUEPRINT.md`. Cómo hacerla: el skill indicado en `.continue/prompts/<skill>.md`._
 _Responde SIEMPRE en español. Catálogo: `docs/catalogo-resumen.md` (nunca productos.json entero)._
 
+## Estado al 09/11/2026 (léelo antes de empezar)
+- Todo lo marcado [x] YA ESTÁ en main y publicado: no lo rehagas ni crees ramas para eso (la rama local gemini/T01 es vieja: ignórala).
+- La siguiente tarea es la **8 (T19 · flujo de compra web)**. Después 9, 10, 11, 12, 15 y 22.
+- `npm test` en main da 1027 OK · 0 FALLA. Si tu rama falla en algo que no tocaste, compara con main antes de cambiar pruebas.
+
 ## Una vez (en este orden)
 - [x] 1. T20 · Seguridad (rama gemini/T20, 26/10/2026)
 - [x] 2. T14 · Paquete del servidor (fusionado en main por Claude, 29/10/2026)
@@ -19,15 +24,15 @@ _Responde SIEMPRE en español. Catálogo: `docs/catalogo-resumen.md` (nunca prod
 - [ ] 10. T18 · Estilo del catálogo y las tarjetas. Skill: mejorar-estilo
 - [ ] 11. T19 · Flujo de Mis pedidos. Skill: mejorar-flujo
 - [ ] 12. T18 · Estilo de la ficha de producto y el carrito. Skill: mejorar-estilo
-- [ ] 13. T11 · El plan de redes se renueva solo
-- [ ] 14. T12 · Resumen semanal de redes por WhatsApp
+- [x] 13. T11 · El plan de redes se renueva solo (hecho por Claude, 09/11/2026: ya está en main, no rehacer)
+- [x] 14. T12 · Resumen semanal de redes por WhatsApp (hecho por Claude, 09/11/2026: ya está en main, no rehacer)
 - [ ] 15. T15 · Qué tareas del PC pasan al servidor o a GitHub
-- [ ] 16. T03 · Recordatorio al cliente sin comprobante
-- [ ] 17. T04 · Cliente molesto → pasa al director
-- [ ] 18. T05 · De qué red llegó cada cliente
-- [ ] 19. T07 · Libro de PQR en el panel
-- [ ] 20. T08 · Gastos fijos y punto de equilibrio
-- [ ] 21. T09 · Accesibilidad y contraste
+- [x] 16. T03 · Recordatorio al cliente sin comprobante (hecho por Claude, 09/11/2026: ya está en main, no rehacer)
+- [x] 17. T04 · Cliente molesto → pasa al director (hecho por Claude, 09/11/2026: ya está en main, no rehacer)
+- [x] 18. T05 · De qué red llegó cada cliente (hecho por Claude, 09/11/2026: ya está en main, no rehacer)
+- [x] 19. T07 · Libro de PQR en el panel (hecho por Claude, 09/11/2026: ya está en main, no rehacer)
+- [x] 20. T08 · Gastos fijos y punto de equilibrio (hecho por Claude, 09/11/2026: ya está en main, no rehacer)
+- [x] 21. T09 · Accesibilidad y contraste (hecho por Claude, 09/11/2026: ya está en main, no rehacer)
 - [ ] 22. T18 · Estilo del panel admin. Skill: mejorar-estilo
 
 ## Cada semana (cuando la lista de arriba esté al día, o los lunes)

@@ -4,6 +4,16 @@ La más reciente va arriba.
 
 ---
 
+## 09/11/2026 · Claude · T03, T04, T05, T07, T08, T09, T11 y T12 (todo en main y publicado)
+- **Qué se hizo:**
+  - T03 recordatorio de pago al cliente (wo-054, ya aplicado); T04 cliente molesto → «🚨 URGENTE» y pausa; T05 origen ?de= (wo-055);
+  - T07 libro de PQR en «Pagos & Agente Bot» (wo-056, pqr.js); T08 gastos fijos y utilidad real en Finanzas (wo-057);
+  - T09 accesibilidad: botones con letra blanca en `--acento-fondo` (#C8102E), rojo de texto #EB4A59 en oscuro, 44 px, foco visible (`pruebas/web/prueba-accesibilidad.mjs`);
+  - T11 el plan de redes se renueva solo; T12 `herramientas/resumen-redes.mjs` (la tarea la instala el director). REDES_AUTOMATICAS=no hasta que el director termine las redes.
+  - n8n sincronizado (bot APAGADO). `.agent/COLA.md` y las reglas de Continue puestas al día.
+- **Pruebas:** `npm test` 1027 OK · 0 FALLA.
+- **Siguiente para la IA:** COLA.md 8 (T19 · flujo de compra web), luego 9–12, 15 y 22. Director: aplicar wo-055, wo-056 y wo-057.
+
 ## 03/11/2026 · Claude · Existencias cada 3 h y arreglo del SQL pendiente
 - **Qué se hizo:**
   - wo-047: `drop function` antes de crear `sincronizar_proveedor` (APLICAR-PENDIENTES daba 42P13 en una base con wo-050) + prueba;
