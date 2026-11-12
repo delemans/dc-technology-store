@@ -1,5 +1,5 @@
 # Catálogo resumido de DC Tecnology (para las IA)
-_Generado por herramientas/resumen-catalogo.js el 10/11/2026 a partir de productos.json y disponibilidad.json. No editar a mano._
+_Generado por herramientas/resumen-catalogo.js el 12/11/2026 a partir de productos.json y disponibilidad.json. No editar a mano._
 
 Precios en pesos colombianos. Son los de productos.json: en la tienda manda el precio de la base (precios_publicos), que puede cambiar.
 **Antes de publicar un precio, confírmalo en la página del producto.** Para el detalle de un producto: busca su id en productos.json (no lo leas entero).
@@ -204,7 +204,7 @@ Precios en pesos colombianos. Son los de productos.json: en la tienda manda el p
 - Duolingo Super · desde $ 10.000 · id `duolingo-super` · https://www.dctecnology.xyz/p/duolingo-super.html
 - McAfee Antivirus Total Protection · desde $ 45.000 · 2 planes · id `mcafee-antivirus` · https://www.dctecnology.xyz/p/mcafee-antivirus.html
 
-## Pines y regalos (8)
+## Pines y regalos (7)
 
 - PIN Virtual Deezer · desde $ 19.500 · id `pin-virtual-deezer` · https://www.dctecnology.xyz/p/pin-virtual-deezer.html
 - PIN Virtual Netflix Colombia · desde $ 20.000 · 5 planes · id `pin-virtual-netflix` · https://www.dctecnology.xyz/p/pin-virtual-netflix.html
@@ -213,4 +213,3 @@ Precios en pesos colombianos. Son los de productos.json: en la tienda manda el p
 - PIN Virtual Disney Plus · desde $ 25.900 · 3 planes · id `pin-virtual-disney-plus-1tpu5` · https://www.dctecnology.xyz/p/pin-virtual-disney-plus-1tpu5.html
 - PIN Virtual Win Play · desde $ 39.900 · id `pin-virtual-win-play` · https://www.dctecnology.xyz/p/pin-virtual-win-play.html
 - PIN Virtual Directv Go · desde $ 64.000 · 3 planes · id `pin-virtual-directv-go` · https://www.dctecnology.xyz/p/pin-virtual-directv-go.html
-- PIN Virtual McAfee · desde $ 105.900 · 3 planes · id `pin-virtual-mcafee` · https://www.dctecnology.xyz/p/pin-virtual-mcafee.html
