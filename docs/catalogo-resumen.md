@@ -1,5 +1,5 @@
 # Catálogo resumido de DC Tecnology (para las IA)
-_Generado por herramientas/resumen-catalogo.js el 15/11/2026 a partir de productos.json y disponibilidad.json. No editar a mano._
+_Generado por herramientas/resumen-catalogo.js el 20/11/2026 a partir de productos.json y disponibilidad.json. No editar a mano._
 
 Precios en pesos colombianos. Son los de productos.json: en la tienda manda el precio de la base (precios_publicos), que puede cambiar.
 **Antes de publicar un precio, confírmalo en la página del producto.** Para el detalle de un producto: busca su id en productos.json (no lo leas entero).
@@ -184,7 +184,7 @@ Precios en pesos colombianos. Son los de productos.json: en la tienda manda el p
 - Parlante Portatil Original Kimiso KMS-374 · desde $ 202.500 · id `er-parlante-portatil-original-kimiso-kms-374-283` · https://www.dctecnology.xyz/p/er-parlante-portatil-original-kimiso-kms-374-283.html
 - Parlante Portatil Original Kimiso KMS-325 Max · desde $ 298.500 · id `er-parlante-portatil-original-kimiso-kms-325-max-285` · https://www.dctecnology.xyz/p/er-parlante-portatil-original-kimiso-kms-325-max-285.html
 
-## Streaming (10)
+## Streaming (11)
 
 - Max (HBO) · desde $ 8.000 · 3 planes · id `hbo-max` · https://www.dctecnology.xyz/p/hbo-max.html
 - Vix Premium · desde $ 8.000 · id `vix-premium` · https://www.dctecnology.xyz/p/vix-premium.html
@@ -196,12 +196,12 @@ Precios en pesos colombianos. Son los de productos.json: en la tienda manda el p
 - Mubi Cinema · desde $ 10.000 · id `mubi` · https://www.dctecnology.xyz/p/mubi.html
 - Apple TV Plus · desde $ 12.000 · id `apple-tv` · https://www.dctecnology.xyz/p/apple-tv.html
 - Netflix Premium 4K · desde $ 15.000 · id `netflix` · https://www.dctecnology.xyz/p/netflix.html
+- Disney Plus Premium · desde $ 15.000 · id `disney-plus` · https://www.dctecnology.xyz/p/disney-plus.html
 
-## Licencias (4)
+## Licencias (3)
 
 - Canva Pro · desde $ 10.000 · 2 planes · id `canva-pro` · https://www.dctecnology.xyz/p/canva-pro.html
 - Duolingo Super · desde $ 10.000 · id `duolingo-super` · https://www.dctecnology.xyz/p/duolingo-super.html
-- CapCut Pro Edición · desde $ 28.000 · id `capcut-pro` · https://www.dctecnology.xyz/p/capcut-pro.html
 - McAfee Antivirus Total Protection · desde $ 45.000 · 2 planes · id `mcafee-antivirus` · https://www.dctecnology.xyz/p/mcafee-antivirus.html
 
 ## Pines y regalos (8)
