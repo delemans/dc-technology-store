@@ -14,7 +14,7 @@ Precios en pesos colombianos. Son los de productos.json: en la tienda manda el p
 
 - Alquiler de Laptops y Equipos de Cómputo · desde $ 160.000 · 3 planes · id `servicio-alquiler-equipos-computo` · https://www.dctecnology.xyz/p/servicio-alquiler-equipos-computo.html
 
-## Tecnología (167)
+## Tecnología (168)
 
 - Auriculares con Cable ATH-73 · desde $ 2.000 · id `er-auriculares-con-cable-ath-73-1126` · https://www.dctecnology.xyz/p/er-auriculares-con-cable-ath-73-1126.html
 - Lampara USB LED-18 · desde $ 2.400 · id `er-lampara-usb-led-18-115` · https://www.dctecnology.xyz/p/er-lampara-usb-led-18-115.html
@@ -154,6 +154,7 @@ Precios en pesos colombianos. Son los de productos.json: en la tienda manda el p
 - Microfono Profesional Q-MIC3 · desde $ 75.000 · id `er-microfono-profesional-q-mic3-1406` · https://www.dctecnology.xyz/p/er-microfono-profesional-q-mic3-1406.html
 - Diademas de Alta Calidad EB31 · desde $ 79.400 · id `er-diademas-de-alta-calidad-eb31-125` · https://www.dctecnology.xyz/p/er-diademas-de-alta-calidad-eb31-125.html
 - Diademas Pro EB32 · desde $ 79.500 · id `er-diademas-pro-eb32-127` · https://www.dctecnology.xyz/p/er-diademas-pro-eb32-127.html
+- Diademas Gamer A3S Alámbrico · desde $ 80.000 · id `diademas-gamer-a3s-alambrico` · https://www.dctecnology.xyz/p/diademas-gamer-a3s-alambrico.html
 - Power Bank 30.000 mAh sin Cable · desde $ 82.500 · id `er-power-bank-30000-mah-sin-cable-30` · https://www.dctecnology.xyz/p/er-power-bank-30000-mah-sin-cable-30.html
 - Audífonos Inalámbricos ANC-JM19 Traductores · desde $ 82.500 · id `er-airpods-anc-jm19-traductores-208` · https://www.dctecnology.xyz/p/er-airpods-anc-jm19-traductores-208.html
 - Mini Proyector LED Yg 300 - Esquinas Cuadradas · desde $ 82.500 · id `er-mini-proyector-led-yg-300-esquinas-cuadradas-1614` · https://www.dctecnology.xyz/p/er-mini-proyector-led-yg-300-esquinas-cuadradas-1614.html

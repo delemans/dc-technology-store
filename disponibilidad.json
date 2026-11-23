@@ -2,7 +2,6 @@
  "_nota": "Generado por herramientas/disponibilidad-proveedores.mjs: lo que no se muestra porque ya no lo hay en ANC ni en Emprende Red.",
  "fuente": "tienda pública de ANC (el portal no respondió)",
  "ocultos": {
-  "diademas-gamer-a3s-alambrico": "ANC ya no ofrece este producto",
   "powerbank-portatil-recargable-20-000-mah": "Agotado o retirado en ANC",
   "auriculares-inalambricos-m19-con-powerbank": "ANC ya no ofrece este producto",
   "reloj-inteligente-smartwatch-h19": "ANC ya no ofrece este producto",
@@ -133,6 +132,9 @@
   },
   "diademas-inalambricas-cr-8-con-luces-r9s7x": {
    "Unidad Completa": 7
+  },
+  "diademas-gamer-a3s-alambrico": {
+   "Unidad Gamer": 3
   },
   "reloj-inteligente-smartwatch-gt5-pro-en-acero-inoxidable": {
    "Acero Inoxidable": 2
@@ -958,5 +960,5 @@
   "er-gorra-ch47854-2046": 1,
   "er-gorra-yeison-jimenez-ch557-2047": 1
  },
- "actualizado": "2026-11-23T11:44:41.576Z"
+ "actualizado": "2026-11-23T22:51:37.437Z"
 }
