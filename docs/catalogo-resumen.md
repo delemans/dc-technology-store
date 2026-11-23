@@ -1,5 +1,5 @@
 # Catálogo resumido de DC Tecnology (para las IA)
-_Generado por herramientas/resumen-catalogo.js el 22/11/2026 a partir de productos.json y disponibilidad.json. No editar a mano._
+_Generado por herramientas/resumen-catalogo.js el 23/11/2026 a partir de productos.json y disponibilidad.json. No editar a mano._
 
 Precios en pesos colombianos. Son los de productos.json: en la tienda manda el precio de la base (precios_publicos), que puede cambiar.
 **Antes de publicar un precio, confírmalo en la página del producto.** Para el detalle de un producto: busca su id en productos.json (no lo leas entero).
@@ -150,10 +150,10 @@ Precios en pesos colombianos. Son los de productos.json: en la tienda manda el p
 - Smart Watch S9 Mini Amoled · desde $ 73.500 · id `er-smart-watch-s9-mini-amoled-249` · https://www.dctecnology.xyz/p/er-smart-watch-s9-mini-amoled-249.html
 - Audifonos Ows YKS286 · desde $ 73.500 · id `er-audifonos-ows-yks286-262` · https://www.dctecnology.xyz/p/er-audifonos-ows-yks286-262.html
 - Aibimy Original MY212 Waterproof · desde $ 74.300 · id `er-aibimy-original-my212-waterproof-92` · https://www.dctecnology.xyz/p/er-aibimy-original-my212-waterproof-92.html
+- Auriculares Inalámbricos de Gancho SP16 · desde $ 75.000 · id `auriculares-inalambricos-de-gancho-sp16` · https://www.dctecnology.xyz/p/auriculares-inalambricos-de-gancho-sp16.html
 - Microfono Profesional Q-MIC3 · desde $ 75.000 · id `er-microfono-profesional-q-mic3-1406` · https://www.dctecnology.xyz/p/er-microfono-profesional-q-mic3-1406.html
 - Diademas de Alta Calidad EB31 · desde $ 79.400 · id `er-diademas-de-alta-calidad-eb31-125` · https://www.dctecnology.xyz/p/er-diademas-de-alta-calidad-eb31-125.html
 - Diademas Pro EB32 · desde $ 79.500 · id `er-diademas-pro-eb32-127` · https://www.dctecnology.xyz/p/er-diademas-pro-eb32-127.html
-- Diademas Gamer A3S Alámbrico · desde $ 80.000 · id `diademas-gamer-a3s-alambrico` · https://www.dctecnology.xyz/p/diademas-gamer-a3s-alambrico.html
 - Power Bank 30.000 mAh sin Cable · desde $ 82.500 · id `er-power-bank-30000-mah-sin-cable-30` · https://www.dctecnology.xyz/p/er-power-bank-30000-mah-sin-cable-30.html
 - Audífonos Inalámbricos ANC-JM19 Traductores · desde $ 82.500 · id `er-airpods-anc-jm19-traductores-208` · https://www.dctecnology.xyz/p/er-airpods-anc-jm19-traductores-208.html
 - Mini Proyector LED Yg 300 - Esquinas Cuadradas · desde $ 82.500 · id `er-mini-proyector-led-yg-300-esquinas-cuadradas-1614` · https://www.dctecnology.xyz/p/er-mini-proyector-led-yg-300-esquinas-cuadradas-1614.html

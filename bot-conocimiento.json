@@ -1,5 +1,5 @@
 {
-  "version": "2026-11-22T18:37:53.368Z",
+  "version": "2026-11-23T11:44:43.186Z",
   "identidad": [
     "Eres DC TECNOLOGY: respondes el WhatsApp de la tienda (https://www.dctecnology.xyz) en nombre del equipo. Habla como la tienda (\"te ayudamos\", \"te enviamos\").",
     "En el PRIMER mensaje de la conversación saluda así: \"¡Hola! Te saluda *DC TECNOLOGY* 👋\", responde lo que preguntó y cierra con: \"Escribe *menú* para ver todas las opciones.\" Después no vuelvas a presentarte (si el contexto trae un mensaje del menú, la conversación ya empezó).",
@@ -758,7 +758,7 @@
       "marca": "DC Tecnology",
       "nombre": "Diademas Gamer A3S Alámbrico",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-2026-08-05t130350-966-4dfe07f4c2d364484917859531935783-640-0.webp",
-      "url": "https://www.dctecnology.xyz/p/diademas-gamer-a3s-alambrico.html",
+      "url": "https://www.dctecnology.xyz/?producto=diademas-gamer-a3s-alambrico",
       "variantes": [
         {
           "nombre": "Unidad Gamer",
@@ -766,8 +766,9 @@
           "precio_anterior": 150000
         }
       ],
+      "oculto": true,
       "desde": 80000,
-      "descripcion": "Disfruta de las Diademas Gamer A3S con cable, sonido estéreo y micrófono claro. Confort y cero latencia para ganar.¡Lleva tus partidas al siguiente nivel con las Diademas Gamer A3S ! Diseñadas especialmente para jugadores exigentes, te ofrecen una inmersión acústica total, comunicación precisa con tu equipo y la máxima comodidad para que nada te distraiga en el campo de batalla.Precisión acústica, confort total y comunicación perfecta. El equipamiento esencial para asegurar tu victoria.Sonido Estéreo Envolvente: Escucha cada detalle del juego. Identifica pasos, recargas y explosiones con preci"
+      "descripcion": null
     },
     {
       "id": "reloj-inteligente-smartwatch-gt5-pro-en-acero-inoxidable",
@@ -810,7 +811,7 @@
       "marca": "DC Tecnology",
       "nombre": "Auriculares Inalámbricos de Gancho SP16",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/d5daf6d4-fcfd8845691cefcb9a17356883269515-640-0.webp",
-      "url": "https://www.dctecnology.xyz/?producto=auriculares-inalambricos-de-gancho-sp16",
+      "url": "https://www.dctecnology.xyz/p/auriculares-inalambricos-de-gancho-sp16.html",
       "variantes": [
         {
           "nombre": "Unidad Estándar",
@@ -818,9 +819,8 @@
           "precio_anterior": 130000
         }
       ],
-      "oculto": true,
       "desde": 75000,
-      "descripcion": null
+      "descripcion": "Disfruta de sonido nítido y batería larga con Auriculares Inalámbricos SP16.¡Lleva tus entrenamientos al siguiente nivel con los Auriculares Inalámbricos de Gancho SP16 ! Diseñados con un sistema de sujeción ergonómico, te brindan total comodidad, seguridad y un sonido de alta fidelidad sin importar cuánto te muevas.El aliado perfecto para deportistas y personas activas: máxima sujeción, confort y resistencia en cada movimiento.&amp;zwj; Ajuste Seguro Deportivo: Su diseño de gancho flexible y ergonómico se adapta perfectamente a tu oreja, evitando que se caigan durante trotes, saltos o entrena"
     },
     {
       "id": "auriculares-inalambricos-m19-con-powerbank",
