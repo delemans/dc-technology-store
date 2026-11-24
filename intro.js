@@ -100,10 +100,39 @@
     function quitar(ya) {
         clearTimeout(quitarEn);
         if (ya !== true && performance.now() < finMin) { quitarEn = setTimeout(quitar, finMin - performance.now()); return; }
-        vivo = false; capa.classList.add('fuera');
+        vivo = false; sonidoSalida(); capa.classList.add('fuera');
         setTimeout(() => { capa.remove(); estilo.remove(); }, 650);
     }
-    capa.querySelector('.dci-saltar').addEventListener('click', (e) => { e.stopPropagation(); quitar(true); });
+    capa.querySelector('.dci-saltar').addEventListener('click', (e) => {
+        e.stopPropagation();
+        // «Saltar» es un toque: deja sonar el efecto de salida aunque el sonido aún no se hubiera activado
+        try { if (!ctx) { const C = window.AudioContext || window.webkitAudioContext; ctx = new C(); } ctx.resume(); } catch { /* sin audio */ }
+        quitar(true);
+    });
+    // Efecto de salida (original): barrido de aire que se abre hacia la tienda + golpe suave + brillo final
+    let salio = false;
+    function sonidoSalida() {
+        if (salio || !ctx || ctx.state !== 'running') return; salio = true;
+        try {
+            const t = ctx.currentTime + 0.02, sr = ctx.sampleRate;
+            const out = ctx.createGain(); out.gain.value = 0.55; out.connect(ctx.destination);
+            const ruido = ctx.createBuffer(2, sr * 1.2, sr); for (let c = 0; c < 2; c++) { const d = ruido.getChannelData(c); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; }
+            // barrido de aire (de grave a brillante, abierto en estéreo)
+            const n = ctx.createBufferSource(); n.buffer = ruido; const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = 1.4;
+            bp.frequency.setValueAtTime(400, t); bp.frequency.exponentialRampToValueAtTime(6000, t + 0.55);
+            const gn = ctx.createGain(); gn.gain.setValueAtTime(0.0001, t); gn.gain.exponentialRampToValueAtTime(0.4, t + 0.22); gn.gain.exponentialRampToValueAtTime(0.0001, t + 0.75);
+            n.connect(bp).connect(gn).connect(out); n.start(t); n.stop(t + 0.8);
+            // golpe suave con cuerpo
+            const k = ctx.createOscillator(); k.frequency.setValueAtTime(110, t + 0.18); k.frequency.exponentialRampToValueAtTime(48, t + 0.45);
+            const gk = ctx.createGain(); gk.gain.setValueAtTime(0.0001, t + 0.18); gk.gain.exponentialRampToValueAtTime(0.5, t + 0.2); gk.gain.exponentialRampToValueAtTime(0.0001, t + 0.6);
+            k.connect(gk).connect(out); k.start(t + 0.18); k.stop(t + 0.65);
+            // brillo final (tres notas de cristal que suben)
+            [86, 93, 98].forEach((m, i) => { const tt = t + 0.3 + i * 0.06; const o = ctx.createOscillator(); o.frequency.value = 440 * Math.pow(2, (m - 69) / 12);
+                const p = ctx.createStereoPanner(); p.pan.value = [-0.5, 0.5, 0][i]; const g = ctx.createGain();
+                g.gain.setValueAtTime(0.0001, tt); g.gain.exponentialRampToValueAtTime(0.08, tt + 0.008); g.gain.exponentialRampToValueAtTime(0.0001, tt + 1.1);
+                o.connect(g).connect(p).connect(out); o.start(tt); o.stop(tt + 1.2); });
+        } catch { /* sin audio */ }
+    }
 
     // Consola de arranque
     const consola = capa.querySelector('.dci-consola');
