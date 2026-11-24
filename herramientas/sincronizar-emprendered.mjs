@@ -252,7 +252,8 @@ export function marcaDe(nombre) {
     if (/play ?station|\bps[45]\b/i.test(n)) return 'Sony';
     return MARCAS.find((m) => new RegExp(`\\b${m.replace(/[-]/g, '[- ]?')}\\b`, 'i').test(n)) ?? null;
 }
-export const CATEGORIAS_VISIBLES_POR_DEFECTO = ['TECNOLOGIA'];
+// 24/11/2026: Emprende Red EN PAUSA (solo se vende lo de ANC): todo llega con "oculto": true. Antes: ['TECNOLOGIA']
+export const CATEGORIAS_VISIBLES_POR_DEFECTO = [];
 export const CATEGORIAS_IMPORTAR = null; // null = todas menos EXCLUIR_CATEGORIAS
 export const importable = (categoria) => Boolean(categoria) && !EXCLUIR_CATEGORIAS.includes(categoria) && (!CATEGORIAS_IMPORTAR || CATEGORIAS_IMPORTAR.includes(categoria));
 export const MARGEN_PCT = 50;
@@ -395,7 +396,7 @@ if (process.argv[1] && fileURLToPath(import.meta.url).toLowerCase() === process.
         fs.writeFileSync('supabase/wo-041-emprendered.sql', generarSql(nuevos, datos.leido_at));
         const porCat = {}; nuevos.forEach((p) => { porCat[p._proveedor.categoria] = (porCat[p._proveedor.categoria] ?? 0) + 1; });
         console.log(`\nTienda: ${r.proveedor} productos de Emprende Red con stock + ${r.propios} propios en productos.json`);
-        console.log(`  por categoría (visibles por defecto: ${CATEGORIAS_VISIBLES_POR_DEFECTO.join(', ')}): ${Object.entries(porCat).map(([k, v]) => `${k} ${v}`).join(' · ')}`);
+        console.log(`  por categoría (visibles por defecto: ${CATEGORIAS_VISIBLES_POR_DEFECTO.join(', ') || 'ninguna, Emprende Red en pausa'}): ${Object.entries(porCat).map(([k, v]) => `${k} ${v}`).join(' · ')}`);
         console.log(`  no importadas: ${EXCLUIR_CATEGORIAS.join(', ')}`);
         const replicas = datos.productos.filter((p) => importable(p.categoria) && NOMBRE_REPLICA.test(p.nombre));
         if (replicas.length) console.log(`  excluidas por ser réplicas declaradas (${replicas.length}): ${replicas.map((p) => p.nombre).join(' | ')}`);

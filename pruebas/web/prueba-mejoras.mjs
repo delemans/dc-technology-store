@@ -19,7 +19,9 @@ for (const [ancho, alto, movil, tanda] of [[390, 844, true, 12], [1366, 900, fal
   ok(await n() === tanda, `${ancho}px: primera tanda de ${tanda} (${await n()})`);
   ok(/Viendo 12|Viendo 24/.test(await ev(`document.getElementById('catalogo-mas').textContent`)), 'texto "Viendo X de Y"');
   await ev(`document.querySelector('.catalogo-mas__boton').click()`); await esperar(500);
-  ok(await n() === tanda * 2, `Ver más → ${tanda * 2} (${await n()})`);
+  // 24/11/2026: con solo ANC el catálogo puede tener menos de dos tandas → muestra todo
+  const total = await ev(`window.DCTienda.productos().length`);
+  ok(await n() === Math.min(tanda * 2, total), `Ver más → ${Math.min(tanda * 2, total)} (${await n()})`);
   await ev(`(()=>{const s=document.getElementById('orden-catalogo');s.value=s.value==='az'?'menor':'az';s.dispatchEvent(new Event('change'))})()`); await esperar(400);
   ok(await n() === tanda, 'cambiar el orden vuelve a la primera tanda');
   ok(/\d+ productos/.test(await ev(`document.getElementById('product-count').textContent`)), 'el conteo sigue mostrando el total');

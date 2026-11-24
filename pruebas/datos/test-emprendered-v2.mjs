@@ -21,14 +21,15 @@ ok(t.length === 3 && nombres.includes('Olla Arrocera') && nombres.includes('Pila
 ok(!nombres.some((x) => /rolex|adulto|vape|netflix|1\.1|airpods/i.test(x)), 'fuera: réplicas, adultos, vapeadores, streaming de terceros y "1.1"');
 const olla = t.find((p) => p.nombre === 'Olla Arrocera'), carg = t.find((p) => /Cargador/.test(p.nombre));
 ok(olla.tipo === 'variedades' && olla.categoria === 'Hogar' && olla.oculto === true, 'otra categoría → "variedades", con su nombre y OCULTA por defecto');
-ok(carg.tipo === 'tecnologia' && !carg.oculto && carg.variantes[0].precio === 15000 && carg.variantes[0].precio_anterior === null, 'TECNOLOGIA visible, 10.000 → 15.000 y sin precio "antes"');
+// 24/11/2026: Emprende Red en pausa (solo ANC) → también TECNOLOGIA llega oculta
+ok(carg.tipo === 'tecnologia' && carg.oculto === true && carg.variantes[0].precio === 15000 && carg.variantes[0].precio_anterior === null, 'TECNOLOGIA oculta (Emprende Red en pausa), 10.000 → 15.000 y sin precio "antes"');
 const sql = m.generarSql(t, '2026-10-19');
 ok(sql.includes('"categoria":"HOGAR"') && sql.includes('proveedor_categorias') && !sql.includes('create or replace function public.sincronizar_proveedor'), 'el SQL generado manda la categoría y exige wo-047 (no redefine la función)');
 
 // productos.json publicado: ocultos marcados, ids anteriores conservados
 const productos = JSON.parse(fs.readFileSync(`${RAIZ}/productos.json`, 'utf8'));
 const er = productos.filter((p) => p.id.startsWith('er-'));
-ok(er.length > 100 && er.every((p) => p.oculto ? p.tipo === 'variedades' : p.tipo === 'tecnologia'), `productos.json: ${er.filter((p) => !p.oculto).length} de tecnología visibles y ${er.filter((p) => p.oculto).length} ocultos`);
+ok(er.length > 100 && er.every((p) => p.oculto && ['variedades', 'tecnologia'].includes(p.tipo)), `productos.json: Emprende Red en pausa, ${er.filter((p) => p.oculto).length} de ${er.length} ocultos`);
 ok(productos.some((p) => p.id === 'er-cargador-con-cable-original-yookie-20w-rapido-2'), 'se conserva el id anterior del cargador Yookie (página de Google y precio intactos)');
 
 // Nodo "Leer Emprende Red" del flujo (código real) con el proveedor simulado

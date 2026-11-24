@@ -34,8 +34,9 @@ for (const [ancho, alto, movil] of [[390, 844, true], [1366, 900, false]]) {
   await ev(`document.querySelector('#hero a[href="#catalogo"]')?.click()`); await esperar(800);
   ok(await ev(visible('#catalogo')), 'botón "Ver catálogo" de la portada abre el Catálogo');
   await ev(`document.querySelector('${nav} [data-ir-vista="inicio"]').click()`); await esperar(600);
-  await ev(`(()=>{const a=[...document.querySelectorAll('#novedades a, #novedades button')].find(x=>/Ver los/.test(x.textContent)); a?.click(); return !!a})()`); await esperar(1000);
-  ok(await ev(visible('#catalogo')), '"Ver los 180" (desde el código) abre el Catálogo');
+  // Novedades = productos de Emprende Red: en pausa desde el 24/11/2026 → la franja no sale
+  const conNovedades = await ev(`(()=>{const a=[...document.querySelectorAll('#novedades a, #novedades button')].find(x=>/Ver los/.test(x.textContent)); if (!a || document.getElementById('novedades').hidden) return false; a.click(); return true})()`); await esperar(1000);
+  ok(conNovedades ? await ev(visible('#catalogo')) : await ev(`!document.getElementById('novedades') || document.getElementById('novedades').hidden || !document.getElementById('novedades').offsetParent`), conNovedades ? '"Ver los N" de novedades abre el Catálogo' : 'sin novedades del proveedor: la franja no sale');
   await enviar('Page.navigate', { url: 'http://localhost:5599/#desarrollos' }); await esperar(6000);
   ok(await ev(visible('#desarrollos')) && !(await ev(visible('#hero'))) && await ev(`Math.abs(document.getElementById('desarrollos').getBoundingClientRect().top) < 260`), 'enlace directo #desarrollos → módulo Servicios en esa sección');
   await enviar('Page.navigate', { url: 'http://localhost:5599/?pedido=DC-ABCDEF' }); await esperar(6000);

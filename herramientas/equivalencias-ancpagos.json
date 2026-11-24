@@ -283,5 +283,46 @@
     "variantes": {
       "Unidad Completa": ""
     }
+  },
+  "combo-3-o-4-plataformas": {
+    "proveedor": "Combo de 3 o 4 Plataformas",
+    "variantes": {
+      "Netflix + Prime Video + Disney Premium + Max": "Netflix - Prime video - Disney premium - Max",
+      "Netflix + Prime Video + Disney Premium": "Netflix - Prime video - Disney premium",
+      "Netflix + Prime Video + Max": "Netflix - Prime video - Max",
+      "Prime Video + Disney Premium + Max": "Prime video - Disney premium - Max"
+    }
+  },
+  "directv-go": {
+    "proveedor": "DirecTV Go",
+    "variantes": {
+      "Pantalla con ESPN": "Pantalla con ESPN",
+      "Pantalla con Win Play": "Pantalla con Win Play"
+    }
+  },
+  "youtube-premium": {
+    "proveedor": "YouTube Premium",
+    "variantes": {
+      "Suscripción 1 Mes": "1 mes"
+    }
+  },
+  "spotify-premium": {
+    "proveedor": "Spotify Premium",
+    "variantes": {
+      "Suscripción 1 Mes": "1 mes",
+      "Suscripción 3 Meses": "3 meses"
+    }
+  },
+  "deezer-premium": {
+    "proveedor": "Deezer Premium",
+    "variantes": {
+      "Suscripción 1 Mes": "1 mes"
+    }
+  },
+  "pin-virtual-datacredito": {
+    "proveedor": "PIN Virtual Datacrédito",
+    "variantes": {
+      "PIN de $15.000": "14.714"
+    }
   }
 }

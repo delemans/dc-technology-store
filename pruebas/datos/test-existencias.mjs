@@ -16,11 +16,17 @@ const anc = [
     { producto: 'Netflix', variante: 'Completa 30 dias', agotado: false, stock: null },
     { producto: 'Disney', variante: 'Pantalla', agotado: false, stock: 0 },
 ];
-const r = calcular(productos, eq, anc);
+const r = calcular(productos, eq, anc, { emprendeRedEnPausa: false });
 ok(r.existencias['er-bafle-1'] === 4, 'Emprende Red: guarda las unidades del producto');
 ok(r.ocultos['er-reloj-2'] && !('er-reloj-2' in r.existencias), 'Emprende Red sin unidades: no sale y no lleva cantidad');
 ok(r.existencias.netflix?.['Pantalla 30 días'] === 3 && !('Cuenta Completa 30 días' in r.existencias.netflix), 'ANC: cantidad por plan (sin cantidad publicada = sin límite)');
 ok(r.ocultos['disney-plus'] && !('disney-plus' in r.existencias), 'ANC con 0 unidades: agotado, no sale');
+// 24/11/2026: Emprende Red en pausa → no sale ninguno de sus productos (aunque tenga unidades); ANC sigue igual
+const pausa = calcular(productos, eq, anc);
+ok(pausa.ocultos['er-bafle-1'] && pausa.ocultos['er-reloj-2'] && !('er-bafle-1' in pausa.existencias), 'Emprende Red en pausa: no sale nada de ese proveedor');
+ok(pausa.existencias.netflix?.['Pantalla 30 días'] === 3 && !pausa.ocultos.netflix, '… y lo de ANC sigue saliendo con sus cantidades');
+const vivo = JSON.parse(fs.readFileSync(new URL('../../productos.json', import.meta.url), 'utf8'));
+ok(vivo.filter((p) => String(p.id).startsWith('er-')).every((p) => p.oculto), 'productos.json: todo lo de Emprende Red va oculto');
 
 const y = fs.readFileSync(new URL('../../.github/workflows/vigilante-catalogo.yml', import.meta.url), 'utf8');
 ok(/cron: '0 \*\/3 \* \* \*'/.test(y) && /'--rapido'/.test(y), 'GitHub corre el vigilante rápido cada 3 h');

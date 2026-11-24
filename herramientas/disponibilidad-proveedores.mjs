@@ -5,7 +5,7 @@
 //     Plan que ANC ya no ofrece o tiene agotado → ese plan no sale. Producto sin ningún plan disponible → no sale.
 //   · Sin proveedor: productos propios que no son servicios y no están enlazados a ANC (recargas, apuestas, pines sin
 //     proveedor…) → no salen.
-//   · Emprende Red: los agotados (sin unidades) no salen; vuelven solos cuando el proveedor repone.
+//   · Emprende Red: EN PAUSA desde el 24/11/2026 (EMPRENDE_RED_EN_PAUSA): no sale nada. Sin pausa, los agotados (sin unidades) no salen; vuelven solos cuando el proveedor repone.
 //   · Cantidades (03/11/2026): «existencias» guarda las unidades que publica cada proveedor (Emprende Red por producto, ANC
 //     por plan). La tienda las usa como TOPE sobre las de la base: si el proveedor tiene menos, manda el proveedor (nunca
 //     se vende de más aunque n8n lleve horas sin sincronizar la base). El vigilante en la nube lo recalcula cada 3 h.
@@ -21,11 +21,16 @@ import { leerAnc, leerTiendaAnc } from './catalogo_ancpagos.mjs';
 const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SALIDA = path.join(RAIZ, 'disponibilidad.json');
 const PROPIOS_SIEMPRE = ['servicios', 'alquiler']; // lo hace DC Tecnology: siempre disponible
+// 24/11/2026, decisión del director: solo se vende lo de ANC (físico y digital). Emprende Red queda EN PAUSA: sus productos
+// siguen en productos.json y n8n los sigue sincronizando, pero ninguno sale (tienda, Google, Shopping ni bot).
+// Para volver a mostrarlos: false aquí, CATEGORIAS_VISIBLES_POR_DEFECTO en sincronizar-emprendered.mjs y activar sus
+// categorías en el panel (Promociones → «Categorías a mostrar»).
+export const EMPRENDE_RED_EN_PAUSA = true;
 export const plano = (x) => String(x ?? '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim();
 const sinDias = (x) => plano(x).replace(/\b\d+ dias?\b/g, '').replace(/\s+/g, ' ').trim();
 
 // Núcleo puro (se prueba sin red): productos, equivalencias y la lectura de ANC → qué se oculta
-export function calcular(productos, eq, anc) {
+export function calcular(productos, eq, anc, { emprendeRedEnPausa = EMPRENDE_RED_EN_PAUSA } = {}) {
     const ocultos = {}, variantes = {}, existencias = {};
     let enlazados = 0, encontrados = 0;
     const deAnc = (proveedor, plan) => {
@@ -36,7 +41,8 @@ export function calcular(productos, eq, anc) {
     };
     for (const p of productos) {
         if (String(p.id).startsWith('er-')) {
-            if (p.agotado || Number(p.existencias) === 0) ocultos[p.id] = 'Emprende Red: sin unidades';
+            if (emprendeRedEnPausa) ocultos[p.id] = 'Emprende Red en pausa (solo se vende lo de ANC)';
+            else if (p.agotado || Number(p.existencias) === 0) ocultos[p.id] = 'Emprende Red: sin unidades';
             else if (Number.isInteger(p.existencias)) existencias[p.id] = p.existencias;
             continue;
         }

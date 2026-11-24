@@ -1,5 +1,6 @@
 // 25/10/2026: lo que ya no hay NO sale: agotado en la base, oculto en disponibilidad.json (ANC / Emprende Red / sin proveedor)
 import { spawn } from 'node:child_process';
+import fs from 'node:fs';
 const PUERTO = 9400 + Math.floor(Math.random() * 100);
 const chrome = spawn('C:/Program Files/Google/Chrome/Application/chrome.exe', ['--headless=new', '--disable-gpu', `--remote-debugging-port=${PUERTO}`, `--user-data-dir=${process.env.TEMP}/ag-${PUERTO}`, 'about:blank'], { stdio: 'ignore' });
 const esperar = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -8,8 +9,12 @@ const ws = new WebSocket(lista.find((t) => t.type === 'page').webSocketDebuggerU
 let id = 0; const pend = new Map(); const errs = [];
 // precios_publicos simulado con wo-050: un producto de tecnología agotado y un plan de Max agotado
 const vivos = await (await fetch('https://vyqcizwfmjlflncdwzve.supabase.co/rest/v1/rpc/precios_publicos', { method: 'POST', headers: { apikey: 'sb_publishable_GvQiv6M7iSrlwsA90lXsOQ_5OfSYBwy', 'Content-Type': 'application/json' }, body: '{}' })).json();
-const tec = vivos.find((x) => x.producto_id.startsWith('er-'));
-const sim = vivos.map((x) => ({ ...x, existencias: x.producto_id.startsWith('er-') ? 5 : null, agotado: x.producto_id === tec.producto_id || (x.producto_id === 'hbo-max' && /Platino/.test(x.variante) && /Pantalla/.test(x.variante)) }));
+// Un producto físico visible de ANC (24/11/2026: Emprende Red en pausa)
+const catalogo = JSON.parse(fs.readFileSync(new URL('../../productos.json', import.meta.url), 'utf8'));
+const sinDisp = JSON.parse(fs.readFileSync(new URL('../../disponibilidad.json', import.meta.url), 'utf8')).ocultos ?? {};
+const fisicos = new Set(catalogo.filter((p) => p.tipo === 'tecnologia' && !p.oculto && !sinDisp[p.id]).map((p) => p.id));
+const tec = vivos.find((x) => fisicos.has(x.producto_id));
+const sim = vivos.map((x) => ({ ...x, existencias: fisicos.has(x.producto_id) ? 5 : null, agotado: x.producto_id === tec.producto_id || (x.producto_id === 'hbo-max' && /Platino/.test(x.variante) && /Pantalla/.test(x.variante)) }));
 const enviar = (method, params = {}) => new Promise((r) => { const n = ++id; pend.set(n, r); ws.send(JSON.stringify({ id: n, method, params })); });
 ws.addEventListener('message', (ev) => { const m = JSON.parse(ev.data);
   if (m.id && pend.has(m.id)) { pend.get(m.id)(m.result ?? m.error); pend.delete(m.id); }
@@ -25,7 +30,7 @@ await enviar('Fetch.enable', { patterns: [{ urlPattern: '*rpc/precios_publicos*'
 await enviar('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 1, mobile: true });
 await enviar('Page.navigate', { url: 'http://localhost:5599/#catalogo' }); await esperar(9000);
 const ids = await ev(`window.DCTienda.productos().map(p => p.id)`);
-ok(Array.isArray(ids) && ids.length > 50, `catálogo cargado (${ids?.length} productos)`);
+ok(Array.isArray(ids) && ids.length > 20, `catálogo cargado (${ids?.length} productos)`);
 ok(!ids.includes(tec.producto_id), 'agotado en la base → no sale');
 const max = await ev(`JSON.stringify(window.DCTienda.productos().find(p => p.id === 'hbo-max')?.variantes.map(v => v.nombre))`);
 ok(max && !/Pantalla Platino/.test(max) && /Pantalla Estándar/.test(max), `plan agotado no sale; los demás sí (${max})`);
@@ -40,11 +45,13 @@ const fuera = await ev(`JSON.stringify(Object.entries(window.DCDisponibilidad?.v
     return p ? p.variantes.filter((v) => vs[v.nombre]).map((v) => id + ' · ' + v.nombre) : [];
 }))`);
 ok(fuera === '[]', `ningún plan que ANC ya no ofrece aparece en la tienda (${fuera})`);
-// Tope de cantidades del proveedor (03/11/2026): la base dice 5 unidades de todo lo de Emprende Red; el archivo manda si tiene menos
+// Tope de cantidades del proveedor (03/11/2026): la base dice 5 unidades de lo físico; el archivo manda si tiene menos
+// (Emprende Red: { id: n } · ANC: { id: { plan: n } }, el tope del producto es el plan con más unidades)
 const tope = await ev(`JSON.stringify((() => {
     const ex = window.DCDisponibilidad?.existencias ?? {};
-    const conMenos = window.DCTienda.productos().filter((p) => typeof ex[p.id] === 'number' && ex[p.id] < 5);
-    const mal = window.DCTienda.productos().filter((p) => typeof ex[p.id] === 'number' && Number(p.existencias) > ex[p.id]).map((p) => p.id);
+    const del = (id) => typeof ex[id] === 'number' ? ex[id] : (ex[id] && typeof ex[id] === 'object' ? Math.max(...Object.values(ex[id])) : NaN);
+    const conMenos = window.DCTienda.productos().filter((p) => del(p.id) < 5);
+    const mal = window.DCTienda.productos().filter((p) => Number.isFinite(del(p.id)) && Number(p.existencias) > del(p.id)).map((p) => p.id);
     return { revisados: conMenos.length, mal };
 })())`);
 const t = JSON.parse(tope ?? '{}');
