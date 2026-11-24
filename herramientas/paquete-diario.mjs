@@ -95,11 +95,17 @@ function cuenta(d) {
     return { grande: String(faltan), linea: faltan === 1 ? 'día para Navidad' : 'días para Navidad', etiqueta };
 }
 const N = orden.length;
-const plan = dias.map((d, i) => {
+// Campaña (24/11/2026): expectativa «Faltan 2 días» / «Falta 1 día», lanzamiento el 27/11 (bienvenida, «Lo que vas a
+// encontrar», «Así de fácil») y desde el 28/11 el paquete diario de productos.
+const LANZ = Date.UTC(2026, 10, 27);
+const plan = dias.map((d) => {
+    if (d.getTime() < LANZ) { const n = Math.round((LANZ - d.getTime()) / 864e5); return { d, fecha: iso(d), fase: 'expectativa', faltan: n, video: n === 1 ? 'L2-falta-1-dia' : 'L1-faltan-2-dias' }; }
+    if (d.getTime() === LANZ) return { d, fecha: iso(d), fase: 'lanzamiento' };
+    const i = Math.round((d.getTime() - LANZ) / 864e5) - 1;
     const pick = (k) => orden[((i + k) % N + N) % N];
     let prodDia = pick(26);
     if (d.getTime() >= Date.UTC(2026, 11, 18)) { for (let k = 26; !digital(prodDia); k++) prodDia = pick(k); }
-    return { d, fecha: iso(d), video1: i === 0 ? 'resumen' : pick(0), video2: pick(13), cuenta: { ...cuenta(d), x: prodDia }, feed: pick(7), promo: PROMO[i % PROMO.length], i };
+    return { d, fase: 'productos', fecha: iso(d), video1: i === 0 ? 'resumen' : pick(0), video2: pick(13), cuenta: { ...cuenta(d), x: prodDia }, feed: pick(7), promo: PROMO[i % PROMO.length], i };
 });
 
 /* ---------- Diseño de las imágenes nuevas ---------- */
@@ -153,6 +159,21 @@ function htmlPromo(p) {
     const it = p.items.slice(0, 6);
     return marco(1350, `<h1>${p.titulo}</h1><p class="sub">${esc(p.sub)}</p><div class="grid${it.length === 4 ? ' dos' : ''}">${it.map((x) => `<div class="it"><div class="f"><img src="${esc(x.imagen)}" alt=""></div><div class="n">${esc(corto(x.nombre))}</div><div class="p">${precioTxt(x)}</div>${x.quedan && x.quedan <= 5 ? `<div class="q">Solo quedan ${x.quedan}</div>` : ''}</div>`).join('')}</div>`);
 }
+const minimoTipo = (t) => cop(Math.min(...datos.filter((x) => x.tipo === t).map(desde)));
+function htmlExpectativa(n) {
+    return marco(1920, `<div class="etq">✨ Muy pronto</div><div class="num">${n}</div><div class="lin">${n === 1 ? 'día' : 'días'}</div>
+<h1 style="margin-top:70px">La nueva era de<br><em>DC Tecnology</em></h1><p class="sub">Tecnología · Plataformas · Pines · Servicio técnico</p>
+<div class="pasos"><div class="paso"><i>📅</i><div><b>Llega el 27 de noviembre</b><span>Estuvimos trabajando para darte un servicio más rápido y mejor</span></div></div>
+<div class="paso"><i>💬</i><div><b>Guarda nuestro número</b><span>WhatsApp ${WA}</span></div></div></div>`);
+}
+function htmlBienvenida() {
+    return marco(1920, `<div class="etq">🎉 ¡Ya llegó!</div><h1 style="margin-top:40px;font-size:96px">Bienvenido a la<br><em>nueva era digital</em></h1><p class="sub">Todo lo que necesitas, en un solo lugar</p>
+<div class="pasos"><div class="paso"><i>⌚</i><div><b>Tecnología</b><span>Relojes y audífonos desde ${minimoTipo('tecnologia')} · envíos a todo el país</span></div></div>
+<div class="paso"><i>🎬</i><div><b>Plataformas</b><span>Series y películas desde ${minimoTipo('streaming')} · llega por WhatsApp</span></div></div>
+<div class="paso"><i>🎁</i><div><b>Pines</b><span>Regalos digitales desde ${minimoTipo('pines')}</span></div></div>
+<div class="paso"><i>🛠</i><div><b>Servicio técnico</b><span>Revisión de tu PC por ${cop(desde(porId['servicio-reparacion-repuestos']))}</span></div></div></div>
+<div class="nota">💬 Escríbenos: te ayudamos a elegir</div>`);
+}
 function htmlCuenta(c, fecha) {
     const x = c.x; const nota = digital(x) ? '⚡ Llega por WhatsApp al validar tu pago' : x.tipo === 'tecnologia' ? '🚚 Envíos a todo el país' : '🛠 Agenda por WhatsApp';
     return marco(1920, `<div class="etq">🎄 ${esc(c.etiqueta)}</div><div class="num${c.grande.length > 3 ? ' txt' : ''}">${esc(c.grande)}</div><div class="lin">${esc(c.linea)}</div>
@@ -171,7 +192,38 @@ const TAGS = '#DCTecnology #Navidad2026 #RegalosDeNavidad #Colombia';
 
 /* ---------- Piezas del día (rutas y textos) ---------- */
 const VID = path.join(DESTINO, 'Videos 1080x1920');
+const LAN = path.join(DESTINO, 'Lanzamiento 1080x1920');
+// Festividades y oferta real (videos-diciembre.mjs --variante festivos): reemplazan el video de ese turno en su fecha
+const FES = path.join(DESTINO, 'Festividades 1080x1920');
+const FESTIVOS = {
+    '2026-12-01': { hora: '12:30', archivo: 'F1-oferta-primera-compra', nombre: 'Oferta primera compra', t: '🎁 ¿Primera compra en DC Tecnology? Usa el código DCTECH2026 y tienes descuento en tu primera compra.\nPlataformas, pines y tecnología.' },
+    '2026-12-07': { hora: '19:30', archivo: 'F2-noche-de-velitas', nombre: 'Noche de velitas', t: '🕯️ Feliz noche de velitas. Ilumina a los tuyos con un regalo: audífonos y relojes con envío a todo el país.' },
+    '2026-12-09': { hora: '12:30', archivo: 'F1-oferta-primera-compra', nombre: 'Oferta primera compra', t: '🎁 ¿Primera compra? Código DCTECH2026 al pagar.' },
+    '2026-12-12': { hora: '19:30', archivo: 'F3-amigo-secreto', nombre: 'Amigo secreto', t: '🤫 ¿Te tocó el amigo secreto? Regalos digitales que llegan por WhatsApp al validar tu pago.' },
+    '2026-12-15': { hora: '19:30', archivo: 'F4-llego-la-prima', nombre: 'Llegó la prima', t: '💰 ¡Llegó la prima! Date el gusto: relojes inteligentes y el combo de plataformas.' },
+    '2026-12-16': { hora: '19:30', archivo: 'F5-empieza-la-novena', nombre: 'Empieza la novena', t: '🎄 Empieza la novena: nueve días para regalar. Pines sin tarjeta de crédito.' },
+    '2026-12-19': { hora: '12:30', archivo: 'F1-oferta-primera-compra', nombre: 'Oferta primera compra', t: '🎁 Código DCTECH2026: descuento en tu primera compra.' },
+    '2026-12-24': { hora: '19:30', archivo: 'F6-nochebuena', nombre: 'Nochebuena', t: '🌟 ¿Te faltó un regalo? Lo digital llega por WhatsApp al validar tu pago. ¡Feliz Nochebuena!' },
+    '2026-12-25': { hora: '12:30', archivo: 'F7-feliz-navidad', nombre: 'Feliz Navidad', t: '🎄 ¡Feliz Navidad! Gracias por confiar en DC Tecnology.' },
+    '2026-12-31': { hora: '19:30', archivo: 'F8-feliz-2027', nombre: 'Feliz 2027', t: '🎆 ¡Feliz año nuevo! Arranca el 2027 con todo.' },
+};
 function piezas(p) {
+    const lista = piezasBase(p); const fe = FESTIVOS[p.fecha];
+    if (fe && p.fase === 'productos') { const k = lista.findIndex((x) => x.hora === fe.hora && x.tipo === 'video'); if (k >= 0) lista[k] = { hora: fe.hora, tipo: 'video', f: path.join(FES, `${fe.archivo}.mp4`), t: `${fe.t}\n\n🛒 ${WEB}\n💬 WhatsApp ${WA}`, nombre: `Especial: ${fe.nombre}` }; }
+    return lista;
+}
+function piezasBase(p) {
+    if (p.fase === 'expectativa') return [
+        { hora: '07:30', tipo: 'imagen', f: path.join(CUENTA, `${p.fecha}.jpg`), t: [`✨ ${p.faltan === 1 ? 'Falta 1 día' : `Faltan ${p.faltan} días`} para la nueva era de DC Tecnology`, 'Estuvimos trabajando para darte un servicio más rápido y mejor.', '📅 Llega el 27 de noviembre', `💬 Guarda nuestro número: ${WA}`].join('\n'), nombre: `Expectativa: ${p.faltan === 1 ? 'falta 1 día' : `faltan ${p.faltan} días`}` },
+        { hora: '19:30', tipo: 'video', f: path.join(LAN, `${p.video}.mp4`), t: [`✨ ${p.faltan === 1 ? 'Mañana todo cambia' : 'Estuvimos trabajando en algo grande'}`, 'Tecnología, plataformas, pines y servicio técnico, todo desde tu celular.', `💬 Guarda nuestro número: ${WA}`].join('\n'), nombre: `Video expectativa (${p.faltan === 1 ? '1 día' : `${p.faltan} días`})` },
+    ];
+    if (p.fase === 'lanzamiento') return [
+        { hora: '07:30', tipo: 'imagen', f: path.join(CUENTA, `${p.fecha}.jpg`), t: ['🎉 ¡Bienvenido a la nueva era digital de DC Tecnology!', `⌚ Tecnología desde ${minimoTipo('tecnologia')} (envíos a todo el país)`, `🎬 Plataformas desde ${minimoTipo('streaming')} (llega por WhatsApp)`, `🎁 Pines desde ${minimoTipo('pines')}`, `🛠 Revisión de tu PC por ${cop(desde(porId['servicio-reparacion-repuestos']))}`, '', `🛒 ${WEB}`, `💬 WhatsApp ${WA}`].join('\n'), nombre: 'Bienvenida' },
+        { hora: '12:30', tipo: 'video', f: path.join(LAN, 'L3-bienvenida-nueva-era.mp4'), t: ['🎉 Estuvimos trabajando para ti: bienvenido a la nueva era digital de DC Tecnology.', 'Tecnología · Plataformas · Pines · Servicio técnico, todo en un solo lugar.', '', `🛒 ${WEB}`, `💬 WhatsApp ${WA}`].join('\n'), nombre: 'Video bienvenida' },
+        { hora: '15:00', tipo: 'imagen', f: path.join(PROMOS, 'como-comprar.jpg'), t: textoPromo(PROMO.find((x) => x.info === 'pasos')), nombre: 'Cómo comprar' },
+        { hora: '19:30', tipo: 'video', f: path.join(LAN, 'L4-lo-que-vas-a-encontrar.mp4'), t: ['🎁 Esto es lo que vas a encontrar en DC Tecnology', `⌚ Tecnología desde ${minimoTipo('tecnologia')}`, `🎬 Plataformas desde ${minimoTipo('streaming')}`, `🎁 Pines desde ${minimoTipo('pines')}`, `💻 Licencias desde ${minimoTipo('licencias')}`, '', `🛒 ${WEB}`, `💬 WhatsApp ${WA}`].join('\n'), nombre: 'Video lo que vas a encontrar' },
+        { hora: '21:00', tipo: 'video', f: path.join(LAN, 'L5-asi-de-facil-compras.mp4'), t: textoPromo(PROMO.find((x) => x.info === 'pasos')), nombre: 'Video así de fácil compras' },
+    ];
     const v1 = p.video1 === 'resumen' ? { f: path.join(VID, '00-todo-el-catalogo-de-navidad.mp4'), t: `🎄 Todo para esta Navidad en DC Tecnology: ${datos.length} regalos entre tecnología, plataformas, pines y servicios.\n\n🛒 ${WEB}\n💬 WhatsApp ${WA}`, nombre: 'Resumen del catálogo' }
         : { f: path.join(VID, `${p.video1.archivo}.mp4`), t: p.video1.texto.replace(/#\S+/g, '').trim(), nombre: corto(p.video1.nombre) };
     return [
@@ -185,6 +237,7 @@ function piezas(p) {
 
 if (args.includes('--probar')) {
     for (const p of plan) {
+        if (p.fase !== 'productos') { console.log(`  ${p.fecha} · ${p.fase}${p.faltan ? ` (faltan ${p.faltan})` : ''} · ${piezas(p).map((x) => `${x.hora} ${x.tipo} ${x.nombre}`).join(' · ')}`); continue; }
         const ids = [p.video1 === 'resumen' ? 'resumen' : p.video1.id, p.video2.id, p.cuenta.x.id, p.feed.id];
         console.log(`  ${p.fecha} · ${p.cuenta.grande} ${p.cuenta.linea} · regalo del día: ${p.cuenta.x.id} (${digital(p.cuenta.x) ? 'digital' : p.cuenta.x.tipo}) · productos: ${ids.join(', ')} · promo: ${p.promo.id}`);
     }
@@ -236,7 +289,7 @@ fs.rmSync(TMP, { recursive: true, force: true }); fs.mkdirSync(TMP, { recursive:
 for (const d of [PROMOS, CUENTA]) { fs.rmSync(d, { recursive: true, force: true }); fs.mkdirSync(d, { recursive: true }); }
 const trabajos = [
     ...PROMO.map((p) => ({ html: htmlPromo(p), alto: 1350, sale: path.join(PROMOS, `${p.id}.jpg`) })),
-    ...plan.map((p) => ({ html: htmlCuenta(p.cuenta, p.fecha), alto: 1920, sale: path.join(CUENTA, `${p.fecha}.jpg`) })),
+    ...plan.map((p) => ({ html: p.fase === 'expectativa' ? htmlExpectativa(p.faltan) : p.fase === 'lanzamiento' ? htmlBienvenida() : htmlCuenta(p.cuenta, p.fecha), alto: 1920, sale: path.join(CUENTA, `${p.fecha}.jpg`) })),
 ];
 trabajos.forEach((t, i) => { t.tmp = path.join(TMP, `${i}.html`); fs.writeFileSync(t.tmp, t.html); });
 const PUERTO = 9600 + Math.floor(Math.random() * 90);
@@ -288,6 +341,33 @@ for (const p of plan) {
     fs.writeFileSync(path.join(dir, 'TEXTOS DEL DIA.txt'), txt.join('\r\n'));
 }
 fs.writeFileSync(path.join(PAQUETE, 'CALENDARIO.txt'), cal.join('\r\n'));
+// Plan de publicidad (HTML para leer en el celular o el computador): estrategia + calendario día a día
+{
+    const fila = (p) => { const ps = piezas(p); const etq = p.fase === 'expectativa' ? `Expectativa · faltan ${p.faltan}` : p.fase === 'lanzamiento' ? 'LANZAMIENTO' : FESTIVOS[p.fecha] ? `Especial: ${FESTIVOS[p.fecha].nombre}` : `${p.cuenta.grande} ${p.cuenta.linea}`;
+        const dia = p.d.toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC' });
+        return `<article class="dia${p.fase !== 'productos' || FESTIVOS[p.fecha] ? ' esp' : ''}"><header><b>${esc(dia)}</b><span>${esc(etq)}</span></header><ol>${ps.map((x) => `<li><time>${x.hora}</time><i>${x.tipo === 'video' ? '🎬' : '🖼'}</i><div><b>${esc(x.nombre)}</b><small>${esc(x.t.split('\n')[0])}</small></div></li>`).join('')}</ol></article>`; };
+    const html = `<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Plan de publicidad · Diciembre 2026</title>
+<style>body{margin:0;background:#0B0F1E;color:#EEF1F8;font:15px/1.5 Inter,system-ui,sans-serif}main{max-width:980px;margin:0 auto;padding:20px 16px 60px}h1{font:900 28px/1.1 system-ui;margin:8px 0}h1 em{color:#F2C14E;font-style:normal}h2{margin:34px 0 10px;font-size:19px;color:#F2C14E}
+.tarj{background:#141A2E;border:1px solid #232B45;border-radius:16px;padding:16px 18px;margin:10px 0}ul{padding-left:20px;margin:6px 0}li{margin:4px 0}
+.dia{background:#141A2E;border:1px solid #232B45;border-radius:16px;margin:12px 0;overflow:hidden}.dia.esp{border-color:#C8102E;box-shadow:0 0 0 1px #C8102E}
+.dia header{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:10px 14px;background:#1B2340}.dia header b{text-transform:capitalize}.dia header span{color:#F2C14E;font-weight:700}
+.dia ol{list-style:none;margin:0;padding:6px 10px}.dia li{display:flex;gap:10px;align-items:flex-start;padding:8px 4px;border-bottom:1px solid #1F2742}.dia li:last-child{border:0}
+time{flex:none;width:46px;font-weight:800;color:#9FB0D9}i{font-style:normal}small{display:block;color:#9AA6C4}table{width:100%;border-collapse:collapse}td,th{padding:6px;border-bottom:1px solid #232B45;text-align:left;vertical-align:top}</style></head><body><main>
+<p style="color:#9AA6C4;margin:0">DC Tecnology · Plan de publicidad</p><h1>Diciembre <em>2026</em></h1>
+<div class="tarj"><b>Objetivo:</b> vender más en la temporada navideña mostrando SOLO lo que hay: ${datos.length} productos y servicios (tecnología, plataformas, pines, licencias y servicio técnico), con precios vigentes y la marca en cada pieza.</div>
+<h2>Cómo funciona</h2><div class="tarj"><ul>
+<li><b>Fases:</b> 25 y 26 nov expectativa («Faltan 2 días», «Falta 1 día») · 27 nov lanzamiento (bienvenida, «Lo que vas a encontrar», «Así de fácil») · desde el 28 nov, paquete diario.</li>
+<li><b>Cada día:</b> 2 videos con voz + 3 imágenes · 07:30 cuenta regresiva · 12:30 video · 15:00 producto · 19:30 video · 21:00 guía de regalos o «cómo comprar».</li>
+<li><b>Dónde:</b> estados de WhatsApp (todo), Reels e historias de Instagram/Facebook y TikTok (videos y cuenta regresiva), feed de Facebook/Instagram (imágenes).</li>
+<li><b>Fechas especiales:</b> oferta de primera compra (1, 9 y 19 dic, cupón real DCTECH2026), velitas (7), amigo secreto (12), prima (15), novena (16), Nochebuena (24), Navidad (25), Año Nuevo (31).</li>
+<li><b>Desde el 18 dic</b> el regalo del día es digital: llega por WhatsApp al validar el pago (sin prometer envíos que no alcancen).</li>
+<li><b>En la tienda:</b> «Encuentra el regalo perfecto» con enlaces directos para la publicidad: <code>dctecnology.xyz/#regalos?para=gamer</code> (también ninos, mama, el, ella, amigo, estudio) y <code>&hasta=20000</code>.</li>
+<li><b>Reglas:</b> precios vigentes de la base · «Solo quedan N» solo con unidades reales · sin descuentos inventados · nunca se nombra al proveedor · cada locución se verifica (palabras completas, marca y precios).</li></ul></div>
+<h2>Calendario día a día</h2>${plan.map(fila).join('')}
+<p style="color:#9AA6C4">Archivos: Escritorio › Anuncios DC Tecnology › Diciembre 2026 › Paquete diario (una carpeta por día con los textos listos). Generado el ${new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' })}.</p></main></body></html>`;
+    fs.writeFileSync(path.join(DESTINO, 'PLAN DE PUBLICIDAD DICIEMBRE 2026.html'), html);
+}
+
 fs.rmSync(TMP, { recursive: true, force: true, maxRetries: 10, retryDelay: 300 });
 console.log(`Listo: ${plan.length} días en ${PAQUETE} (${plan.length * 2} videos y ${plan.length * 3} imágenes programadas)`);
 if (faltan.length) console.log(`⚠ Faltan ${faltan.length} archivos (¿ya corrió videos-diciembre.mjs?):\n  ${faltan.slice(0, 10).join('\n  ')}${faltan.length > 10 ? '\n  …' : ''}`);

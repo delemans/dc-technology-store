@@ -466,7 +466,7 @@ function productosFiltrados() {
 
 // Sugerencias cuando una búsqueda no encuentra nada: solo lo que HOY se puede comprar (04/11/2026: se sugería Netflix,
 // Windows y Office cuando estaban ocultos por agotados o por el portal del proveedor caído, y al tocarlos no salía nada)
-const SUGERENCIAS = ['Netflix', 'Disney', 'Prime Video', 'Windows', 'Office', 'Audífonos', 'Reloj', 'Parlante', 'Cargador', 'Roblox', 'Google Play', 'Mantenimiento'];
+const SUGERENCIAS = ['Netflix', 'Disney', 'Prime Video', 'Spotify', 'Audífonos', 'Reloj', 'Diadema', 'Roblox', 'Canva', 'McAfee', 'Mantenimiento'];
 function sugerenciasDisponibles(max = 6) {
     const hay = (s) => estado.productos.some((p) => !p.agotado && `${p.nombre} ${p.marca ?? ''} ${p.tipo}`.toLowerCase().includes(s.toLowerCase()));
     return SUGERENCIAS.filter(hay).slice(0, max);

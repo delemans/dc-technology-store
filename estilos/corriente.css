@@ -82,7 +82,8 @@
 @keyframes chip { 50% { stroke: rgb(255 77 94 / .95); } }
 .circuito__halo { animation: halo 4s ease-in-out infinite; transform-origin: 240px 210px; }
 @keyframes halo { 50% { opacity: .55; transform: scale(1.06); } }
-@media (max-width: 899px) { .circuito { width: min(100%, 340px); } .hero-dc__visual { order: -1; } }
+@media (max-width: 899px) { .circuito { width: min(100%, 340px); } .hero-dc__visual { order: 2; } }
+@media (max-width: 639px) { .circuito { width: min(62%, 220px); } }
 
 /* ---------- Línea de energía bajo el encabezado ---------- */
 body > header.sticky { position: sticky; background-color: rgb(var(--tarjeta)) !important; } /* sólido: nada se transparenta al pegarse */

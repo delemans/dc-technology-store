@@ -165,6 +165,7 @@
     // 1) Regalo sorpresa: la caja se sacude, sale la tapa y aparece el producto
     F.regalo = {
         dur: 12.5,
+        anclas: { gancho: 4.45, beneficios: 5.4, precio: 7.9, cta: 9.0 },
         eventos: [{ t: 0.1, tipo: 'whoosh' }, { t: 2.35, tipo: 'golpe' }, { t: 2.4, tipo: 'brillo' }, { t: 4.0, tipo: 'whoosh' }, { t: 8.0, tipo: 'brillo' }, { t: 9.0, tipo: 'golpe' }],
         init() {
             esc2.innerHTML = `<div id="rayos"></div><div id="caja"><div id="tapa"><i></i></div><div id="cuerpo"><i></i></div><div id="lazo">🎀</div></div>`;
@@ -190,6 +191,7 @@
     // 2) Tráiler de cine (streaming): franjas negras, tarjetas de texto y revelación
     F.trailer = {
         dur: 13,
+        anclas: { gancho: 3.75, beneficios: 7.2, precio: 9.8, cta: 10.6 },
         eventos: [{ t: 0.2, tipo: 'drone' }, { t: 1.9, tipo: 'boom' }, { t: 3.7, tipo: 'boom' }, { t: 6.2, tipo: 'golpe' }, { t: 6.25, tipo: 'brillo' }, { t: 9.4, tipo: 'brillo' }, { t: 10.4, tipo: 'golpe' }],
         init() {
             esc2.innerHTML = `<div class="barra" id="b1"></div><div class="barra" id="b2"></div><div id="oscuro"></div>
@@ -218,6 +220,7 @@
     const tr = pal.length * BEAT + 0.3;
     F.ritmo = {
         dur: Math.ceil((tr + 7.4) * 2) / 2,
+        anclas: { gancho: 0.05, beneficios: tr + 2.2, precio: tr + 4.4, cta: tr + 5.3 },
         eventos: [...pal.map((_, i) => ({ t: i * BEAT, tipo: 'bombo' })), { t: tr, tipo: 'golpe' }, { t: tr + 1.3, tipo: 'whoosh' }, { t: tr + 4.4, tipo: 'golpe' }, { t: tr + 5.4, tipo: 'brillo' }],
         beat: BEAT,
         init() {
@@ -244,6 +247,7 @@
     const p24 = orden.indexOf(24);
     F.adviento = {
         dur: 12.5,
+        anclas: { gancho: 4.95, beneficios: 6.0, precio: 8.5, cta: 9.4 },
         eventos: [...orden.map((_, i) => ({ t: 0.1 + i * 0.05, tipo: i % 4 ? null : 'tic' })).filter((e) => e.tipo), { t: 1.8, tipo: 'whoosh' }, { t: 3.05, tipo: 'golpe' }, { t: 3.1, tipo: 'brillo' }, { t: 4.8, tipo: 'whoosh' }, { t: 8.6, tipo: 'golpe' }],
         init() {
             esc2.innerHTML = `<div id="cal">${orden.map((n) => `<div class="pu${n === 24 ? ' p24' : ''}"><div class="hoja"><b>${n}</b></div><div class="dentro">🎁</div></div>`).join('')}</div>`;
@@ -268,6 +272,7 @@
     // 5) Vitrina giratoria: foco de luz, pedestal y las razones flotando alrededor
     F.vitrina = {
         dur: 11.5,
+        anclas: { gancho: 0.35, beneficios: 1.9, precio: 5.9, cta: 7.0 },
         eventos: [{ t: 0.3, tipo: 'whoosh' }, { t: 1.15, tipo: 'golpe' }, { t: 1.9, tipo: 'tic' }, { t: 2.7, tipo: 'tic' }, { t: 3.5, tipo: 'tic' }, { t: 4.6, tipo: 'whoosh' }, { t: 6.2, tipo: 'brillo' }, { t: 7.2, tipo: 'golpe' }],
         init() {
             esc2.innerHTML = `<div id="foco"></div><div id="pedestal"></div>${D.b.map((b, i) => `<div class="chip" id="ch${i}">★ ${esc(b)}</div>`).join('')}`;
@@ -289,6 +294,7 @@
     // 6) Tarjeta navideña: se abre el sobre y sale la tarjeta «Para: ti · De: DC Tecnology»
     F.tarjeta = {
         dur: 12,
+        anclas: { gancho: 3.65, beneficios: 5.4, precio: 7.8, cta: 8.8 },
         eventos: [{ t: 0.1, tipo: 'whoosh' }, { t: 1.0, tipo: 'tic' }, { t: 1.7, tipo: 'whoosh' }, { t: 3.0, tipo: 'brillo' }, { t: 4.2, tipo: 'golpe' }, { t: 8.0, tipo: 'golpe' }],
         init() {
             esc2.innerHTML = `<div id="sobre"><div id="carta"><div class="para">Para: <b>ti</b> 🎁</div><div class="de">De: DC Tecnology</div><div class="feliz">¡Feliz Navidad!</div></div><div id="sobre-c"></div><div id="solapa"></div></div><div id="marco"></div>`;
@@ -312,6 +318,7 @@
     // 7) Lista de regalos: un ticket que se imprime con los planes y precios
     F.ticket = {
         dur: 12,
+        anclas: { gancho: 0.3, precio: 2.2, beneficios: 6.0, cta: 8.4 },
         eventos: [{ t: 0.2, tipo: 'whoosh' }, ...planes.map((_, i) => ({ t: 2.2 + i * 0.45, tipo: 'tic' })), { t: 2.2 + planes.length * 0.45 + 0.5, tipo: 'golpe' }, { t: 6.4, tipo: 'brillo' }, { t: 8.4, tipo: 'golpe' }],
         init() {
             esc2.innerHTML = `<div id="ranura"></div><div id="corte"><div id="papel"><div class="tk-t">🎁 LISTA DE REGALOS</div><div class="tk-n">${esc(D.nombre)}</div><div class="tk-l"></div>
@@ -337,6 +344,7 @@ ${planes.map((v, i) => `<div class="tk-r" id="tk${i}"><span>${esc(v.nombre)}</sp
         init() {
             const L = D.todos;
             this.corte = 0.75; this.ini = 2.4; this.dur = this.ini + L.length * this.corte + 4;
+            this.anclas = { gancho: 0.25, beneficios: this.ini + 0.2, cta: this.ini + L.length * this.corte + 1.9 };
             esc2.innerHTML = `<div class="tc" id="ti">TODO PARA<br><span class="em">ESTA NAVIDAD</span></div>${L.map((x, i) => `<div class="cl" id="cl${i}" style="background:${x.estilo.fondo};color:${x.estilo.texto}">
 <div class="cl-m">DC <b style="color:${x.estilo.claro ? '#C8102E' : x.estilo.acento}">TECNOLOGY</b> · ${String(i + 1).padStart(2, '0')}/${L.length}</div><div class="cl-v"><img src="${esc(x.imagen)}" alt=""></div><div class="cl-n">${esc(x.nombre)}</div><div class="cl-p" style="color:${x.estilo.claro ? '#C8102E' : x.estilo.acento}">${x.planes.length > 1 ? 'Desde ' : ''}${cop(Math.min(...x.planes.map((v) => v.precio)))}</div></div>`).join('')}
 <div class="tc" id="tf">${L.length} regalos<br><span class="em">te esperan</span></div>
@@ -364,6 +372,40 @@ ${planes.map((v, i) => `<div class="tk-r" id="tk${i}"><span>${esc(v.nombre)}</sp
         },
     };
 
+    // 8) Presentación por escenas (expectativa «Faltan 2 días», bienvenida, «Lo que vas a encontrar», «Así de fácil»)
+    F.presenta = {
+        init() {
+            let s = 0;
+            this.ini = D.diapos.map((d) => { const a = s; s += d.dur; return a; });
+            this.dur = s;
+            this.anclas = Object.fromEntries(D.diapos.map((d, k) => [`d${k}`, this.ini[k] + 0.2]));
+            const html = (d) => {
+                if (d.tipo === 'frase') return `<div class="pf a">${d.texto}</div>${d.sub ? `<div class="ps a">${esc(d.sub)}</div>` : ''}`;
+                if (d.tipo === 'logo') return `<img class="pl a" src="${D.logo}" alt=""><div class="pm a">DC <b>TECNOLOGY</b></div>${d.sub ? `<div class="ps a">${esc(d.sub)}</div>` : ''}`;
+                if (d.tipo === 'cuenta') return `<div class="pe a">${esc(d.etiqueta ?? 'Muy pronto')}</div><div class="pn a" style="font-size:${Math.min(420, Math.floor(1500 / Math.max(1, d.grande.length)))}px">${esc(d.grande)}</div><div class="pf a">${d.linea}</div>${d.sub ? `<div class="ps a">${esc(d.sub)}</div>` : ''}`;
+                if (d.tipo === 'categoria') return `<div class="pe a">${esc(d.etiqueta)}</div><div class="pf a">${d.titulo}</div><div class="pc a">${d.imagenes.map((im, i) => `<span style="--i:${i}"><img src="${esc(im)}" alt=""></span>`).join('')}</div><div class="pp a">${esc(d.precio)}</div>${d.sub ? `<div class="ps a">${esc(d.sub)}</div>` : ''}`;
+                if (d.tipo === 'pasos') return `<div class="pf a">${d.titulo}</div>${d.pasos.map((p) => `<div class="pt a"><i>${esc(p[0])}</i><div><b>${esc(p[1])}</b><span>${esc(p[2])}</span></div></div>`).join('')}`;
+                if (d.tipo === 'cta') return `<div class="pf a">${d.texto}</div><div class="pw a">💬 ${esc('322 328 4622')}</div><div class="pu a">www.dctecnology.xyz</div>`;
+                return '';
+            };
+            esc2.innerHTML = D.diapos.map((d, k) => `<div class="dp" id="dp${k}">${html(d)}</div>`).join('');
+            this.eventos = D.diapos.flatMap((d, k) => [{ t: this.ini[k], tipo: k ? 'whoosh' : 'drone' }, { t: this.ini[k] + 0.35, tipo: d.tipo === 'logo' || d.tipo === 'cuenta' ? 'boom' : d.tipo === 'cta' ? 'golpe' : 'tic' }, ...(d.tipo === 'logo' ? [{ t: this.ini[k] + 0.6, tipo: 'brillo' }] : [])]);
+            D.diapos.forEach((d, k) => { if (d.tipo === 'logo' || d.tipo === 'cta') rafaga(this.ini[k] + 0.35, W / 2, 820, 70, 0.9); });
+        },
+        render(t) {
+            D.diapos.forEach((d, k) => {
+                const u = t - this.ini[k]; const el = $(`#dp${k}`); const ultima = k === D.diapos.length - 1;
+                const vis = u >= -0.01 && u < d.dur + 0.01;
+                const o = vis ? eo(seg(u, 0, 0.35)) * (ultima ? 1 : 1 - seg(u, d.dur - 0.3, d.dur)) : 0;
+                S(el, o, `scale(${lerp(1.06, 1, eo(seg(u, 0, d.dur)))})`, { filter: `blur(${lerp(10, 0, eo(seg(u, 0, 0.35)))}px)` });
+                if (!vis) return;
+                el.querySelectorAll('.a').forEach((a, i) => { const x = eb(seg(u, 0.15 + i * 0.2, 0.65 + i * 0.2)); S(a, cl(x * 1.3), `translateY(${lerp(70, 0, x)}px) scale(${lerp(0.9, 1, x)})`); });
+                el.querySelectorAll('.pc span').forEach((sp, i) => { sp.style.transform = `rotate(${(i - 1) * 8}deg) translateY(${Math.abs(i - 1) * 30 + Math.sin(t * 2 + i) * 8}px)`; });
+            });
+            ['#marca', '#tema', '#h1', '#vit', '#info', '#pie'].forEach((s) => S($(s), 0));
+        },
+    };
+
     const formato = F[D.formato];
     window.preparar = async () => {
         formato.init();
@@ -374,14 +416,18 @@ ${planes.map((v, i) => `<div class="tk-r" id="tk${i}"><span>${esc(v.nombre)}</sp
         // ningún elemento arranca visible: cada formato los va mostrando
         ['#marca', '#tema', '#cta', '#web'].forEach((s) => S($(s), 0)); S(vit, 0); lis.forEach((l) => S(l, 0)); prs.forEach((p) => S(p, 0)); ws.forEach((w) => S(w, 0));
         const fallas = [];
-        if (D.formato !== 'todos' && !(foto.naturalWidth > 0)) fallas.push('sin foto');
-        const capa = $('#capa').getBoundingClientRect(); if ($('#pie').getBoundingClientRect().bottom > capa.bottom + 2 || (D.formato !== 'ticket' && D.formato !== 'todos' && vit.getBoundingClientRect().height < 300)) fallas.push('el contenido no cabe');
+        if (!['todos', 'presenta'].includes(D.formato) && !(foto.naturalWidth > 0)) fallas.push('sin foto');
+        const capa = $('#capa').getBoundingClientRect(); if ($('#pie').getBoundingClientRect().bottom > capa.bottom + 2 || (!['ticket', 'todos', 'presenta'].includes(D.formato) && vit.getBoundingClientRect().height < 300)) fallas.push('el contenido no cabe');
         if (D.formato === 'todos') document.querySelectorAll('.cl-v img').forEach((im, i) => { if (!(im.naturalWidth > 0)) fallas.push(`sin foto ${D.todos[i].id}`); });
         BASE = formato.dur;
-        return { dur: BASE + OUTRO, eventos: [...formato.eventos, { t: BASE, tipo: 'whoosh' }, { t: BASE + 0.4, tipo: 'golpe' }, { t: BASE + 0.55, tipo: 'brillo' }], beat: formato.beat ?? null, fallas };
+        // Todo 30 % más lento (pedido del director: que las imágenes no pasen tan rápido). Lo que sale de aquí ya va en tiempo lento.
+        const BL = BASE * LENTO;
+        return { dur: BL + OUTRO, anclas: Object.fromEntries(Object.entries(formato.anclas ?? {}).map(([k, v]) => [k, v * LENTO])), base: BL,
+            eventos: [...formato.eventos.map((e) => ({ ...e, t: e.t * LENTO })), { t: BL, tipo: 'whoosh' }, { t: BL + 0.4, tipo: 'golpe' }, { t: BL + 0.55, tipo: 'brillo' }], beat: formato.beat ? formato.beat * LENTO : null, fallas };
     };
     // Cierre de marca (todos los videos): el logo en grande, DC TECNOLOGY, WhatsApp y web
-    const OUTRO = 2.2;
+    const OUTRO = 2.6;
+    const LENTO = 1.3;
     let BASE = 0;
     const cierre = document.createElement('div');
     cierre.id = 'cierre';
@@ -400,5 +446,10 @@ ${planes.map((v, i) => `<div class="tk-r" id="tk${i}"><span>${esc(v.nombre)}</sp
         S(cierre.querySelector('.ci-u'), eo(seg(u, 1.0, 1.4)));
         S(cierre.querySelector('.ci-halo'), 0.9, `rotate(${u * 40}deg)`);
     }
-    window.render = (t) => { particulas(t); formato.render(Math.min(t, BASE)); outro(t - BASE); };
+    // Pausas para la locución: [{ at, dur }] en tiempo del formato. Mientras dura una pausa la animación se queda quieta
+    // (las partículas y los adornos siguen moviéndose) para que ninguna frase se corte.
+    let PAUSAS = [];
+    window.pausar = (p) => { PAUSAS = [...p].sort((a, b) => a.at - b.at); return BASE * LENTO + PAUSAS.reduce((s, x) => s + x.dur, 0) + OUTRO; };
+    const tiempoFormato = (t) => { let acc = 0; for (const p of PAUSAS) { if (t < p.at + acc) break; if (t < p.at + acc + p.dur) return p.at; acc += p.dur; } return t - acc; };
+    window.render = (t) => { particulas(t); const tf = tiempoFormato(t); const total = PAUSAS.reduce((s, x) => s + x.dur, 0); formato.render(Math.min(tf / LENTO, BASE)); outro(t - BASE * LENTO - total); };
 })();

@@ -75,14 +75,14 @@
     <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","@id":"https://dctecnology.xyz/#sitio","name":"DC Tecnology","url":"https://dctecnology.xyz/","inLanguage":"es-CO","publisher":{"@id":"https://dctecnology.xyz/#organizacion"},"potentialAction":{"@type":"SearchAction","target":{"@type":"EntryPoint","urlTemplate":"https://dctecnology.xyz/?buscar={search_term_string}"},"query-input":"required name=search_term_string"}}</script>
 
     <!-- Estilos compilados con Tailwind (npm run css): sin CDN de desarrollo -->
-    <link rel="stylesheet" href="estilos/tailwind.css?v=202611242127">
+    <link rel="stylesheet" href="estilos/tailwind.css?v=202611242237">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" integrity="sha384-iw3OoTErCYJJB9mCa8LNS2hbsQ7M3C0EpIsO/H5+EGAkPGc6rk+V8i04oW/K5xq0" crossorigin="anonymous" referrerpolicy="no-referrer">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;700;800;900&display=swap" rel="stylesheet">
     <!-- Tema claro/oscuro (antes de pintar, sin destello) -->
-    <script src="tema.js?v=202611242127"></script>
-    <link rel="stylesheet" href="tema.css?v=202611242127">
+    <script src="tema.js?v=202611242237"></script>
+    <link rel="stylesheet" href="tema.css?v=202611242237">
     <!-- Carrito, combos y pago web: mismos estilos que el portal (carrito.js) -->
-    <link rel="stylesheet" href="estilos/cliente.css?v=202611242127">
+    <link rel="stylesheet" href="estilos/cliente.css?v=202611242237">
     <style>
         html { -webkit-tap-highlight-color: transparent; }
         [hidden] { display: none !important; }
@@ -269,10 +269,12 @@
         }
     </style>
     <!-- Estilo corporativo (va de último: recalibra colores y apaga efectos neón) -->
-    <link rel="stylesheet" href="estilos/profesional.css?v=202611242127">
-    <link rel="stylesheet" href="estilos/corriente.css?v=202611242127">
+    <link rel="stylesheet" href="estilos/profesional.css?v=202611242237">
+    <link rel="stylesheet" href="estilos/corriente.css?v=202611242237">
+    <link rel="stylesheet" href="estilos/navidad.css?v=202611242237">
 </head>
 <body class="bg-dcDarkBg text-white min-h-screen flex flex-col font-sans antialiased selection:bg-dcRed/40">
+    <script src="intro.js?v=202611242237"></script>
     <a href="#contenido" class="saltar">Saltar al contenido</a>
     <div class="mesh" aria-hidden="true"><span></span><span></span><span></span></div>
     <div class="bg-grid fixed inset-0 pointer-events-none" aria-hidden="true"></div>
@@ -296,7 +298,7 @@
             <label class="order-3 md:order-none w-full md:w-auto md:flex-1 md:max-w-md relative">
                 <span class="sr-only">Buscar productos</span>
                 <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500 text-sm"></i>
-                <input type="search" id="searchInput" placeholder="Buscar Netflix, Windows, recargas, audífonos…" autocomplete="off" enterkeyhint="search"
+                <input type="search" id="searchInput" placeholder="Busca Netflix, relojes, pines, Roblox…" autocomplete="off" enterkeyhint="search"
                     class="w-full min-h-[48px] rounded-2xl pl-11 pr-4 bg-white/[0.04] ring-1 ring-white/10 text-base sm:text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-dcRed/60 transition-all">
             </label>
 
@@ -403,6 +405,21 @@
         </section>
 
         <!-- Así se compra: grabación real del portal (orden de demostración), video liviano sin sonido -->
+        <!-- Temporada de diciembre (navidad.js): cuenta regresiva y buscador de regalos con precios vigentes -->
+        <section id="regalos" data-vista="inicio" hidden class="max-w-7xl mx-auto px-4 pb-12" aria-labelledby="regalos-titulo">
+            <div class="nav-marco">
+                <p class="nav-cuenta"><span aria-hidden="true">🎄</span> <span id="regalos-cuenta">Temporada navideña</span></p>
+                <h2 id="regalos-titulo" class="nav-titulo">Encuentra el <span>regalo perfecto</span></h2>
+                <p class="nav-sub">Elige para quién es y tu presupuesto. Lo digital llega por WhatsApp al validar tu pago; la tecnología, con envío a todo el país.</p>
+                <p class="nav-etq">¿Para quién?</p>
+                <div id="regalos-para" class="nav-chips" role="group" aria-label="Para quién es el regalo"></div>
+                <p class="nav-etq">Presupuesto</p>
+                <div id="regalos-presupuesto" class="nav-chips" role="group" aria-label="Presupuesto"></div>
+                <div id="regalos-grid" class="nav-grid" aria-live="polite"></div>
+                <p id="regalos-nota" class="nav-nota"></p>
+            </div>
+        </section>
+
         <section id="asi-se-compra" data-vista="inicio" class="asi max-w-7xl mx-auto px-4 pb-12" aria-labelledby="asi-titulo">
             <div class="asi__marco">
                 <div class="asi__texto">
@@ -723,8 +740,6 @@
             </div>
             <div class="aprende">
                 <a href="guias/cada-cuanto-hacer-mantenimiento-al-computador.html" class="aprende__tarjeta"><i class="fa-solid fa-screwdriver-wrench" aria-hidden="true"></i><b>¿Cada cuánto el mantenimiento del PC?</b><span>Frecuencia recomendada y señales de alerta.</span></a>
-                <a href="guias/windows-10-fin-del-soporte-que-hacer.html" class="aprende__tarjeta"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i><b>Windows 10 ya no tiene soporte</b><span>Qué significa y cómo pasar a Windows 11.</span></a>
-                <a href="guias/office-365-o-vitalicio-cual-conviene.html" class="aprende__tarjeta"><i class="fa-solid fa-file-word" aria-hidden="true"></i><b>Office 365 o vitalicio</b><span>Ventajas, desventajas y cuál te conviene.</span></a>
                 <a href="guias/consejos-para-no-perder-tu-informacion.html" class="aprende__tarjeta"><i class="fa-solid fa-lock" aria-hidden="true"></i><b>4 consejos de seguridad</b><span>Lo básico para proteger tu información.</span></a>
             </div>
         </section>
@@ -822,7 +837,7 @@
                 <a href="#opiniones" class="min-h-[44px] inline-flex items-center hover:text-white">Opiniones</a>
                 <a href="c/streaming.html" class="min-h-[44px] inline-flex items-center hover:text-white">Cuentas de streaming</a>
                 <a href="c/licencias.html" class="min-h-[44px] inline-flex items-center hover:text-white">Licencias y apps</a>
-                <a href="c/recargas.html" class="min-h-[44px] inline-flex items-center hover:text-white">Recargas y pines</a>
+                <a href="c/recargas.html" class="min-h-[44px] inline-flex items-center hover:text-white">Pines y tarjetas de regalo</a>
                 <a href="c/tecnologia.html" class="min-h-[44px] inline-flex items-center hover:text-white">Tecnología</a>
                 <a href="guias/" class="min-h-[44px] inline-flex items-center hover:text-white">Guías de compra</a>
             </nav>
@@ -846,9 +861,9 @@
         </div>
         <!-- SEO:DIRECTORIO (generado por herramientas/generar_seo.js, no editar a mano) -->
         <details class="max-w-7xl mx-auto px-4 mt-8 pt-6 border-t border-white/5 text-xs text-neutral-500">
-        <summary class="cursor-pointer min-h-[44px] inline-flex items-center font-bold uppercase tracking-wider text-neutral-400 hover:text-white">Ver todos los productos (41)</summary>
+        <summary class="cursor-pointer min-h-[44px] inline-flex items-center font-bold uppercase tracking-wider text-neutral-400 hover:text-white">Ver todos los productos (42)</summary>
         <nav aria-label="Todos los productos" class="mt-4 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            <div><p class="font-bold uppercase tracking-wider text-neutral-400 mb-2"><a href="c/streaming.html" class="hover:text-white">Streaming</a></p><ul class="space-y-1"><li><a href="p/netflix.html" class="hover:text-white">Netflix Premium 4K</a></li><li><a href="p/prime-video.html" class="hover:text-white">Prime Video Ultra HD</a></li><li><a href="p/hbo-max.html" class="hover:text-white">Max (HBO)</a></li><li><a href="p/crunchyroll.html" class="hover:text-white">Crunchyroll Mega Fan</a></li><li><a href="p/vix-premium.html" class="hover:text-white">Vix Premium</a></li><li><a href="p/paramount-plus.html" class="hover:text-white">Paramount Plus</a></li><li><a href="p/universal-plus.html" class="hover:text-white">Universal Plus</a></li><li><a href="p/viki-rakuten.html" class="hover:text-white">Viki Rakuten Pass</a></li><li><a href="p/apple-tv.html" class="hover:text-white">Apple TV Plus</a></li><li><a href="p/mubi.html" class="hover:text-white">Mubi Cinema</a></li><li><a href="p/combo-3-o-4-plataformas.html" class="hover:text-white">Combo de 3 o 4 Plataformas</a></li><li><a href="p/directv-go.html" class="hover:text-white">DirecTV Go</a></li><li><a href="p/youtube-premium.html" class="hover:text-white">YouTube Premium</a></li><li><a href="p/spotify-premium.html" class="hover:text-white">Spotify Premium</a></li><li><a href="p/deezer-premium.html" class="hover:text-white">Deezer Premium</a></li></ul></div>
+            <div><p class="font-bold uppercase tracking-wider text-neutral-400 mb-2"><a href="c/streaming.html" class="hover:text-white">Streaming</a></p><ul class="space-y-1"><li><a href="p/netflix.html" class="hover:text-white">Netflix Premium 4K</a></li><li><a href="p/prime-video.html" class="hover:text-white">Prime Video Ultra HD</a></li><li><a href="p/disney-plus.html" class="hover:text-white">Disney Plus Premium</a></li><li><a href="p/hbo-max.html" class="hover:text-white">Max (HBO)</a></li><li><a href="p/crunchyroll.html" class="hover:text-white">Crunchyroll Mega Fan</a></li><li><a href="p/vix-premium.html" class="hover:text-white">Vix Premium</a></li><li><a href="p/paramount-plus.html" class="hover:text-white">Paramount Plus</a></li><li><a href="p/universal-plus.html" class="hover:text-white">Universal Plus</a></li><li><a href="p/viki-rakuten.html" class="hover:text-white">Viki Rakuten Pass</a></li><li><a href="p/apple-tv.html" class="hover:text-white">Apple TV Plus</a></li><li><a href="p/mubi.html" class="hover:text-white">Mubi Cinema</a></li><li><a href="p/combo-3-o-4-plataformas.html" class="hover:text-white">Combo de 3 o 4 Plataformas</a></li><li><a href="p/directv-go.html" class="hover:text-white">DirecTV Go</a></li><li><a href="p/youtube-premium.html" class="hover:text-white">YouTube Premium</a></li><li><a href="p/spotify-premium.html" class="hover:text-white">Spotify Premium</a></li><li><a href="p/deezer-premium.html" class="hover:text-white">Deezer Premium</a></li></ul></div>
             <div><p class="font-bold uppercase tracking-wider text-neutral-400 mb-2"><a href="c/licencias.html" class="hover:text-white">Licencias de software</a></p><ul class="space-y-1"><li><a href="p/canva-pro.html" class="hover:text-white">Canva Pro</a></li><li><a href="p/duolingo-super.html" class="hover:text-white">Duolingo Super</a></li><li><a href="p/mcafee-antivirus.html" class="hover:text-white">McAfee Antivirus Total Protection</a></li></ul></div>
             <div><p class="font-bold uppercase tracking-wider text-neutral-400 mb-2"><a href="c/pines.html" class="hover:text-white">Pines virtuales</a></p><ul class="space-y-1"><li><a href="p/pin-virtual-disney-plus-1tpu5.html" class="hover:text-white">PIN Virtual Disney Plus</a></li><li><a href="p/pin-virtual-netflix.html" class="hover:text-white">PIN Virtual Netflix Colombia</a></li><li><a href="p/pin-virtual-directv-go.html" class="hover:text-white">PIN Virtual Directv Go</a></li><li><a href="p/pin-virtual-win-play.html" class="hover:text-white">PIN Virtual Win Play</a></li><li><a href="p/pin-virtual-vix.html" class="hover:text-white">PIN Virtual Vix</a></li><li><a href="p/pin-virtual-deezer.html" class="hover:text-white">PIN Virtual Deezer</a></li><li><a href="p/pin-virtual-roblox.html" class="hover:text-white">PIN Virtual Roblox</a></li><li><a href="p/pin-virtual-mcafee.html" class="hover:text-white">PIN Virtual McAfee</a></li><li><a href="p/pin-virtual-datacredito.html" class="hover:text-white">PIN Virtual Datacrédito</a></li></ul></div>
             <div><p class="font-bold uppercase tracking-wider text-neutral-400 mb-2"><a href="c/tecnologia.html" class="hover:text-white">Tecnología</a></p><ul class="space-y-1"><li><a href="p/reloj-inteligente-smartwatch-d16-con-auriculares-inalambricos-incorporados.html" class="hover:text-white">Reloj Inteligente Smartwatch D16 con Auriculares Inalámbricos incorporados</a></li><li><a href="p/diademas-inalambricas-cr-8-con-luces-r9s7x.html" class="hover:text-white">Diademas Inalámbricas CR-8 con Luces LED</a></li><li><a href="p/diademas-gamer-a3s-alambrico.html" class="hover:text-white">Diademas Gamer A3S Alámbrico</a></li><li><a href="p/reloj-inteligente-smartwatch-gt5-pro-en-acero-inoxidable.html" class="hover:text-white">Reloj Inteligente Smartwatch GT5 Pro En Acero Inoxidable</a></li><li><a href="p/auriculares-inalambricos-de-gancho-sp16.html" class="hover:text-white">Auriculares Inalámbricos de Gancho SP16</a></li><li><a href="p/auriculares-inalambricos-m25-con-powerbank.html" class="hover:text-white">Auriculares Inalámbricos M25 (Con Powerbank)</a></li><li><a href="p/reloj-inteligente-smartwatch-p13-de-lujo-en-acero-inoxidable.html" class="hover:text-white">Reloj Inteligente Smartwatch P13 de Lujo en Acero Inoxidable</a></li></ul></div>
@@ -1017,21 +1032,22 @@
     <div id="toasts" class="fixed z-[60] left-4 right-24 sm:right-auto bottom-[max(1rem,env(safe-area-inset-bottom))] flex flex-col items-start gap-2 pointer-events-none" aria-live="polite"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js" integrity="sha384-Rj26LVGvoeRVR6+mwQmFfcR3QOBEwT+ZmuCWpuiqeTzJpCs0ER4ITAWGb4Hiy3Ok" crossorigin="anonymous"></script>
-    <script src="vistas.js?v=202611242127"></script>
-    <script src="plantillas-whatsapp.js?v=202611242127"></script>
-    <script src="ui.js?v=202611242127"></script>
-    <script src="app.js?v=202611242127"></script>
-    <script src="tienda-carrito.js?v=202611242127"></script>
-    <script src="carrito.js?v=202611242127"></script>
-    <script src="sesion.js?v=202611242127"></script>
-    <script src="soporte.js?v=202611242127"></script>
-    <script src="pedidos-tienda.js?v=202611242127"></script>
-    <script src="efectos.js?v=202611242127"></script>
-    <script src="marcas.js?v=202611242127"></script>
-    <script src="portafolio.js?v=202611242127"></script>
-    <script src="copiloto.js?v=202611242127"></script>
-    <script src="app-instalable.js?v=202611242127"></script>
-    <script src="detalles.js?v=202611242127"></script>
+    <script src="vistas.js?v=202611242237"></script>
+    <script src="plantillas-whatsapp.js?v=202611242237"></script>
+    <script src="ui.js?v=202611242237"></script>
+    <script src="app.js?v=202611242237"></script>
+    <script src="tienda-carrito.js?v=202611242237"></script>
+    <script src="carrito.js?v=202611242237"></script>
+    <script src="sesion.js?v=202611242237"></script>
+    <script src="soporte.js?v=202611242237"></script>
+    <script src="pedidos-tienda.js?v=202611242237"></script>
+    <script src="efectos.js?v=202611242237"></script>
+    <script src="marcas.js?v=202611242237"></script>
+    <script src="portafolio.js?v=202611242237"></script>
+    <script src="copiloto.js?v=202611242237"></script>
+    <script src="app-instalable.js?v=202611242237"></script>
+    <script src="detalles.js?v=202611242237"></script>
+    <script src="navidad.js?v=202611242237"></script>
 
 </body>
 </html>

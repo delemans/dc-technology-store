@@ -28,6 +28,10 @@ async function estado() {
     const s = await evo(`/instance/connectionState/${INST}`).catch(() => null);
     const st = s?.instance?.state ?? 'sin-evolution';
     if (st === 'open') return { estado: 'open' };
+    // Recién vinculado (el celular ya aceptó): NO pedir otro QR, porque /connect reinicia la conexión y corta la
+    // sincronización (así se quedó en close/connecting el 24/11/2026). Se espera a que quede "open".
+    const inst = (await evo(`/instance/fetchInstances?instanceName=${INST}`).catch(() => []))?.[0];
+    if (inst?.ownerJid && Date.now() - new Date(inst.updatedAt).getTime() < 10 * 60 * 1000 && qr) return { estado: 'vinculando', qr: null, codigo };
     // QR nuevo cada 25 s (WhatsApp los vence a los ~40 s)
     if (!qr || Date.now() - qrHora > 25000) {
         const c = await evo(`/instance/connect/${INST}`).catch(() => ({}));
@@ -71,7 +75,7 @@ En WhatsApp: Dispositivos vinculados → Vincular un dispositivo → <b>«Vincul
 async function ver(){try{const r=await (await fetch('/estado')).json();
 if(r.estado==='open'){document.getElementById('ok').style.display='block';document.getElementById('ins').style.display='none';document.getElementById('caja').style.display='none';return;}
 if(r.qr){document.getElementById('img').src=r.qr;document.getElementById('t').textContent='Se renueva solo. Estado: '+r.estado;}
-else document.getElementById('t').textContent='Esperando a Evolution… ('+r.estado+')';}catch(e){document.getElementById('t').textContent='Esta ventana perdió conexión con el programa.';}
+else document.getElementById('t').textContent=r.estado==='vinculando'?'¡Celular vinculado! Terminando de conectar, no cierres WhatsApp…':'Esperando a Evolution… ('+r.estado+')';}catch(e){document.getElementById('t').textContent='Esta ventana perdió conexión con el programa.';}
 setTimeout(ver,3000);}
 async function pedir(){const n=document.getElementById('num').value.replace(/\\D/g,'');if(n.length<11){alert('Escribe el número con 57, por ejemplo 573001234567');return;}
 document.getElementById('cod').textContent='…';const r=await (await fetch('/codigo?n='+n)).json();document.getElementById('cod').textContent=r.codigo||'No se pudo, usa el QR';}

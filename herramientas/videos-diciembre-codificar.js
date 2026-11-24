@@ -6,12 +6,24 @@
     const SR = 48000;
     const mf = (m) => 440 * Math.pow(2, (m - 69) / 12);
 
-    async function sintetizar({ dur, eventos, beat, musica }) {
+    async function sintetizar({ dur, eventos, beat, musica, voces = [] }) {
         const ctx = new OfflineAudioContext(2, Math.ceil(SR * dur), SR);
         const comp = ctx.createDynamicsCompressor(); comp.threshold.value = -16; comp.ratio.value = 4; comp.attack.value = 0.004; comp.release.value = 0.2;
         const master = ctx.createGain(); master.gain.setValueAtTime(0, 0); master.gain.linearRampToValueAtTime(0.85, 0.08);
         master.gain.setValueAtTime(0.85, Math.max(0.1, dur - 0.9)); master.gain.linearRampToValueAtTime(0, dur);
-        master.connect(comp).connect(ctx.destination);
+        // La música y los efectos bajan (ducking) mientras habla la voz; la voz va directo al compresor
+        const duck = ctx.createGain(); duck.gain.setValueAtTime(1, 0);
+        master.connect(duck).connect(comp).connect(ctx.destination);
+        for (const v of voces) {
+            const r = await fetch(v.url); const b = new Int16Array(await r.arrayBuffer()); if (!b.length) continue;
+            const buf = ctx.createBuffer(1, b.length, 24000); const d = buf.getChannelData(0); for (let i = 0; i < b.length; i++) d[i] = b[i] / 32768;
+            const src = ctx.createBufferSource(); src.buffer = buf; const g = ctx.createGain(); g.gain.value = 1.15;
+            const eq = ctx.createBiquadFilter(); eq.type = 'highpass'; eq.frequency.value = 80;
+            src.connect(eq).connect(g).connect(comp); src.start(v.inicio);
+            const fin = v.inicio + b.length / 24000;
+            duck.gain.setValueAtTime(1, Math.max(0, v.inicio - 0.25)); duck.gain.linearRampToValueAtTime(0.3, v.inicio);
+            duck.gain.setValueAtTime(0.3, fin); duck.gain.linearRampToValueAtTime(1, fin + 0.35);
+        }
         // reverberación (impulso generado)
         const imp = ctx.createBuffer(2, SR * 2.4, SR); let s = 11;
         for (let c = 0; c < 2; c++) { const d = imp.getChannelData(c); for (let i = 0; i < d.length; i++) { s = (s * 16807) % 2147483647; d[i] = ((s / 2147483647) * 2 - 1) * Math.pow(1 - i / d.length, 3.2); } }
@@ -90,7 +102,7 @@
         return ctx.startRendering();
     }
 
-    window.codificar = async ({ id, cuadros, fps, dur, eventos, beat, musica }) => {
+    window.codificar = async ({ id, cuadros, fps, dur, eventos, beat, musica, voces }) => {
         const muxer = new Mp4Muxer.Muxer({
             target: new Mp4Muxer.ArrayBufferTarget(), fastStart: 'in-memory', firstTimestampBehavior: 'offset',
             video: { codec: 'avc', width: 1080, height: 1920, frameRate: fps },
@@ -102,7 +114,7 @@
         const ae = new AudioEncoder({ output: (c, m) => muxer.addAudioChunk(c, m), error: (e) => { falla = e; } });
         ae.configure({ codec: 'mp4a.40.2', sampleRate: SR, numberOfChannels: 2, bitrate: 160000 });
         // audio primero (intercalado lo resuelve el muxer en memoria)
-        const buf = await sintetizar({ dur: cuadros / fps, eventos, beat, musica });
+        const buf = await sintetizar({ dur: cuadros / fps, eventos, beat, musica, voces });
         const L = buf.getChannelData(0), R = buf.getChannelData(1);
         for (let s0 = 0; s0 < L.length; s0 += 4800) {
             const k = Math.min(4800, L.length - s0); const d = new Float32Array(k * 2); d.set(L.subarray(s0, s0 + k), 0); d.set(R.subarray(s0, s0 + k), k);

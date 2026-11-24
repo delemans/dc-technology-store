@@ -13,5 +13,6 @@ ok(formatos.every((f, i) => i === 0 || f !== formatos[i - 1]), 'nunca dos videos
 const codigo = ['herramientas/videos-diciembre-escena.js', 'herramientas/videos-diciembre-codificar.js', 'herramientas/videos-diciembre.css', 'herramientas/videos-diciembre.mjs']
     .map((f) => fs.readFileSync(ruta(f), 'utf8').split('\n').filter((l) => !/^\s*(\/\/|\/\*)/.test(l)).join('\n')).join('\n'); // sin comentarios internos
 ok(!/\bANC\b|Emprende|allnecessary/i.test(codigo), 'los videos no nombran al proveedor');
-ok(!/precio_anterior|descuento|ahorra|\bantes:/i.test(codigo), 'sin precio «antes» ni descuentos en los videos');
+ok(!/precio_anterior|ahorra|\bantes:/i.test(codigo) && /validar_cupon/.test(codigo) && codigo.split('\n').filter((l) => /descuento/i.test(l)).every((l) => /cupon|DCTECH2026|primera compra/i.test(l)), 'sin precio «antes» ni descuentos inventados (solo el cupón real, verificado en la base)');
+ok(/revisarVoz/.test(codigo) && /dick\|dicks\|dizzy/.test(codigo) && /no se oyó el precio/.test(codigo), 'cada locución se transcribe y se valida: palabras completas, la marca bien dicha y los precios');
 ok(/precios_publicos|--json/.test(codigo), 'los precios salen de los mismos datos vigentes de las imágenes');
