@@ -34,6 +34,21 @@ const REG = fs.existsSync(REGISTRO_VOZ) ? JSON.parse(fs.readFileSync(REGISTRO_VO
 // Voces de Gemini TTS que rotan entre videos (lanzamiento: Charon)
 const VOCES = ['Puck', 'Aoede', 'Charon', 'Kore', 'Zephyr', 'Fenrir', 'Leda', 'Orus'];
 
+// --instalar: tarea diaria 3:30 a. m. (el cupo de voz de Gemini ya se renovó): genera lo pendiente en orden de
+// urgencia y rearma el paquete diario con los videos nuevos. La instala el director (pide permiso de Windows una vez).
+if (args.includes('--instalar')) {
+    const tarea = 'DC Tecnology - videos de diciembre';
+    const node = process.execPath, raiz = RAIZ.replace(/'/g, "''");
+    const cmd = `cd /d "${RAIZ}" && "${node}" --use-system-ca herramientas\videos-diciembre.mjs --variante todo >> herramientas\salida\videos-diario.log 2>&1 && "${node}" --use-system-ca herramientas\paquete-diario.mjs >> herramientas\salida\videos-diario.log 2>&1`;
+    const ps = `$a = New-ScheduledTaskAction -Execute 'cmd.exe' -Argument '/c ${cmd.replace(/'/g, "''")}' -WorkingDirectory '${raiz}';
+$t = New-ScheduledTaskTrigger -Daily -At '03:30';
+$s = New-ScheduledTaskSettingsSet -StartWhenAvailable -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -ExecutionTimeLimit (New-TimeSpan -Hours 3);
+Register-ScheduledTask -TaskName '${tarea}' -Action $a -Trigger $t -Settings $s -Description 'Genera cada madrugada los videos de diciembre que faltan (voz verificada) y rearma el paquete diario. DC Tecnology.' -Force | Out-Null`;
+    execFileSync('powershell.exe', ['-NoProfile', '-Command', ps], { stdio: 'inherit' });
+    console.log(`Tarea "${tarea}" instalada: todos los días a las 3:30 a. m. (registro: herramientas/salida/videos-diario.log).`);
+    process.exit(0);
+}
+
 /* ---------- Datos (los mismos de las imágenes) ---------- */
 const salida = execFileSync(process.execPath, ['--use-system-ca', path.join(RAIZ, 'herramientas', 'publicidad-diciembre.mjs'), '--json', '--forzar-precios'], { encoding: 'utf8', maxBuffer: 64 << 20 });
 const datos = JSON.parse(salida.split('@@DATOS@@')[1]);

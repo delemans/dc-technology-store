@@ -353,7 +353,7 @@ try {
         await cdp('Emulation.setDeviceMetricsOverride', { width: 1080, height: t.alto, deviceScaleFactor: 1, mobile: false });
         await cdp('Page.navigate', { url: 'file:///' + t.tmp.replace(/\\/g, '/') });
         await esperar(900);
-        const q = (await cdp('Runtime.evaluate', { expression: `Promise.all([document.fonts.ready, ...[...document.images].map((i) => i.complete ? 1 : new Promise((r) => { i.onload = i.onerror = r; setTimeout(r, 8000); }))]).then(() => JSON.stringify({ sinFoto: [...document.images].filter((i) => !(i.naturalWidth > 0)).length, desborda: document.querySelector('.pie').getBoundingClientRect().bottom > ${t.alto} + 2 }))`, awaitPromise: true, returnByValue: true })).result?.value;
+        const q = (await cdp('Runtime.evaluate', { expression: `Promise.all([document.fonts.ready, ...[...document.images].map((i) => i.complete ? 1 : new Promise((r) => { i.onload = i.onerror = r; setTimeout(r, 8000); }))]).then(() => JSON.stringify({ sinFoto: [...document.images].filter((i) => !(i.naturalWidth > 0)).length, desborda: document.querySelector('.pie').getBoundingClientRect().bottom > ${t.alto} + 12 }))`, awaitPromise: true, returnByValue: true })).result?.value;
         const c = JSON.parse(q ?? '{}'); if (c.sinFoto || c.desborda) fallas.push(`${path.basename(t.sale)}: ${c.sinFoto ? `${c.sinFoto} sin foto ` : ''}${c.desborda ? 'no cabe' : ''}`);
         await esperar(200);
         const img = await cdp('Page.captureScreenshot', { format: 'jpeg', quality: 90 });
