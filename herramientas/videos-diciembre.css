@@ -1,0 +1,138 @@
+/* herramientas/videos-diciembre.css — Estilos de los videos de diciembre (1080×1920). */
+*{box-sizing:border-box}
+html,body{margin:0;width:1080px;height:1920px;overflow:hidden;background:#000;font-family:Inter,system-ui,sans-serif}
+#raiz{position:absolute;inset:0;overflow:hidden;color:var(--texto)}
+#bg{position:absolute;inset:-40px;background:var(--fondo)}
+#viñeta{position:absolute;inset:0;background:radial-gradient(120% 80% at 50% 45%,transparent 55%,rgba(0,0,0,.35));pointer-events:none}
+#fx{position:absolute;inset:0;z-index:1}
+#escena{position:absolute;inset:0;z-index:2}
+#flash{position:absolute;inset:0;background:#fff;opacity:0;z-index:20;pointer-events:none}
+
+/* Composición final (zona segura: arriba 130 px, abajo 300 px libres para los botones de Reels/TikTok/estados) */
+#capa{position:absolute;top:130px;left:80px;right:80px;bottom:300px;display:flex;flex-direction:column;gap:24px;z-index:3}
+#marca{align-self:center;display:flex;align-items:center;gap:16px;font:900 34px/1 Outfit,sans-serif;letter-spacing:.06em}
+#marca img{width:60px;height:60px;border-radius:14px;background:#fff}
+#marca b{color:var(--acento)}
+#tema{align-self:center;padding:12px 26px;border-radius:999px;background:var(--acento);color:#1A0B00;font:800 24px/1 Inter;letter-spacing:.18em;text-transform:uppercase;white-space:nowrap}
+.f-tarjeta #tema,.claro #tema{color:#fff}
+#h1{margin:0;font:900 96px/1.04 Outfit,sans-serif;letter-spacing:-.02em;text-align:center;text-wrap:balance}
+#h1 .w{display:inline-block;overflow:hidden;vertical-align:top;padding:0 .02em .08em}
+#h1 .w i{display:inline-block;font-style:normal}
+#h1 .em i{color:var(--acento)}
+#vit{position:relative;margin-bottom:18px;flex:1 1 0;min-height:0;width:680px;align-self:center;border-radius:48px;
+  background:radial-gradient(120% 90% at 50% 0%,#FFF 0%,#F1F2F5 55%,#DFE3E9 100%);
+  box-shadow:0 50px 90px -40px rgba(0,0,0,.7),0 0 0 8px var(--acento);opacity:0}
+#foto{position:absolute;inset:8%;width:84%;height:84%;object-fit:contain;filter:drop-shadow(0 22px 22px rgba(15,17,26,.28))}
+#halo{position:absolute;inset:0;border-radius:inherit;mix-blend-mode:overlay;pointer-events:none}
+#quedan{position:absolute;bottom:-26px;left:50%;white-space:nowrap;padding:14px 26px;border-radius:999px;background:#C8102E;color:#fff;font:800 30px/1 Inter;box-shadow:0 16px 34px -12px rgba(200,16,46,.9);opacity:0}
+#info{position:relative;height:340px;flex:none}
+#bens,#precios{position:absolute;left:0;right:0;top:0;margin:0;padding:0}
+#bens{list-style:none;display:grid;gap:18px;padding-top:12px}
+#bens li{position:relative;padding-left:60px;font:700 40px/1.2 Inter;opacity:0}
+#bens li::before{content:'★';position:absolute;left:0;top:-2px;color:var(--acento);font-size:1.15em}
+#precios{display:grid;gap:12px;bottom:0;align-content:center}
+.pr{display:flex;justify-content:space-between;align-items:center;gap:18px;padding:18px 28px;border-radius:22px;background:var(--carta);box-shadow:inset 0 0 0 2px var(--carta-borde);opacity:0}
+.pr span{font:600 32px/1.15 Inter;color:var(--plan)}
+.pr b{font:900 50px/1 Outfit;color:var(--precio);white-space:nowrap}
+.muchos .pr{padding:12px 24px}.muchos .pr span{font-size:27px}.muchos .pr b{font-size:40px}
+#pie{display:flex;flex-direction:column;align-items:center;gap:14px;flex:none}
+#cta{display:inline-flex;align-items:center;gap:14px;padding:26px 46px;border-radius:999px;background:#059669;color:#fff;font:800 42px/1 Inter;box-shadow:0 24px 44px -18px rgba(5,150,105,.95);opacity:0}
+#web{font:900 40px/1 Outfit;letter-spacing:.02em;opacity:0}
+#web b{color:var(--acento)}
+
+/* 1) Regalo sorpresa */
+#caja{position:absolute;left:50%;top:760px;width:440px;height:400px;transform-origin:50% 100%}
+#tapa{position:absolute;left:-22px;top:0;width:484px;height:120px;border-radius:14px;background:linear-gradient(#E03445,#B00D27);box-shadow:0 14px 24px -10px rgba(0,0,0,.6);z-index:2}
+#cuerpo{position:absolute;left:0;top:110px;width:440px;height:290px;border-radius:0 0 18px 18px;background:linear-gradient(#C8102E,#8E0A20)}
+#tapa i,#cuerpo i{position:absolute;left:50%;top:0;bottom:0;width:70px;transform:translateX(-50%);background:linear-gradient(90deg,#E8B947,#FFE08A,#E8B947)}
+#lazo{position:absolute;left:50%;top:-110px;font-size:150px;z-index:3}
+#rayos{position:absolute;left:50%;top:900px;width:1700px;height:1700px;border-radius:50%;opacity:0;
+  background:repeating-conic-gradient(from 0deg,rgba(255,230,150,.38) 0 7deg,transparent 7deg 22deg);
+  -webkit-mask:radial-gradient(circle,#000 0,#000 30%,transparent 68%);mask:radial-gradient(circle,#000 0,#000 30%,transparent 68%)}
+
+/* 2) Tráiler */
+.barra{position:absolute;left:0;right:0;height:230px;background:#000;z-index:6}
+#b1{top:0}#b2{bottom:0}
+#oscuro{position:absolute;inset:0;background:rgba(0,0,0,.84);z-index:1}
+.tc{position:absolute;left:50%;top:50%;width:960px;text-align:center;color:#fff;z-index:5;opacity:0;text-shadow:0 10px 40px rgba(0,0,0,.6)}
+#tc1{font:800 30px/1 Inter;letter-spacing:.3em}
+#tc2{font:900 180px/.92 Outfit;background:linear-gradient(180deg,#FFF6D8,#F2C14E 70%,#C98A1C);-webkit-background-clip:text;background-clip:text;color:transparent}
+#tc3{font:900 112px/1.05 Outfit;text-wrap:balance}
+.tc .em{color:var(--acento)}
+
+/* 3) Ritmo */
+#destello{position:absolute;inset:0;background:#fff;opacity:0;z-index:1;mix-blend-mode:overlay}
+.gp{position:absolute;left:50%;top:50%;font-weight:900;font-family:Outfit,sans-serif;line-height:1;white-space:nowrap;text-transform:uppercase;z-index:4;opacity:0;text-shadow:0 14px 50px rgba(0,0,0,.45)}
+.gp.em{color:var(--acento)}
+
+/* 4) Calendario de adviento */
+#cal{position:absolute;left:0;top:0;width:1080px;height:1920px;padding:300px 0 0 120px;display:grid;grid-template-columns:repeat(4,190px);grid-auto-rows:210px;gap:20px}
+.pu{position:relative;opacity:0}
+.hoja{position:absolute;inset:0;border-radius:18px;display:grid;place-items:center;transform-origin:0 50%;backface-visibility:hidden;z-index:2;
+  background:linear-gradient(160deg,#C8102E,#8E0A20);box-shadow:inset 0 0 0 4px rgba(255,224,138,.55),0 18px 30px -16px rgba(0,0,0,.7)}
+.pu:nth-child(3n) .hoja{background:linear-gradient(160deg,#1F7A4D,#0C3A24)}
+.pu:nth-child(4n+1) .hoja{background:linear-gradient(160deg,#F7E3B0,#D9A946)}
+.pu:nth-child(4n+1) .hoja b{color:#5A1A08}
+.hoja b{font:900 84px/1 Outfit;color:#FFF6D8}
+.p24 .hoja{background:linear-gradient(160deg,#FFE08A,#E8B947)!important}.p24 .hoja b{color:#8E0A20!important}
+.dentro{position:absolute;inset:0;border-radius:18px;display:grid;place-items:center;font-size:90px;background:radial-gradient(circle,#FFF8E6,#F2C14E);box-shadow:0 0 60px 10px rgba(255,214,107,.7)}
+
+/* 5) Vitrina giratoria */
+#foco{position:absolute;left:50%;top:0;width:1000px;height:1450px;opacity:0;
+  background:linear-gradient(180deg,rgba(255,246,216,.55),rgba(255,246,216,.08));clip-path:polygon(42% 0,58% 0,100% 100%,0 100%);filter:blur(6px)}
+#pedestal{position:absolute;left:50%;top:1250px;width:760px;height:120px;border-radius:50%;opacity:0;
+  background:radial-gradient(closest-side,rgba(255,255,255,.55),rgba(255,255,255,.12) 70%,transparent)}
+.chip{position:absolute;padding:18px 28px;border-radius:999px;background:var(--carta);box-shadow:inset 0 0 0 2px var(--acento),0 18px 34px -16px rgba(0,0,0,.6);font:800 34px/1 Inter;white-space:nowrap;opacity:0;z-index:4}
+#ch0{left:70px;top:1360px}#ch1{right:70px;top:1470px}#ch2{left:70px;top:1580px}
+.f-vitrina #vit{background:radial-gradient(120% 90% at 50% 0%,#FFFFFF,#EEF0F4 60%,#D8DDE5)}
+
+/* 6) Tarjeta navideña */
+#sobre{position:absolute;left:50%;top:980px;width:820px;height:520px;perspective:1600px}
+#sobre-c{position:absolute;inset:0;border-radius:18px;z-index:3;background:linear-gradient(160deg,#C8102E,#8E0A20);clip-path:polygon(0 0,50% 58%,100% 0,100% 100%,0 100%);box-shadow:0 30px 60px -20px rgba(0,0,0,.5)}
+#solapa{position:absolute;left:0;top:0;width:100%;height:310px;background:linear-gradient(#A50E26,#7E0A1C);clip-path:polygon(0 0,100% 0,50% 100%);transform-origin:50% 0;z-index:4}
+#carta{position:absolute;left:44px;right:44px;top:24px;height:470px;border-radius:16px;background:#FFF9F2;z-index:2;padding:40px 48px;text-align:center;box-shadow:inset 0 0 0 6px #E8B947}
+.para{font:700 68px/1.1 Caveat,cursive;color:#2B1410}.para b{color:#C8102E}
+.de{margin-top:18px;font:700 50px/1.1 Caveat,cursive;color:#5A3A2E}
+.feliz{margin-top:40px;font:900 74px/1 Outfit;color:#1F7A4D}
+#marco{position:absolute;inset:40px;border-radius:40px;opacity:0;box-shadow:inset 0 0 0 6px #C8102E,inset 0 0 0 16px #FFF9F2,inset 0 0 0 20px #E8B947}
+.f-tarjeta #marca b{color:#C8102E}
+.f-tarjeta #tema{background:#C8102E}
+
+/* 7) Lista de regalos (ticket) */
+.f-ticket #h1{font-size:80px}
+#ranura{position:absolute;left:50%;top:560px;width:880px;height:34px;border-radius:17px;background:#11141C;box-shadow:inset 0 6px 10px rgba(0,0,0,.7),0 2px 0 rgba(255,255,255,.2);z-index:5;opacity:0}
+#corte{position:absolute;left:0;right:0;top:577px;height:900px;overflow:hidden;z-index:4}
+#papel{position:absolute;left:50%;top:0;width:780px;padding:44px 52px 54px;background:#FFFFFF;color:#1B1F2A;box-shadow:0 30px 60px -24px rgba(0,0,0,.6);opacity:0;
+  -webkit-mask:conic-gradient(from -45deg at bottom,#0000,#000 1deg 89deg,#0000 90deg) 50% / 30px 100%;mask:conic-gradient(from -45deg at bottom,#0000,#000 1deg 89deg,#0000 90deg) 50% / 30px 100%}
+.tk-t{font:800 26px/1 Inter;letter-spacing:.22em;text-align:center;color:#C8102E}
+.tk-n{margin-top:16px;font:900 46px/1.1 Outfit;text-align:center;text-wrap:balance}
+.tk-l{margin:22px 0;border-top:3px dashed #C9CDD6}
+.tk-r{display:flex;justify-content:space-between;align-items:center;gap:18px;padding:12px 0;border-bottom:2px dotted #DDE0E6;opacity:0}
+.tk-r span{font:600 30px/1.15 Inter}.tk-r b{font:900 42px/1 Outfit;color:#C8102E;white-space:nowrap}
+.tk-p{font:600 28px/1.6 Inter;color:#3A4150}
+.tk-c{margin-top:24px;height:70px;background:repeating-linear-gradient(90deg,#1B1F2A 0 4px,transparent 4px 7px,#1B1F2A 7px 9px,transparent 9px 15px,#1B1F2A 15px 21px,transparent 21px 24px)}
+#sticker{position:absolute;right:34px;top:1150px;width:250px;height:250px;border-radius:50%;background:#fff;box-shadow:0 0 0 10px var(--acento),0 26px 50px -16px rgba(0,0,0,.7);display:grid;place-items:center;z-index:6;opacity:0}
+#sticker img{width:78%;height:78%;object-fit:contain}
+
+/* Resumen: todo el catálogo */
+.f-todos #tema,.f-todos #h1,.f-todos #vit,.f-todos #info{visibility:hidden}
+.f-todos #capa{opacity:0}
+.cl{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:44px;padding:200px 80px 340px;opacity:0}
+.cl-v{width:780px;height:780px;border-radius:56px;background:radial-gradient(120% 90% at 50% 0%,#FFF,#EEF0F4 60%,#D8DDE5);display:grid;place-items:center;box-shadow:0 50px 90px -40px rgba(0,0,0,.7)}
+.cl-v img{width:80%;height:80%;object-fit:contain}
+.cl-n{font:900 66px/1.08 Outfit;text-align:center;text-wrap:balance}
+.cl-p{font:900 104px/1 Outfit}
+#ti,#tf{font:900 150px/.98 Outfit}
+.cl-m{font:900 30px/1 Outfit,sans-serif;letter-spacing:.08em;opacity:.9}
+#ef{top:44%;font:900 120px/1 Outfit}
+#ef small{display:block;margin-top:40px;font:700 40px/1.3 Inter;color:var(--texto);opacity:.9}
+/* Cierre de marca */
+#cierre{position:absolute;inset:0;z-index:50;display:none;flex-direction:column;align-items:center;justify-content:center;gap:26px;padding-bottom:160px;
+  background:radial-gradient(70% 45% at 50% 42%,#B00D27 0%,#5A0412 45%,#12060A 100%);color:#fff;text-align:center}
+#cierre .ci-halo{position:absolute;left:50%;top:42%;width:1500px;height:1500px;margin:-750px 0 0 -750px;border-radius:50%;
+  background:repeating-conic-gradient(from 0deg,rgba(255,214,107,.16) 0 6deg,transparent 6deg 20deg);-webkit-mask:radial-gradient(circle,#000 20%,transparent 65%);mask:radial-gradient(circle,#000 20%,transparent 65%)}
+#cierre img{position:relative;width:300px;height:300px;border-radius:64px;background:#fff;box-shadow:0 0 0 10px #F2C14E,0 40px 90px -20px rgba(0,0,0,.8)}
+#cierre .ci-m{position:relative;font:900 106px/1 Outfit,sans-serif;letter-spacing:.04em}#cierre .ci-m b{color:#F2C14E}
+#cierre .ci-l{position:relative;font:700 34px/1.3 Inter;opacity:.9;max-width:900px}
+#cierre .ci-w{position:relative;margin-top:30px;padding:26px 50px;border-radius:999px;background:#059669;font:800 52px/1 Inter;box-shadow:0 24px 44px -18px rgba(5,150,105,.95)}
+#cierre .ci-u{position:relative;font:900 44px/1 Outfit;color:#F2C14E}

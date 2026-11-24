@@ -197,6 +197,13 @@ const texto = (x) => {
         '', `🛒 ${url}`, '💬 WhatsApp 322 328 4622', '#DCTecnology #Navidad2026 #RegalosDeNavidad'].join('\n');
 };
 
+// --json: los mismos datos (precios vigentes, unidades, temas) para herramientas/videos-diciembre.mjs
+if (args.includes('--json')) {
+    process.stdout.write('\n@@DATOS@@' + JSON.stringify(listas.map((x) => ({ id: x.p.id, n: x.n, archivo: archivo(x), nombre: x.p.nombre, tipo: x.p.tipo, imagen: x.p.imagen,
+        tema: x.g.tema, t: x.g.t, s: x.g.s, b: x.g.b, estilo: x.estilo, quedan: x.quedan, texto: texto(x),
+        planes: x.planes.map((v) => ({ nombre: (x.g.plan ?? ((n) => n))(v.nombre), precio: v.precio })) }))));
+    process.exit(0);
+}
 console.log(`Diciembre 2026: ${listas.length} piezas (${listas.filter((x) => x.p.tipo === 'tecnologia').length} de tecnología, ${listas.filter((x) => x.p.tipo !== 'tecnologia').length} digitales y servicios)`);
 if (PROBAR) {
     for (const x of listas) console.log(`  ${x.n} · ${x.g.tema.padEnd(26)} · ${x.estilo.id.padEnd(10)} · ${x.p.nombre} · ${x.planes.map((v) => cop(v.precio)).join(' / ')}${x.quedan ? ` · quedan ${x.quedan}` : ''}`);
@@ -216,7 +223,11 @@ if (PUBLICAR) {
         const t = await r.text(); if (!r.ok) throw new Error(`Evolution ${r.status}: ${t.slice(0, 200)}`); return t ? JSON.parse(t) : {};
     };
     const hechas = fs.existsSync(REGISTRO) ? JSON.parse(fs.readFileSync(REGISTRO, 'utf8')) : [];
-    const pendientes = listas.filter((x) => !hechas.some((h) => h.id === x.p.id)).slice(0, PUBLICAR);
+    // Si ya existe el video (herramientas/videos-diciembre.mjs) sale el video; si no, la imagen. Primero, el resumen.
+    const VIDEOS = path.join(DESTINO, 'Videos 1080x1920');
+    const RESUMEN = { p: { id: 'todos', nombre: 'Todo el catálogo de Navidad' }, g: { tema: 'Resumen del catálogo' }, resumen: true };
+    const conResumen = fs.existsSync(path.join(VIDEOS, '00-todo-el-catalogo-de-navidad.mp4')) && !args.includes('--solo-imagenes') ? [RESUMEN, ...listas] : listas;
+    const pendientes = conResumen.filter((x) => !hechas.some((h) => h.id === x.p.id)).slice(0, PUBLICAR);
     if (!pendientes.length) { console.log('Ya salieron todas las piezas de diciembre.'); process.exit(0); }
     const contactos = await evo(`/chat/findContacts/${INST}`, {});
     const lista = [...new Set((Array.isArray(contactos) ? contactos : [])
@@ -225,20 +236,23 @@ if (PUBLICAR) {
     if (!lista.length) throw new Error('Evolution no devolvió contactos: no se publica.');
     // Las imágenes se le entregan a Evolution por un servidor local temporal (no hay URL pública)
     const servidor = http.createServer((req, res) => {
-        const f = path.join(DESTINO, 'Historia 1080x1920', decodeURIComponent(req.url.slice(1)));
+        const f = path.join(DESTINO, decodeURIComponent(req.url.slice(1)));
         if (!f.startsWith(DESTINO) || !fs.existsSync(f)) { res.writeHead(404); return res.end(); }
-        res.writeHead(200, { 'Content-Type': 'image/jpeg' }); fs.createReadStream(f).pipe(res);
+        res.writeHead(200, { 'Content-Type': f.endsWith('.mp4') ? 'video/mp4' : 'image/jpeg', 'Content-Length': fs.statSync(f).size }); fs.createReadStream(f).pipe(res);
     });
     await new Promise((ok) => servidor.listen(0, '127.0.0.1', ok));
     try {
         for (const x of pendientes) {
-            const nombre = `${archivo(x)}.jpg`;
-            if (!fs.existsSync(path.join(DESTINO, 'Historia 1080x1920', nombre))) throw new Error(`Falta ${nombre}: genera primero las imágenes`);
-            await evo(`/message/sendStatus/${INST}`, { type: 'image', content: `http://127.0.0.1:${servidor.address().port}/${encodeURIComponent(nombre)}`, caption: texto(x).replace(/#\S+/g, '').trim(), statusJidList: lista });
+            const video = x.resumen ? 'Videos 1080x1920/00-todo-el-catalogo-de-navidad.mp4' : `Videos 1080x1920/${archivo(x)}.mp4`;
+            const usarVideo = fs.existsSync(path.join(DESTINO, video)) && !args.includes('--solo-imagenes');
+            const rel = usarVideo ? video : `Historia 1080x1920/${archivo(x)}.jpg`;
+            if (!fs.existsSync(path.join(DESTINO, rel))) throw new Error(`Falta ${rel}: genera primero las imágenes`);
+            const pie = x.resumen ? `🎄 Todo para esta Navidad en DC Tecnology: ${listas.length} regalos entre tecnología, plataformas, pines y servicios.\n\n🛒 https://www.dctecnology.xyz\n💬 WhatsApp 322 328 4622` : texto(x).replace(/#\S+/g, '').trim();
+            await evo(`/message/sendStatus/${INST}`, { type: usarVideo ? 'video' : 'image', content: `http://127.0.0.1:${servidor.address().port}/${encodeURIComponent(rel)}`, caption: pie, statusJidList: lista });
             hechas.push({ id: x.p.id, tema: x.g.tema, publicado: new Date().toISOString() });
             fs.mkdirSync(path.dirname(REGISTRO), { recursive: true });
             fs.writeFileSync(REGISTRO, JSON.stringify(hechas, null, 1) + '\n');
-            console.log(`✔ estado publicado: ${x.p.nombre} (${x.g.tema}) para ${lista.length} contactos`);
+            console.log(`✔ estado publicado (${usarVideo ? 'video' : 'imagen'}): ${x.p.nombre} (${x.g.tema}) para ${lista.length} contactos`);
             await new Promise((ok) => setTimeout(ok, 4000));
         }
     } finally { servidor.close(); }
