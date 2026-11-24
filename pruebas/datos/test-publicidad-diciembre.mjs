@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import { execFileSync } from 'node:child_process';
 const ok = (c, m) => { console.log(`${c ? 'OK   ' : 'FALLA'} ${m}`); if (!c) process.exitCode = 1; };
 const RAIZ = new URL('../../', import.meta.url);
-const salida = execFileSync(process.execPath, ['--use-system-ca', new URL('herramientas/publicidad-diciembre.mjs', RAIZ).pathname.replace(/^\/([A-Za-z]:)/, '$1').replace(/%20/g, ' '), '--probar'], { encoding: 'utf8' });
+const salida = execFileSync(process.execPath, ['--use-system-ca', new URL('herramientas/publicidad-diciembre.mjs', RAIZ).pathname.replace(/^\/([A-Za-z]:)/, '$1').replace(/%20/g, ' '), '--probar', '--forzar-precios'], { encoding: 'utf8' });
 ok(!/sin gancho/.test(salida), 'todos los productos visibles de ANC tienen su gancho de diciembre');
 const filas = salida.split('\n').filter((l) => /^\s+\d{2} · /.test(l));
 ok(filas.length >= 30, `una pieza por producto (${filas.length})`);

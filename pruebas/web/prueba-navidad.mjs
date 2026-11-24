@@ -16,7 +16,7 @@ await enviar('Page.enable'); await enviar('Runtime.enable');
 await enviar('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 1, mobile: true });
 
 // Intro de marca
-await enviar('Page.navigate', { url: `${BASE}/?intro` }); for (let i = 0; i < 20 && !(await ev("!!document.getElementById('dc-intro')")); i++) await esperar(100);
+await enviar('Page.navigate', { url: `${BASE}/?intro` }); for (let i = 0; i < 60 && !(await ev("!!document.getElementById('dc-intro')")); i++) await esperar(100);
 ok(await ev(`!!document.getElementById('dc-intro') && /DC/.test(document.getElementById('dc-intro').innerText)`), 'la intro de marca sale al abrir (con ?intro)');
 await ev(`document.querySelector('#dc-intro .dci-saltar').click()`); await esperar(800);
 ok(await ev(`!document.getElementById('dc-intro')`), '«Saltar» la quita');

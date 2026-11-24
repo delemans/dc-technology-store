@@ -35,7 +35,7 @@ const REG = fs.existsSync(REGISTRO_VOZ) ? JSON.parse(fs.readFileSync(REGISTRO_VO
 const VOCES = ['Puck', 'Aoede', 'Charon', 'Kore', 'Zephyr', 'Fenrir', 'Leda', 'Orus'];
 
 /* ---------- Datos (los mismos de las imágenes) ---------- */
-const salida = execFileSync(process.execPath, ['--use-system-ca', path.join(RAIZ, 'herramientas', 'publicidad-diciembre.mjs'), '--json'], { encoding: 'utf8', maxBuffer: 64 << 20 });
+const salida = execFileSync(process.execPath, ['--use-system-ca', path.join(RAIZ, 'herramientas', 'publicidad-diciembre.mjs'), '--json', ...(['--formatos', '--probar'].some((x) => process.argv.includes(x)) ? ['--forzar-precios'] : [])], { encoding: 'utf8', maxBuffer: 64 << 20 });
 const datos = JSON.parse(salida.split('@@DATOS@@')[1]);
 for (const l of salida.split('@@DATOS@@')[0].split('\n')) if (l.trim()) console.log(l);
 
@@ -87,6 +87,41 @@ const minimo = (l) => cop(Math.min(...l.flatMap((x) => x.planes.map((v) => v.pre
 const imgs = (ids) => ids.map((i) => datos.find((x) => x.id === i)?.imagen).filter(Boolean);
 const base = { formato: 'presenta', t: '', s: '', b: [], planes: [], nombre: 'Lanzamiento', tema: 'Lanzamiento', carpeta: CARPETA_L };
 const lanzamiento = [
+    // Expectativa (24/11/2026): intriga en los estados del 25 y 26/11 → «Cargando…» hasta el 100 % del lanzamiento
+    { ...base, id: 'T6', n: 'T6', archivo: 'T6-cargando-60', estilo: estiloDe('medianoche'), musica: 'cine', diapos: [
+        { tipo: 'frase', texto: 'Algo <em>nuevo</em><br>se está cargando', dur: 2.8, voz: 'Algo nuevo se está cargando.' },
+        { tipo: 'carga', etiqueta: 'Cargando', desde: 0, hasta: 60, texto: 'La nueva era de<br><em>DC Tecnology</em>', dur: 4.2, voz: 'La nueva era de DC Tecnology va en sesenta por ciento.' },
+        { tipo: 'frase', texto: '<em>Próximamente</em>', sub: 'Entérate antes que nadie', dur: 2.8, voz: 'Próximamente. Entérate antes que nadie.' }] },
+    { ...base, id: 'T1', n: 'T1', archivo: 'T1-nueva-forma-de-pedir', estilo: estiloDe('gamer'), musica: 'cine', diapos: [
+        { tipo: 'frase', texto: 'Viene una <em>nueva forma</em><br>de hacer tus pedidos', dur: 3.2, voz: 'Viene una nueva forma de hacer tus pedidos.' },
+        { tipo: 'frase', texto: 'Por <em>WhatsApp</em>', sub: 'Más fácil. Más rápido.', dur: 2.8, voz: 'Por WhatsApp. Más fácil y más rápido.' },
+        { tipo: 'logo', sub: 'Próximamente · entérate', dur: 3, voz: 'Próximamente en DC Tecnology. Entérate.' }] },
+    { ...base, id: 'T3', n: 'T3', archivo: 'T3-imaginate-comprar-asi', estilo: estiloDe('pino'), musica: 'cine', diapos: [
+        { tipo: 'frase', texto: '<em>Imagínate</em>…', dur: 2.2, voz: 'Imagínate...' },
+        { tipo: 'frase', texto: 'Pedir tu plataforma<br><em>desde tu celular</em>', dur: 2.8, voz: 'Pedir tu plataforma favorita desde tu celular,' },
+        { tipo: 'frase', texto: 'Pagar <em>desde tu app</em>', sub: 'Nequi · Daviplata · Llave Bre-B', dur: 2.8, voz: 'pagar desde tu app,' },
+        { tipo: 'frase', texto: 'Y recibirla<br><em>en tu WhatsApp</em>', dur: 2.8, voz: 'y recibirla en tu WhatsApp.' },
+        { tipo: 'logo', sub: 'Muy pronto', dur: 3, voz: 'Muy pronto, en DC Tecnology.' }] },
+    { ...base, id: 'T2', n: 'T2', archivo: 'T2-hemos-trabajado-para-ti', estilo: estiloDe('rojo'), musica: 'cine', diapos: [
+        { tipo: 'frase', texto: 'Hemos trabajado<br>para la <em>comodidad</em><br>de tus pedidos', dur: 3.4, voz: 'Hemos trabajado para la comodidad de tus pedidos.' },
+        { tipo: 'frase', texto: 'Elige · Paga · <em>Recibe</em>', sub: 'Todo desde tu celular', dur: 3, voz: 'Elige, paga y recibe, todo desde tu celular.' },
+        { tipo: 'logo', sub: 'Muy pronto', dur: 3, voz: 'Muy pronto, DC Tecnology.' }] },
+    { ...base, id: 'T7', n: 'T7', archivo: 'T7-cargando-80', estilo: estiloDe('medianoche'), musica: 'cine', diapos: [
+        { tipo: 'carga', etiqueta: 'Cargando', desde: 60, hasta: 80, texto: 'La nueva era de<br><em>DC Tecnology</em>', dur: 4.2, voz: 'Ya vamos en ochenta por ciento.' },
+        { tipo: 'frase', texto: 'Falta <em>muy poco</em>', sub: 'Guarda nuestro número: 322 328 4622', dur: 3, voz: 'Falta muy poco. Guarda nuestro número: 322 328 4622.' }] },
+    { ...base, id: 'T4', n: 'T4', archivo: 'T4-imaginate-todo-en-un-lugar', estilo: estiloDe('fiesta'), musica: 'ritmo', diapos: [
+        { tipo: 'frase', texto: '<em>Imagínate</em> tenerlo<br>todo en un solo lugar', dur: 3, voz: 'Imagínate tenerlo todo en un solo lugar.' },
+        { tipo: 'categoria', etiqueta: 'Series y música', titulo: 'Tus <em>plataformas</em>', imagenes: imgs(['netflix', 'disney-plus', 'spotify-premium']), precio: 'En un solo pedido', dur: 3, voz: 'Tus series y tu música,' },
+        { tipo: 'categoria', etiqueta: 'Regalos', titulo: 'Pines y <em>tecnología</em>', imagenes: imgs(['pin-virtual-roblox', 'reloj-inteligente-smartwatch-gt5-pro-en-acero-inoxidable', 'diademas-gamer-a3s-alambrico']), precio: 'Y servicio técnico', dur: 3, voz: 'tus pines, tu tecnología y tu servicio técnico.' },
+        { tipo: 'logo', sub: 'Muy pronto', dur: 3, voz: 'Muy pronto, todo en DC Tecnology.' }] },
+    { ...base, id: 'T5', n: 'T5', archivo: 'T5-imaginate-automatizar', estilo: estiloDe('bosque'), musica: 'ritmo', diapos: [
+        { tipo: 'frase', texto: '<em>Imagínate</em> automatizar<br>tu negocio', dur: 3, voz: 'Imagínate automatizar tu negocio.' },
+        { tipo: 'pasos', titulo: 'Sin <em>enredos</em>', pasos: [['🤖', 'Catálogo con bot', 'Tus clientes piden por WhatsApp'], ['📦', 'Inventario', 'Sabes qué tienes y qué se vende'], ['📊', 'Tableros', 'Tus números claros']], dur: 5.4, voz: 'Un catálogo con bot que recibe pedidos por WhatsApp, tu inventario al día y tus números claros.' },
+        { tipo: 'frase', texto: 'Eso también<br><em>lo hacemos</em>', sub: 'Pide tu cotización', dur: 2.8, voz: 'Eso también lo hacemos. Pide tu cotización.' },
+        { tipo: 'logo', sub: 'Muy pronto', dur: 3, voz: 'Muy pronto, DC Tecnology.' }] },
+    { ...base, id: 'T8', n: 'T8', archivo: 'T8-cargando-99', estilo: estiloDe('medianoche'), musica: 'cine', diapos: [
+        { tipo: 'carga', etiqueta: 'Casi listo', desde: 80, hasta: 99, texto: 'La nueva era de<br><em>DC Tecnology</em>', dur: 4.4, voz: 'Noventa y nueve por ciento.' },
+        { tipo: 'logo', sub: `Mañana, ${LANZAMIENTO.texto}`, dur: 3.2, voz: `Mañana, ${LANZAMIENTO.texto}, llega la nueva era de DC Tecnology.` }] },
     { ...base, id: 'L1', n: 'L1', archivo: 'L1-faltan-2-dias', estilo: estiloDe('medianoche'), musica: 'cine', diapos: [
         { tipo: 'frase', texto: 'Estuvimos trabajando<br>en algo <em>grande</em>', dur: 3, voz: 'Estuvimos trabajando en algo grande.' },
         { tipo: 'cuenta', etiqueta: 'Muy pronto', grande: '2', linea: 'días', sub: 'para la nueva era de DC Tecnology', dur: 3.6, voz: 'Faltan dos días para la nueva era de DC Tecnology.' },

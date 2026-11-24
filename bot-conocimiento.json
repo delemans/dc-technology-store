@@ -1,5 +1,5 @@
 {
-  "version": "2026-11-24T21:27:27.867Z",
+  "version": "2026-11-24T23:03:55.079Z",
   "identidad": [
     "Eres DC TECNOLOGY: respondes el WhatsApp de la tienda (https://www.dctecnology.xyz) en nombre del equipo. Habla como la tienda (\"te ayudamos\", \"te enviamos\").",
     "En el PRIMER mensaje de la conversación saluda así: \"¡Hola! Te saluda *DC TECNOLOGY* 👋\", responde lo que preguntó y cierra con: \"Escribe *menú* para ver todas las opciones.\" Después no vuelvas a presentarte (si el contexto trae un mensaje del menú, la conversación ya empezó).",
@@ -728,11 +728,11 @@
       "variantes": [
         {
           "nombre": "Unidad Completa",
-          "precio": 180000,
+          "precio": 225000,
           "precio_anterior": 250000
         }
       ],
-      "desde": 180000,
+      "desde": 225000,
       "descripcion": "Smartwatch D16 con auriculares Bluetooth integrados, monitoreo de salud y notificaciones inteligentes.El Smartwatch D16 es el gadget 2 en 1 definitivo. No solo es un avanzado reloj inteligente para gestionar tu día a día, sino que oculta un par de audífonos inalámbricos de alta calidad en su interior. ¡Lleva tu música a donde vayas sin cargar estuches extra!Innovación, confort y doble funcionalidad. El gadget perfecto para hacer tu vida más fácil y conectada.Llamadas Bluetooth y Sonido HD: Responde llamadas nítidas con los auriculares o visualiza todas tus notificaciones, alertas y mensajes en"
     },
     {
@@ -745,11 +745,11 @@
       "variantes": [
         {
           "nombre": "Unidad Completa",
-          "precio": 100000,
+          "precio": 125000,
           "precio_anterior": 180000
         }
       ],
-      "desde": 100000,
+      "desde": 125000,
       "descripcion": "Disfruta de las Diademas Inalámbricas CR-8 con luces dinámicas y sonido estéreo. Comodidad y estilo para tu música.¡Ponle color y ritmo a tu vida con las Diademas Inalámbricas CR-8 ! Diseñadas para ofrecerte un sonido potente y envolvente, estas diademas destacan por su espectacular sistema de luces integradas, dándote un estilo único y llamativo mientras disfrutas de tu música sin enredos.Estilo, confort total y luces vibrantes. El accesorio ideal para quienes viven la música a otro nivel.Sonido Envolvente y Graves Potentes: Sumérgete en tus playlists y juegos con una calidad de audio superio"
     },
     {
@@ -762,11 +762,11 @@
       "variantes": [
         {
           "nombre": "Unidad Gamer",
-          "precio": 80000,
+          "precio": 100000,
           "precio_anterior": 150000
         }
       ],
-      "desde": 80000,
+      "desde": 100000,
       "descripcion": "Disfruta de las Diademas Gamer A3S con cable, sonido estéreo y micrófono claro. Confort y cero latencia para ganar.¡Lleva tus partidas al siguiente nivel con las Diademas Gamer A3S ! Diseñadas especialmente para jugadores exigentes, te ofrecen una inmersión acústica total, comunicación precisa con tu equipo y la máxima comodidad para que nada te distraiga en el campo de batalla.Precisión acústica, confort total y comunicación perfecta. El equipamiento esencial para asegurar tu victoria.Sonido Estéreo Envolvente: Escucha cada detalle del juego. Identifica pasos, recargas y explosiones con preci"
     },
     {
@@ -779,11 +779,11 @@
       "variantes": [
         {
           "nombre": "Acero Inoxidable",
-          "precio": 140000,
+          "precio": 175000,
           "precio_anterior": 250000
         }
       ],
-      "desde": 140000,
+      "desde": 175000,
       "descripcion": "Descubre el Smartwatch GT5 Pro con pantalla táctil, monitoreo cardíaco y resistencia IP67.¡Descubre el equilibrio perfecto entre el máximo rendimiento y la exclusividad con el Smartwatch GT5 Pro ! Fabricado con una imponente correa y caja de acero inoxidable, este reloj inteligente es la herramienta definitiva para quienes exigen tecnología avanzada sin comprometer la elegancia y el buen gusto.El aliado definitivo para quienes buscan un estilo imponente sin renunciar a la mejor tecnología inteligente.Diseño Imponente de Lujo: Construcción robusta y premium en acero inoxidable que garantiza dur"
     },
     {
@@ -814,11 +814,11 @@
       "variantes": [
         {
           "nombre": "Unidad Estándar",
-          "precio": 75000,
+          "precio": 94000,
           "precio_anterior": 130000
         }
       ],
-      "desde": 75000,
+      "desde": 94000,
       "descripcion": "Disfruta de sonido nítido y batería larga con Auriculares Inalámbricos SP16.¡Lleva tus entrenamientos al siguiente nivel con los Auriculares Inalámbricos de Gancho SP16 ! Diseñados con un sistema de sujeción ergonómico, te brindan total comodidad, seguridad y un sonido de alta fidelidad sin importar cuánto te muevas.El aliado perfecto para deportistas y personas activas: máxima sujeción, confort y resistencia en cada movimiento.&amp;zwj; Ajuste Seguro Deportivo: Su diseño de gancho flexible y ergonómico se adapta perfectamente a tu oreja, evitando que se caigan durante trotes, saltos o entrena"
     },
     {
@@ -867,11 +867,11 @@
       "variantes": [
         {
           "nombre": "Gamer M25",
-          "precio": 40000,
+          "precio": 50000,
           "precio_anterior": 80000
         }
       ],
-      "desde": 40000,
+      "desde": 50000,
       "descripcion": "Disfruta los Auriculares Inalámbricos M25 con powerbank integrado, sonido nítido y hasta 24 horas de uso.¡Descubre la libertad del sonido sin cables con los Auriculares Inalámbricos M25 ! Estos auriculares no solo te ofrecen una experiencia auditiva excepcional, sino que también cuentan con una batería integrada tipo Powerbank para emergencias.El compañero ideal para el ritmo de vida colombiano: dinámico, conectado y con estilo.Audio Inmersivo Hi-Fi: Sonido envolvente con tecnología de cancelación de ruido ambiental (CVC) para llamadas más claras y música sin distracciones.Powerbank de Emergen"
     },
     {
@@ -902,11 +902,11 @@
       "variantes": [
         {
           "nombre": "Acero de Lujo P13",
-          "precio": 130000,
+          "precio": 165000,
           "precio_anterior": 210000
         }
       ],
-      "desde": 130000,
+      "desde": 165000,
       "descripcion": "Elegante reloj inteligente en acero inoxidable con pantalla táctil y monitoreo de salud.¡Eleva tu estilo y tecnología con el Smartwatch P13 de Lujo ! Diseñado con una exquisita correa de acero inoxidable, este reloj inteligente es la fusión perfecta entre la sofisticación clásica y las funciones avanzadas que necesitas para tu día a día.Sofisticación, resistencia y tecnología avanzada. El reloj inteligente definitivo para quienes exigen lo mejor.Diseño de Lujo en Acero: Acabado premium en acero inoxidable que aporta gran resistencia y una estética elegante, perfecta tanto para reuniones de neg"
     },
     {
@@ -937,11 +937,11 @@
       "variantes": [
         {
           "nombre": "Pantalla Colombia 30 días",
-          "precio": 15000,
+          "precio": 22000,
           "precio_anterior": 25000
         }
       ],
-      "desde": 15000,
+      "desde": 22000,
       "descripcion": null
     },
     {
@@ -954,11 +954,11 @@
       "variantes": [
         {
           "nombre": "Pantalla (1 Dispositivo)",
-          "precio": 10000,
+          "precio": 14000,
           "precio_anterior": 18000
         }
       ],
-      "desde": 10000,
+      "desde": 14000,
       "descripcion": null
     },
     {
@@ -989,21 +989,21 @@
       "variantes": [
         {
           "nombre": "Pantalla Estándar 1 Mes",
-          "precio": 8000,
+          "precio": 12000,
           "precio_anterior": 15500
         },
         {
           "nombre": "Pantalla Platino 1 Mes",
-          "precio": 12000,
+          "precio": 16000,
           "precio_anterior": 20000
         },
         {
           "nombre": "Cuenta Completa Estándar 1 Mes",
-          "precio": 18000,
+          "precio": 23000,
           "precio_anterior": 27000
         }
       ],
-      "desde": 8000,
+      "desde": 12000,
       "descripcion": null
     },
     {
@@ -1016,11 +1016,11 @@
       "variantes": [
         {
           "nombre": "Perfil Mega Fan 1 Mes",
-          "precio": 10000,
+          "precio": 14000,
           "precio_anterior": 18000
         }
       ],
-      "desde": 10000,
+      "desde": 14000,
       "descripcion": null
     },
     {
@@ -1033,11 +1033,11 @@
       "variantes": [
         {
           "nombre": "Pantalla 1 Mes",
-          "precio": 8000,
+          "precio": 12000,
           "precio_anterior": 13500
         }
       ],
-      "desde": 8000,
+      "desde": 12000,
       "descripcion": null
     },
     {
@@ -1050,11 +1050,11 @@
       "variantes": [
         {
           "nombre": "Pantalla 1 Mes",
-          "precio": 10000,
+          "precio": 14000,
           "precio_anterior": 18000
         }
       ],
-      "desde": 10000,
+      "desde": 14000,
       "descripcion": null
     },
     {
@@ -1067,11 +1067,11 @@
       "variantes": [
         {
           "nombre": "Pantalla 1 Mes",
-          "precio": 10000,
+          "precio": 14000,
           "precio_anterior": 18000
         }
       ],
-      "desde": 10000,
+      "desde": 14000,
       "descripcion": null
     },
     {
@@ -1084,11 +1084,11 @@
       "variantes": [
         {
           "nombre": "Pantalla 1 Mes",
-          "precio": 10000,
+          "precio": 14000,
           "precio_anterior": 18000
         }
       ],
-      "desde": 10000,
+      "desde": 14000,
       "descripcion": null
     },
     {
@@ -1101,11 +1101,11 @@
       "variantes": [
         {
           "nombre": "Perfil 1 Mes",
-          "precio": 12000,
+          "precio": 16000,
           "precio_anterior": 20000
         }
       ],
-      "desde": 12000,
+      "desde": 16000,
       "descripcion": null
     },
     {
@@ -1118,11 +1118,11 @@
       "variantes": [
         {
           "nombre": "Perfil 1 Mes",
-          "precio": 10000,
+          "precio": 14000,
           "precio_anterior": 18500
         }
       ],
-      "desde": 10000,
+      "desde": 14000,
       "descripcion": null
     },
     {
@@ -1177,26 +1177,26 @@
       "variantes": [
         {
           "nombre": "Netflix + Prime Video + Disney Premium + Max",
-          "precio": 45000,
+          "precio": 57000,
           "precio_anterior": null
         },
         {
           "nombre": "Netflix + Prime Video + Disney Premium",
-          "precio": 40000,
+          "precio": 50000,
           "precio_anterior": null
         },
         {
           "nombre": "Netflix + Prime Video + Max",
-          "precio": 32000,
+          "precio": 40000,
           "precio_anterior": null
         },
         {
           "nombre": "Prime Video + Disney Premium + Max",
-          "precio": 30000,
+          "precio": 38000,
           "precio_anterior": null
         }
       ],
-      "desde": 30000,
+      "desde": 38000,
       "descripcion": "Varias plataformas en un solo pedido: un perfil en cada una.Prohibido usar, vincular o reproducir el producto en más dispositivos de los permitidos (1 por cada plataforma del combo).Prohibido modificar correo, contraseña, PIN, perfiles o datos de facturación bajo cualquier motivo.Prohibido compartir, revender o transferir el acceso a terceros.Netflix + Prime + Disney + Max: Netflix + Prime Video + Disney Plus + Max: un (1) perfil en cada plataforma, cada uno para 1 solo dispositivo.Netflix + Prime + Disney: Netflix + Prime Video + Disney Plus: un (1) perfil en cada plataforma, cada uno para 1 "
     },
     {
@@ -1209,16 +1209,16 @@
       "variantes": [
         {
           "nombre": "Pantalla con ESPN",
-          "precio": 30000,
+          "precio": 38000,
           "precio_anterior": null
         },
         {
           "nombre": "Pantalla con Win Play",
-          "precio": 35000,
+          "precio": 44000,
           "precio_anterior": null
         }
       ],
-      "desde": 30000,
+      "desde": 38000,
       "descripcion": "Televisión en vivo y deportes en tu celular, Smart TV o computador.Prohibido usar, vincular o reproducir el producto en más dispositivos de los permitidos (1 para Pantalla).Prohibido modificar correo, contraseña o datos de facturación bajo cualquier motivo.Prohibido compartir, revender o transferir el acceso a terceros.Pantalla con ESPN: Canales base de DirecTV Go (como Dsports, Caracol y RCN, entre otros) más los canales premium de ESPN: ligas internacionales, Champions League, NBA y tenis.Pantalla con Win Play: Canales base de DirecTV Go más Win Sports+ para ver el fútbol profesional colombi"
     },
     {
@@ -1231,11 +1231,11 @@
       "variantes": [
         {
           "nombre": "Suscripción 1 Mes",
-          "precio": 15000,
+          "precio": 19000,
           "precio_anterior": null
         }
       ],
-      "desde": 15000,
+      "desde": 19000,
       "descripcion": "Prohibido usar, vincular o reproducir el producto en más dispositivos de los permitidos (1 dispositivo).Prohibido modificar correo, contraseña o datos de facturación bajo cualquier motivo.Prohibido compartir, revender o transferir el acceso a terceros.Plan 1 mes: Te entregamos una cuenta nueva con YouTube Premium activo, para 1 solo dispositivo: sin anuncios, con descargas y con YouTube Music Premium incluido."
     },
     {
@@ -1248,16 +1248,16 @@
       "variantes": [
         {
           "nombre": "Suscripción 1 Mes",
-          "precio": 14000,
+          "precio": 18000,
           "precio_anterior": null
         },
         {
           "nombre": "Suscripción 3 Meses",
-          "precio": 34000,
+          "precio": 43000,
           "precio_anterior": null
         }
       ],
-      "desde": 14000,
+      "desde": 18000,
       "descripcion": "Prohibido usar, vincular o reproducir el producto en más dispositivos de los permitidos (1 dispositivo).Prohibido modificar correo, contraseña o datos de facturación bajo cualquier motivo.Prohibido compartir, revender o transferir el acceso a terceros.1 mes: Cuenta con Spotify Premium ya activo por 1 mes, para 1 solo dispositivo: música sin anuncios, saltos ilimitados, máxima calidad de audio y descargas para escuchar sin conexión."
     },
     {
@@ -1270,11 +1270,11 @@
       "variantes": [
         {
           "nombre": "Suscripción 1 Mes",
-          "precio": 10000,
+          "precio": 14000,
           "precio_anterior": null
         }
       ],
-      "desde": 10000,
+      "desde": 14000,
       "descripcion": "Prohibido usar, vincular o reproducir el producto en más dispositivos de los permitidos (1 dispositivo).Prohibido modificar correo, contraseña o datos de facturación bajo cualquier motivo.Prohibido compartir, revender o transferir el acceso a terceros.1 mes: Cuenta con Deezer Premium ya activo, para 1 solo dispositivo: audio de alta fidelidad (HiFi) sin anuncios, modo sin conexión y Flow, la mezcla que se arma con tus gustos."
     },
     {
@@ -1305,16 +1305,16 @@
       "variantes": [
         {
           "nombre": "Acceso 1 Mes",
-          "precio": 10000,
+          "precio": 14000,
           "precio_anterior": 18500
         },
         {
           "nombre": "Acceso 1 Año Completo",
-          "precio": 40000,
+          "precio": 50000,
           "precio_anterior": 85000
         }
       ],
-      "desde": 10000,
+      "desde": 14000,
       "descripcion": null
     },
     {
@@ -1327,11 +1327,11 @@
       "variantes": [
         {
           "nombre": "Suscripción 1 Mes",
-          "precio": 10000,
+          "precio": 14000,
           "precio_anterior": 18500
         }
       ],
-      "desde": 10000,
+      "desde": 14000,
       "descripcion": null
     },
     {
@@ -1344,16 +1344,16 @@
       "variantes": [
         {
           "nombre": "Licencia 1 Año (1 PC)",
-          "precio": 45000,
+          "precio": 57000,
           "precio_anterior": 80000
         },
         {
           "nombre": "Licencia 1 Año (5 PCs)",
-          "precio": 130000,
+          "precio": 165000,
           "precio_anterior": 180000
         }
       ],
-      "desde": 45000,
+      "desde": 57000,
       "descripcion": null
     },
     {
@@ -1463,21 +1463,21 @@
       "variantes": [
         {
           "nombre": "PIN de $25.900",
-          "precio": 25900,
+          "precio": 33000,
           "precio_anterior": null
         },
         {
           "nombre": "PIN de $36.900",
-          "precio": 36900,
+          "precio": 46000,
           "precio_anterior": null
         },
         {
           "nombre": "PIN de $54.900",
-          "precio": 54900,
+          "precio": 69000,
           "precio_anterior": null
         }
       ],
-      "desde": 25900,
+      "desde": 33000,
       "descripcion": "Disfruta Disney Plus con PIN virtual para 1 dispositivo.El PIN es de un solo uso y solo funciona en cuentas de Colombia.Antes de canjearlo, verifica que tu cuenta de Disney+ sea de Colombia: en cuentas de otro país la plataforma marca error.No compartas ni publiques el PIN antes de canjearlo: cualquiera que lo tenga lo puede usar.Estándar con Anuncios: 1 mes de Disney+ Estándar, con anuncios y sin ESPN.Estándar sin Anuncios: 1 mes de Disney+ Estándar, sin anuncios y sin ESPN.Premium Máximo: 1 mes de Disney+ Premium, con ESPN y deportes en vivo.No. Es prepago: no necesitas tarjeta de crédito y "
     },
     {
@@ -1490,31 +1490,31 @@
       "variantes": [
         {
           "nombre": "PIN de $20.000",
-          "precio": 20000,
+          "precio": 25000,
           "precio_anterior": null
         },
         {
           "nombre": "PIN de $30.000",
-          "precio": 30000,
+          "precio": 38000,
           "precio_anterior": null
         },
         {
           "nombre": "PIN de $35.000",
-          "precio": 35000,
+          "precio": 44000,
           "precio_anterior": null
         },
         {
           "nombre": "PIN de $40.000",
-          "precio": 40000,
+          "precio": 50000,
           "precio_anterior": null
         },
         {
           "nombre": "PIN de $50.000",
-          "precio": 50000,
+          "precio": 63000,
           "precio_anterior": null
         }
       ],
-      "desde": 20000,
+      "desde": 25000,
       "descripcion": "Activa tu suscripción Netflix con PIN Virtual. Pago seguro, entrega rápida y sin tarjeta.El PIN es de un solo uso y solo funciona en cuentas de Colombia.Antes de canjearlo, verifica que tu cuenta de Netflix sea de Colombia: en cuentas de otro país la plataforma marca error.No compartas ni publiques el PIN antes de canjearlo: cualquiera que lo tenga lo puede usar.PIN $20.000: Saldo de $20.000 que se abona a tu cuenta de Netflix.PIN $30.000: Saldo de $30.000 que se abona a tu cuenta de Netflix.PIN $35.000: Saldo de $35.000 que se abona a tu cuenta de Netflix.PIN $40.000: Saldo de $40.000 que se "
     },
     {
@@ -1527,21 +1527,21 @@
       "variantes": [
         {
           "nombre": "PIN de $64.000",
-          "precio": 64000,
+          "precio": 80000,
           "precio_anterior": null
         },
         {
           "nombre": "PIN de $79.900",
-          "precio": 79900,
+          "precio": 100000,
           "precio_anterior": null
         },
         {
           "nombre": "PIN de $102.900",
-          "precio": 102900,
+          "precio": 130000,
           "precio_anterior": null
         }
       ],
-      "desde": 64000,
+      "desde": 80000,
       "descripcion": "Recarga tu PIN Virtual Directv Go y disfruta TV en vivo, deportes y series sin contrato. Acceso inmediato y multidispositivo.El PIN es de un solo uso y solo funciona en cuentas de Colombia.Antes de canjearlo, verifica que tu cuenta de DirecTV Go sea de Colombia: en cuentas de otro país la plataforma marca error.No compartas ni publiques el PIN antes de canjearlo: cualquiera que lo tenga lo puede usar.PIN $64.000: PIN por valor de $64.000 para recargar tu cuenta de DirecTV Go.PIN $79.900: PIN por valor de $79.900 para recargar tu cuenta de DirecTV Go.PIN $102.900: PIN por valor de $102.900 para"
     },
     {
@@ -1554,11 +1554,11 @@
       "variantes": [
         {
           "nombre": "PIN 1 Mes ($39.900)",
-          "precio": 39900,
+          "precio": 50000,
           "precio_anterior": null
         }
       ],
-      "desde": 39900,
+      "desde": 50000,
       "descripcion": "Disfruta Win Play con PIN Virtual para ver fútbol colombiano en vivo HD.El PIN es de un solo uso y solo funciona en cuentas de Colombia.Antes de canjearlo, verifica que tu cuenta de Win Play sea de Colombia: en cuentas de otro país la plataforma marca error.No compartas ni publiques el PIN antes de canjearlo: cualquiera que lo tenga lo puede usar.PIN de $39.900: 1 mes de Win Play: partidos en vivo, programas y repeticiones, para ver en TV, celular y computador.No. Es prepago: no necesitas tarjeta de crédito y no hay cobros automáticos. Cuando se acaba el tiempo, el servicio se pausa y tú decid"
     },
     {
@@ -1571,11 +1571,11 @@
       "variantes": [
         {
           "nombre": "PIN de $22.900",
-          "precio": 22900,
+          "precio": 29000,
           "precio_anterior": null
         }
       ],
-      "desde": 22900,
+      "desde": 29000,
       "descripcion": "Activa tu PIN Virtual ViX Premium y disfruta series, deportes y más en 3 dispositivos sin contratos.El PIN es de un solo uso y solo funciona en cuentas de Colombia.Antes de canjearlo, verifica que tu cuenta de ViX sea de Colombia: en cuentas de otro país la plataforma marca error.No compartas ni publiques el PIN antes de canjearlo: cualquiera que lo tenga lo puede usar.PIN $22.900: 1 mes de ViX Premium: catálogo Premium y deportes en vivo, en varios dispositivos.No. Es prepago: no necesitas tarjeta de crédito y no hay cobros automáticos. Cuando se acaba el tiempo, el servicio se pausa y tú dec"
     },
     {
@@ -1588,11 +1588,11 @@
       "variantes": [
         {
           "nombre": "PIN de $19.500",
-          "precio": 19500,
+          "precio": 25000,
           "precio_anterior": null
         }
       ],
-      "desde": 19500,
+      "desde": 25000,
       "descripcion": "Recarga tu cuenta Deezer Premium con PIN Virtual en Colombia. Música sin anuncios, modo offline y calidad HiFi.El PIN es de un solo uso y solo funciona en cuentas de Colombia.Antes de canjearlo, verifica que tu cuenta de Deezer sea de Colombia: en cuentas de otro país la plataforma marca error.No compartas ni publiques el PIN antes de canjearlo: cualquiera que lo tenga lo puede usar.PIN $19.500: 1 mes de Deezer Premium: música sin anuncios y para escuchar sin conexión.No. Es prepago: no necesitas tarjeta de crédito y no hay cobros automáticos. Cuando se acaba el tiempo, el servicio se pausa y "
     },
     {
@@ -1633,21 +1633,21 @@
       "variantes": [
         {
           "nombre": "PIN de $25.000",
-          "precio": 25000,
+          "precio": 32000,
           "precio_anterior": null
         },
         {
           "nombre": "PIN de $50.000",
-          "precio": 50000,
+          "precio": 63000,
           "precio_anterior": null
         },
         {
           "nombre": "PIN de $100.000",
-          "precio": 100000,
+          "precio": 125000,
           "precio_anterior": null
         }
       ],
-      "desde": 25000,
+      "desde": 32000,
       "descripcion": "El PIN es de un solo uso y solo funciona en cuentas de Colombia.Antes de canjearlo, verifica que tu cuenta de Roblox sea de Colombia: en cuentas de otro país la plataforma marca error.No compartas ni publiques el PIN antes de canjearlo: cualquiera que lo tenga lo puede usar.PIN $25.000: Saldo de $25.000 para tu cuenta de Roblox: úsalo en Robux, Roblox Premium o compras.PIN $50.000: Saldo de $50.000 para tu cuenta de Roblox: úsalo en Robux, Roblox Premium o compras.PIN $100.000: Saldo de $100.000 para tu cuenta de Roblox: úsalo en Robux, Roblox Premium o compras."
     },
     {
@@ -1711,21 +1711,21 @@
       "variantes": [
         {
           "nombre": "PIN de $105.900",
-          "precio": 105900,
+          "precio": 135000,
           "precio_anterior": null
         },
         {
           "nombre": "PIN de $159.900",
-          "precio": 159900,
+          "precio": 200000,
           "precio_anterior": null
         },
         {
           "nombre": "PIN de $189.900",
-          "precio": 189900,
+          "precio": 240000,
           "precio_anterior": null
         }
       ],
-      "desde": 105900,
+      "desde": 135000,
       "descripcion": "Activa tu PIN Virtual McAfee y protege tus dispositivos contra virus y amenazas.Prohibido activar el código en más dispositivos de los que incluye tu plan.Prohibido usar programas pirata, cracks o activadores ilegales en el equipo.Prohibido compartir, revender o transferir la licencia a terceros.1 año, 1 dispositivo: Licencia original por 365 días para 1 dispositivo: antivirus en tiempo real y navegación segura.1 año, 5 dispositivos: Licencia original por 365 días para hasta 5 dispositivos (PC, Mac, Android e iOS).1 año, 10 dispositivos: Licencia original por 365 días para hasta 10 dispositivo"
     },
     {
@@ -1738,11 +1738,11 @@
       "variantes": [
         {
           "nombre": "PIN de $15.000",
-          "precio": 15000,
+          "precio": 19000,
           "precio_anterior": null
         }
       ],
-      "desde": 15000,
+      "desde": 19000,
       "descripcion": "Accede a tu perfil financiero en Datacrédito. Consulta tu puntaje, reportes y previene fraudes.El PIN es de un solo uso y solo funciona con cédula colombiana.Canjéalo en la página oficial de Mi DataCrédito, con tu propia cédula.No compartas ni publiques el PIN antes de canjearlo: cualquiera que lo tenga lo puede usar.PIN de $15.000: 1 mes de acceso Premium a Mi DataCrédito (Experian): tu historia y puntaje de crédito, con alertas de cambios.No. Es prepago: no necesitas tarjeta de crédito y no hay cobros automáticos. Cuando se acaba el tiempo, el servicio se pausa y tú decides cuándo recargar."
     },
     {

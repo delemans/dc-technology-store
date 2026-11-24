@@ -16,7 +16,7 @@ const fila = (o) => ({ referencia: 'DC-AAAAA', estado: 'REVISION_MANUAL', espera
 const enrutar = (msg, abiertas) => { datos = { 'Config bot': [cfg], 'Normalizar mensaje': [msg] }; return correr('Enrutar evento', abiertas).then((r) => r.map((x) => x.json)); };
 
 (async () => {
-    ok(base.canal_compra === 'manual' && base.anc_margen === '0', 'Config: compra manual y margen sobre ANC 0 (mismo precio que ANC)');
+    ok(base.canal_compra === 'manual' && base.anc_margen === '12' && base.anc_descuento_max === '10' && base.anc_margen_minimo === '2000', 'Config: compra manual y margen sobre ANC 12 % garantizado aun con el 10 % de descuento');
     memoria.ordenesChat = { [CLI]: { referencia: 'DC-AAAAA', plan: 'Netflix · Pantalla 26 dias', costo: 15000, at: Date.now() } };
     // #ok de un pedido por chat
     let r = await enrutar({ origen: 'admin', accion: 'ok', referencia: 'DC-AAAAA', numero: ADMIN, texto: '#ok DC-AAAAA' }, [fila()]);
@@ -98,10 +98,11 @@ const enrutar = (msg, abiertas) => { datos = { 'Config bot': [cfg], 'Normalizar 
     datos = { 'Config bot': [cfg] };
     const p = (await correr('Leer precios ANC', [], real))[0].json;
     const net = p.items.find((i) => i.producto_id === 'netflix');
-    ok(p.items.length >= 12 && net && net.precio === net.costo && net.precio >= 10000, `precios de ANC: ${p.items.length} planes (Netflix ${net?.variante}: $${net?.precio})`);
-    datos = { 'Config bot': [{ ...cfg, anc_margen: '10' }] };
+    const pv = (c) => { const b = Math.max((c * 1.12) / 0.9, (c + 2000) / 0.9); const paso = b >= 100000 ? 5000 : 1000; return Math.ceil(b / paso) * paso; };
+    ok(p.items.length >= 12 && net && net.precio === pv(net.costo) && net.precio > net.costo, `precios de ANC con margen: ${p.items.length} planes (Netflix ${net?.variante}: costo ${net?.costo} → ${net?.precio})`);
+    datos = { 'Config bot': [{ ...cfg, anc_margen: '0' }] };
     const p2 = (await correr('Leer precios ANC', [], real))[0].json;
-    ok(p2.items.find((i) => i.producto_id === 'netflix').precio === Math.round(net.costo * 1.1 / 100) * 100, 'con anc_margen = 10 → costo + 10 % redondeado a $100');
+    ok(p2.items.find((i) => i.producto_id === 'netflix').precio === pv(net.costo), 'con anc_margen = 0 igual se guarda el margen mínimo (nunca se vende a costo)');
     datos = { 'Config bot': [cfg], 'Leer precios ANC': [p] };
     const correrPreciosAnc = ([sync]) => { datos['Sincronizar precios ANC'] = [sync]; return correr('Resultado precios ANC', [{}]); };
     const rp = await correrPreciosAnc([{ actualizados: 1, sin_cambio: 10, omitidos: 1, cambios: [{ producto_id: 'netflix', variante: 'Pantalla', antes: 15000, ahora: 16000, aplicado: true }, { producto_id: 'hbo-max', variante: 'X', antes: 8000, ahora: 30000, aplicado: false }] }]);

@@ -2578,10 +2578,15 @@ function resultadoPanel() {
     return admin ? [{ json: { numero: admin, texto: `⚠️ El panel no registró *#${pedido.referencia ?? ''}* (${String(r.error?.message ?? fila?.mensaje ?? 'sin respuesta').slice(0, 140)}). Márcalo a mano; si dice que no existe la función, aplica supabase/wo-042-pedidos-whatsapp.sql.` } }] : [];
 }
 
-/* ---------- J) Precios de ANC cada 6 h (WO-042): precio de venta = tienda de ANC + margen (anc_margen, 0 por defecto) ---------- */
+/* ---------- J) Precios de ANC cada 6 h (WO-042 → 24/11/2026): precio de venta = costo de ANC con margen garantizado (precios-margen.mjs) ---------- */
 async function leerPreciosAnc() {
     const cfg = $('Config bot').first().json;
-    const margen = Number(cfg.anc_margen) > 0 ? Number(cfg.anc_margen) : 0;
+    // Regla de margen (herramientas/precios-margen.mjs, 24/11/2026): margen NETO mínimo aun con el mayor descuento
+    // (cupón de primera compra). Nunca menos de 12 % ni de $2.000 aunque Config bot diga 0 (antes se vendía a costo).
+    const margen = Math.max(12, Number(cfg.anc_margen) || 0);
+    const descMax = Math.min(50, Math.max(10, Number(cfg.anc_descuento_max) || 0));
+    const minimo = Math.max(2000, Number(cfg.anc_margen_minimo) || 0);
+    const precioVenta = (c) => { const d = 1 - descMax / 100; const b = Math.max((c * (1 + margen / 100)) / d, (c + minimo) / d); const paso = b >= 100000 ? 5000 : 1000; return Math.ceil(b / paso) * paso; };
     const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Safari/537.36';
     const base = 'https://allnecessarycolombia.com/productos/';
     const productos = [];
@@ -2616,7 +2621,7 @@ async function leerPreciosAnc() {
         if (!v?.precio) continue;
         const nuestros = dias(m.variante), suyos = dias(v.nombre);
         if (nuestros && suyos && nuestros !== suyos) duraciones.push({ producto_id: m.id, variante: m.variante, nuestros, suyos, plan: v.nombre });
-        items.push({ producto_id: m.id, variante: m.variante, costo: v.precio, precio: Math.round((v.precio * (1 + margen / 100)) / 100) * 100, plan: `${m.anc_producto} · ${m.anc_plan}` });
+        items.push({ producto_id: m.id, variante: m.variante, costo: v.precio, precio: precioVenta(v.precio), plan: `${m.anc_producto} · ${m.anc_plan}` });
     }
     // Lo que ya no está en su tienda cuenta como agotado, solo si la lectura fue completa (≥ 80 % encontrado)
     if (disponibilidad.length >= (disponibilidad.length + faltan.length) * 0.8) disponibilidad.push(...faltan);
@@ -2830,7 +2835,9 @@ nodo('Config bot', 'n8n-nodes-base.set', 3.4, [220, 0], set({
     // Etiquetas de WhatsApp Business en las que el bot NO responde (separadas por coma): contactos personales u otros negocios
     etiquetas_silencio: 'BAENAMORA',
     // Precio de venta = tienda de ANC + este % (0 = igual que ANC). Se aplica cada 6 h (WO-042)
-    anc_margen: '0',
+    anc_margen: '12',
+    anc_descuento_max: '10',
+    anc_margen_minimo: '2000',
     bot_responde: 'si',
     entrega_cuentas: 'manual', // 'manual' (por defecto): las cuentas las entregas tú con #entregar · 'automatica': el bot entrega lo que mande ANC (confianza ≥ 0,9)
     consultar_proveedor: 'si',   // 'no' = no le pregunta a ANC por los productos de cada pedido nuevo          // 'no' = el bot no le contesta a nadie (tus comandos #ok/#no/#entregar y el proveedor siguen)

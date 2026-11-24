@@ -46,7 +46,7 @@ Register-ScheduledTask -TaskName '${tarea}' -Action $a -Trigger $d -Settings $s 
 }
 
 /* ---------- Datos vigentes ---------- */
-const salida = execFileSync(process.execPath, ['--use-system-ca', path.join(RAIZ, 'herramientas', 'publicidad-diciembre.mjs'), '--json'], { encoding: 'utf8', maxBuffer: 64 << 20 });
+const salida = execFileSync(process.execPath, ['--use-system-ca', path.join(RAIZ, 'herramientas', 'publicidad-diciembre.mjs'), '--json', ...(['--formatos', '--probar'].some((x) => process.argv.includes(x)) ? ['--forzar-precios'] : [])], { encoding: 'utf8', maxBuffer: 64 << 20 });
 const datos = JSON.parse(salida.split('@@DATOS@@')[1]);
 const porId = Object.fromEntries(datos.map((x) => [x.id, x]));
 const desde = (x) => Math.min(...x.planes.map((v) => v.precio));

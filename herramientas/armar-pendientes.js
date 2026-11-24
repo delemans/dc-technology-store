@@ -24,6 +24,7 @@ const ORDEN = [
     ['wo-056-libro-pqr.sql', 'libro de PQR'],
     ['wo-057-gastos-fijos.sql', 'gastos fijos'],
     ['wo-058-solo-anc.sql', 'solo ANC y precios de servicios'],
+    ['wo-059-precios-con-margen.sql', 'precios de ANC con margen garantizado (también con el cupón)'],
 ];
 const hoy = new Date().toLocaleDateString('es-CO', { timeZone: 'America/Bogota', day: '2-digit', month: '2-digit', year: 'numeric' });
 const partes = [

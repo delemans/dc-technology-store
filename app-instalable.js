@@ -54,12 +54,15 @@
     addEventListener('beforeinstallprompt', () => setTimeout(() => mostrarAviso(false), 12000));
     if (esIOS && /safari/i.test(navigator.userAgent) && !/crios|fxios/i.test(navigator.userAgent)) setTimeout(() => mostrarAviso(true), 12000);
 
-    /* ---------- Música de fondo (Web Audio) ---------- */
-    const VOLUMEN = 0.05;
-    let ctx = null, salida = null, temporizador = null, encendida = false;
-    // Acordes suaves en La menor (Am9 → Fmaj7 → C → G6), frecuencias en Hz
-    const ACORDES = [[110, 164.81, 196, 246.94], [87.31, 130.81, 164.81, 220], [130.81, 196, 246.94, 329.63], [98, 146.83, 196, 246.94]];
-    const NOTAS = [440, 523.25, 587.33, 659.25, 783.99, 880];
+    /* ---------- Música de fondo (Web Audio) · 24/11/2026: ritmo caribeño PROPIO (no usa canciones con derechos) ----------
+       Patrón sincopado tipo dancehall a 96 ppm: bombo, caja, shaker, bajo y una melodía de «steel drum» original
+       (pentatónica de La menor). Suave (volumen bajo) y por compases programados con anticipación (no se entrecorta). */
+    const VOLUMEN = 0.06;
+    const PPM = 96, PASO = 60 / PPM / 4, COMPAS = PASO * 16;
+    let ctx = null, salida = null, temporizador = null, encendida = false, siguiente = 0, ruido = null;
+    // Am – F – C – G (raíces del bajo en Hz) y notas de la melodía (La menor pentatónica)
+    const RAICES = [55, 43.65, 65.41, 49];
+    const ESCALA = [440, 523.25, 587.33, 659.25, 783.99, 880, 1046.5];
     let paso = 0;
 
     function crear() {
@@ -68,45 +71,42 @@
         salida.gain.value = 0;
         const filtro = ctx.createBiquadFilter();
         filtro.type = 'lowpass';
-        filtro.frequency.value = 1400;
-        // Eco suave: da la sensación de espacio "tecnológico"
+        filtro.frequency.value = 2600;
         const eco = ctx.createDelay(1);
-        eco.delayTime.value = 0.38;
+        eco.delayTime.value = PASO * 3;
         const reto = ctx.createGain();
-        reto.gain.value = 0.32;
+        reto.gain.value = 0.22;
         eco.connect(reto).connect(eco);
         filtro.connect(salida);
         filtro.connect(eco);
         reto.connect(salida);
         salida.connect(ctx.destination);
         salida.filtro = filtro;
+        ruido = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
+        const d = ruido.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
     }
+    const env = (g, t, v, a, dur) => { g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(v, t + a); g.gain.exponentialRampToValueAtTime(0.0001, t + a + dur); };
+    function bombo(t) { const o = ctx.createOscillator(); o.frequency.setValueAtTime(120, t); o.frequency.exponentialRampToValueAtTime(45, t + 0.12); const g = ctx.createGain(); env(g, t, 0.9, 0.003, 0.28); o.connect(g).connect(salida.filtro); o.start(t); o.stop(t + 0.35); }
+    function caja(t, v = 0.35) { const b = ctx.createBufferSource(); b.buffer = ruido; const f = ctx.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = 1800; f.Q.value = 0.8; const g = ctx.createGain(); env(g, t, v, 0.002, 0.12); b.connect(f).connect(g).connect(salida.filtro); b.start(t, Math.random() * 0.5); b.stop(t + 0.16); }
+    function shaker(t, v) { const b = ctx.createBufferSource(); b.buffer = ruido; const f = ctx.createBiquadFilter(); f.type = 'highpass'; f.frequency.value = 7000; const g = ctx.createGain(); env(g, t, v, 0.004, 0.05); b.connect(f).connect(g).connect(salida.filtro); b.start(t, Math.random() * 0.5); b.stop(t + 0.07); }
+    function bajo(t, fr, dur) { const o = ctx.createOscillator(); o.type = 'triangle'; o.frequency.value = fr; const g = ctx.createGain(); env(g, t, 0.55, 0.01, dur); o.connect(g).connect(salida.filtro); o.start(t); o.stop(t + dur + 0.05); }
+    function steel(t, fr) { [[1, 1], [2.01, 0.35], [3.9, 0.12]].forEach(([r, a]) => { const o = ctx.createOscillator(); o.frequency.value = fr * r; const g = ctx.createGain(); env(g, t, 0.16 * a, 0.004, 0.45); o.connect(g).connect(salida.filtro); o.start(t); o.stop(t + 0.5); }); }
 
-    function tono(frec, inicio, duracion, nivel, tipo) {
-        const o = ctx.createOscillator();
-        const g = ctx.createGain();
-        o.type = tipo;
-        o.frequency.value = frec;
-        o.detune.value = (Math.random() - 0.5) * 8;
-        g.gain.setValueAtTime(0, inicio);
-        g.gain.linearRampToValueAtTime(nivel, inicio + Math.min(1.8, duracion / 3));
-        g.gain.linearRampToValueAtTime(0, inicio + duracion);
-        o.connect(g).connect(salida.filtro);
-        o.start(inicio);
-        o.stop(inicio + duracion + 0.05);
-    }
-
-    function compas() {
-        const t = ctx.currentTime + 0.05;
-        const acorde = ACORDES[paso % ACORDES.length];
-        acorde.forEach((f) => tono(f, t, 8.4, 0.06, 'sine'));
-        tono(acorde[0] / 2, t, 8.4, 0.05, 'triangle');
-        // Pulsos cortos tipo "dato" (pocos y al azar, para que no canse)
-        for (let i = 0; i < 4; i++) {
-            if (Math.random() < 0.55) tono(NOTAS[Math.floor(Math.random() * NOTAS.length)], t + i * 2 + 0.5, 0.6, 0.025, 'sine');
+    function compas(t) {
+        const raiz = RAICES[paso % RAICES.length];
+        for (let i = 0; i < 16; i++) {
+            const tt = t + i * PASO;
+            if (i % 4 === 0) bombo(tt);                       // bombo en cada tiempo
+            if (i === 3 || i === 6 || i === 11 || i === 14) caja(tt); // caja sincopada (patrón dancehall)
+            shaker(tt, i % 2 ? 0.05 : 0.09);
         }
+        bajo(t, raiz, PASO * 5); bajo(t + PASO * 7, raiz, PASO * 2); bajo(t + PASO * 10, raiz * 1.5, PASO * 4);
+        // melodía: pocas notas y con aire, distinta en cada compás
+        for (let i = 0; i < 16; i += 2) if (Math.random() < (i % 4 ? 0.22 : 0.4)) steel(t + i * PASO, ESCALA[Math.floor(Math.random() * ESCALA.length)]);
         paso += 1;
     }
+    // Programador: siempre deja el compás siguiente listo (el sonido no depende de los temporizadores del navegador)
+    function programar() { while (siguiente < ctx.currentTime + COMPAS * 1.5) { compas(siguiente); siguiente += COMPAS; } }
 
     function pintar() {
         document.querySelectorAll('[data-musica]').forEach((b) => {
@@ -123,7 +123,7 @@
         if (ctx.state === 'suspended') ctx.resume().catch(() => {});
         salida.gain.cancelScheduledValues(ctx.currentTime);
         salida.gain.linearRampToValueAtTime(VOLUMEN, ctx.currentTime + 2.5);
-        if (!temporizador) { compas(); temporizador = setInterval(compas, 8000); }
+        if (!temporizador) { siguiente = ctx.currentTime + 0.1; programar(); temporizador = setInterval(programar, 500); }
         encendida = true;
         pintar();
     }
@@ -144,13 +144,17 @@
         if (encendida) apagar();
         else { guardar('dc_musica', 'si'); encender(); }
     });
-    // Si la dejó encendida antes, vuelve a sonar con su primer toque en la página (los navegadores lo exigen)
-    if (leer('dc_musica') === 'si') {
+    // Suena sola con el primer toque en la página (los navegadores lo exigen), salvo que la persona la haya apagado.
+    // Si la intro de la marca está en pantalla, espera a que termine para no pisar su sonido.
+    if (leer('dc_musica') !== 'no') {
+        const cuandoTermineIntro = (fn) => { if (!document.getElementById('dc-intro')) return fn(); const v = setInterval(() => { if (!document.getElementById('dc-intro')) { clearInterval(v); fn(); } }, 300); };
         const primerToque = (e) => {
             if (e.target.closest?.('[data-musica]')) return;
-            if (leer('dc_musica') === 'si' && !encendida) encender();
+            document.removeEventListener('pointerdown', primerToque); document.removeEventListener('keydown', primerToque);
+            cuandoTermineIntro(() => { if (leer('dc_musica') !== 'no' && !encendida) encender(); });
         };
-        document.addEventListener('pointerdown', primerToque, { once: true });
+        document.addEventListener('pointerdown', primerToque);
+        document.addEventListener('keydown', primerToque);
     }
     document.addEventListener('visibilitychange', () => {
         if (document.hidden && encendida) { apagar(false); encendida = false; document.documentElement.dataset.musicaPausada = '1'; }

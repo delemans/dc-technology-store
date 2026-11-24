@@ -126,6 +126,14 @@ const piezas = visibles.filter((p) => eq[p.id] || GANCHOS[p.id]?.tema && p.id.st
 const faltan = piezas.filter((x) => x.falta).map((x) => x.p.id);
 if (faltan.length) { console.log(`⚠ Productos sin gancho de diciembre (agrégalos en GANCHOS): ${faltan.join(', ')}`); }
 const listas = piezas.filter((x) => !x.falta && x.planes.length);
+// Candado de precios (24/11/2026): la publicidad muestra lo que COBRA la base. Si la base todavía tiene un precio de ANC
+// por debajo del precio con margen (productos.json, recalcular-precios-anc.mjs), no se genera nada: primero se aplica
+// supabase/wo-059 o se espera la sincronización de n8n (cada 6 h). Así ninguna pieza sale con un precio viejo.
+const pendientesPrecio = listas.filter((x) => eq[x.p.id]).flatMap((x) => x.p.variantes.filter((v) => { const b = x.planes.find((y) => y.nombre === v.nombre); return b && b.precio < Number(v.precio); }).map((v) => `${x.p.nombre} · ${v.nombre}: la base cobra ${cop(x.planes.find((y) => y.nombre === v.nombre).precio)} y el precio con margen es ${cop(v.precio)}`));
+if (pendientesPrecio.length && !args.includes('--forzar-precios')) {
+    console.log(`⛔ La base todavía tiene ${pendientesPrecio.length} precios sin el margen nuevo (p. ej. ${pendientesPrecio[0]}).\n   Aplica supabase/APLICAR-PENDIENTES.sql (wo-059) o espera la sincronización de n8n, y vuelve a correr. No se generó nada.`);
+    process.exit(2);
+}
 const archivo = (x) => `${x.n}-${x.p.id}`.slice(0, 80);
 
 /* ---------- Pieza HTML ---------- */

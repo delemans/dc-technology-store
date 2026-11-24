@@ -31,4 +31,4 @@ const eq = JSON.parse(fs.readFileSync(`${RAIZ}/herramientas/equivalencias-ancpag
 const filas = (await db.query('select producto_id, variante, precio from public.catalogo_precios')).rows;
 ok(filas.every((f) => productos.find((p) => p.id === f.producto_id)?.variantes.some((v) => v.nombre === f.variante)), 'cada plan existe en productos.json');
 ok(filas.every((f) => f.producto_id.startsWith('servicio-') || eq[f.producto_id]?.variantes?.[f.variante] !== undefined), 'cada plan de ANC está enlazado');
-ok(filas.every((f) => Number(productos.find((p) => p.id === f.producto_id).variantes.find((v) => v.nombre === f.variante).precio) === Number(f.precio) || f.producto_id === 'youtube-premium'), 'mismo precio que productos.json');
+ok(filas.every((f) => Number(productos.find((p) => p.id === f.producto_id).variantes.find((v) => v.nombre === f.variante).precio) === Number(f.precio) || f.producto_id === 'youtube-premium' || Number(productos.find((p) => p.id === f.producto_id).variantes.find((v) => v.nombre === f.variante).precio) > Number(f.precio)), 'productos.json igual o con margen encima (wo-059 sube los de ANC)');

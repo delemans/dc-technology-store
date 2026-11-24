@@ -35,5 +35,5 @@ const cfg = flujo.nodes.find((n) => n.name === 'Config bot').parameters.assignme
     ok(inter && inter.stock === null, 'ANC: sin cantidad publicada → sin límite (null)');
     const reloj = l.disponibilidad.find((x) => x.producto_id === 'reloj-inteligente-smartwatch-d16-con-auriculares-inalambricos-incorporados');
     ok(reloj?.agotado === true && reloj.stock === 0, 'ANC: reloj D16 (ahora enlazado) con 0 unidades → agotado');
-    ok(l.items.some((x) => x.producto_id === 'reloj-inteligente-smartwatch-d16-con-auriculares-inalambricos-incorporados' && x.precio === 180000), 'ANC: el reloj D16 también sincroniza su precio');
+    ok(l.items.some((x) => x.producto_id === 'reloj-inteligente-smartwatch-d16-con-auriculares-inalambricos-incorporados' && x.costo === 180000 && x.precio === 225000), 'ANC: el reloj D16 también sincroniza su precio (costo $180.000 → $225.000 con margen)');
 })();

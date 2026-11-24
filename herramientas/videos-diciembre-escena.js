@@ -385,6 +385,7 @@ ${planes.map((v, i) => `<div class="tk-r" id="tk${i}"><span>${esc(v.nombre)}</sp
                 if (d.tipo === 'cuenta') return `<div class="pe a">${esc(d.etiqueta ?? 'Muy pronto')}</div><div class="pn a" style="font-size:${Math.min(420, Math.floor(1500 / Math.max(1, d.grande.length)))}px">${esc(d.grande)}</div><div class="pf a">${d.linea}</div>${d.sub ? `<div class="ps a">${esc(d.sub)}</div>` : ''}`;
                 if (d.tipo === 'categoria') return `<div class="pe a">${esc(d.etiqueta)}</div><div class="pf a">${d.titulo}</div><div class="pc a">${d.imagenes.map((im, i) => `<span style="--i:${i}"><img src="${esc(im)}" alt=""></span>`).join('')}</div><div class="pp a">${esc(d.precio)}</div>${d.sub ? `<div class="ps a">${esc(d.sub)}</div>` : ''}`;
                 if (d.tipo === 'pasos') return `<div class="pf a">${d.titulo}</div>${d.pasos.map((p) => `<div class="pt a"><i>${esc(p[0])}</i><div><b>${esc(p[1])}</b><span>${esc(p[2])}</span></div></div>`).join('')}`;
+                if (d.tipo === 'carga') return `<div class="pe a">${esc(d.etiqueta ?? 'Cargando')}</div><div class="pk a" data-desde="${d.desde ?? 0}" data-hasta="${d.hasta}">${d.desde ?? 0}%</div><div class="pb a"><i></i></div><div class="pf a pf-s">${d.texto}</div>${d.sub ? `<div class="ps a">${esc(d.sub)}</div>` : ''}`;
                 if (d.tipo === 'cta') return `<div class="pf a">${d.texto}</div><div class="pw a">💬 ${esc('322 328 4622')}</div><div class="pu a">www.dctecnology.xyz</div>`;
                 return '';
             };
@@ -400,6 +401,8 @@ ${planes.map((v, i) => `<div class="tk-r" id="tk${i}"><span>${esc(v.nombre)}</sp
                 S(el, o, `scale(${lerp(1.06, 1, eo(seg(u, 0, d.dur)))})`, { filter: `blur(${lerp(10, 0, eo(seg(u, 0, 0.35)))}px)` });
                 if (!vis) return;
                 el.querySelectorAll('.a').forEach((a, i) => { const x = eb(seg(u, 0.15 + i * 0.2, 0.65 + i * 0.2)); S(a, cl(x * 1.3), `translateY(${lerp(70, 0, x)}px) scale(${lerp(0.9, 1, x)})`); });
+                // barra de carga: el porcentaje sube durante la escena
+                el.querySelectorAll('.pk').forEach((k) => { const p = Math.round(lerp(Number(k.dataset.desde), Number(k.dataset.hasta), eio(seg(u, 0.5, d.dur * 0.8)))); k.textContent = `${p}%`; const b = el.querySelector('.pb i'); if (b) b.style.width = `${p}%`; });
                 el.querySelectorAll('.pc span').forEach((sp, i) => { sp.style.transform = `rotate(${(i - 1) * 8}deg) translateY(${Math.abs(i - 1) * 30 + Math.sin(t * 2 + i) * 8}px)`; });
             });
             ['#marca', '#tema', '#h1', '#vit', '#info', '#pie'].forEach((s) => S($(s), 0));
