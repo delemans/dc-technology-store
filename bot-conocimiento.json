@@ -1,5 +1,5 @@
 {
-  "version": "2026-11-24T16:33:26.102Z",
+  "version": "2026-11-24T21:27:27.867Z",
   "identidad": [
     "Eres DC TECNOLOGY: respondes el WhatsApp de la tienda (https://www.dctecnology.xyz) en nombre del equipo. Habla como la tienda (\"te ayudamos\", \"te enviamos\").",
     "En el PRIMER mensaje de la conversación saluda así: \"¡Hola! Te saluda *DC TECNOLOGY* 👋\", responde lo que preguntó y cierra con: \"Escribe *menú* para ver todas las opciones.\" Después no vuelvas a presentarte (si el contexto trae un mensaje del menú, la conversación ya empezó).",
@@ -967,7 +967,7 @@
       "marca": "Disney",
       "nombre": "Disney Plus Premium",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-91-9267e0a1730671bcf517247095798757-640-0.webp",
-      "url": "https://www.dctecnology.xyz/p/disney-plus.html",
+      "url": "https://www.dctecnology.xyz/?producto=disney-plus",
       "variantes": [
         {
           "nombre": "Pantalla Premium",
@@ -975,6 +975,7 @@
           "precio_anterior": 25000
         }
       ],
+      "oculto": true,
       "desde": 15000,
       "descripcion": null
     },

@@ -25,7 +25,7 @@ Precios en pesos colombianos. Son los de productos.json: en la tienda manda el p
 - Reloj Inteligente Smartwatch GT5 Pro En Acero Inoxidable · desde $ 140.000 · id `reloj-inteligente-smartwatch-gt5-pro-en-acero-inoxidable` · https://www.dctecnology.xyz/p/reloj-inteligente-smartwatch-gt5-pro-en-acero-inoxidable.html
 - Reloj Inteligente Smartwatch D16 con Auriculares Inalámbricos incorporados · desde $ 180.000 · id `reloj-inteligente-smartwatch-d16-con-auriculares-inalambricos-incorporados` · https://www.dctecnology.xyz/p/reloj-inteligente-smartwatch-d16-con-auriculares-inalambricos-incorporados.html
 
-## Streaming (16)
+## Streaming (15)
 
 - Max (HBO) · desde $ 8.000 · 3 planes · id `hbo-max` · https://www.dctecnology.xyz/p/hbo-max.html
 - Vix Premium · desde $ 8.000 · id `vix-premium` · https://www.dctecnology.xyz/p/vix-premium.html
@@ -39,7 +39,6 @@ Precios en pesos colombianos. Son los de productos.json: en la tienda manda el p
 - Apple TV Plus · desde $ 12.000 · id `apple-tv` · https://www.dctecnology.xyz/p/apple-tv.html
 - Spotify Premium · desde $ 14.000 · 2 planes · id `spotify-premium` · https://www.dctecnology.xyz/p/spotify-premium.html
 - Netflix Premium 4K · desde $ 15.000 · id `netflix` · https://www.dctecnology.xyz/p/netflix.html
-- Disney Plus Premium · desde $ 15.000 · id `disney-plus` · https://www.dctecnology.xyz/p/disney-plus.html
 - YouTube Premium · desde $ 15.000 · id `youtube-premium` · https://www.dctecnology.xyz/p/youtube-premium.html
 - Combo de 3 o 4 Plataformas · desde $ 30.000 · 4 planes · id `combo-3-o-4-plataformas` · https://www.dctecnology.xyz/p/combo-3-o-4-plataformas.html
 - DirecTV Go · desde $ 30.000 · 2 planes · id `directv-go` · https://www.dctecnology.xyz/p/directv-go.html
