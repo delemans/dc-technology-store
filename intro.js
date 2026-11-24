@@ -1,4 +1,5 @@
 // intro.js — Apertura de marca al entrar a la tienda (pedidos del director del 24/11/2026): estilo «apertura mágica»
+// con los colores de DC Tecnology y del sitio (oscuro + rojo #E03445/#FF2A5F + blanco), nunca colores de terceros
 // (cielo nocturno, un arco de luz que cruza sobre el logo dejando brillos, destello, «DC TECNOLOGY» y «dctecnology.xyz»)
 // con un sonido PROPIO de la marca (barrido de destellos + acorde; original, sin recursos de terceros).
 // Sale CADA VEZ que alguien entra desde afuera (no al navegar dentro del sitio), ~3,4 s, botón «Saltar», no bloquea la
@@ -18,23 +19,23 @@
 
     const css = `
 #dc-intro{position:fixed;inset:0;z-index:2147483000;display:grid;place-items:center;overflow:hidden;cursor:pointer;
-  background:radial-gradient(70% 55% at 50% 38%,#16234A 0%,#0A1230 45%,#03050F 100%);transition:opacity .5s ease,visibility .5s}
+  background:radial-gradient(70% 55% at 50% 38%,#3A0E17 0%,#14090D 45%,#08090D 100%);transition:opacity .5s ease,visibility .5s}
 #dc-intro.fuera{opacity:0;visibility:hidden}
 #dc-intro .dci-cielo i{position:absolute;border-radius:50%;background:#fff;opacity:0;animation:dci-tit 2.6s ease-in-out infinite}
-#dc-intro .dci-niebla{position:absolute;left:-10%;right:-10%;bottom:-20%;height:55%;background:radial-gradient(60% 60% at 50% 100%,rgba(90,130,255,.28),transparent 70%);filter:blur(10px)}
-#dc-intro .dci-centro{position:relative;margin-top:-16vh;display:flex;flex-direction:column;align-items:center;gap:16px}
+#dc-intro .dci-niebla{position:absolute;left:-10%;right:-10%;bottom:-20%;height:55%;background:radial-gradient(60% 60% at 50% 100%,rgba(224,52,69,.3),transparent 70%);filter:blur(10px)}
+#dc-intro .dci-centro{position:relative;margin-top:-22vh;display:flex;flex-direction:column;align-items:center;gap:16px}
 #dc-intro svg.dci-arco{position:absolute;left:50%;top:50%;width:min(96vw,620px);height:auto;transform:translate(-50%,-64%);overflow:visible}
-#dc-intro svg.dci-arco path{fill:none;stroke:url(#dci-g);stroke-width:5;stroke-linecap:round;stroke-dasharray:1000;stroke-dashoffset:1000;filter:drop-shadow(0 0 12px #FFE9A8) drop-shadow(0 0 30px rgba(120,160,255,.8));animation:dci-arco 1.6s .2s cubic-bezier(.55,.05,.25,1) forwards}
+#dc-intro svg.dci-arco path{fill:none;stroke:url(#dci-g);stroke-width:5;stroke-linecap:round;stroke-dasharray:1000;stroke-dashoffset:1000;filter:drop-shadow(0 0 12px #FFFFFF) drop-shadow(0 0 30px rgba(224,52,69,.9));animation:dci-arco 1.6s .2s cubic-bezier(.55,.05,.25,1) forwards}
 #dc-intro .dci-chispa-caja{position:absolute;left:50%;top:50%;width:620px;height:290px;transform:translate(-50%,-64%) scale(var(--k,1))}
-#dc-intro .dci-chispa{position:absolute;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 0 20px 9px #FFE9A8,0 0 60px 26px rgba(140,180,255,.65);offset-path:path('M 20 260 Q 310 -100 600 260');offset-distance:0%;opacity:0;animation:dci-chispa 1.6s .2s cubic-bezier(.55,.05,.25,1) forwards}
-#dc-intro .dci-polvo{position:absolute;width:4px;height:4px;border-radius:50%;background:#FFF6D8;box-shadow:0 0 8px 2px #FFE9A8;opacity:0;animation:dci-polvo 1.4s ease-out forwards}
-#dc-intro .dci-destello{position:absolute;left:50%;top:50%;width:520px;height:520px;margin:-260px 0 0 -260px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.95),rgba(255,233,168,.5) 25%,transparent 60%);opacity:0;transform:scale(.2);animation:dci-destello 1s .75s ease-out forwards}
-#dc-intro img{position:relative;width:clamp(116px,28vw,180px);height:auto;border-radius:28%;background:#fff;box-shadow:0 0 0 6px #F2C14E,0 0 60px 10px rgba(255,233,168,.45),0 30px 70px -20px rgba(0,0,0,.9);opacity:0;transform:scale(.55);filter:brightness(2.2);animation:dci-logo 1.1s .8s cubic-bezier(.2,1.3,.4,1) forwards}
-#dc-intro .dci-nombre{position:relative;font:900 clamp(36px,9vw,70px)/1 Outfit,system-ui,sans-serif;letter-spacing:.06em;color:#fff;white-space:nowrap;text-shadow:0 0 24px rgba(140,180,255,.55)}
+#dc-intro .dci-chispa{position:absolute;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 0 20px 9px #FFD5DA,0 0 60px 26px rgba(255,42,95,.7);offset-path:path('M 20 260 Q 310 -100 600 260');offset-distance:0%;opacity:0;animation:dci-chispa 1.6s .2s cubic-bezier(.55,.05,.25,1) forwards}
+#dc-intro .dci-polvo{position:absolute;width:4px;height:4px;border-radius:50%;background:#FFFFFF;box-shadow:0 0 8px 2px #FF2A5F;opacity:0;animation:dci-polvo 1.4s ease-out forwards}
+#dc-intro .dci-destello{position:absolute;left:50%;top:50%;width:520px;height:520px;margin:-260px 0 0 -260px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.95),rgba(255,42,95,.45) 25%,transparent 60%);opacity:0;transform:scale(.2);animation:dci-destello 1s .75s ease-out forwards}
+#dc-intro img{position:relative;width:clamp(116px,28vw,180px);height:auto;border-radius:28%;background:#fff;box-shadow:0 0 0 6px #E03445,0 0 60px 12px rgba(255,42,95,.45),0 30px 70px -20px rgba(0,0,0,.9);opacity:0;transform:scale(.55);filter:brightness(2.2);animation:dci-logo 1.1s .8s cubic-bezier(.2,1.3,.4,1) forwards}
+#dc-intro .dci-nombre{position:relative;font:900 clamp(36px,9vw,70px)/1 Outfit,system-ui,sans-serif;letter-spacing:.06em;color:#fff;white-space:nowrap;text-shadow:0 0 24px rgba(255,42,95,.45)}
 #dc-intro .dci-nombre span{display:inline-block;opacity:0;transform:translateY(26px) scale(.9);animation:dci-letra .55s cubic-bezier(.2,1.25,.4,1) forwards}
-#dc-intro .dci-nombre b{color:#F2C14E}
+#dc-intro .dci-nombre b{color:#E03445}
 #dc-intro .dci-dominio{position:relative;font:800 clamp(18px,4.6vw,28px)/1 Outfit,system-ui,sans-serif;letter-spacing:.08em;color:#fff;opacity:0;animation:dci-sube .7s 1.85s cubic-bezier(.2,1.2,.4,1) forwards}
-#dc-intro .dci-dominio b{color:#F2C14E}
+#dc-intro .dci-dominio b{color:#FF2A5F}
 #dc-intro .dci-lema{position:relative;font:700 clamp(11px,3vw,15px)/1.3 Inter,system-ui,sans-serif;letter-spacing:.26em;text-transform:uppercase;color:rgba(255,255,255,.7);opacity:0;animation:dci-in .7s 2.2s forwards}
 #dc-intro .dci-saltar{position:absolute;right:16px;bottom:calc(16px + env(safe-area-inset-bottom));min-height:44px;padding:10px 18px;border:1px solid rgba(255,255,255,.25);border-radius:999px;background:rgba(255,255,255,.08);color:#fff;font:700 13px/1 Inter,system-ui,sans-serif;cursor:pointer}
 #dc-intro .dci-sonido{position:absolute;left:16px;bottom:calc(28px + env(safe-area-inset-bottom));color:rgba(255,255,255,.6);font:600 12px/1 Inter,system-ui,sans-serif;letter-spacing:.06em;white-space:nowrap;opacity:0;animation:dci-in .5s 1s forwards}
@@ -63,7 +64,7 @@
     capa.innerHTML = `<div class="dci-cielo" aria-hidden="true">${Array.from({ length: 60 }, () => { const s = 1 + Math.random() * 2.5; return `<i style="left:${Math.random() * 100}%;top:${Math.random() * 75}%;width:${s}px;height:${s}px;animation-delay:${Math.random() * 2.4}s"></i>`; }).join('')}</div>
 <div class="dci-niebla" aria-hidden="true"></div>
 <div class="dci-centro">
-  <svg class="dci-arco" viewBox="0 0 620 290" aria-hidden="true"><defs><linearGradient id="dci-g" x1="0" x2="1"><stop offset="0" stop-color="#7FA2FF" stop-opacity="0"/><stop offset=".35" stop-color="#BFD0FF"/><stop offset=".7" stop-color="#FFE9A8"/><stop offset="1" stop-color="#FFFFFF"/></linearGradient></defs><path d="M 20 260 Q 310 -100 600 260"/></svg>
+  <svg class="dci-arco" viewBox="0 0 620 290" aria-hidden="true"><defs><linearGradient id="dci-g" x1="0" x2="1"><stop offset="0" stop-color="#CC0029" stop-opacity="0"/><stop offset=".35" stop-color="#E03445"/><stop offset=".7" stop-color="#FF2A5F"/><stop offset="1" stop-color="#FFFFFF"/></linearGradient></defs><path d="M 20 260 Q 310 -100 600 260"/></svg>
   <div class="dci-chispa-caja" aria-hidden="true"><div class="dci-chispa"></div>${polvo}</div>
   <div class="dci-destello" aria-hidden="true"></div>
   <img src="img/logo-dc-192.png" alt="">
