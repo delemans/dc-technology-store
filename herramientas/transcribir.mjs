@@ -25,7 +25,7 @@ export async function transcribir(audio) {
     throw new Error('AssemblyAI: tiempo agotado');
 }
 
-const norm = (t) => String(t).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9ñ ]+/g, ' ').split(/\s+/).filter((w) => w.length > 2 && !/^\d+$/.test(w));
+const norm = (t) => String(t).toLowerCase().replace(/technolog/g, 'tecnolog').replace(/por ciento/g, '%').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9ñ ]+/g, ' ').split(/\s+/).filter((w) => w.length > 2 && !/^\d+$/.test(w));
 export function parecido(guion, dicho) {
     const g = norm(guion), d = norm(dicho);
     const cubiertas = g.filter((w) => d.includes(w)).length / Math.max(1, g.length);

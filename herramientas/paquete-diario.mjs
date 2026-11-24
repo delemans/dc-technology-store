@@ -46,7 +46,7 @@ Register-ScheduledTask -TaskName '${tarea}' -Action $a -Trigger $d -Settings $s 
 }
 
 /* ---------- Datos vigentes ---------- */
-const salida = execFileSync(process.execPath, ['--use-system-ca', path.join(RAIZ, 'herramientas', 'publicidad-diciembre.mjs'), '--json', ...(['--formatos', '--probar'].some((x) => process.argv.includes(x)) ? ['--forzar-precios'] : [])], { encoding: 'utf8', maxBuffer: 64 << 20 });
+const salida = execFileSync(process.execPath, ['--use-system-ca', path.join(RAIZ, 'herramientas', 'publicidad-diciembre.mjs'), '--json', ...(['--formatos', '--probar', '--solo-expectativa'].some((x) => process.argv.includes(x)) ? ['--forzar-precios'] : [])], { encoding: 'utf8', maxBuffer: 64 << 20 });
 const datos = JSON.parse(salida.split('@@DATOS@@')[1]);
 const porId = Object.fromEntries(datos.map((x) => [x.id, x]));
 const desde = (x) => Math.min(...x.planes.map((v) => v.precio));
@@ -166,6 +166,18 @@ function htmlExpectativa(n) {
 <div class="pasos"><div class="paso"><i>📅</i><div><b>Llega el 27 de noviembre</b><span>Estuvimos trabajando para darte un servicio más rápido y mejor</span></div></div>
 <div class="paso"><i>💬</i><div><b>Guarda nuestro número</b><span>WhatsApp ${WA}</span></div></div></div>`);
 }
+function htmlCarga(pct, linea) {
+    return marco(1920, `<div class="etq">⏳ ${pct >= 99 ? 'Casi listo' : 'Cargando'}</div><div class="num">${pct}%</div>
+<div style="position:relative;margin:30px 90px 0;height:34px;border-radius:999px;background:rgba(255,255,255,.12);box-shadow:inset 0 0 0 2px rgba(255,255,255,.18);overflow:hidden"><div style="height:100%;width:${pct}%;border-radius:999px;background:linear-gradient(90deg,#E03445,#FF2A5F);box-shadow:0 0 30px 6px rgba(255,42,95,.55)"></div></div>
+<h1 style="margin-top:60px">La nueva era de<br><em>DC Tecnology</em></h1><p class="sub">${linea}</p>
+<div class="pasos"><div class="paso"><i>📲</i><div><b>Una nueva forma de pedir</b><span>Por WhatsApp, más fácil y más rápido</span></div></div>
+<div class="paso"><i>💬</i><div><b>Guarda nuestro número</b><span>WhatsApp ${WA}</span></div></div></div>`);
+}
+function htmlImagina(titulo, lineas) {
+    return marco(1920, `<div class="etq">✨ Imagínate…</div><h1 style="margin-top:50px;font-size:92px">${titulo}</h1>
+<div class="pasos">${lineas.map(([i, b, sp]) => `<div class="paso"><i>${i}</i><div><b>${b}</b><span>${sp}</span></div></div>`).join('')}</div>
+<div class="nota">Muy pronto · dctecnology.xyz</div>`);
+}
 function htmlBienvenida() {
     return marco(1920, `<div class="etq">🎉 ¡Ya llegó!</div><h1 style="margin-top:40px;font-size:96px">Bienvenido a la<br><em>nueva era digital</em></h1><p class="sub">Todo lo que necesitas, en un solo lugar</p>
 <div class="pasos"><div class="paso"><i>⌚</i><div><b>Tecnología</b><span>Relojes y audífonos desde ${minimoTipo('tecnologia')} · envíos a todo el país</span></div></div>
@@ -193,6 +205,7 @@ const TAGS = '#DCTecnology #Navidad2026 #RegalosDeNavidad #Colombia';
 /* ---------- Piezas del día (rutas y textos) ---------- */
 const VID = path.join(DESTINO, 'Videos 1080x1920');
 const LAN = path.join(DESTINO, 'Lanzamiento 1080x1920');
+const EXPE = path.join(DESTINO, 'Expectativa 1080x1920');
 // Festividades y oferta real (videos-diciembre.mjs --variante festivos): reemplazan el video de ese turno en su fecha
 const FES = path.join(DESTINO, 'Festividades 1080x1920');
 const FESTIVOS = {
@@ -213,10 +226,31 @@ function piezas(p) {
     return lista;
 }
 function piezasBase(p) {
-    if (p.fase === 'expectativa') return [
-        { hora: '07:30', tipo: 'imagen', f: path.join(CUENTA, `${p.fecha}.jpg`), t: [`✨ ${p.faltan === 1 ? 'Falta 1 día' : `Faltan ${p.faltan} días`} para la nueva era de DC Tecnology`, 'Estuvimos trabajando para darte un servicio más rápido y mejor.', '📅 Llega el 27 de noviembre', `💬 Guarda nuestro número: ${WA}`].join('\n'), nombre: `Expectativa: ${p.faltan === 1 ? 'falta 1 día' : `faltan ${p.faltan} días`}` },
-        { hora: '19:30', tipo: 'video', f: path.join(LAN, `${p.video}.mp4`), t: [`✨ ${p.faltan === 1 ? 'Mañana todo cambia' : 'Estuvimos trabajando en algo grande'}`, 'Tecnología, plataformas, pines y servicio técnico, todo desde tu celular.', `💬 Guarda nuestro número: ${WA}`].join('\n'), nombre: `Video expectativa (${p.faltan === 1 ? '1 día' : `${p.faltan} días`})` },
-    ];
+    // Expectativa (24/11/2026): intriga todo el día en los estados → «Cargando…» hasta el 100 % del lanzamiento
+    if (p.fase === 'expectativa') {
+        const dos = p.faltan === 2;
+        const v = (archivo) => path.join(LAN, `${archivo}.mp4`);
+        const img = (archivo) => path.join(EXPE, `${archivo}.jpg`);
+        return dos ? [
+            { hora: '07:30', tipo: 'imagen', f: img('cargando-60'), t: [`⏳ Cargando… 60 %`, `Algo nuevo llega a DC Tecnology.`, `Próximamente. Entérate antes que nadie.`].join('\n'), nombre: 'Cargando 60 %' },
+            { hora: '10:00', tipo: 'video', f: v('T6-cargando-60'), t: [`⏳ La nueva era de DC Tecnology va en 60 %.`, `Próximamente.`].join('\n'), nombre: 'Video cargando 60 %' },
+            { hora: '12:30', tipo: 'video', f: v('T1-nueva-forma-de-pedir'), t: [`📲 Viene una nueva forma de hacer tus pedidos por WhatsApp.`, `Más fácil. Más rápido. Próximamente, entérate.`].join('\n'), nombre: 'Video nueva forma de pedir' },
+            { hora: '15:00', tipo: 'imagen', f: img('imaginate-comprar'), t: [`✨ Imagínate pedir tu plataforma desde tu celular, pagar desde tu app y recibirla en tu WhatsApp.`, `Muy pronto.`].join('\n'), nombre: 'Imagínate comprar así' },
+            { hora: '18:00', tipo: 'video', f: v('T3-imaginate-comprar-asi'), t: [`✨ Imagínate comprar así…`, `Muy pronto en DC Tecnology.`].join('\n'), nombre: 'Video imagínate comprar así' },
+            { hora: '20:00', tipo: 'video', f: v('L1-faltan-2-dias'), t: [`✨ Estuvimos trabajando en algo grande. Faltan 2 días.`, `Llega el 27 de noviembre.`].join('\n'), nombre: 'Video faltan 2 días' },
+            { hora: '21:30', tipo: 'imagen', f: path.join(CUENTA, `${p.fecha}.jpg`), t: [`✨ Faltan 2 días para la nueva era de DC Tecnology`, `📅 Llega el 27 de noviembre`, `💬 Guarda nuestro número: ${WA}`].join('\n'), nombre: 'Faltan 2 días' },
+        ] : [
+            { hora: '07:30', tipo: 'imagen', f: img('cargando-80'), t: [`⏳ Cargando… 80 %`, `Falta muy poco para la nueva era de DC Tecnology.`].join('\n'), nombre: 'Cargando 80 %' },
+            { hora: '10:00', tipo: 'video', f: v('T7-cargando-80'), t: [`⏳ Ya vamos en 80 %. Falta muy poco.`, `💬 Guarda nuestro número: ${WA}`].join('\n'), nombre: 'Video cargando 80 %' },
+            { hora: '12:30', tipo: 'video', f: v('T2-hemos-trabajado-para-ti'), t: [`🛠 Hemos trabajado para la comodidad de tus pedidos.`, `Elige, paga y recibe, todo desde tu celular. Muy pronto.`].join('\n'), nombre: 'Video hemos trabajado para ti' },
+            { hora: '15:00', tipo: 'imagen', f: img('imaginate-todo'), t: [`✨ Imagínate tenerlo todo en un solo lugar: series, música, pines, tecnología y servicio técnico.`, `Muy pronto.`].join('\n'), nombre: 'Imagínate todo en un lugar' },
+            { hora: '17:00', tipo: 'video', f: v('T4-imaginate-todo-en-un-lugar'), t: [`✨ Imagínate tenerlo todo en un solo lugar.`, `Muy pronto, DC Tecnology.`].join('\n'), nombre: 'Video imagínate todo en un lugar' },
+            { hora: '18:30', tipo: 'video', f: v('T5-imaginate-automatizar'), t: [`🤖 Imagínate automatizar tu negocio: catálogo con bot, inventario y tus números claros.`, `Eso también lo hacemos. Muy pronto.`].join('\n'), nombre: 'Video imagínate automatizar' },
+            { hora: '20:00', tipo: 'video', f: v('L2-falta-1-dia'), t: [`✨ Mañana todo cambia. Falta 1 día.`, `💬 Guarda nuestro número: ${WA}`].join('\n'), nombre: 'Video falta 1 día' },
+            { hora: '21:30', tipo: 'video', f: v('T8-cargando-99'), t: [`⏳ 99 %… Mañana, 27 de noviembre, llega la nueva era de DC Tecnology.`].join('\n'), nombre: 'Video cargando 99 %' },
+            { hora: '21:45', tipo: 'imagen', f: img('cargando-99'), t: [`⏳ 99 %… Mañana.`].join('\n'), nombre: 'Cargando 99 %' },
+        ];
+    }
     if (p.fase === 'lanzamiento') return [
         { hora: '07:30', tipo: 'imagen', f: path.join(CUENTA, `${p.fecha}.jpg`), t: ['🎉 ¡Bienvenido a la nueva era digital de DC Tecnology!', `⌚ Tecnología desde ${minimoTipo('tecnologia')} (envíos a todo el país)`, `🎬 Plataformas desde ${minimoTipo('streaming')} (llega por WhatsApp)`, `🎁 Pines desde ${minimoTipo('pines')}`, `🛠 Revisión de tu PC por ${cop(desde(porId['servicio-reparacion-repuestos']))}`, '', `🛒 ${WEB}`, `💬 WhatsApp ${WA}`].join('\n'), nombre: 'Bienvenida' },
         { hora: '12:30', tipo: 'video', f: path.join(LAN, 'L3-bienvenida-nueva-era.mp4'), t: ['🎉 Estuvimos trabajando para ti: bienvenido a la nueva era digital de DC Tecnology.', 'Tecnología · Plataformas · Pines · Servicio técnico, todo en un solo lugar.', '', `🛒 ${WEB}`, `💬 WhatsApp ${WA}`].join('\n'), nombre: 'Video bienvenida' },
@@ -286,11 +320,23 @@ if (args.includes('--publicar')) {
 /* ---------- Generar imágenes nuevas (Chrome sin ventana) ---------- */
 const TMP = path.join(RAIZ, 'herramientas', 'salida', 'paquete-html');
 fs.rmSync(TMP, { recursive: true, force: true }); fs.mkdirSync(TMP, { recursive: true });
-for (const d of [PROMOS, CUENTA]) { fs.rmSync(d, { recursive: true, force: true }); fs.mkdirSync(d, { recursive: true }); }
+if (!args.includes('--solo-expectativa')) for (const d of [PROMOS, CUENTA]) { fs.rmSync(d, { recursive: true, force: true }); fs.mkdirSync(d, { recursive: true }); }
+const EXPECTATIVA = [
+    { id: 'cargando-60', html: () => htmlCarga(60, 'Algo nuevo llega. Próximamente, entérate.') },
+    { id: 'cargando-80', html: () => htmlCarga(80, 'Falta muy poco.') },
+    { id: 'cargando-99', html: () => htmlCarga(99, 'Mañana, 27 de noviembre.') },
+    { id: 'imaginate-comprar', html: () => htmlImagina('Poder comprar <em>así</em>', [['📱', 'Eliges en tu celular', 'Tu plataforma, tu pin o tu tecnología'], ['💳', 'Pagas desde tu app', 'Nequi, Daviplata o Llave Bre-B'], ['💬', 'Lo recibes por WhatsApp', 'Sin filas ni esperas']]) },
+    { id: 'imaginate-todo', html: () => htmlImagina('Tenerlo todo en <em>un solo lugar</em>', [['🎬', 'Tus series y tu música', 'Netflix, Disney, Spotify y más'], ['🎁', 'Pines para regalar', 'Sin tarjeta de crédito'], ['⌚', 'Tecnología', 'Con envío a todo el país'], ['🛠', 'Servicio técnico', 'Para tu PC']]) },
+    { id: 'imaginate-automatizar', html: () => htmlImagina('Automatizar <em>tu negocio</em>', [['🤖', 'Catálogo con bot', 'Tus clientes piden por WhatsApp'], ['📦', 'Inventario', 'Sabes qué tienes y qué se vende'], ['📊', 'Tableros', 'Tus números claros']]) },
+];
+fs.rmSync(EXPE, { recursive: true, force: true }); fs.mkdirSync(EXPE, { recursive: true });
 const trabajos = [
+    ...EXPECTATIVA.map((e) => ({ html: e.html(), alto: 1920, sale: path.join(EXPE, `${e.id}.jpg`) })),
     ...PROMO.map((p) => ({ html: htmlPromo(p), alto: 1350, sale: path.join(PROMOS, `${p.id}.jpg`) })),
     ...plan.map((p) => ({ html: p.fase === 'expectativa' ? htmlExpectativa(p.faltan) : p.fase === 'lanzamiento' ? htmlBienvenida() : htmlCuenta(p.cuenta, p.fecha), alto: 1920, sale: path.join(CUENTA, `${p.fecha}.jpg`) })),
 ];
+// --solo-expectativa: solo las imágenes sin precios (Cargando… e Imagínate…), útil mientras la base aún no cobra los precios con margen
+if (args.includes('--solo-expectativa')) trabajos.splice(EXPECTATIVA.length);
 trabajos.forEach((t, i) => { t.tmp = path.join(TMP, `${i}.html`); fs.writeFileSync(t.tmp, t.html); });
 const PUERTO = 9600 + Math.floor(Math.random() * 90);
 const chrome = spawn('C:/Program Files/Google/Chrome/Application/chrome.exe', ['--headless=new', '--hide-scrollbars', '--allow-file-access-from-files', `--remote-debugging-port=${PUERTO}`, `--user-data-dir=${path.join(TMP, 'perfil')}`, 'about:blank'], { stdio: 'ignore' });
@@ -316,6 +362,7 @@ try {
 } finally { ws.close(); chrome.kill(); await new Promise((r) => { chrome.once('exit', r); setTimeout(r, 4000); }); }
 console.log(`Imágenes nuevas: ${PROMO.length} promociones y ${plan.length} cuentas regresivas`);
 
+if (args.includes('--solo-expectativa')) { console.log(`Listo: ${EXPECTATIVA.length} imágenes de expectativa en ${EXPE}`); process.exit(fallas.length ? 1 : 0); }
 /* ---------- Armar «Paquete diario» (una carpeta por día, archivos numerados por hora) ---------- */
 fs.rmSync(PAQUETE, { recursive: true, force: true }); fs.mkdirSync(PAQUETE, { recursive: true });
 const faltan = [];

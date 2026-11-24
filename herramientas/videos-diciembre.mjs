@@ -35,7 +35,7 @@ const REG = fs.existsSync(REGISTRO_VOZ) ? JSON.parse(fs.readFileSync(REGISTRO_VO
 const VOCES = ['Puck', 'Aoede', 'Charon', 'Kore', 'Zephyr', 'Fenrir', 'Leda', 'Orus'];
 
 /* ---------- Datos (los mismos de las imágenes) ---------- */
-const salida = execFileSync(process.execPath, ['--use-system-ca', path.join(RAIZ, 'herramientas', 'publicidad-diciembre.mjs'), '--json', ...(['--formatos', '--probar'].some((x) => process.argv.includes(x)) ? ['--forzar-precios'] : [])], { encoding: 'utf8', maxBuffer: 64 << 20 });
+const salida = execFileSync(process.execPath, ['--use-system-ca', path.join(RAIZ, 'herramientas', 'publicidad-diciembre.mjs'), '--json', '--forzar-precios'], { encoding: 'utf8', maxBuffer: 64 << 20 });
 const datos = JSON.parse(salida.split('@@DATOS@@')[1]);
 for (const l of salida.split('@@DATOS@@')[0].split('\n')) if (l.trim()) console.log(l);
 
@@ -90,7 +90,7 @@ const lanzamiento = [
     // Expectativa (24/11/2026): intriga en los estados del 25 y 26/11 → «Cargando…» hasta el 100 % del lanzamiento
     { ...base, id: 'T6', n: 'T6', archivo: 'T6-cargando-60', estilo: estiloDe('medianoche'), musica: 'cine', diapos: [
         { tipo: 'frase', texto: 'Algo <em>nuevo</em><br>se está cargando', dur: 2.8, voz: 'Algo nuevo se está cargando.' },
-        { tipo: 'carga', etiqueta: 'Cargando', desde: 0, hasta: 60, texto: 'La nueva era de<br><em>DC Tecnology</em>', dur: 4.2, voz: 'La nueva era de DC Tecnology va en sesenta por ciento.' },
+        { tipo: 'carga', etiqueta: 'Cargando', desde: 0, hasta: 60, texto: 'La nueva era de<br><em>DC Tecnology</em>', dur: 4.2, voz: 'La nueva era de DC Tecnology va en 60 %.' },
         { tipo: 'frase', texto: '<em>Próximamente</em>', sub: 'Entérate antes que nadie', dur: 2.8, voz: 'Próximamente. Entérate antes que nadie.' }] },
     { ...base, id: 'T1', n: 'T1', archivo: 'T1-nueva-forma-de-pedir', estilo: estiloDe('gamer'), musica: 'cine', diapos: [
         { tipo: 'frase', texto: 'Viene una <em>nueva forma</em><br>de hacer tus pedidos', dur: 3.2, voz: 'Viene una nueva forma de hacer tus pedidos.' },
@@ -107,7 +107,7 @@ const lanzamiento = [
         { tipo: 'frase', texto: 'Elige · Paga · <em>Recibe</em>', sub: 'Todo desde tu celular', dur: 3, voz: 'Elige, paga y recibe, todo desde tu celular.' },
         { tipo: 'logo', sub: 'Muy pronto', dur: 3, voz: 'Muy pronto, DC Tecnology.' }] },
     { ...base, id: 'T7', n: 'T7', archivo: 'T7-cargando-80', estilo: estiloDe('medianoche'), musica: 'cine', diapos: [
-        { tipo: 'carga', etiqueta: 'Cargando', desde: 60, hasta: 80, texto: 'La nueva era de<br><em>DC Tecnology</em>', dur: 4.2, voz: 'Ya vamos en ochenta por ciento.' },
+        { tipo: 'carga', etiqueta: 'Cargando', desde: 60, hasta: 80, texto: 'La nueva era de<br><em>DC Tecnology</em>', dur: 4.2, voz: 'Ya vamos en 80 %.' },
         { tipo: 'frase', texto: 'Falta <em>muy poco</em>', sub: 'Guarda nuestro número: 322 328 4622', dur: 3, voz: 'Falta muy poco. Guarda nuestro número: 322 328 4622.' }] },
     { ...base, id: 'T4', n: 'T4', archivo: 'T4-imaginate-todo-en-un-lugar', estilo: estiloDe('fiesta'), musica: 'ritmo', diapos: [
         { tipo: 'frase', texto: '<em>Imagínate</em> tenerlo<br>todo en un solo lugar', dur: 3, voz: 'Imagínate tenerlo todo en un solo lugar.' },
@@ -120,7 +120,7 @@ const lanzamiento = [
         { tipo: 'frase', texto: 'Eso también<br><em>lo hacemos</em>', sub: 'Pide tu cotización', dur: 2.8, voz: 'Eso también lo hacemos. Pide tu cotización.' },
         { tipo: 'logo', sub: 'Muy pronto', dur: 3, voz: 'Muy pronto, DC Tecnology.' }] },
     { ...base, id: 'T8', n: 'T8', archivo: 'T8-cargando-99', estilo: estiloDe('medianoche'), musica: 'cine', diapos: [
-        { tipo: 'carga', etiqueta: 'Casi listo', desde: 80, hasta: 99, texto: 'La nueva era de<br><em>DC Tecnology</em>', dur: 4.4, voz: 'Noventa y nueve por ciento.' },
+        { tipo: 'carga', etiqueta: 'Casi listo', desde: 80, hasta: 99, texto: 'La nueva era de<br><em>DC Tecnology</em>', dur: 4.4, voz: 'Ya vamos en 99 %.' },
         { tipo: 'logo', sub: `Mañana, ${LANZAMIENTO.texto}`, dur: 3.2, voz: `Mañana, ${LANZAMIENTO.texto}, llega la nueva era de DC Tecnology.` }] },
     { ...base, id: 'L1', n: 'L1', archivo: 'L1-faltan-2-dias', estilo: estiloDe('medianoche'), musica: 'cine', diapos: [
         { tipo: 'frase', texto: 'Estuvimos trabajando<br>en algo <em>grande</em>', dur: 3, voz: 'Estuvimos trabajando en algo grande.' },
@@ -222,7 +222,16 @@ if (args.includes('--formatos')) {
     for (const x of v2) console.log(`  ${x.n}b · ${NOMBRE[x.formato].padEnd(26)} · ${x.t.replace(/<\/?em>/g, '')}`); console.log(usos2);
     process.exit(0);
 }
-if (!videos.length) { console.log(`No hay pieza «${SOLO}».`); process.exit(1); }
+// Candado de precios (24/11/2026): la base debe cobrar al menos el precio con margen de productos.json
+const productosJson = JSON.parse(fs.readFileSync(path.join(RAIZ, 'productos.json'), 'utf8'));
+const preciosViejos = datos.filter((x) => x.tipo !== 'servicios').flatMap((x) => x.planes.filter((v) => { const pj = productosJson.find((p) => p.id === x.id)?.variantes.find((y) => (x.g?.plan ?? ((n) => n))(y.nombre) === v.nombre || y.nombre === v.nombre); return pj && v.precio < Number(pj.precio); }).map((v) => `${x.nombre} · ${v.nombre}`));
+const muestraPrecio = (x) => x.formato !== 'presenta' || /\$\s?\d/.test(JSON.stringify(x.diapos ?? []));
+if (preciosViejos.length && !args.includes('--forzar-precios') && !args.includes('--formatos')) {
+    const antes = videos.length;
+    for (let k = videos.length - 1; k >= 0; k--) if (muestraPrecio(videos[k])) videos.splice(k, 1);
+    console.log(`⛔ La base todavía cobra ${preciosViejos.length} precios sin el margen nuevo: solo se hacen los videos SIN precios (${videos.length} de ${antes}). Aplica wo-059 y vuelve a correr para el resto.`);
+}
+if (!videos.length) { console.log(SOLO ? `No hay pieza «${SOLO}».` : 'Nada que generar por ahora.'); process.exit(SOLO ? 1 : 0); }
 
 /* ---------- Guion hablado: gancho, beneficio, precio y cierre (datos reales; el precio, el vigente) ---------- */
 function guion(x) {
