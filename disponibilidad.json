@@ -7,8 +7,8 @@
   "reloj-inteligente-smartwatch-h19": "ANC ya no ofrece este producto",
   "reloj-inteligente-smartwatch-z90": "ANC ya no ofrece este producto",
   "reloj-inteligente-smartwatch-m9": "ANC ya no ofrece este producto",
-  "disney-plus": "Agotado o retirado en ANC",
   "iptv-smarters": "ANC ya no ofrece este producto",
+  "youtube-premium": "Agotado o retirado en ANC",
   "capcut-pro": "Agotado o retirado en ANC",
   "office-365": "Agotado o retirado en ANC",
   "office-2016-2019-2021-2024-pro-plus": "ANC ya no ofrece este producto",
@@ -942,6 +942,9 @@
   },
   "mubi": {
    "Cuenta Completa 1 Mes": "ANC ya no ofrece este plan"
+  },
+  "directv-go": {
+   "Pantalla con ESPN": "Agotado en ANC"
   }
  },
  "existencias": {
@@ -965,10 +968,7 @@
   },
   "reloj-inteligente-smartwatch-p13-de-lujo-en-acero-inoxidable": {
    "Acero de Lujo P13": 3
-  },
-  "youtube-premium": {
-   "Suscripción 1 Mes": 1
   }
  },
- "actualizado": "2026-11-25T03:55:53.504Z"
+ "actualizado": "2026-11-25T16:44:26.381Z"
 }

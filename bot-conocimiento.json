@@ -1,5 +1,5 @@
 {
-  "version": "2026-11-25T03:55:55.208Z",
+  "version": "2026-11-25T16:44:28.042Z",
   "identidad": [
     "Eres DC TECNOLOGY: respondes el WhatsApp de la tienda (https://www.dctecnology.xyz) en nombre del equipo. Habla como la tienda (\"te ayudamos\", \"te enviamos\").",
     "En el PRIMER mensaje de la conversación saluda así: \"¡Hola! Te saluda *DC TECNOLOGY* 👋\", responde lo que preguntó y cierra con: \"Escribe *menú* para ver todas las opciones.\" Después no vuelvas a presentarte (si el contexto trae un mensaje del menú, la conversación ya empezó).",
@@ -967,7 +967,7 @@
       "marca": "Disney",
       "nombre": "Disney Plus Premium",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-91-9267e0a1730671bcf517247095798757-640-0.webp",
-      "url": "https://www.dctecnology.xyz/?producto=disney-plus",
+      "url": "https://www.dctecnology.xyz/p/disney-plus.html",
       "variantes": [
         {
           "nombre": "Pantalla Premium",
@@ -975,7 +975,6 @@
           "precio_anterior": 25000
         }
       ],
-      "oculto": true,
       "desde": 15000,
       "descripcion": null
     },
@@ -1208,17 +1207,12 @@
       "url": "https://www.dctecnology.xyz/p/directv-go.html",
       "variantes": [
         {
-          "nombre": "Pantalla con ESPN",
-          "precio": 38000,
-          "precio_anterior": null
-        },
-        {
           "nombre": "Pantalla con Win Play",
           "precio": 44000,
           "precio_anterior": null
         }
       ],
-      "desde": 38000,
+      "desde": 44000,
       "descripcion": "Televisión en vivo y deportes en tu celular, Smart TV o computador.Prohibido usar, vincular o reproducir el producto en más dispositivos de los permitidos (1 para Pantalla).Prohibido modificar correo, contraseña o datos de facturación bajo cualquier motivo.Prohibido compartir, revender o transferir el acceso a terceros.Pantalla con ESPN: Canales base de DirecTV Go (como Dsports, Caracol y RCN, entre otros) más los canales premium de ESPN: ligas internacionales, Champions League, NBA y tenis.Pantalla con Win Play: Canales base de DirecTV Go más Win Sports+ para ver el fútbol profesional colombi"
     },
     {
@@ -1227,7 +1221,7 @@
       "marca": "YouTube",
       "nombre": "YouTube Premium",
       "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/image-removebg-preview-2024-04-18t163850-061-1-7c5ae07db764d6619d17134763729834-640-0.webp",
-      "url": "https://www.dctecnology.xyz/p/youtube-premium.html",
+      "url": "https://www.dctecnology.xyz/?producto=youtube-premium",
       "variantes": [
         {
           "nombre": "Suscripción 1 Mes",
@@ -1235,8 +1229,9 @@
           "precio_anterior": null
         }
       ],
+      "oculto": true,
       "desde": 19000,
-      "descripcion": "Prohibido usar, vincular o reproducir el producto en más dispositivos de los permitidos (1 dispositivo).Prohibido modificar correo, contraseña o datos de facturación bajo cualquier motivo.Prohibido compartir, revender o transferir el acceso a terceros.Plan 1 mes: Te entregamos una cuenta nueva con YouTube Premium activo, para 1 solo dispositivo: sin anuncios, con descargas y con YouTube Music Premium incluido."
+      "descripcion": null
     },
     {
       "id": "spotify-premium",
