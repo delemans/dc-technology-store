@@ -758,10 +758,10 @@
     "marca": "DC Tech",
     "nombre": "Reparación de Computadores y Venta de Repuestos",
     "imagen": "https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&w=640&q=80",
-    "descripcion": "Diagnóstico y reparación de computadores de escritorio y portátiles, y venta de repuestos. Cada revisión del equipo vale $25.000: revisamos la falla y te decimos qué tiene y cuánto cuesta repararlo. Cuéntanos el equipo y la falla por WhatsApp.",
+    "descripcion": "Diagnóstico y reparación de computadores de escritorio y portátiles, y venta de repuestos. Cada revisión del equipo vale $25.000: revisamos la falla y te decimos qué tiene y cuánto cuesta repararlo. La reparación no tiene precio fijo porque depende de lo que encontremos; si decides hacerla, los $25.000 de la revisión se descuentan del valor de la reparación. Cuéntanos el equipo y la falla por WhatsApp.",
     "variantes": [
       { "nombre": "Revisión del Equipo (Diagnóstico)", "precio": 25000, "precio_anterior": null },
-      { "nombre": "Diagnóstico y Reparación (Requiere Cotización)", "precio": 0, "precio_anterior": null },
+      { "nombre": "Reparación (se cotiza tras la revisión; se descuentan los $25.000)", "precio": 0, "precio_anterior": null },
       { "nombre": "Repuestos para Computador (Requiere Cotización)", "precio": 0, "precio_anterior": null }
     ]
   },

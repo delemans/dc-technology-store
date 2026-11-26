@@ -36,9 +36,9 @@ Precios en pesos colombianos. Son los de productos.json: en la tienda manda el p
 - Viki Rakuten Pass · desde $ 14.000 · id `viki-rakuten` · https://www.dctecnology.xyz/p/viki-rakuten.html
 - Mubi Cinema · desde $ 14.000 · id `mubi` · https://www.dctecnology.xyz/p/mubi.html
 - Deezer Premium · desde $ 14.000 · id `deezer-premium` · https://www.dctecnology.xyz/p/deezer-premium.html
-- Disney Plus Premium · desde $ 15.000 · id `disney-plus` · https://www.dctecnology.xyz/p/disney-plus.html
 - Apple TV Plus · desde $ 16.000 · id `apple-tv` · https://www.dctecnology.xyz/p/apple-tv.html
 - Spotify Premium · desde $ 18.000 · 2 planes · id `spotify-premium` · https://www.dctecnology.xyz/p/spotify-premium.html
+- Disney Plus Premium · desde $ 19.000 · id `disney-plus` · https://www.dctecnology.xyz/p/disney-plus.html
 - Netflix Premium 4K · desde $ 22.000 · id `netflix` · https://www.dctecnology.xyz/p/netflix.html
 - Combo de 3 o 4 Plataformas · desde $ 38.000 · 4 planes · id `combo-3-o-4-plataformas` · https://www.dctecnology.xyz/p/combo-3-o-4-plataformas.html
 - DirecTV Go · desde $ 44.000 · id `directv-go` · https://www.dctecnology.xyz/p/directv-go.html
