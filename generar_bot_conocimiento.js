@@ -192,6 +192,13 @@ const flujoDigital = [
 // FAQ ligadas a reglas de negocio: se sobrescriben siempre con estos textos
 const faqObligatorias = (horario) => [
     {
+        id: 'revision_reparacion',
+        pregunta: '¿Cuánto cuesta revisar o reparar mi computador?',
+        palabras_clave: ['revision', 'revisión', 'diagnostico', 'diagnóstico', 'reparar', 'reparacion', 'reparación', 'arreglar', 'daño', 'dañado', 'no prende', 'falla'],
+        respuesta: 'La revisión del equipo cuesta $25.000: revisamos la falla y te decimos qué tiene y cuánto cuesta repararlo. La reparación no tiene precio fijo porque depende de lo que encontremos. Si decides hacer la reparación, los $25.000 de la revisión se descuentan del valor de la reparación. El mantenimiento sí tiene precio fijo: preventivo $60.000. ¿Qué equipo tienes y qué falla presenta?',
+        pendiente_configurar: false,
+    },
+    {
         id: 'metodos_pago',
         pregunta: '¿Qué métodos de pago aceptan?',
         palabras_clave: ['pago', 'pagar', 'nequi', 'daviplata', 'bancolombia', 'transferencia', 'tarjeta', 'efectivo', 'pse', 'paypal', 'credito', 'llave', 'bre-b', 'breb'],

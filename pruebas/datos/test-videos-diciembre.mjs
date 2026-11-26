@@ -6,7 +6,7 @@ const RAIZ = new URL('../../', import.meta.url);
 const ruta = (f) => new URL(f, RAIZ).pathname.replace(/^\/([A-Za-z]:)/, '$1').replace(/%20/g, ' ');
 const salida = execFileSync(process.execPath, ['--use-system-ca', ruta('herramientas/videos-diciembre.mjs'), '--formatos'], { encoding: 'utf8' });
 const filas = salida.split('\n').filter((l) => /^\s+\d{2} · /.test(l)).map((l) => l.split(' · ').map((s) => s.trim()));
-ok(filas.length >= 31 && filas[0][0] === '00', `un video por pieza + el resumen (${filas.length})`);
+ok(filas.length >= 21 && filas[0][0] === '00', `un video por pieza disponible + el resumen (${filas.length})`);
 const formatos = filas.slice(1).map((f) => f[1]);
 ok(new Set(formatos).size === 7, 'se usan los 7 formatos de video');
 ok(formatos.every((f, i) => i === 0 || f !== formatos[i - 1]), 'nunca dos videos seguidos con el mismo formato');

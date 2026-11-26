@@ -98,7 +98,7 @@ const GANCHOS = {
     'pin-virtual-mcafee': { tema: 'Regalo útil', t: 'El regalo más <em>útil del año</em>', s: 'PIN de McAfee por 1 año para 1, 5 o 10 dispositivos.', b: ['Protección por 1 año', 'Para 1, 5 o 10 dispositivos', 'El código llega por WhatsApp'] },
     'pin-virtual-datacredito': { tema: 'Finanzas de enero', t: 'Que enero no te <em>coja desprevenido</em>', s: 'PIN de Mi DataCrédito: tu historia y puntaje de crédito.', b: ['1 mes de acceso Premium', 'Alertas de cambios en tu reporte', 'Funciona con cédula colombiana'] },
     'servicio-mantenimiento-computadores': { tema: 'Limpieza de fin de año', t: 'Tu PC también merece <em>su limpieza de diciembre</em>', s: 'Mantenimiento preventivo o correctivo con cambio de pasta térmica.', b: ['Limpieza interna y del software', 'Correctivo con cambio térmico', 'Agenda por WhatsApp'] },
-    'servicio-reparacion-repuestos': { tema: 'Antes de las vacaciones', t: '¿Falla tu PC? <em>Revisión de $25.000</em>', s: 'Te decimos qué tiene y cuánto cuesta repararlo.', b: ['Escritorio y portátiles', 'Diagnóstico claro antes de reparar', 'Venta de repuestos'], soloPrecios: (v) => /Revisi/.test(v.nombre) },
+    'servicio-reparacion-repuestos': { tema: 'Antes de las vacaciones', t: '¿Falla tu PC? <em>Revisión de $25.000</em>', s: 'Te decimos qué tiene y, si lo reparas, la revisión se descuenta.', b: ['Escritorio y portátiles', 'Si reparas, se descuentan los $25.000', 'Venta de repuestos'], soloPrecios: (v) => /Revisi/.test(v.nombre) },
 };
 
 /* ---------- 12 estilos decembrinos (rotan: dos piezas seguidas nunca se parecen) ---------- */

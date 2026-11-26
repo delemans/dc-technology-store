@@ -103,8 +103,10 @@ const plan = dias.map((d) => {
     if (d.getTime() === LANZ) return { d, fecha: iso(d), fase: 'lanzamiento' };
     const i = Math.round((d.getTime() - LANZ) / 864e5) - 1;
     const pick = (k) => orden[((i + k) % N + N) % N];
+    // regalo del día: distinto de los demás productos del día; desde el 18/12, digital
+    const usados = new Set([pick(0).id, pick(13).id, pick(7).id]);
     let prodDia = pick(26);
-    if (d.getTime() >= Date.UTC(2026, 11, 18)) { for (let k = 26; !digital(prodDia); k++) prodDia = pick(k); }
+    for (let k = 26; k < 26 + N && (usados.has(prodDia.id) || (d.getTime() >= Date.UTC(2026, 11, 18) && !digital(prodDia))); k++) prodDia = pick(k);
     return { d, fase: 'productos', fecha: iso(d), video1: i === 0 ? 'resumen' : pick(0), video2: pick(13), cuenta: { ...cuenta(d), x: prodDia }, feed: pick(7), promo: PROMO[i % PROMO.length], i };
 });
 

@@ -6,7 +6,7 @@ const RAIZ = new URL('../../', import.meta.url);
 const salida = execFileSync(process.execPath, ['--use-system-ca', new URL('herramientas/publicidad-diciembre.mjs', RAIZ).pathname.replace(/^\/([A-Za-z]:)/, '$1').replace(/%20/g, ' '), '--probar', '--forzar-precios'], { encoding: 'utf8' });
 ok(!/sin gancho/.test(salida), 'todos los productos visibles de ANC tienen su gancho de diciembre');
 const filas = salida.split('\n').filter((l) => /^\s+\d{2} · /.test(l));
-ok(filas.length >= 30, `una pieza por producto (${filas.length})`);
+ok(filas.length >= 20, `una pieza por producto disponible (${filas.length}; lo agotado en ANC no sale)`);
 const temas = filas.map((l) => l.split(' · ')[1].trim());
 ok(new Set(temas).size === temas.length, 'cada pieza tiene una temática distinta');
 ok(filas.some((l) => /Mantenimiento/.test(l) && /\$60\.000/.test(l)), 'mantenimiento preventivo a $60.000');

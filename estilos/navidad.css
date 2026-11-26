@@ -13,7 +13,7 @@
 .nav-chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}.nav-chips::-webkit-scrollbar{display:none}
 .nav-chip{flex:none;min-height:44px;padding:10px 16px;border-radius:999px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);color:#fff;font:700 14px/1 Inter,sans-serif;cursor:pointer;transition:background .2s,border-color .2s,transform .2s}
 .nav-chip:hover{transform:translateY(-1px);border-color:rgba(255,42,95,.6)}
-.nav-chip[aria-pressed="true"]{background:#E03445;border-color:#E03445;color:#fff;box-shadow:0 8px 20px -8px rgba(224,52,69,.8)}
+.nav-chip[aria-pressed="true"]{background:#C8102E;border-color:#C8102E;color:#fff;box-shadow:0 8px 20px -8px rgba(224,52,69,.8)}
 .nav-chip:focus-visible,.nav-regalo:focus-visible{outline:3px solid #FF2A5F;outline-offset:2px}
 .nav-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:20px}
 @media (min-width:768px){.nav-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}}

@@ -135,7 +135,7 @@
     "marca": "Disney",
     "nombre": "Disney Plus Premium",
     "imagen": "https://acdn-us.mitiendanube.com/stores/004/384/271/products/diseno-sin-titulo-91-9267e0a1730671bcf517247095798757-640-0.webp",
-    "variantes": [ { "nombre": "Pantalla Premium", "precio": 15000, "precio_anterior": 25000 } ]
+    "variantes": [ { "nombre": "Pantalla Premium", "precio": 19000, "precio_anterior": 25000 } ]
   },
   {
     "id": "hbo-max",

@@ -14,10 +14,10 @@ const ok = (c, m) => { console.log(`${c ? 'OK   ' : 'FALLA'} ${m}`); if (!c) pro
 await enviar('Page.enable'); await enviar('Runtime.enable');
 for (const [ancho, alto, movil] of [[390, 844, true], [1366, 900, false]]) {
     await enviar('Emulation.setDeviceMetricsOverride', { width: ancho, height: alto, deviceScaleFactor: 1, mobile: movil });
-    await enviar('Page.navigate', { url: `${BASE}/?buscar=roblox` }); await esperar(6500);
+    await enviar('Page.navigate', { url: `${BASE}/?buscar=netflix` }); await esperar(6500);
     const r = await ev(`({vista: document.documentElement.dataset.vistaActiva, valor: document.getElementById('searchInput').value, n: document.querySelectorAll('#product-grid article').length,
-        todos: [...document.querySelectorAll('#product-grid article')].every(a => /roblox/i.test(a.textContent)), url: location.href})`);
-    ok(r.vista === 'catalogo' && r.valor === 'roblox' && r.n > 0 && r.todos, `${ancho}px: ?buscar=roblox abre el Catálogo filtrado (${r.n} resultados)`);
+        todos: [...document.querySelectorAll('#product-grid article')].every(a => /netflix/i.test(a.textContent)), url: location.href})`);
+    ok(r.vista === 'catalogo' && r.valor === 'netflix' && r.n > 0 && r.todos, `${ancho}px: ?buscar=netflix abre el Catálogo filtrado (${r.n} resultados)`);
     ok(!/buscar=/.test(r.url), `${ancho}px: la dirección queda limpia (${r.url})`);
     await enviar('Page.navigate', { url: `${BASE}/` }); await esperar(5000);
     await enviar('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Tab', code: 'Tab', windowsVirtualKeyCode: 9 });
